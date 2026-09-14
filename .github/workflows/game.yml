@@ -1,0 +1,57 @@
+name: 游戏验证与发布
+on:
+  push:
+    branches: [main]
+    paths:
+      - public/play.html
+      - tests/**
+      - scripts/build-static.mjs
+      - vercel.json
+      - .github/workflows/game.yml
+  pull_request:
+    paths:
+      - public/play.html
+      - tests/**
+      - scripts/build-static.mjs
+      - vercel.json
+      - .github/workflows/game.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: glyph-game-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    name: 玩法测试与静态构建
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: 验证游戏经济与存档
+        run: node --test tests/game.test.mjs
+      - name: 构建零依赖游戏
+        run: node scripts/build-static.mjs
+      - name: 检查仓库是否已有部署授权
+        id: auth
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          if [ -n "$VERCEL_TOKEN" ]; then
+            echo 'available=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'available=false' >> "$GITHUB_OUTPUT"
+            echo '游戏测试与构建已完成；仓库未配置 VERCEL_TOKEN，Vercel 发布未执行。也可以在 Vercel 中直接导入此仓库。' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: 发布独立游戏到 Vercel
+        if: steps.auth.outputs.available == 'true'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          npx --yes vercel@59.16.0 deploy --yes --prod --name glyph-factory --scope nyn5255-8475s-projects --token "$VERCEL_TOKEN" > deployment-url.txt
+          printf '\n游戏实际部署 URL：\n' >> "$GITHUB_STEP_SUMMARY"
+          cat deployment-url.txt >> "$GITHUB_STEP_SUMMARY"
