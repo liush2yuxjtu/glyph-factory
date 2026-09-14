@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1c241e"><meta name="description" content="从印一个字，到写满世界。手机可玩的中文像素增量游戏，自动化、研发、订单与本地存档。">
+<title>字工厂 · 从一个字开始</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23c7f36b'/%3E%3Ctext x='4' y='25' font-size='26'%3E字%3C/text%3E%3C/svg%3E">
+<style>
+:root{--ink:#1c241e;--paper:#eee9d9;--card:#f7f3e8;--muted:#626956;--line:#c9cbbb;--green:#c7f36b;--rust:#a34e34;--shadow:3px 3px 0 var(--ink)}
+*{box-sizing:border-box}html{background:#d7d9c9;color:var(--ink);color-scheme:light}body{margin:0;font:14px/1.6 "PingFang SC","Microsoft YaHei",system-ui,sans-serif;background:radial-gradient(#a7aa921f 1px,transparent 1px);background-size:5px 5px}button{font:inherit;cursor:pointer;touch-action:manipulation;min-height:44px;border:1.5px solid var(--ink);background:var(--card);color:var(--ink);font-weight:650;border-radius:0}button:not(:disabled):hover{background:var(--green)}button:focus-visible{outline:3px solid var(--rust);outline-offset:3px}button:disabled{color:#72786a;opacity:.57;cursor:not-allowed;background:#e4e4d8}button:not(:disabled):active{transform:translate(2px,2px);box-shadow:none}[hidden]{display:none!important}.shell{max-width:1056px;margin:0 auto;background:var(--paper);min-height:100vh;padding:30px 36px 18px;border-inline:1px solid #b6bbaa}.masthead{display:flex;justify-content:space-between;align-items:center;gap:16px;padding-bottom:18px;border-bottom:2px solid var(--ink)}.brand{display:flex;align-items:center;gap:16px}.brand-stamp{display:grid;place-items:center;background:var(--ink);color:var(--green);width:56px;height:60px;font-size:38px;font-weight:800;box-shadow:4px 4px 0 #acb18e}.eyebrow{font-size:11px;letter-spacing:.12em;margin:0 0 3px;color:var(--muted)}h1{font-size:36px;line-height:1.3;margin:0;font-weight:850;letter-spacing:.04em}h1 span{color:var(--rust);margin:0 4px}.header-right{display:flex;align-items:center;gap:16px}.status{font-size:11px;display:flex;align-items:center;gap:7px;white-space:nowrap}.status i{width:7px;height:7px;background:#54804c}.quiet{border:0;background:transparent;text-decoration:underline;text-underline-offset:4px;font-size:12px;padding:6px}.ticker{display:flex;justify-content:space-between;gap:8px;font-size:11px;padding:12px 0 15px;font-variant-numeric:tabular-nums}.ticker>span:first-child{font-weight:750;color:var(--rust)}.hero{display:grid;grid-template-columns:1.15fr 1fr;gap:22px}.control-panel{display:flex;flex-direction:column;gap:10px}.metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px}.metric{border:1.5px solid var(--ink);background:var(--green);padding:12px 14px;min-width:0;box-shadow:var(--shadow)}.metric>span,.metric>small{display:block;font-size:11px}.metric strong{font:750 clamp(28px,4vw,44px)/1.25 ui-monospace,monospace;display:block;padding:3px 0 1px;letter-spacing:-1px;overflow-wrap:anywhere}.metric.money{background:var(--card)}.metric small{color:#495738}.print-button{min-height:60px;display:flex;align-items:center;gap:14px;justify-content:space-between;padding:12px 17px;background:var(--ink);color:var(--green);box-shadow:var(--shadow);font-size:18px;font-weight:800}.print-button:not(:disabled):hover{background:#303f2c;color:var(--green)}.print-button small{font-size:11px;opacity:.8;margin-left:auto}.print-button>span:last-child{font-size:24px}.sell-button{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;box-shadow:var(--shadow);font-size:13px}.sell-button span{font-size:11px;font-weight:400}.hint{margin:0;font-size:11px;color:var(--muted);line-height:1.7}.pixel-scene{position:relative;min-height:280px;border:2px solid var(--ink);overflow:hidden;image-rendering:pixelated;background:linear-gradient(90deg,#667e66 0 3%,#89987c 3% 96%,#748569 96%);box-shadow:var(--shadow)}.scene-label{position:absolute;z-index:4;left:12px;right:12px;top:10px;display:flex;justify-content:space-between;font-size:9px;letter-spacing:.18em;color:#f0eed7}.window{position:absolute;left:10%;top:17%;width:39%;height:37%;border:7px solid #303f32;background:#283c49;box-shadow:0 4px 0 #b3b992,inset 0 0 0 3px #596f6b;overflow:hidden}.window:before{content:"";position:absolute;left:47%;height:100%;width:5px;background:#303f32;z-index:2}.window:after{content:"";position:absolute;left:0;top:47%;width:100%;height:5px;background:#303f32;z-index:2}.moon{position:absolute;top:9%;left:60%;width:13px;height:13px;background:#e5dfba;box-shadow:3px 0 #485a58}.building{position:absolute;bottom:0;left:8%;width:20%;height:36%;background:repeating-linear-gradient(0deg,transparent 0 9px,#f0be6f 10px 12px,transparent 12px 18px),#1d343c}.b2{left:30%;height:25%}.b3{left:75%;height:46%}.shelf{position:absolute;right:10%;top:27%;width:25%;height:8px;background:#3a4330;box-shadow:0 4px #687853}.shelf i{position:absolute;bottom:8px;width:10px;height:25px;background:#b89c6c;border:2px solid #414c35}.shelf i:nth-child(2){left:13px;height:30px;background:#736b50}.shelf i:nth-child(3){left:27px;background:#bac09a}.shelf i:nth-child(4){left:40px;height:21px;background:#9b6952}.desk{position:absolute;left:5%;right:5%;bottom:24%;height:15px;background:#ae8050;border:3px solid #3b3b28;box-shadow:0 6px #6e5637;z-index:2}.desk:before,.desk:after{content:"";position:absolute;width:10px;height:55px;background:#4c4a30;top:12px;left:8px;box-shadow:3px 0 #74623f}.desk:after{left:auto;right:8px}.machine{position:absolute;left:42%;bottom:30%;width:105px;height:57px;background:#32483c;border:4px solid #1c332d;box-shadow:4px 4px #25382b;z-index:3}.roller{position:absolute;top:-12px;left:5px;width:87px;height:13px;background:#75856c;border:3px solid #1c332d}.paper{position:absolute;top:-54px;left:25px;width:51px;height:45px;border:2px solid #746f4f;background:#f0ebc9;color:#474a34;font:bold 24px/42px serif;text-align:center}.keys{position:absolute;left:9px;right:9px;bottom:10px;height:20px;background:repeating-linear-gradient(0deg,transparent 0 6px,#1c332d 6px 9px),repeating-linear-gradient(90deg,#c0c8a1 0 6px,#1c332d 6px 9px)}.machine>span{position:absolute;right:-10px;top:-5px;width:8px;height:8px;background:#bba773}.plant{position:absolute;left:13%;bottom:30%;width:27px;height:27px;background:#a56546;border:3px solid #414332;z-index:3}.plant i{position:absolute;top:-32px;left:9px;width:5px;height:30px;background:#334f36}.plant i:before,.plant i:after{content:"";position:absolute;left:-14px;top:0;width:15px;height:10px;background:#3c603b;box-shadow:3px 10px #4b713f}.plant i:after{left:4px;top:7px}.lamp{position:absolute;right:12%;bottom:30%;width:7px;height:70px;background:#344533;z-index:3}.lamp b{position:absolute;top:-13px;left:-23px;width:36px;height:22px;background:#ccb766;border:3px solid #586340;box-shadow:0 3px #e2d086}.lamp i{position:absolute;bottom:0;left:-8px;width:27px;height:7px;background:#45543a}.light-beam{position:absolute;right:12%;bottom:29%;width:100px;height:80px;background:#f7e69b26;clip-path:polygon(55% 0,72% 0,100% 100%,0 100%);z-index:1}.stack{position:absolute;right:7%;bottom:29%;width:32px;height:8px;background:#e8e1bf;border:2px solid #686947;z-index:3}.stack i{position:absolute;width:30px;height:5px;left:-8px;bottom:6px;background:#ddd8b7;border-bottom:2px solid #81835c}.stack i:nth-child(2){bottom:10px;left:-3px}.stack i:nth-child(3){bottom:14px;left:-6px}.floor{position:absolute;bottom:0;left:0;right:0;height:24%;background:repeating-linear-gradient(90deg,#757653 0 2px,transparent 2px 48px),#8e8a63;border-top:4px solid #4b583c}.scene-caption{position:absolute;left:0;right:0;bottom:8px;z-index:4;text-align:center;font-size:10px;color:#e6e9cb;letter-spacing:.1em}.running .roller{animation:work 1.2s steps(2) infinite}.printing .paper{animation:print .22s steps(3)}@keyframes work{50%{transform:translateX(3px)}}@keyframes print{50%{transform:translateY(-5px)}}
+.story-card{margin:22px 0;background:#e3e5d3;border-left:3px solid var(--ink);padding:12px 16px}.chapter-tag{font-size:10px;letter-spacing:.1em;font-weight:750;color:var(--rust)}.story-card p{font-size:12px;margin:5px 0 10px}.progress-copy{display:flex;justify-content:space-between;gap:10px;font-size:10px;color:var(--muted)}.progress-track{height:5px;background:#c5cbb4;margin-top:7px}.progress-track>div{height:100%;background:#688343;width:0;transition:width .3s}.lower-grid{display:grid;grid-template-columns:1.7fr 1fr;gap:22px}.tabs{display:flex;border-bottom:2px solid var(--ink);margin-bottom:12px;gap:2px}.tabs button{flex:1;min-height:40px;font-size:12px;padding:8px 4px;border:0;background:transparent}.tabs button[aria-pressed=true]{background:var(--ink);color:var(--green)}.section-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 10px}.section-title h2{font-size:12px;margin:0}.section-title>span{font-size:9px;color:var(--muted)}.upgrade{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 10px;background:var(--card);border:1px solid var(--line);margin-bottom:8px}.unit-icon{display:grid;place-items:center;background:#dce1cc;border:1.5px solid #677458;width:39px;height:42px;font:700 24px/1 serif;box-shadow:2px 2px #b2bba1}.upgrade h3,.research-card h3{font-size:13px;margin:0 0 2px}.upgrade p,.research-card p{font-size:10px;margin:0 0 3px;color:var(--muted)}.upgrade small{font-size:10px;color:var(--muted)}.upgrade button{min-width:83px;padding:6px;font-size:11px;background:var(--green);box-shadow:2px 2px var(--ink)}.upgrade.locked{background:#e7e6da}.upgrade.locked .unit-icon{filter:grayscale(1)}.orders{background:var(--card);padding:17px;border:1px solid #bcbfac;position:relative;align-self:start}.orders h3{font-size:16px;margin:26px 0 9px;font-weight:750}.orders p{font-size:12px;margin:0 0 14px}.orders .order-note{font-size:10px;color:var(--muted);margin:10px 0 0}.order-stamp{position:absolute;right:16px;top:48px;font-size:15px;letter-spacing:2px;border:2px solid var(--rust);color:var(--rust);padding:2px 5px;transform:rotate(-8deg);opacity:.65}.wide-button{width:100%;padding:8px 10px;font-size:12px;box-shadow:2px 2px var(--ink)}.research-card{display:flex;gap:10px;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--line);margin-bottom:10px;padding:14px}.research-card small{font-size:10px;color:var(--muted)}.research-card button{min-width:64px;padding:5px;font-size:12px}.journal{background:var(--ink);color:var(--green);padding:14px;min-height:240px}.journal .section-title>span{color:#b5c792}.journal p{font-size:11px;color:#d3dbc0;border-bottom:1px solid #465340;padding-bottom:9px;white-space:pre-wrap;overflow-wrap:anywhere}.journal p:first-of-type{color:var(--green)}.ending{margin:20px 0 0;padding:20px;border:2px solid var(--ink);background:#dce6c8}.ending h2{font-size:20px;margin:4px 0 10px}.ending p{font-size:12px}.ending .print-button{font-size:14px;min-height:48px;width:100%;display:block}.notice{font-size:11px;min-height:20px;margin-top:13px;color:var(--rust)}footer{display:flex;align-items:center;justify-content:space-between;gap:8px;border-top:1px solid var(--line);padding-top:12px;margin-top:8px;font-size:10px;color:var(--muted)}footer>div{display:flex;gap:8px}footer button{font-size:10px!important}.danger{color:var(--rust)}dialog{max-width:min(500px,calc(100vw - 28px));width:100%;padding:24px;border:2px solid var(--ink);background:var(--paper);color:var(--ink);box-shadow:6px 6px var(--ink)}dialog::backdrop{background:#101d18aa}dialog h2{font-size:20px;margin:0 0 12px}dialog p{font-size:13px}dialog button{padding:8px 12px}.dialog-head{display:flex;align-items:start;gap:10px;justify-content:space-between}.dialog-head .quiet{white-space:nowrap}.howto b{font-size:13px;color:#465d34}.howto p{margin:3px 0 14px}.dialog-actions{display:flex;gap:12px;margin-top:20px}.dialog-actions button{flex:1;font-size:12px}.danger-button{color:#fff;background:var(--rust)}
+@media(max-width:700px){.shell{padding:20px 16px 16px}.hero{gap:14px;grid-template-columns:1fr 1fr}.pixel-scene{min-height:275px}.machine{left:35%;transform:scale(.9);transform-origin:bottom center}.brand{gap:12px}h1{font-size:31px}.brand-stamp{width:46px;height:51px;font-size:31px}.lower-grid{gap:14px;grid-template-columns:1.4fr 1fr}.upgrade{grid-template-columns:32px minmax(0,1fr) auto;gap:7px;padding:10px 7px}.unit-icon{width:31px;height:35px;font-size:20px}.upgrade button{min-width:70px}.metrics{gap:8px}.metric{padding:10px}.metric strong{font-size:30px}}
+@media(max-width:520px){.shell{border:0;padding:17px 14px 15px}.header-right{flex-direction:column;gap:0;align-items:flex-end}.masthead{padding-bottom:13px}.hero{display:flex;flex-direction:column;gap:14px}.pixel-scene{min-height:206px;order:0}.control-panel{order:1}.window{width:32%;left:13%;height:43%;top:14%}.lamp{right:23%;height:56px}.machine{left:43%;transform:scale(.92)}.shelf{right:12%;top:24%;width:24%}.scene-caption{font-size:9px;bottom:5px}.desk{bottom:22%;left:9%;right:9%}.floor{height:22%}.plant{bottom:29%;left:20%}.stack{right:16%}.light-beam{right:22%}.metrics{gap:12px}.metric{padding:10px 14px}.metric strong{font-size:34px}.metric>small{font-size:10px}.print-button{min-height:58px}.story-card{margin:19px 0;padding:12px}.lower-grid{grid-template-columns:1fr;gap:16px}.upgrade{grid-template-columns:40px minmax(0,1fr) auto;gap:11px;padding:12px 10px}.unit-icon{width:38px;height:39px}.upgrade button{min-width:87px;min-height:46px}.upgrade h3{font-size:14px}.upgrade p{font-size:11px}.section-title h2{font-size:13px}.section-title>span{font-size:10px}.orders h3{margin-top:18px}.orders{padding:16px}.order-stamp{top:40px}.ticker{font-size:10px}.hint{font-size:11px}.tabs button{min-height:46px}.ending h2{font-size:19px}footer{align-items:flex-start;flex-direction:column;gap:4px}.progress-copy{font-size:10px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header class="masthead"><div class="brand"><span class="brand-stamp" aria-hidden="true">字</span><div><p class="eyebrow">一间工坊，写满世界。</p><h1>字<span>//</span>工厂</h1></div></div><div class="header-right"><span class="status"><i></i>单人工坊</span><button id="help" class="quiet">怎么玩</button></div></header>
+<div class="ticker"><span id="era">01 · 台灯时代</span><span>自动 <b id="rate">0</b> 字／秒</span><span>累计 <b id="total">0</b> 字</span></div>
+<main>
+<section class="hero" aria-label="印字工坊">
+  <div class="pixel-scene" id="scene" role="img" aria-label="像素画：夜晚的书桌、台灯和打字机">
+    <div class="scene-label">营业中 <span id="scene-era">01 / 05</span></div>
+    <div class="window"><i class="moon"></i><i class="building b1"></i><i class="building b2"></i><i class="building b3"></i></div>
+    <div class="shelf"><i></i><i></i><i></i><i></i></div>
+    <div class="light-beam"></div><div class="lamp"><b></b><i></i></div>
+    <div class="plant"><i></i><b></b></div>
+    <div class="machine"><div class="paper" id="paper">字</div><div class="roller"></div><div class="keys"></div><span></span></div>
+    <div class="stack"><i></i><i></i><i></i></div><div class="desk"></div><div class="floor"></div>
+    <div class="scene-caption" id="scene-caption">第一句话，还在等你。</div>
+  </div>
+  <div class="control-panel"><div class="metrics"><div class="metric"><span>待售文字</span><strong id="glyphs">0</strong><small>字 · 库存</small></div><div class="metric money"><span>工坊资金</span><strong id="credits">0</strong><small>每字售价 0.5</small></div></div>
+  <button id="print" class="print-button"><span id="print-label">印一个字</span><small id="print-gain">每次 +1</small><span aria-hidden="true">↵</span></button>
+  <button id="sell" class="sell-button" disabled>出售全部库存 <span id="sell-value">+0 资金</span></button>
+  <p class="hint" id="hint">先印 10 个字，再出售，买下第一台机械键盘。</p></div>
+</section>
+<section class="story-card"><span class="chapter-tag" id="chapter">第一章 · 一盏台灯</span><p id="story">深夜，你在旧仓库找到一台打字机。它只问你：第一句话是什么？</p><div class="progress-copy"><span id="next-goal">下一阶段：累计印出 100 字</span><span id="progress-text">0 / 100</span></div><div class="progress-track" role="progressbar" id="era-progress" aria-label="阶段进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="progress-fill"></div></div></section>
+<div class="lower-grid"><div>
+<nav class="tabs" aria-label="工坊面板"><button data-tab="workshop" aria-pressed="true">生产车间</button><button data-tab="research" aria-pressed="false">研发室</button><button data-tab="journal" aria-pressed="false">工坊日志</button></nav>
+<section id="workshop" class="tab-panel"><div class="section-title"><h2>让文字自己生长</h2><span>设备持续生产 · 价格递增</span></div><div id="upgrades"></div></section>
+<section id="research" class="tab-panel" hidden><div class="section-title"><h2>不只印得更多</h2><span>研发只需购买一次</span></div><article class="research-card"><div><h3>复写纸</h3><p>手动印字从 1 个变为 4 个。</p><small>累计 150 字解锁 · 45 资金</small></div><button id="boost">研发</button></article><article class="research-card"><div><h3>自动售货台</h3><p>无需点击出售。交付委托前，可暂停积攒库存。</p><small>累计 300 字解锁 · 60 资金</small></div><button id="research-auto">研发</button></article><button id="auto" class="wide-button" hidden>自动出售：已暂停</button></section>
+<section id="journal" class="tab-panel journal" hidden><div class="section-title"><h2>夜班记录</h2><span>保留最近 24 条</span></div><div id="logs"></div></section>
+</div><aside class="orders"><div class="section-title"><h2>街角委托</h2><span id="contract-count">0 / 3</span></div><div class="order-stamp" aria-hidden="true">待寄</div><h3 id="contract-title">给邻居的一封信</h3><p id="contract-detail">交付 20 个库存文字，获得 20 资金。</p><button id="contract" class="wide-button" disabled>交付委托</button><p class="order-note">委托比直接出售更划算。它们需要库存，不是累计产量。</p></aside></div>
+<section class="ending" id="ending" hidden><span class="eyebrow">你的第一份报纸</span><h2 id="ending-title">把明天，交到所有人手中。</h2><p id="ending-detail">累计印出 5,000 字，拥有 1 台印刷机，准备 200 库存文字与 300 资金。</p><button id="publish" class="print-button" disabled>发行《明日》创刊号</button></section>
+<div class="notice" id="notice" role="status" aria-live="polite"></div>
+</main>
+<footer><span id="save-status">正在读取本地存档…</span><div><button id="export" class="quiet">导出存档</button><button id="reset" class="quiet danger">重新开始</button></div></footer>
+</div>
+<dialog id="help-dialog"><div class="dialog-head"><h2>从一个字，到一座工厂。</h2><button id="close-help" class="quiet" aria-label="关闭玩法说明">关闭</button></div><div class="howto"><b>01　印字</b><p>点击「印一个字」。文字先放进库存。</p><b>02　出售或交订单</b><p>把库存换成资金；街角委托给得更多。</p><b>03　购买自动化</b><p>机械键盘、打字员、印刷机会自己印字。离线最多结算 8 小时。</p><b>04　写满世界</b><p>解锁研发，累计印出 5,000 字，再发行《明日》创刊号，完成第一章。</p></div><p class="hint">存档只存在当前浏览器，不上传服务器。清理网站数据会删除进度，请用「导出存档」备份。自动出售会消耗库存，交订单前请暂停。</p></dialog>
+<dialog id="reset-dialog"><h2>重新开始这一章？</h2><p>这会清空当前浏览器中的工坊进度。可以先取消并导出存档。</p><div class="dialog-actions"><button id="cancel-reset">保留进度</button><button id="confirm-reset" class="danger-button">确认重新开始</button></div></dialog>
+<noscript><p class="notice">游戏需要浏览器启用 JavaScript。</p></noscript>
+<script>
+/** 字工厂：纯函数经济引擎。时间由调用者传入，便于确定性测试。 */
+const Engine = (() => {
+  const VERSION = 2;
+  const SAVE_KEY = 'glyph-factory-save-v1';
+  const OFFLINE_CAP = 8 * 60 * 60;
+  const PRICE = 0.5;
+  const UNITS = [
+    { id: 'keyboards', name: '机械键盘', icon: '⌨', rate: 0.5, cost: 5, growth: 1.17, unlock: 0, note: '让第一行字自己长出来。' },
+    { id: 'typists', name: '夜班打字员', icon: '人', rate: 2, cost: 25, growth: 1.18, unlock: 100, note: '你休息的时候，故事还在继续。' },
+    { id: 'presses', name: '小型印刷机', icon: '▤', rate: 12, cost: 100, growth: 1.20, unlock: 600, note: '一张书桌，开始变成一间工厂。' },
+  ];
+  const ERAS = [
+    { at: 0, name: '台灯时代', story: '深夜，你在旧仓库找到一台打字机。它只问你：第一句话是什么？' },
+    { at: 100, name: '街角印坊', story: '第一批字走出了房间。街角有人问：明天还会有新的故事吗？' },
+    { at: 600, name: '机器轰鸣', story: '墙后的空房间开始亮灯。你造的不再只是文字，而是传播文字的机器。' },
+    { at: 2500, name: '城市来信', story: '陌生城市寄来空白信封。他们等着你，为他们写下明天。' },
+    { at: 5000, name: '写满世界', story: '印刷机的声音穿过夜色。现在，给所有人印一份属于他们的报纸。' },
+  ];
+  const CONTRACTS = [
+    { glyphs: 20, reward: 20, name: '给邻居的一封信' },
+    { glyphs: 100, reward: 85, name: '街角书店的传单' },
+    { glyphs: 500, reward: 350, name: '送往远方的故事' },
+  ];
+  const fresh = (now = Date.now()) => ({
+    version: VERSION, glyphs: 0, credits: 0, lifetimeGlyphs: 0,
+    keyboards: 0, typists: 0, presses: 0, contracts: 0,
+    manualBoost: false, autoSellUnlocked: false, autoSell: false, finished: false,
+    updatedAt: now, startedAt: now, log: ['台灯亮了。点击「印一个字」，开始你的工坊。'],
+  });
+  const rate = (g) => UNITS.reduce((n, unit) => n + g[unit.id] * unit.rate, 0);
+  const era = (g) => ERAS.reduce((index, item, i) => g.lifetimeGlyphs >= item.at ? i : index, 0);
+  const cost = (g, id) => { const u = UNITS.find((v) => v.id === id); return u ? Math.ceil(u.cost * u.growth ** g[id]) : Infinity; };
+  const note = (g, text) => ({ ...g, log: [text, ...g.log].slice(0, 24) });
+  const amount = (n) => typeof n === 'number' && Number.isFinite(n) && n >= 0 ? Math.min(n, 1e12) : 0;
+  function advance(g, now = Date.now()) {
+    // 时间倒退不重复结算；后台标签和离线共用同一结算路径。
+    if (!Number.isFinite(now) || now <= g.updatedAt) return g;
+    const elapsed = Math.min(OFFLINE_CAP, (now - g.updatedAt) / 1000);
+    const made = rate(g) * elapsed;
+    let next = { ...g, updatedAt: now, glyphs: amount(g.glyphs + made), lifetimeGlyphs: amount(g.lifetimeGlyphs + made) };
+    if (g.autoSellUnlocked && g.autoSell) {
+      const sold = Math.floor(next.glyphs);
+      next = { ...next, glyphs: next.glyphs - sold, credits: amount(next.credits + sold * PRICE) };
+    }
+    if (era(next) > era(g)) next = note(next, `新篇章：${ERAS[era(next)].name}。${ERAS[era(next)].story}`);
+    return next;
+  }
+  function restore(raw, now = Date.now()) {
+    let value;
+    try { value = typeof raw === 'string' ? JSON.parse(raw) : raw; } catch { return fresh(now); }
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return fresh(now);
+    let g = fresh(now);
+    for (const key of ['glyphs', 'credits', 'lifetimeGlyphs']) g[key] = amount(value[key]);
+    for (const key of ['keyboards', 'typists', 'presses']) g[key] = Math.min(10000, Math.floor(amount(value[key])));
+    g.lifetimeGlyphs = Math.max(g.lifetimeGlyphs, g.glyphs);
+    g.contracts = Math.min(CONTRACTS.length, Math.floor(amount(value.contracts)));
+    g.manualBoost = value.manualBoost === true;
+    g.autoSellUnlocked = value.autoSellUnlocked === true;
+    g.autoSell = g.autoSellUnlocked && value.autoSell === true;
+    g.finished = value.finished === true;
+    g.startedAt = Math.min(now, typeof value.startedAt === 'number' && value.startedAt > 0 && Number.isFinite(value.startedAt) ? value.startedAt : now);
+    g.updatedAt = Math.min(now, typeof value.updatedAt === 'number' && value.updatedAt > 0 && Number.isFinite(value.updatedAt) ? value.updatedAt : now);
+    // 不把存档中的任意字符串注入页面，也不接受旧版英文事件记录。
+    if (value.version === VERSION && Array.isArray(value.log)) {
+      const logs = value.log.filter((v) => typeof v === 'string').map((v) => v.slice(0, 200)).slice(0, 24);
+      if (logs.length) g.log = logs;
+    }
+    const seconds = Math.min(OFFLINE_CAP, (now - g.updatedAt) / 1000);
+    const made = Math.floor(rate(g) * seconds);
+    g = advance(g, now);
+    if (seconds >= 60 && made > 0) g = note(g, `欢迎回来。离开时工坊生产了 ${made.toLocaleString('zh-CN')} 个字（最多结算 8 小时）。`);
+    return g;
+  }
+  function act(state, command, now = Date.now()) {
+    let g = advance(state, now);
+    const beforeEra = era(g);
+    if (command.type === 'print') {
+      const count = g.manualBoost ? 4 : 1;
+      g = { ...g, glyphs: amount(g.glyphs + count), lifetimeGlyphs: amount(g.lifetimeGlyphs + count) };
+    } else if (command.type === 'sell') {
+      const sold = Math.floor(g.glyphs);
+      if (sold > 0) g = { ...g, glyphs: g.glyphs - sold, credits: amount(g.credits + sold * PRICE) };
+    } else if (command.type === 'buy') {
+      const unit = UNITS.find((v) => v.id === command.id);
+      if (!unit || g.lifetimeGlyphs < unit.unlock || g.credits < cost(g, unit.id) || g[unit.id] >= 10000) return g;
+      g = note({ ...g, credits: g.credits - cost(g, unit.id), [unit.id]: g[unit.id] + 1 }, `购入${unit.name}。自动产量增加 ${unit.rate} 字／秒。`);
+    } else if (command.type === 'boost' && !g.manualBoost && g.lifetimeGlyphs >= 150 && g.credits >= 45) {
+      g = note({ ...g, credits: g.credits - 45, manualBoost: true }, '复写纸研发完成。每次手动印字变为 4 个。');
+    } else if (command.type === 'research-auto' && !g.autoSellUnlocked && g.lifetimeGlyphs >= 300 && g.credits >= 60) {
+      g = note({ ...g, credits: g.credits - 60, autoSellUnlocked: true }, '自动售货台研发完成。手动开启后自动出售库存；交订单前可暂停。');
+    } else if (command.type === 'toggle-auto' && g.autoSellUnlocked) {
+      g = note({ ...g, autoSell: !g.autoSell }, g.autoSell ? '自动出售已暂停，开始积攒订单库存。' : '自动出售已开启。库存将按每字 0.5 资金出售。');
+    } else if (command.type === 'contract') {
+      const c = CONTRACTS[g.contracts];
+      if (c && g.glyphs >= c.glyphs) g = note({ ...g, glyphs: g.glyphs - c.glyphs, credits: amount(g.credits + c.reward), contracts: g.contracts + 1 }, `完成委托「${c.name}」，获得 ${c.reward} 资金。`);
+    } else if (command.type === 'publish' && !g.finished && canFinish(g)) {
+      g = note({ ...g, glyphs: g.glyphs - 200, credits: g.credits - 300, finished: true }, '《明日》创刊号发行了。你从一个字开始，让整座城市有了共同的故事。第一章通关。');
+    }
+    if (era(g) > beforeEra) g = note(g, `新篇章：${ERAS[era(g)].name}。${ERAS[era(g)].story}`);
+    return g;
+  }
+  const canFinish = (g) => g.lifetimeGlyphs >= 5000 && g.presses >= 1 && g.glyphs >= 200 && g.credits >= 300;
+  return { VERSION, SAVE_KEY, OFFLINE_CAP, PRICE, UNITS, ERAS, CONTRACTS, fresh, restore, rate, era, cost, act, advance, canFinish };
+})();
+/* 浏览器界面；经济逻辑唯一来源为上方 Engine。 */
+(() => {
+  'use strict';
+  const E = Engine;
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n, decimals = 0) => n >= 1e9 ? (n / 1e8).toFixed(1) + '亿' : n >= 1e6 ? (n / 1e4).toFixed(1) + '万' : n.toLocaleString('zh-CN', { maximumFractionDigits: decimals });
+  let g = E.fresh(), storageOK = true, lastSave = 0, lastLog = '', lastNotice = '';
+  try { const raw = localStorage.getItem(E.SAVE_KEY); if (raw) g = E.restore(raw); } catch { storageOK = false; }
+  const flash = (text) => { if (text !== lastNotice) { $('notice').textContent = text; lastNotice = text; } };
+  const unitElements = new Map();
+  E.UNITS.forEach((u) => {
+    const card = document.createElement('article'); card.className = 'upgrade';
+    const icon = document.createElement('div'); icon.className = 'unit-icon'; icon.textContent = u.icon; icon.setAttribute('aria-hidden', 'true');
+    const copy = document.createElement('div');
+    const title = document.createElement('h3'); title.textContent = u.name;
+    const description = document.createElement('p'); description.textContent = `每台 +${u.rate} 字／秒`;
+    const owned = document.createElement('small');
+    const button = document.createElement('button'); button.id = 'buy-' + u.id; button.setAttribute('aria-label', '购买' + u.name);
+    button.addEventListener('click', () => perform({ type: 'buy', id: u.id }));
+    copy.append(title, description, owned); card.append(icon, copy, button); $('upgrades').append(card);
+    unitElements.set(u.id, { card, owned, button });
+  });
+  function save(force = false) {
+    if (!force && Date.now() - lastSave < 2000) return;
+    try {
+      localStorage.setItem(E.SAVE_KEY, JSON.stringify(g)); storageOK = true;
+      $('save-status').textContent = '已自动保存 · 当前浏览器 · 最多结算离线 8 小时';
+    } catch { storageOK = false; $('save-status').textContent = '浏览器不允许存档 · 请导出备份，关闭页面会丢失进度'; }
+    lastSave = Date.now();
+  }
+  function perform(command) {
+    const before = g;
+    g = E.act(g, command);
+    if (g.log[0] !== before.log[0]) flash(g.log[0]);
+    if (command.type === 'print') {
+      $('scene').classList.remove('printing');
+      void $('scene').offsetWidth;
+      $('scene').classList.add('printing');
+    }
+    render(); save(true);
+  }
+  function render() {
+    const index = E.era(g), stage = E.ERAS[index], next = E.ERAS[index + 1];
+    $('glyphs').textContent = fmt(Math.floor(g.glyphs)); $('credits').textContent = fmt(g.credits, 1);
+    $('rate').textContent = fmt(E.rate(g), 1); $('total').textContent = fmt(Math.floor(g.lifetimeGlyphs));
+    $('era').textContent = `0${index + 1} · ${stage.name}`; $('scene-era').textContent = `0${index + 1} / 05`;
+    $('story').textContent = stage.story; $('chapter').textContent = `第一章 · ${stage.name}`;
+    $('scene-caption').textContent = E.rate(g) ? '机器不停，故事就不会结束。' : '第一句话，还在等你。';
+    $('scene').classList.toggle('running', E.rate(g) > 0);
+    $('print-label').textContent = g.manualBoost ? '印四个字' : '印一个字'; $('print-gain').textContent = `每次 +${g.manualBoost ? 4 : 1}`;
+    $('sell').disabled = g.glyphs < 1; $('sell-value').textContent = `+${fmt(Math.floor(g.glyphs) * E.PRICE, 1)} 资金`;
+    $('next-goal').textContent = next ? `下一阶段：累计印出 ${fmt(next.at)} 字` : g.finished ? '第一章已通关，你仍可以继续经营。' : '最后一步：发行《明日》创刊号';
+    $('progress-text').textContent = next ? `${fmt(Math.floor(g.lifetimeGlyphs))} / ${fmt(next.at)}` : '5 / 5';
+    const progress = next ? Math.min(100, (g.lifetimeGlyphs - stage.at) / (next.at - stage.at) * 100) : 100;
+    $('progress-fill').style.width = progress + '%'; $('era-progress').setAttribute('aria-valuenow', String(Math.floor(progress)));
+    for (const u of E.UNITS) {
+      const { card, owned, button } = unitElements.get(u.id); const locked = g.lifetimeGlyphs < u.unlock; const price = E.cost(g, u.id);
+      card.classList.toggle('locked', locked); owned.textContent = locked ? `累计 ${u.unlock} 字解锁` : `已拥有 ${fmt(g[u.id])} 台`;
+      button.textContent = locked ? '尚未解锁' : `${fmt(price)} 资金`; button.disabled = locked || g.credits < price;
+      button.title = `${u.note} 购买需要 ${price} 资金。`;
+    }
+    const contract = E.CONTRACTS[g.contracts]; $('contract-count').textContent = `${g.contracts} / 3`;
+    $('contract-title').textContent = contract ? contract.name : '这条街，记住了你的名字。';
+    $('contract-detail').textContent = contract ? `交付 ${contract.glyphs} 个库存文字，获得 ${contract.reward} 资金。` : '三份委托全部完成。把工坊的故事，写进你的第一份报纸。';
+    $('contract').textContent = contract ? `交付 ${contract.glyphs} 字 → +${contract.reward} 资金` : '委托已全部完成'; $('contract').disabled = !contract || g.glyphs < contract.glyphs;
+    $('boost').textContent = g.manualBoost ? '已研发' : '研发'; $('boost').disabled = g.manualBoost || g.lifetimeGlyphs < 150 || g.credits < 45;
+    $('research-auto').textContent = g.autoSellUnlocked ? '已研发' : '研发'; $('research-auto').disabled = g.autoSellUnlocked || g.lifetimeGlyphs < 300 || g.credits < 60;
+    $('auto').hidden = !g.autoSellUnlocked; $('auto').textContent = g.autoSell ? '自动出售：运行中 · 点击暂停' : '自动出售：已暂停 · 点击开启'; $('auto').setAttribute('aria-pressed', String(g.autoSell));
+    $('hint').textContent = g.finished ? '第一章已通关。继续经营，或导出存档留作纪念。' : g.autoSell ? '正在自动出售。需要积攒委托库存时，请到研发室暂停。' : g.lifetimeGlyphs < 10 ? '先印 10 个字，再出售，买下第一台机械键盘。' : E.rate(g) === 0 ? '出售库存可以换取资金；第一台机械键盘只需 5 资金。' : g.lifetimeGlyphs < 150 ? '工坊已经开始自动生产。完成街角委托，扩建你的车间。' : '打开研发室，让手动印字更快，或解锁自动出售。';
+    if (g.log.join('\n') !== lastLog) {
+      $('logs').replaceChildren(...g.log.map((text, i) => { const p = document.createElement('p'); p.textContent = (i ? '· ' : '› ') + text; return p; })); lastLog = g.log.join('\n');
+    }
+    $('ending').hidden = g.lifetimeGlyphs < 2500 && !g.finished;
+    $('publish').disabled = g.finished || !E.canFinish(g);
+    if (g.finished) {
+      $('ending-title').textContent = '第一章通关：世界有了明天。';
+      $('ending-detail').textContent = '你从一个字开始，造出一间工厂，又把第一份《明日》送到了城市每个角落。现在可以继续经营，或导出这份存档。';
+      $('publish').textContent = '《明日》创刊号 · 已发行';
+    } else {
+      $('ending-title').textContent = '把明天，交到所有人手中。';
+      $('ending-detail').textContent = `发行条件：累计 ${fmt(Math.floor(g.lifetimeGlyphs))} / 5,000 字 · 印刷机 ${g.presses} / 1 台 · 库存 ${fmt(Math.floor(g.glyphs))} / 200 字 · 资金 ${fmt(g.credits, 1)} / 300。`;
+      $('publish').textContent = '发行《明日》创刊号';
+    }
+  }
+  $('print').addEventListener('click', () => perform({ type: 'print' }));
+  $('sell').addEventListener('click', () => perform({ type: 'sell' }));
+  $('contract').addEventListener('click', () => perform({ type: 'contract' }));
+  $('boost').addEventListener('click', () => perform({ type: 'boost' }));
+  $('research-auto').addEventListener('click', () => perform({ type: 'research-auto' }));
+  $('auto').addEventListener('click', () => perform({ type: 'toggle-auto' }));
+  $('publish').addEventListener('click', () => perform({ type: 'publish' }));
+  document.querySelectorAll('[data-tab]').forEach((button) => button.addEventListener('click', () => {
+    document.querySelectorAll('[data-tab]').forEach((b) => b.setAttribute('aria-pressed', String(b === button)));
+    document.querySelectorAll('.tab-panel').forEach((p) => { p.hidden = p.id !== button.dataset.tab; });
+  }));
+  $('help').addEventListener('click', () => $('help-dialog').showModal());
+  $('close-help').addEventListener('click', () => $('help-dialog').close());
+  $('reset').addEventListener('click', () => $('reset-dialog').showModal());
+  $('cancel-reset').addEventListener('click', () => $('reset-dialog').close());
+  $('confirm-reset').addEventListener('click', () => {
+    g = E.fresh(); $('reset-dialog').close(); flash('已开始新的工坊。'); render(); save(true);
+  });
+  $('export').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(E.advance(g), null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob), a = document.createElement('a'); a.href = url; a.download = '字工厂-存档.json'; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000); flash('已导出存档文件。请妥善保管。');
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.code !== 'Space' || event.repeat || event.altKey || event.ctrlKey || event.metaKey || document.querySelector('dialog[open]') || /INPUT|TEXTAREA|BUTTON|A|SELECT/.test(document.activeElement.tagName)) return;
+    event.preventDefault(); perform({ type: 'print' });
+  });
+  const tick = () => { g = E.advance(g); render(); save(); };
+  window.setInterval(tick, 250);
+  window.addEventListener('pagehide', () => { g = E.advance(g); save(true); });
+  document.addEventListener('visibilitychange', () => { g = E.advance(g); render(); save(true); });
+  render();
+  if (storageOK) save(true); else $('save-status').textContent = '浏览器不允许存档 · 请导出备份';
+  if (g.log[0].startsWith('欢迎回来')) flash(g.log[0]);
+})();
+</script>
+</body></html>
