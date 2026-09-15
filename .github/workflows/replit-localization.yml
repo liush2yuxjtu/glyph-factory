@@ -1,0 +1,53 @@
+name: Replit Chinese browser verification
+on:
+  push:
+    branches: [main]
+    paths:
+      - deploy/replit-localization/**
+      - .github/workflows/replit-localization.yml
+  pull_request:
+    paths:
+      - deploy/replit-localization/**
+      - .github/workflows/replit-localization.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: replit-localization-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verifier-tests:
+    name: Verifier regression fixtures (not production)
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install playwright==1.57.0
+      - run: python -m playwright install --with-deps chromium
+      - run: python deploy/replit-localization/test_verifier.py
+  live-browser:
+    name: Actual public Replit acceptance
+    if: github.ref == 'refs/heads/main'
+    needs: verifier-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install playwright==1.57.0
+      - run: python -m playwright install --with-deps chromium
+      - name: Verify Chinese and English, phone and desktop, saves and reload
+        run: python deploy/replit-localization/verify_live.py
+      - name: Keep screenshots and exact browser report, including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: replit-chinese-browser-evidence
+          path: artifacts/replit-localization/
+          if-no-files-found: warn
+          retention-days: 7
