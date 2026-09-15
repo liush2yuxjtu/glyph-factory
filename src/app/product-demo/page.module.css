@@ -1,0 +1,306 @@
+.page {
+  min-height: 100vh;
+  padding: 24px 14px 48px;
+  background:
+    radial-gradient(circle at 1px 1px, rgba(23, 32, 26, 0.08) 1px, transparent 0) 0 0 / 8px 8px,
+    #d7d9c9;
+  color: #17201a;
+  font-family: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+.frame {
+  width: min(920px, 100%);
+  margin: 0 auto;
+  padding: clamp(20px, 5vw, 46px);
+  border: 2px solid #17201a;
+  background: #f1eddf;
+  box-shadow: 7px 7px 0 #17201a;
+}
+
+.topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.eyebrow,
+.phase {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+
+.eyebrow { color: #a34e34; }
+.phase { color: #526055; }
+
+.title {
+  max-width: 800px;
+  margin: 6px 0 12px;
+  font-size: clamp(34px, 7vw, 62px);
+  line-height: 1;
+  letter-spacing: -.04em;
+}
+
+.deck {
+  max-width: 720px;
+  margin: 0 0 24px;
+  color: #526055;
+  font-size: clamp(14px, 2.2vw, 17px);
+  line-height: 1.75;
+}
+
+.progress {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.step {
+  min-height: 74px;
+  padding: 10px 12px;
+  border: 1.5px solid #17201a;
+  background: #e5e1d3;
+  color: #677067;
+}
+
+.stepActive {
+  background: #c8ef70;
+  color: #17201a;
+  box-shadow: 3px 3px 0 #17201a;
+}
+
+.stepNumber {
+  display: block;
+  margin-bottom: 3px;
+  font: 900 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.step strong {
+  display: block;
+  font-size: 13px;
+}
+
+.game {
+  display: grid;
+  grid-template-columns: 1.2fr .8fr;
+  gap: 16px;
+}
+
+.workbench,
+.machineCard {
+  border: 2px solid #17201a;
+  background: #fffdf5;
+}
+
+.workbench { padding: 18px; }
+.machineCard { padding: 16px; }
+
+.stock {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.glyphBox {
+  min-height: 150px;
+  display: grid;
+  place-items: center;
+  border: 2px solid #17201a;
+  background: #f7f3e8;
+}
+
+.glyphBoxForest { background: #c8ef70; }
+
+.glyph {
+  display: block;
+  font: 900 clamp(48px, 11vw, 82px)/1 serif;
+}
+
+.count {
+  display: block;
+  margin-top: 4px;
+  text-align: center;
+  font: 900 18px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.arrow {
+  font-size: 34px;
+  font-weight: 900;
+}
+
+.primary,
+.secondary,
+.reset {
+  width: 100%;
+  min-height: 52px;
+  border: 2px solid #17201a;
+  border-radius: 0;
+  font: 900 15px/1.2 inherit;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 #17201a;
+}
+
+.primary {
+  background: #17201a;
+  color: #c8ef70;
+}
+
+.secondary {
+  margin-top: 10px;
+  background: #c8ef70;
+  color: #17201a;
+}
+
+.secondary:disabled {
+  background: #deddd2;
+  color: #7a817a;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.primary:active,
+.secondary:not(:disabled):active,
+.reset:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 #17201a;
+}
+
+.primary:focus-visible,
+.secondary:focus-visible,
+.reset:focus-visible {
+  outline: 3px solid #a34e34;
+  outline-offset: 3px;
+}
+
+.machineTitle {
+  margin: 0 0 12px;
+  font-size: 13px;
+  letter-spacing: .08em;
+}
+
+.machineVisual {
+  min-height: 196px;
+  display: grid;
+  place-items: center;
+  border: 2px dashed #17201a;
+  background: #e8e5d8;
+  text-align: center;
+  overflow: hidden;
+}
+
+.recipe {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font: 900 clamp(24px, 5vw, 38px)/1 serif;
+}
+
+.gear {
+  display: inline-grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  margin: 14px auto 0;
+  border: 2px solid #17201a;
+  background: #fffdf5;
+  font-size: 30px;
+}
+
+.running .gear {
+  animation: turn 1.2s steps(8) infinite;
+}
+
+.machineCopy {
+  min-height: 52px;
+  margin: 12px 0 0;
+  color: #526055;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.aha {
+  margin-top: 18px;
+  padding: clamp(18px, 4vw, 28px);
+  border: 2px solid #17201a;
+  background: #17201a;
+  color: #c8ef70;
+  text-align: center;
+}
+
+.aha small {
+  display: block;
+  margin-bottom: 8px;
+  color: #d8e6b8;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .14em;
+}
+
+.aha strong {
+  display: block;
+  font-size: clamp(22px, 5vw, 36px);
+  line-height: 1.25;
+}
+
+.note {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.note > div {
+  padding: 12px;
+  border-left: 3px solid #17201a;
+  background: #e5e1d3;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.note b { display: block; margin-bottom: 3px; }
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.link {
+  color: #17201a;
+  font-size: 12px;
+  font-weight: 900;
+  text-underline-offset: 4px;
+}
+
+.reset {
+  width: auto;
+  min-height: 42px;
+  padding: 8px 14px;
+  background: #fffdf5;
+  color: #17201a;
+  font-size: 12px;
+}
+
+@keyframes turn { to { transform: rotate(360deg); } }
+
+@media (max-width: 720px) {
+  .game { grid-template-columns: 1fr; }
+  .progress { grid-template-columns: 1fr; }
+  .step { min-height: auto; }
+  .note { grid-template-columns: 1fr; }
+  .topline, .footer { align-items: flex-start; flex-direction: column; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .running .gear { animation: none; }
+}
