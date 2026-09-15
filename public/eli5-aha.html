@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; img-src data:; font-src data:; media-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Paperclips 的 Aha Moment → 字工厂</title>
+<style>
+:root{--ink:#17201a;--paper:#f1eddf;--panel:#fffdf5;--blue:#3e6fb0;--green:#c8ef70;--rust:#a34e34;--line:#bec4b2}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}.wrap{max-width:780px;margin:auto;padding:34px 18px 60px}h1{font-size:clamp(32px,8vw,54px);line-height:1.05;margin:0 0 10px}.lead{font-size:16px;margin:0 0 38px;color:#526055}.step{margin:0 0 42px}.num{font-size:42px;font-weight:900;color:var(--blue);line-height:1}.step h2{font-size:30px;margin:4px 0 12px}.panel{background:var(--panel);border:2px solid var(--ink);padding:18px;min-height:220px;display:grid;place-items:center;box-shadow:5px 5px 0 #aeb7a2}.caption{font-size:14px;text-align:center;margin:12px 0 0;font-weight:700}svg{width:100%;height:auto;max-height:240px}.demo{display:grid;gap:12px}.counter{font-size:52px;font-weight:900;text-align:center}.buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px}button{min-height:52px;border:2px solid var(--ink);background:var(--panel);font:700 16px system-ui;color:var(--ink);cursor:pointer;box-shadow:3px 3px 0 var(--ink)}button:focus-visible{outline:4px solid var(--rust);outline-offset:3px}button:disabled{opacity:.4;cursor:not-allowed}.primary{background:var(--green)}.machine{padding:16px;border:2px dashed var(--ink);text-align:center;font-weight:800}.aha{background:var(--ink);color:var(--green);padding:22px;font-size:clamp(22px,5vw,34px);font-weight:900;text-align:center}.small{font-size:13px;color:#5c6459;text-align:center}@media(max-width:520px){.buttons{grid-template-columns:1fr}.panel{min-height:190px}.step h2{font-size:26px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<h1>Paperclips 的 Aha Moment</h1>
+<p class="lead">不是“夹子变多了”。是你突然发现：你在造一台会自己变强的机器。</p>
+
+<section class="step">
+<div class="num">1</div><h2>先亲手点</h2>
+<div class="panel">
+<svg viewBox="0 0 640 220" role="img" aria-label="手动点击制作回形针">
+<rect x="80" y="70" width="160" height="80" rx="12" fill="#fffdf5" stroke="#17201a" stroke-width="5"/><text x="160" y="120" text-anchor="middle" font-size="34" fill="#17201a">做 1 个</text>
+<path d="M300 110H420" stroke="#17201a" stroke-width="8"/><path d="M400 90l25 20-25 20" fill="none" stroke="#17201a" stroke-width="8"/>
+<path d="M470 74c55-24 79 50 36 74-35 18-64-7-49-34 12-22 48-20 50 5" fill="none" stroke="#3e6fb0" stroke-width="10" stroke-linecap="round"/>
+</svg>
+</div><p class="caption">你以为这是点击游戏。</p>
+</section>
+
+<section class="step">
+<div class="num">2</div><h2>机器开始替你点</h2>
+<div class="panel">
+<svg viewBox="0 0 640 220" role="img" aria-label="自动机器不断制造回形针">
+<rect x="72" y="55" width="210" height="110" fill="#c8ef70" stroke="#17201a" stroke-width="5"/><circle cx="125" cy="110" r="24" fill="#fffdf5" stroke="#17201a" stroke-width="5"/><circle cx="225" cy="110" r="24" fill="#fffdf5" stroke="#17201a" stroke-width="5"/><path d="M305 110H390" stroke="#17201a" stroke-width="8"/><path d="M370 90l25 20-25 20" fill="none" stroke="#17201a" stroke-width="8"/>
+<g transform="translate(430 40)" fill="none" stroke="#3e6fb0" stroke-width="8" stroke-linecap="round"><path d="M30 10c48-20 66 42 31 62-30 17-53-5-40-27 10-18 38-16 40 4"/><path d="M30 75c48-20 66 42 31 62-30 17-53-5-40-27 10-18 38-16 40 4"/></g>
+</svg>
+</div><p class="caption">Aha：我的工作不是点。是设计增长。</p>
+</section>
+
+<section class="step">
+<div class="num">3</div><h2>字工厂：把“结构”变成机器</h2>
+<div class="panel demo">
+<div class="counter"><span id="wood">0</span> × 木　 <span id="forest">0</span> × 林</div>
+<div class="buttons">
+<button id="print" class="primary">印一个「木」</button>
+<button id="mold" disabled>刻模：木 + 木 → 林</button>
+</div>
+<div id="machine" class="machine">先亲手印 3 个「木」</div>
+</div><p class="caption">不是买“更快按钮”。是发明一个可重复的字形规则。</p>
+</section>
+
+<section class="step">
+<div class="num">4</div><h2>真正的 Aha</h2>
+<div class="aha">“我不是在印字。<br>我在造一门会自我生产的文字系统。”</div>
+<p class="small">这就是 Paperclips 的精神转折，但换成 Glyph Factory 自己的核心幻想。</p>
+</section>
+</main>
+<script>
+let wood=0,forest=0,running=false;const woodEl=document.getElementById('wood'),forestEl=document.getElementById('forest'),print=document.getElementById('print'),mold=document.getElementById('mold'),machine=document.getElementById('machine');function render(){woodEl.textContent=wood;forestEl.textContent=forest;if(!running&&wood>=3){mold.disabled=false;machine.textContent='新发现：可以把字形关系刻成模具';}}print.addEventListener('click',()=>{wood++;render()});mold.addEventListener('click',()=>{if(running||wood<2)return;wood-=2;forest++;running=true;mold.disabled=true;print.textContent='你仍可手工印「木」';machine.textContent='模具运行中：每 1.2 秒，把 2 个「木」压成 1 个「林」';render();setInterval(()=>{if(wood>=2){wood-=2;forest++;render()}},1200)});render();
+</script>
+</body>
+</html>
