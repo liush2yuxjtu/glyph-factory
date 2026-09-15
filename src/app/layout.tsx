@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: '字工厂 · 从一个字开始',
-  description: '手机可玩的中文像素增量游戏。从手动印字，到自动化工坊，再到发行第一份报纸。',
+  title: 'Glyph Factory / 字工厂 · Start with one glyph',
+  description: 'A bilingual Chinese/English pixel incremental game about printing glyphs, automation, research, street orders, and local saves.',
 };
 
 export const viewport: Viewport = {
