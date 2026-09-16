@@ -4,11 +4,11 @@ import { readFile } from 'node:fs/promises';
 
 const controller = await readFile(new URL('../public/glyph-game-v3.js', import.meta.url), 'utf8');
 const builder = await readFile(new URL('../scripts/build-static.mjs', import.meta.url), 'utf8');
+const privacy = await readFile(new URL('../public/player-privacy-v3.js', import.meta.url), 'utf8');
 const intent = await readFile(new URL('../public/intent.html', import.meta.url), 'utf8');
 
 test('future game surfaces stay hidden until discovery', () => {
   assert.match(controller, /const visibleActs = preview \? E\.ACTS : E\.ACTS\.filter\(\(act\) => act\.id <= s\.act\)/);
-  assert.match(controller, /const visible = preview \? E\.AHAS : E\.AHAS\.filter\(\(item\)=>seen\.has\(item\.id\)\)/);
   assert.match(controller, /\$\('world-card'\)\.hidden = !isDirector && s\.act < 3/);
 });
 
@@ -28,9 +28,30 @@ test('reset clears both game progress and remembered UI reveals', () => {
   assert.match(controller, /g=E\.fresh\(\);preview=null;clearReveals\(\);save\(true\);render\(\)/);
 });
 
-test('intent.html ships in the static review bundle', () => {
-  assert.match(builder, /'intent\.html'/);
-  assert.match(builder, /progressiveDisclosure: true/);
-  assert.match(intent, /不用，就不存在/);
-  assert.match(intent, /Hidden until actionable/);
+test('normal player UI hides design/review language and scrubs internal event lines', () => {
+  assert.match(privacy, /localReviewHost/);
+  assert.match(privacy, /remove\('\.head-actions a\[href="\/preview\.html"\]'\)/);
+  assert.match(privacy, /remove\('#director-toggle'\)/);
+  assert.match(privacy, /hide\('\.aha-focus'\)/);
+  assert.match(privacy, /hide\('#act-strip'\)/);
+  assert.match(privacy, /hide\('\.act-title'\)/);
+  assert.match(privacy, /filter\(\(line\) => !\/\^\[›·\]\?\\s\*A\\d\{2\}/);
+});
+
+test('production bundle does not deploy designer Aha review artifacts', () => {
+  assert.match(builder, /playerSpoilers: false/);
+  assert.match(builder, /internalReviewArtifactsDeployed: false/);
+  assert.match(builder, /writeFile\(new URL\('glyph-engine-v3\.js', out\), playerEngine\)/);
+  assert.match(builder, /writeFile\(new URL\('glyph-game-v3\.js', out\), playerController\)/);
+  assert.match(builder, /copyFile\(new URL\('player-privacy-v3\.js'/);
+  assert.doesNotMatch(builder, /copyFile\(new URL\('preview\.html'/);
+  assert.doesNotMatch(builder, /copyFile\(new URL\('intent\.html'/);
+  assert.doesNotMatch(builder, /copyFile\(new URL\('glyph-factory-v3-preview\.webm'/);
+});
+
+test('intent is explicitly internal and documents the one-way reveal contract', () => {
+  assert.match(intent, /内部设计\/开发材料/);
+  assert.match(intent, /hidden → revealed → persistent → intentionally replaced/);
+  assert.match(intent, /A01–A28/);
+  assert.match(intent, /生产玩家界面不能出现 Aha/);
 });
