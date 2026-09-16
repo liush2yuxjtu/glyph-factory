@@ -43,6 +43,11 @@ jobs:
           node-version: '22'
       - name: 验证第一章回归、28 Aha、Director 与 Preview
         run: node --test tests/*.test.mjs
+      - name: 验证 Preview WebM 容器与时长
+        run: |
+          duration="$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 public/glyph-factory-v3-preview.webm)"
+          echo "Preview duration: ${duration}s"
+          node -e "const d=Number(process.argv[1]); if (!Number.isFinite(d) || d < 20) { console.error('Preview video must decode and be at least 20 seconds; got', process.argv[1]); process.exit(1); }" "$duration"
       - name: 构建零依赖游戏与预览视频包
         run: node scripts/build-static.mjs
       - name: 检查仓库是否已有部署授权
