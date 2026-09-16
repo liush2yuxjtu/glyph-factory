@@ -2,7 +2,8 @@
   'use strict';
 
   const params = new URLSearchParams(location.search);
-  const reviewMode = params.get('review') === '1' || params.get('director') === '1';
+  const localReviewHost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+  const reviewMode = localReviewHost && (params.get('review') === '1' || params.get('director') === '1');
   if (reviewMode) return;
 
   document.documentElement.dataset.audience = 'player';
@@ -23,8 +24,7 @@
   hide('.aha-focus');
   hide('#aha-list');
   hide('#aha-count');
-  const ahaHead = document.querySelector('#aha-count')?.closest('.panel-head');
-  if (ahaHead) hide('.panel-head:has(#aha-count)');
+  hide('.panel-head:has(#aha-count)');
   hide('#act-strip');
   hide('.act-kicker');
   hide('.act-title');
