@@ -2,6 +2,6 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
   "installCommand": "",
-  "buildCommand": "node --test tests/game.test.mjs && node scripts/build-static.mjs",
+  "buildCommand": "node --test tests/*.test.mjs && node scripts/build-static.mjs",
   "outputDirectory": "dist"
 }
