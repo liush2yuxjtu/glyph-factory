@@ -2,13 +2,23 @@
 
 function injectEnhancements(frame: HTMLIFrameElement) {
   const doc = frame.contentDocument;
-  if (!doc || doc.getElementById('glyph-a11y-i18n-script')) return;
+  if (!doc) return;
 
-  const script = doc.createElement('script');
-  script.id = 'glyph-a11y-i18n-script';
-  script.src = '/game-accessibility-i18n.js';
-  script.defer = true;
-  doc.head.appendChild(script);
+  if (!doc.getElementById('glyph-a11y-i18n-script')) {
+    const script = doc.createElement('script');
+    script.id = 'glyph-a11y-i18n-script';
+    script.src = '/game-accessibility-i18n.js';
+    script.defer = true;
+    doc.head.appendChild(script);
+  }
+
+  if (!doc.getElementById('glyph-simple-interaction-script')) {
+    const simple = doc.createElement('script');
+    simple.id = 'glyph-simple-interaction-script';
+    simple.src = '/simple-interaction.js';
+    simple.defer = true;
+    doc.head.appendChild(simple);
+  }
 }
 
 export default function GameShell() {
