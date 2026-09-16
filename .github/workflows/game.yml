@@ -33,9 +33,9 @@ concurrency:
   cancel-in-progress: true
 jobs:
   verify:
-    name: Acts Engine v3 测试与静态构建
+    name: Acts Engine v3 测试、静态构建与 Preview
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -54,9 +54,8 @@ jobs:
           node -e "const d=Number(process.argv[1]); if (!Number.isFinite(d) || d < 20) { console.error('Preview video must decode and be at least 20 seconds; got', process.argv[1]); process.exit(1); }" "$duration"
       - name: 构建零依赖游戏与预览视频包
         run: node scripts/build-static.mjs
-      - name: 检查仓库是否已有部署授权
+      - name: 检查 Vercel 部署授权
         id: auth
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
@@ -64,13 +63,21 @@ jobs:
             echo 'available=true' >> "$GITHUB_OUTPUT"
           else
             echo 'available=false' >> "$GITHUB_OUTPUT"
-            echo '游戏测试与构建已完成；仓库未配置 VERCEL_TOKEN，Vercel 发布未执行。也可以在 Vercel 中直接导入此仓库。' >> "$GITHUB_STEP_SUMMARY"
+            echo '测试与构建已完成，但仓库没有 VERCEL_TOKEN；跳过显式部署。' >> "$GITHUB_STEP_SUMMARY"
           fi
-      - name: 发布独立游戏到 Vercel
-        if: steps.auth.outputs.available == 'true'
+      - name: 发布 PR Preview 到 Vercel
+        if: github.event_name == 'pull_request' && steps.auth.outputs.available == 'true'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          npx --yes vercel@59.16.0 deploy --yes --name glyph-factory --scope nyn5255-8475s-projects --token "$VERCEL_TOKEN" > deployment-url.txt
+          printf '\nPR Preview URL：\n' >> "$GITHUB_STEP_SUMMARY"
+          cat deployment-url.txt >> "$GITHUB_STEP_SUMMARY"
+      - name: 发布 main 到 Vercel Production
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && steps.auth.outputs.available == 'true'
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
           npx --yes vercel@59.16.0 deploy --yes --prod --name glyph-factory --scope nyn5255-8475s-projects --token "$VERCEL_TOKEN" > deployment-url.txt
-          printf '\n游戏实际部署 URL：\n' >> "$GITHUB_STEP_SUMMARY"
+          printf '\nProduction URL：\n' >> "$GITHUB_STEP_SUMMARY"
           cat deployment-url.txt >> "$GITHUB_STEP_SUMMARY"
