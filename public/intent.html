@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Glyph Factory · Progressive Disclosure Intent</title>
+<style>
+:root{--ink:#17201a;--paper:#efe9d8;--panel:#fffaf0;--muted:#657064;--line:#bcc4ae;--green:#c8ef70;--rust:#a34e34}*{box-sizing:border-box}body{margin:0;background:#cfd4c2;color:var(--ink);font:14px/1.55 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}.page{max-width:980px;margin:auto;min-height:100vh;background:var(--paper);padding:28px clamp(16px,4vw,42px)}h1{font-size:clamp(30px,6vw,58px);line-height:1;margin:.2em 0}h2{font-size:18px;margin:0 0 10px}.eyebrow{font:800 11px/1.2 ui-monospace,monospace;letter-spacing:.14em;color:var(--rust)}.lead{font-size:18px;max-width:760px}.rule{border:2px solid var(--ink);background:var(--green);padding:18px;box-shadow:4px 4px 0 var(--ink);font-size:20px;font-weight:800}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:18px}.card{border:1.5px solid var(--ink);background:var(--panel);padding:16px}.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}.step{border:1px solid var(--line);padding:12px;background:#f5f1e4}.step b{display:block}.demo{margin-top:18px;border:2px solid var(--ink);background:var(--panel);padding:18px}.screen{max-width:480px;border:1.5px solid var(--ink);padding:18px;background:#fff}.count{font:800 36px/1.2 ui-monospace,monospace;margin:18px 0}button{font:inherit;font-weight:750;min-height:44px;border:1.5px solid var(--ink);background:#fffaf0;padding:10px 12px;box-shadow:2px 2px 0 var(--ink);cursor:pointer}button:hover{background:var(--green)}.reveal{display:none;border-top:1px solid var(--line);margin-top:14px;padding-top:14px}.reveal.show{display:block}.small{font-size:12px;color:var(--muted)}a{color:var(--ink)}@media(max-width:720px){.grid{grid-template-columns:1fr}.steps{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body><main class="page">
+<p class="eyebrow">GLYPH FACTORY · INTENT.HTML · PR #3 FOLLOW-UP</p>
+<h1>不用，就不存在。</h1>
+<p class="lead">把 Universal Paperclips 式的惊喜放回界面：玩家当前不能有效使用的系统，不显示、不占位、不剧透。能力出现本身，就是奖励。</p>
+<div class="rule">Hidden until actionable. Reveal by consequence. One new question at a time.</div>
+<section class="grid">
+  <article class="card"><h2>默认规则</h2><p>未来章节、未来资源、未来 Aha、不可执行动作默认不渲染。导演模式是例外，因为它是明确的评审工具。</p><div class="steps"><div class="step"><b>未解锁</b><span class="small">不渲染</span></div><div class="step"><b>将可用</b><span class="small">只留必要暗示</span></div><div class="step"><b>已可用</b><span class="small">出现且可点击</span></div><div class="step"><b>被替代</b><span class="small">降权或退出</span></div></div></article>
+  <article class="card"><h2>应用到六幕</h2><p>ACT I 只从“印字”开始；意义和噪音等资源到产生时才出现；城市/世界模型到 ACT III 才出现；28 个 Aha 在正常游玩中只显示已经发生的历史；最后的“停止印刷”只有真正可执行时才出现。</p></article>
+</section>
+<section class="demo"><h2>交互预览</h2><p class="small">点击“刻一个字”。卖出功能只有在有库存时才出生；未来功能不是灰按钮。</p><div class="screen"><div class="count"><span id="n">0</span> 字</div><button id="print">刻一个字</button><div id="sell" class="reveal"><button id="sellBtn">卖出这个字</button></div><div id="auto" class="reveal"><strong>新的问题出现了：</strong><p>重复劳动是否应该交给机器？</p><button id="autoBtn">启用自动刻字</button></div></div></section>
+<section class="grid"><article class="card"><h2>验收标准</h2><p>正常游玩：没有 disabled 的未来按钮；未来 Act 不可见；未发生 Aha 不可见；世界模型在城市阶段前不可见；空日志和未可购买的系统不占空间。</p></article><article class="card"><h2>评审入口</h2><p><a href="/play.html">Playable game</a> · <a href="/preview.html">Aha / Director preview</a></p><p class="small">Director Mode 保留全量内容，方便设计评审；真实玩家视图遵守 progressive disclosure。</p></article></section>
+<script>let n=0,money=0,auto=false;const q=(id)=>document.getElementById(id);function r(){q('n').textContent=n;q('sell').classList.toggle('show',n>0);q('auto').classList.toggle('show',money>=3&&!auto)}q('print').onclick=()=>{n++;r()};q('sellBtn').onclick=()=>{if(n){n--;money++;r()}};q('autoBtn').onclick=()=>{auto=true;q('auto').classList.remove('show');setInterval(()=>{n++;r()},900)};r();</script>
+</main></body></html>
