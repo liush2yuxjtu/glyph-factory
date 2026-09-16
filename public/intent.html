@@ -5,19 +5,38 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Glyph Factory · Progressive Disclosure Intent</title>
 <style>
-:root{--ink:#17201a;--paper:#efe9d8;--panel:#fffaf0;--muted:#657064;--line:#bcc4ae;--green:#c8ef70;--rust:#a34e34}*{box-sizing:border-box}body{margin:0;background:#cfd4c2;color:var(--ink);font:14px/1.55 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}.page{max-width:980px;margin:auto;min-height:100vh;background:var(--paper);padding:28px clamp(16px,4vw,42px)}h1{font-size:clamp(30px,6vw,58px);line-height:1;margin:.2em 0}h2{font-size:18px;margin:0 0 10px}.eyebrow{font:800 11px/1.2 ui-monospace,monospace;letter-spacing:.14em;color:var(--rust)}.lead{font-size:18px;max-width:760px}.rule{border:2px solid var(--ink);background:var(--green);padding:18px;box-shadow:4px 4px 0 var(--ink);font-size:20px;font-weight:800}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:18px}.card{border:1.5px solid var(--ink);background:var(--panel);padding:16px}.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}.step{border:1px solid var(--line);padding:12px;background:#f5f1e4}.step b{display:block}.demo{margin-top:18px;border:2px solid var(--ink);background:var(--panel);padding:18px}.screen{max-width:480px;border:1.5px solid var(--ink);padding:18px;background:#fff}.count{font:800 36px/1.2 ui-monospace,monospace;margin:18px 0}button{font:inherit;font-weight:750;min-height:44px;border:1.5px solid var(--ink);background:#fffaf0;padding:10px 12px;box-shadow:2px 2px 0 var(--ink);cursor:pointer}button:hover{background:var(--green)}.reveal{display:none;border-top:1px solid var(--line);margin-top:14px;padding-top:14px}.reveal.show{display:block}.small{font-size:12px;color:var(--muted)}a{color:var(--ink)}@media(max-width:720px){.grid{grid-template-columns:1fr}.steps{grid-template-columns:1fr 1fr}}
+:root{--ink:#17201a;--paper:#efe9d8;--panel:#fffaf0;--muted:#657064;--line:#bcc4ae;--green:#c8ef70;--rust:#a34e34}*{box-sizing:border-box}body{margin:0;background:#cfd4c2;color:var(--ink);font:14px/1.55 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}.page{max-width:980px;margin:auto;min-height:100vh;background:var(--paper);padding:28px clamp(16px,4vw,42px)}h1{font-size:clamp(30px,6vw,58px);line-height:1;margin:.2em 0}h2{font-size:18px;margin:0 0 10px}.eyebrow{font:800 11px/1.2 ui-monospace,monospace;letter-spacing:.14em;color:var(--rust)}.lead{font-size:18px;max-width:760px}.rule{border:2px solid var(--ink);background:var(--green);padding:18px;box-shadow:4px 4px 0 var(--ink);font-size:20px;font-weight:800}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:18px}.card{border:1.5px solid var(--ink);background:var(--panel);padding:16px}.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}.step{border:1px solid var(--line);padding:12px;background:#f5f1e4}.step b{display:block}.demo{margin-top:18px;border:2px solid var(--ink);background:var(--panel);padding:18px}.screen{max-width:480px;border:1.5px solid var(--ink);padding:18px;background:#fff}.count{font:800 36px/1.2 ui-monospace,monospace;margin:18px 0}button{font:inherit;font-weight:750;min-height:44px;border:1.5px solid var(--ink);background:#fffaf0;padding:10px 12px;box-shadow:2px 2px 0 var(--ink);cursor:pointer}button:hover:not(:disabled){background:var(--green)}button:disabled{opacity:.46;cursor:not-allowed}.reveal{display:none;border-top:1px solid var(--line);margin-top:14px;padding-top:14px}.reveal.show{display:block}.small{font-size:12px;color:var(--muted)}a{color:var(--ink)}@media(max-width:720px){.grid{grid-template-columns:1fr}.steps{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body><main class="page">
-<p class="eyebrow">GLYPH FACTORY · INTENT.HTML · PR #3 FOLLOW-UP</p>
-<h1>不用，就不存在。</h1>
-<p class="lead">把 Universal Paperclips 式的惊喜放回界面：玩家当前不能有效使用的系统，不显示、不占位、不剧透。能力出现本身，就是奖励。</p>
-<div class="rule">Hidden until actionable. Reveal by consequence. One new question at a time.</div>
+<p class="eyebrow">GLYPH FACTORY · INTENT.HTML · PR #4</p>
+<h1>不用，就不存在。出现，就留下。</h1>
+<p class="lead">把 Universal Paperclips 式的惊喜放回界面：玩家尚未发现的系统不显示、不占位、不剧透；但一旦玩家真正解锁过它，它就成为世界的一部分，不会因为暂时缺钱、缺字或缺资源而消失。</p>
+<div class="rule">Hidden until actionable → revealed once → persistent thereafter.</div>
 <section class="grid">
-  <article class="card"><h2>默认规则</h2><p>未来章节、未来资源、未来 Aha、不可执行动作默认不渲染。导演模式是例外，因为它是明确的评审工具。</p><div class="steps"><div class="step"><b>未解锁</b><span class="small">不渲染</span></div><div class="step"><b>将可用</b><span class="small">只留必要暗示</span></div><div class="step"><b>已可用</b><span class="small">出现且可点击</span></div><div class="step"><b>被替代</b><span class="small">降权或退出</span></div></div></article>
-  <article class="card"><h2>应用到六幕</h2><p>ACT I 只从“印字”开始；意义和噪音等资源到产生时才出现；城市/世界模型到 ACT III 才出现；28 个 Aha 在正常游玩中只显示已经发生的历史；最后的“停止印刷”只有真正可执行时才出现。</p></article>
+  <article class="card"><h2>默认规则</h2><p>未来章节、未来资源、未来 Aha 默认不渲染。一个控件第一次真正可用时出现；之后永久保留，资源不足时只变成 disabled / 显示需求。导演模式是例外，因为它是明确的评审工具。</p><div class="steps"><div class="step"><b>未解锁</b><span class="small">不渲染</span></div><div class="step"><b>首次可用</b><span class="small">出现 + 可点击</span></div><div class="step"><b>已发现</b><span class="small">永久保留</span></div><div class="step"><b>范式替代</b><span class="small">只有明确被新系统替代时退出</span></div></div></article>
+  <article class="card"><h2>应用到六幕</h2><p>ACT I 只从“印字”开始；资金、机器等第一次可用后留在桌面上。意义和噪音第一次被发现后，即使数值回到 0 也不隐藏。城市/世界模型到 ACT III 才出现；28 个 Aha 在正常游玩中只显示已经发生的历史；最后的“停止印刷”第一次满足条件时出现，此后保留。</p></article>
 </section>
-<section class="demo"><h2>交互预览</h2><p class="small">点击“刻一个字”。卖出功能只有在有库存时才出生；未来功能不是灰按钮。</p><div class="screen"><div class="count"><span id="n">0</span> 字</div><button id="print">刻一个字</button><div id="sell" class="reveal"><button id="sellBtn">卖出这个字</button></div><div id="auto" class="reveal"><strong>新的问题出现了：</strong><p>重复劳动是否应该交给机器？</p><button id="autoBtn">启用自动刻字</button></div></div></section>
-<section class="grid"><article class="card"><h2>验收标准</h2><p>正常游玩：没有 disabled 的未来按钮；未来 Act 不可见；未发生 Aha 不可见；世界模型在城市阶段前不可见；空日志和未可购买的系统不占空间。</p></article><article class="card"><h2>评审入口</h2><p><a href="/play.html">Playable game</a> · <a href="/preview.html">Aha / Director preview</a></p><p class="small">Director Mode 保留全量内容，方便设计评审；真实玩家视图遵守 progressive disclosure。</p></article></section>
-<script>let n=0,money=0,auto=false;const q=(id)=>document.getElementById(id);function r(){q('n').textContent=n;q('sell').classList.toggle('show',n>0);q('auto').classList.toggle('show',money>=3&&!auto)}q('print').onclick=()=>{n++;r()};q('sellBtn').onclick=()=>{if(n){n--;money++;r()}};q('autoBtn').onclick=()=>{auto=true;q('auto').classList.remove('show');setInterval(()=>{n++;r()},900)};r();</script>
+<section class="demo"><h2>交互预览</h2><p class="small">点击“刻一个字”，再卖掉它。注意：“卖出”不会因为库存回到 0 而消失，只会暂时不可用。攒到 3 钱后自动化出现，也会留在桌面上。</p><div class="screen"><div class="count"><span id="n">0</span> 字</div><button id="print">刻一个字</button><div id="sell" class="reveal"><button id="sellBtn">卖出这个字</button><p id="sellState" class="small"></p></div><div id="auto" class="reveal"><strong>新的问题出现了：</strong><p>重复劳动是否应该交给机器？</p><button id="autoBtn">启用自动刻字</button><p id="autoState" class="small"></p></div></div></section>
+<section class="grid"><article class="card"><h2>验收标准</h2><p>正常游玩：未来功能在首次可用之前不可见；出现后的按钮、资源框、机器卡片不会因为当前资源下降而消失；它们可以 disabled。只有被后续玩法明确替代的旧范式允许退出。</p></article><article class="card"><h2>评审入口</h2><p><a href="/play.html">Playable game</a> · <a href="/preview.html">Aha / Director preview</a></p><p class="small">Director Mode 保留全量内容，方便设计评审；真实玩家视图遵守 one-way progressive disclosure。</p></article></section>
+<script>
+let n=0,money=0,auto=false,sellRevealed=false,autoRevealed=false;
+const q=(id)=>document.getElementById(id);
+function r(){
+  if(n>0)sellRevealed=true;
+  if(money>=3)autoRevealed=true;
+  q('n').textContent=n;
+  q('sell').classList.toggle('show',sellRevealed);
+  q('sellBtn').disabled=n<1;
+  q('sellState').textContent=sellRevealed&&n<1?'已发现，所以保留；现在只是暂不可用。':'';
+  q('auto').classList.toggle('show',autoRevealed);
+  q('autoBtn').disabled=auto;
+  q('autoBtn').textContent=auto?'自动刻字已启用':'启用自动刻字';
+  q('autoState').textContent=auto?'这个系统已成为工坊的一部分，不会消失。':'';
+}
+q('print').onclick=()=>{n++;r()};
+q('sellBtn').onclick=()=>{if(n){n--;money++;r()}};
+q('autoBtn').onclick=()=>{if(auto)return;auto=true;setInterval(()=>{n++;r()},900);r()};
+r();
+</script>
 </main></body></html>
