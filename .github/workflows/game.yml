@@ -43,6 +43,10 @@ jobs:
           node-version: '22'
       - name: 验证第一章回归、28 Aha、Director 与 Preview
         run: node --test tests/*.test.mjs
+      - name: 安装视频验证工具
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg >/dev/null
       - name: 验证 Preview WebM 容器与时长
         run: |
           duration="$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 public/glyph-factory-v3-preview.webm)"
