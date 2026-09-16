@@ -1,4 +1,4 @@
-import { mkdir, copyFile, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, copyFile, readFile, writeFile, rm } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 
 const root = new URL('../', import.meta.url);
@@ -35,7 +35,8 @@ if (!intent.includes('hidden → revealed → persistent') && !intent.includes('
 
 // Production/player HTML contains no navigation to review materials. Internal review artifacts
 // remain in the repository for designers/developers but are deliberately not copied to dist/.
-const audienceBoot = `<script>document.documentElement.dataset.audience='player'</script>\n<style>html[data-audience="player"] .eyebrow,html[data-audience="player"] #director,html[data-audience="player"] #director-toggle,html[data-audience="player"] .act-strip,html[data-audience="player"] .act-kicker,html[data-audience="player"] .act-title,html[data-audience="player"] .act-copy,html[data-audience="player"] .aha-focus,html[data-audience="player"] .aha-list,html[data-audience="player"] .panel-head:has(#aha-count),html[data-audience="player"] #systems-note{display:none!important}</style>`;
+// The global hidden rule prevents display:grid/flex from resurrecting undiscovered panels.
+const audienceBoot = `<script>document.documentElement.dataset.audience='player'</script>\n<style>[hidden]{display:none!important}html[data-audience="player"] .eyebrow,html[data-audience="player"] #director,html[data-audience="player"] #director-toggle,html[data-audience="player"] .act-strip,html[data-audience="player"] .act-kicker,html[data-audience="player"] .act-title,html[data-audience="player"] .act-copy,html[data-audience="player"] .aha-focus,html[data-audience="player"] .aha-list,html[data-audience="player"] .panel-head:has(#aha-count),html[data-audience="player"] #systems-note{display:none!important}</style>`;
 let playerHtml = html
   .replace('<title>字工厂 · Acts Engine v3</title>', '<title>字工厂</title>')
   .replace('<meta name="description" content="字工厂 Acts Engine v3：从一个字，到会自己演化的语言系统。">', '<meta name="description" content="字工厂：从一个字开始。">')
@@ -58,6 +59,8 @@ const playerController = controller.replace(
   '  const AHA_EN = {};\n  const ACTIONS =',
 );
 
+// Reused local/CI output must not retain files from an older review build.
+await rm(out, { recursive: true, force: true });
 await mkdir(out, { recursive: true });
 await writeFile(new URL('index.html', out), playerHtml);
 await writeFile(new URL('play.html', out), playerHtml);

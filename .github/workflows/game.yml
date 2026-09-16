@@ -2,37 +2,7 @@ name: 游戏验证与发布
 on:
   push:
     branches: [main]
-    paths:
-      - public/play.html
-      - public/glyph-engine-v3.js
-      - public/glyph-game-v3.js
-      - public/player-privacy-v3.js
-      - public/preview.html
-      - public/intent.html
-      - public/glyph-factory-v3-preview.webm
-      - src/app/GameShell.tsx
-      - tests/**
-      - scripts/build-static.mjs
-      - docs/design/aha-moments-internal.zh-CN.md
-      - docs/development/aha-spoiler-boundary.md
-      - vercel.json
-      - .github/workflows/game.yml
   pull_request:
-    paths:
-      - public/play.html
-      - public/glyph-engine-v3.js
-      - public/glyph-game-v3.js
-      - public/player-privacy-v3.js
-      - public/preview.html
-      - public/intent.html
-      - public/glyph-factory-v3-preview.webm
-      - src/app/GameShell.tsx
-      - tests/**
-      - scripts/build-static.mjs
-      - docs/design/aha-moments-internal.zh-CN.md
-      - docs/development/aha-spoiler-boundary.md
-      - vercel.json
-      - .github/workflows/game.yml
   workflow_dispatch:
 permissions:
   contents: read
@@ -40,29 +10,112 @@ concurrency:
   group: glyph-game-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  verify:
-    name: Acts Engine v3 玩家构建与内部评审资产校验
+  fast:
+    name: Fast engine and player-build contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run the same fast gate used locally
+        shell: bash
+        run: node scripts/verify-player.mjs --fast 2>&1 | tee verification-fast.log
+      - name: Validate internal review video without deploying it
+        shell: bash
+        run: |
+          if ! command -v ffprobe >/dev/null; then
+            sudo apt-get update -qq
+            sudo apt-get install -y ffmpeg >/dev/null
+          fi
+          duration="$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 public/glyph-factory-v3-preview.webm)"
+          node -e "const d=Number(process.argv[1]); if (!Number.isFinite(d) || d < 20) process.exit(1);" "$duration"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: player-build-${{ github.sha }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fast-test-results
+          path: verification-fast.log
+          retention-days: 7
+
+  browser:
+    name: Player regression (${{ matrix.browser }})
+    needs: fast
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: tests/browser/requirements.txt
+      - uses: actions/download-artifact@v4
+        with:
+          name: player-build-${{ github.sha }}
+          path: dist/
+      - name: Install pinned browser tooling
+        run: |
+          python -m pip install -r tests/browser/requirements.txt
+          python -m playwright install --with-deps ${{ matrix.browser }}
+      - name: Exercise the exact player artifact (no retries)
+        shell: bash
+        env:
+          GLYPH_BROWSER: ${{ matrix.browser }}
+        run: python -m unittest discover -s tests/browser -p 'test_*.py' -v 2>&1 | tee browser-results.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: player-regression-${{ matrix.browser }}
+          path: |
+            test-results/
+            browser-results.log
+          retention-days: 7
+
+  merge_gate:
+    name: Player merge gate
+    if: ${{ always() }}
+    needs: [fast, browser]
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Reject failed, cancelled or skipped required checks
+        env:
+          FAST_RESULT: ${{ needs.fast.result }}
+          BROWSER_RESULT: ${{ needs.browser.result }}
+        run: |
+          test "$FAST_RESULT" = success
+          test "$BROWSER_RESULT" = success
+          echo "Player contracts verified for $GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+
+  deploy:
+    name: Deploy verified player build
+    needs: merge_gate
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: 验证核心机制、渐进揭示与 spoiler boundary
-        run: node --test tests/*.test.mjs
-      - name: 安装内部视频验证工具
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y ffmpeg >/dev/null
-      - name: 验证内部评审 WebM 源文件
-        run: |
-          duration="$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 public/glyph-factory-v3-preview.webm)"
-          echo "Internal review video duration: ${duration}s"
-          node -e "const d=Number(process.argv[1]); if (!Number.isFinite(d) || d < 20) { console.error('Internal review video must decode and be at least 20 seconds; got', process.argv[1]); process.exit(1); }" "$duration"
-      - name: 构建玩家安全静态包
-        run: node scripts/build-static.mjs
-      - name: 检查 Vercel 部署授权
+      - name: Check deployment authorization
         id: auth
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -71,21 +124,19 @@ jobs:
             echo 'available=true' >> "$GITHUB_OUTPUT"
           else
             echo 'available=false' >> "$GITHUB_OUTPUT"
-            echo '测试与构建已完成，但仓库没有 VERCEL_TOKEN；跳过显式部署。' >> "$GITHUB_STEP_SUMMARY"
+            echo 'No VERCEL_TOKEN: explicit deployment skipped. Git integration preview is separate from the merge gate.' >> "$GITHUB_STEP_SUMMARY"
           fi
-      - name: 发布 PR Player Preview 到 Vercel
+      - name: Publish verified PR preview
         if: github.event_name == 'pull_request' && steps.auth.outputs.available == 'true'
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
           npx --yes vercel@59.16.0 deploy --yes --name glyph-factory --scope nyn5255-8475s-projects --token "$VERCEL_TOKEN" > deployment-url.txt
-          printf '\nPR Player Preview URL：\n' >> "$GITHUB_STEP_SUMMARY"
           cat deployment-url.txt >> "$GITHUB_STEP_SUMMARY"
-      - name: 发布 main 到 Vercel Production
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && steps.auth.outputs.available == 'true'
+      - name: Publish verified main production
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.auth.outputs.available == 'true'
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
           npx --yes vercel@59.16.0 deploy --yes --prod --name glyph-factory --scope nyn5255-8475s-projects --token "$VERCEL_TOKEN" > deployment-url.txt
-          printf '\nProduction URL：\n' >> "$GITHUB_STEP_SUMMARY"
           cat deployment-url.txt >> "$GITHUB_STEP_SUMMARY"

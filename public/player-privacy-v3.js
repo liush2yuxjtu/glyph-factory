@@ -3,11 +3,13 @@
 
   const params = new URLSearchParams(location.search);
   const localReviewHost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-  const reviewMode = localReviewHost && (params.get('review') === '1' || params.get('director') === '1');
+  // A built player artifact stays a player artifact even when served on localhost.
+  const reviewMode = document.documentElement.dataset.audience !== 'player' && localReviewHost && (params.get('review') === '1' || params.get('director') === '1');
   if (reviewMode) return;
 
   document.documentElement.dataset.audience = 'player';
-  document.title = document.documentElement.lang === 'en' ? 'Glyph Factory' : '字工厂';
+  const updateTitle = () => { document.title = document.documentElement.lang === 'en' ? 'Glyph Factory' : '字工厂'; };
+  updateTitle();
 
   const remove = (selector) => document.querySelectorAll(selector).forEach((node) => node.remove());
   const hide = (selector) => document.querySelectorAll(selector).forEach((node) => {
@@ -15,9 +17,9 @@
     node.setAttribute('aria-hidden', 'true');
   });
 
-  // Review/designer affordances must never appear in the normal player surface.
+  // Do not delete DOM nodes owned by the controller: later timer renders still use them.
   remove('.head-actions a[href="/preview.html"]');
-  remove('#director-toggle');
+  hide('#director-toggle');
   hide('#director');
 
   // Aha IDs, reveal copy, history and act/meta framing are design language, not player copy.
@@ -55,11 +57,13 @@
   const observer = new MutationObserver(() => {
     scrubStatus();
     scrubLog();
+    updateTitle();
   });
   const status = document.getElementById('status');
   const log = document.getElementById('log');
   if (status) observer.observe(status, { childList: true, characterData: true, subtree: true });
   if (log) observer.observe(log, { childList: true, characterData: true, subtree: true });
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
 
   scrubStatus();
   scrubLog();
