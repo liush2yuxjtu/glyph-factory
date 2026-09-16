@@ -15,7 +15,7 @@ import re
 import unittest
 from urllib.parse import urlsplit
 
-from playwright.sync_api import expect, sync_playwright
+from playwright.sync_api import Error as PlaywrightError, expect, sync_playwright
 
 ROOT = Path(__file__).resolve().parents[2]
 DIST = ROOT / "dist"
@@ -306,15 +306,14 @@ class PlayerContract(unittest.TestCase):
         with self.browser.new_context(locale="zh-CN") as control:
             control.route("**/player-privacy-v3.js", lambda route: route.fulfill(status=200, content_type="application/javascript", body=mutated))
             page = control.new_page()
-            errors = []
-            page.on("pageerror", lambda error: errors.append(str(error)))
             page.clock.install(time=FIXED)
             page.clock.pause_at(FIXED + timedelta(seconds=1))
             page.goto(self.origin + "/play.html")
-            page.clock.run_for(1500)
-            self.assertTrue(any("textContent" in error for error in errors), errors)
-            with self.assertRaises(AssertionError):
-                self.assertEqual(errors, [], "The error detector must reject this mutation")
+            # Clock.run_for propagates timer exceptions directly, rather than
+            # emitting pageerror. Require the specific original failure; a
+            # missing browser, unrelated failure or successful tick must fail.
+            with self.assertRaisesRegex(PlaywrightError, "textContent"):
+                page.clock.run_for(1500)
 
 
 if __name__ == "__main__":
