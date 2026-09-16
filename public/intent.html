@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Glyph Factory · Internal Design Intent</title>
+<style>
+:root{--ink:#17201a;--paper:#efe9d8;--panel:#fffaf0;--muted:#657064;--line:#bcc4ae;--green:#c8ef70;--rust:#a34e34}*{box-sizing:border-box}body{margin:0;background:#cfd4c2;color:var(--ink);font:14px/1.55 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}.page{max-width:980px;margin:auto;min-height:100vh;background:var(--paper);padding:28px clamp(16px,4vw,42px)}h1{font-size:clamp(30px,6vw,58px);line-height:1;margin:.2em 0}h2{font-size:18px;margin:0 0 10px}.eyebrow{font:800 11px/1.2 ui-monospace,monospace;letter-spacing:.14em;color:var(--rust)}.lead{font-size:18px;max-width:760px}.rule{border:2px solid var(--ink);background:var(--green);padding:18px;box-shadow:4px 4px 0 var(--ink);font-size:20px;font-weight:800}.internal{border:2px solid var(--rust);padding:12px 14px;background:#f2ded5;font-weight:800;margin:16px 0}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:18px}.card{border:1.5px solid var(--ink);background:var(--panel);padding:16px}.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}.step{border:1px solid var(--line);padding:12px;background:#f5f1e4}.step b{display:block}.demo{margin-top:18px;border:2px solid var(--ink);background:var(--panel);padding:18px}.screen{max-width:480px;border:1.5px solid var(--ink);padding:18px;background:#fff}.count{font:800 36px/1.2 ui-monospace,monospace;margin:18px 0}button{font:inherit;font-weight:750;min-height:44px;border:1.5px solid var(--ink);background:#fffaf0;padding:10px 12px;box-shadow:2px 2px 0 var(--ink);cursor:pointer}button:hover:not(:disabled){background:var(--green)}button:disabled{opacity:.46;cursor:not-allowed}.reveal{display:none;border-top:1px solid var(--line);margin-top:14px;padding-top:14px}.reveal.show{display:block}.small{font-size:12px;color:var(--muted)}code{background:#e8e3d4;padding:2px 5px}@media(max-width:720px){.grid{grid-template-columns:1fr}.steps{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body><main class="page">
+<p class="eyebrow">GLYPH FACTORY · INTERNAL DESIGN INTENT · PR #4</p>
+<div class="internal">内部设计/开发材料。不要把本页的 Aha、阶段、触发条件或设计解释复制到玩家界面。</div>
+<h1>不用，就不存在。出现，就留下。</h1>
+<p class="lead">把 Universal Paperclips 式的惊喜放回界面：玩家尚未发现的系统不显示、不占位、不剧透；但一旦玩家真正解锁过它，它就成为世界的一部分，不会因为暂时缺钱、缺字或缺资源而消失。</p>
+<div class="rule">hidden → revealed → persistent → intentionally replaced</div>
+<section class="grid">
+  <article class="card"><h2>默认规则</h2><p>未来功能在玩家真正发现之前不渲染。一个控件第一次真正可用时出现；之后永久保留，资源不足时只变成 disabled / 显示需求。Aha 编号、未来章节和设计解释永远不是玩家文案。</p><div class="steps"><div class="step"><b>未解锁</b><span class="small">不渲染</span></div><div class="step"><b>首次发现</b><span class="small">出现 + 可操作</span></div><div class="step"><b>已发现</b><span class="small">永久保留</span></div><div class="step"><b>范式替代</b><span class="small">只有明确被新系统替代时退出</span></div></div></article>
+  <article class="card"><h2>玩家与设计师看到不同内容</h2><p>玩家只看到世界内的动作、资源和结果。A01–A28、Director、未来系统说明和 reveal 文案只存在于设计/开发材料。生产构建不会发布本页、Aha Preview 或预告视频。</p></article>
+</section>
+<section class="demo"><h2>交互预览（设计师用）</h2><p class="small">点击“刻一个字”，再卖掉它。注意：“卖出”不会因为库存回到 0 而消失，只会暂时不可用。这个 demo 解释的是界面规则，不是最终玩家教程。</p><div class="screen"><div class="count"><span id="n">0</span> 字</div><button id="print">刻一个字</button><div id="sell" class="reveal"><button id="sellBtn">卖出这个字</button><p id="sellState" class="small"></p></div><div id="auto" class="reveal"><strong>新的问题出现了：</strong><p>重复劳动是否应该交给机器？</p><button id="autoBtn">启用自动刻字</button><p id="autoState" class="small"></p></div></div></section>
+<section class="grid"><article class="card"><h2>玩家验收标准</h2><p>生产玩家界面不能出现 Aha、A01–A28、Director、未来章节路线图、设计解释或内部 reveal 日志。未来功能在首次发现前不可见；发现后的按钮、资源框和机器卡片不会因为当前资源下降而消失。</p></article><article class="card"><h2>内部文档入口</h2><p><code>docs/design/aha-moments-internal.zh-CN.md</code></p><p><code>docs/development/aha-spoiler-boundary.md</code></p><p class="small">本文件与 <code>public/preview.html</code> 保留在源码仓库供本地评审，但不进入 Vercel 玩家构建。</p></article></section>
+<script>
+let n=0,money=0,auto=false,sellRevealed=false,autoRevealed=false;
+const q=(id)=>document.getElementById(id);
+function r(){
+  if(n>0)sellRevealed=true;
+  if(money>=3)autoRevealed=true;
+  q('n').textContent=n;
+  q('sell').classList.toggle('show',sellRevealed);
+  q('sellBtn').disabled=n<1;
+  q('sellState').textContent=sellRevealed&&n<1?'已发现，所以保留；现在只是暂不可用。':'';
+  q('auto').classList.toggle('show',autoRevealed);
+  q('autoBtn').disabled=auto;
+  q('autoBtn').textContent=auto?'自动刻字已启用':'启用自动刻字';
+  q('autoState').textContent=auto?'这个系统已成为工坊的一部分，不会消失。':'';
+}
+q('print').onclick=()=>{n++;r()};
+q('sellBtn').onclick=()=>{if(n){n--;money++;r()}};
+q('autoBtn').onclick=()=>{if(auto)return;auto=true;setInterval(()=>{n++;r()},900);r()};
+r();
+</script>
+</main></body></html>

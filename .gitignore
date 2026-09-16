@@ -12,6 +12,11 @@
 
 # testing
 /coverage
+/test-results/
+/verification-*.log
+/browser-results.log
+__pycache__/
+/.venv/
 
 # next.js
 /.next/
@@ -19,6 +24,7 @@
 
 # production
 /build
+/dist/
 
 # misc
 .DS_Store

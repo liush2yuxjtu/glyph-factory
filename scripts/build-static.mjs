@@ -1,50 +1,83 @@
-import { mkdir, copyFile, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, copyFile, readFile, writeFile, rm } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 
 const root = new URL('../', import.meta.url);
 const publicDir = new URL('public/', root);
 const out = new URL('dist/', root);
-const assets = [
-  'play.html',
-  'glyph-engine-v3.js',
-  'glyph-game-v3.js',
-  'preview.html',
-  'glyph-factory-v3-preview.webm',
-];
-const [html, engine, controller, preview] = await Promise.all([
+
+const [html, engine, controller, privacy, preview, intent] = await Promise.all([
   readFile(new URL('play.html', publicDir), 'utf8'),
   readFile(new URL('glyph-engine-v3.js', publicDir), 'utf8'),
   readFile(new URL('glyph-game-v3.js', publicDir), 'utf8'),
+  readFile(new URL('player-privacy-v3.js', publicDir), 'utf8'),
   readFile(new URL('preview.html', publicDir), 'utf8'),
+  readFile(new URL('intent.html', publicDir), 'utf8'),
 ]);
 
 if (!html.includes('lang="zh-CN"') || !html.includes('/glyph-engine-v3.js') || !html.includes('/glyph-game-v3.js')) {
   throw new Error('v3 游戏入口缺失或脚本引用不完整。');
 }
 if (!engine.includes('GlyphEngineV3') || !engine.includes("aha('A28'")) {
-  throw new Error('Acts Engine v3 或 28 个 Aha 未完整交付。');
+  throw new Error('Acts Engine v3 内部事件系统缺失。');
 }
-if (!controller.includes('director-select') || !controller.includes('E.SAVE_KEY')) {
-  throw new Error('v3 UI / Director Mode / save controller 缺失。');
+if (!controller.includes('E.SAVE_KEY') || !controller.includes('renderDisclosure')) {
+  throw new Error('v3 UI / progressive disclosure controller 缺失。');
+}
+if (!privacy.includes('Aha IDs, reveal copy') || !privacy.includes('scrubLog')) {
+  throw new Error('玩家隐私层缺失：内部设计语言可能泄漏到玩家界面。');
 }
 if (!preview.includes('glyph-factory-v3-preview.webm') || !preview.includes('A28')) {
-  throw new Error('PR preview 页面或内嵌视频引用缺失。');
+  throw new Error('设计评审源文件缺失。');
+}
+if (!intent.includes('hidden → revealed → persistent') && !intent.includes('出现 → 永久保留')) {
+  throw new Error('intent.html 设计契约缺失。');
 }
 
+// Production/player HTML contains no navigation to review materials. Internal review artifacts
+// remain in the repository for designers/developers but are deliberately not copied to dist/.
+// The global hidden rule prevents display:grid/flex from resurrecting undiscovered panels.
+const audienceBoot = `<script>document.documentElement.dataset.audience='player'</script>\n<style>[hidden]{display:none!important}html[data-audience="player"] .eyebrow,html[data-audience="player"] #director,html[data-audience="player"] #director-toggle,html[data-audience="player"] .act-strip,html[data-audience="player"] .act-kicker,html[data-audience="player"] .act-title,html[data-audience="player"] .act-copy,html[data-audience="player"] .aha-focus,html[data-audience="player"] .aha-list,html[data-audience="player"] .panel-head:has(#aha-count),html[data-audience="player"] #systems-note{display:none!important}</style>`;
+let playerHtml = html
+  .replace('<title>字工厂 · Acts Engine v3</title>', '<title>字工厂</title>')
+  .replace('<meta name="description" content="字工厂 Acts Engine v3：从一个字，到会自己演化的语言系统。">', '<meta name="description" content="字工厂：从一个字开始。">')
+  .replace('</head>', `${audienceBoot}\n</head>`)
+  .replace('<a href="/preview.html">预览 / Preview</a>', '')
+  .replace('<button id="director-toggle" type="button">导演模式</button>', '<button id="director-toggle" type="button" hidden aria-hidden="true"></button>')
+  .replace('DIRECTOR MODE / AHA', 'REVIEW MODE')
+  .replace(/<section class="aha-focus" aria-live="polite">[\s\S]*?<\/section>/, '<section class="aha-focus" hidden aria-hidden="true"><small id="aha-id"></small><h2 id="aha-title"></h2><p id="aha-copy"></p></section>')
+  .replace('<div class="panel-head" style="margin-top:16px"><h2>AHA MOMENTS · 28</h2><span id="aha-count">0 / 28</span></div>', '<div class="panel-head" style="margin-top:16px" hidden aria-hidden="true"><h2></h2><span id="aha-count"></span></div>')
+  .replace('<div class="aha-list" id="aha-list" aria-label="Aha moments"></div>', '<div class="aha-list" id="aha-list" hidden aria-hidden="true"></div>')
+  .replace('</body>', '<script src="/player-privacy-v3.js"></script>\n</body>');
+
+// Strip designer reveal copy from the deployed JS payload as a second line of defense.
+const playerEngine = engine.replace(
+  /aha\('([^']+)',(\d+),'[^']*','[^']*'(,'[^']*')?\)/g,
+  (_match, id, act, kind = '') => `aha('${id}',${act},'',''${kind})`,
+);
+const playerController = controller.replace(
+  /  const AHA_EN = \{[\s\S]*?\n  \};\n  const ACTIONS =/,
+  '  const AHA_EN = {};\n  const ACTIONS =',
+);
+
+// Reused local/CI output must not retain files from an older review build.
+await rm(out, { recursive: true, force: true });
 await mkdir(out, { recursive: true });
-await writeFile(new URL('index.html', out), html);
-for (const asset of assets) await copyFile(new URL(asset, publicDir), new URL(asset, out));
+await writeFile(new URL('index.html', out), playerHtml);
+await writeFile(new URL('play.html', out), playerHtml);
+await writeFile(new URL('glyph-engine-v3.js', out), playerEngine);
+await writeFile(new URL('glyph-game-v3.js', out), playerController);
+await copyFile(new URL('player-privacy-v3.js', publicDir), new URL('player-privacy-v3.js', out));
 
 const digest = (text) => createHash('sha256').update(text).digest('hex');
 const manifest = {
   game: '字工厂 / Glyph Factory',
   version: 3,
   entry: 'play.html',
-  preview: 'preview.html',
-  trailer: 'glyph-factory-v3-preview.webm',
-  ahaMoments: 28,
-  sha256: digest(html + engine + controller + preview),
-  bytes: Buffer.byteLength(html) + Buffer.byteLength(engine) + Buffer.byteLength(controller) + Buffer.byteLength(preview),
+  progressiveDisclosure: true,
+  playerSpoilers: false,
+  internalReviewArtifactsDeployed: false,
+  sha256: digest(playerHtml + playerEngine + playerController + privacy),
+  bytes: Buffer.byteLength(playerHtml) + Buffer.byteLength(playerEngine) + Buffer.byteLength(playerController) + Buffer.byteLength(privacy),
 };
 await writeFile(new URL('build.json', out), JSON.stringify(manifest, null, 2) + '\n');
-console.log(`静态构建完成：Acts Engine v${manifest.version} · ${manifest.ahaMoments} Aha · ${manifest.bytes} text bytes · preview video included`);
+console.log(`静态构建完成：Glyph Factory v${manifest.version} · player-safe reveal UI · ${manifest.bytes} text bytes`);
