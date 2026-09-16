@@ -9,8 +9,8 @@
   try { locale = localStorage.getItem(LOCALE_KEY) || (navigator.language.toLowerCase().startsWith('zh') ? 'zh-CN' : 'en'); } catch { locale = 'zh-CN'; }
 
   const I18N = {
-    zh: { director:'导演模式', business:'营业中', inventory:'库存文字', credits:'工坊资金', meaning:'意义', noise:'噪音', systems:'系统 / SYSTEMS', systemsNote:'买机器只是第一层。', log:'工坊日志', export:'导出存档', reset:'重新开始', save:'已自动保存 · 当前浏览器 · 最多结算离线 8 小时', preview:'只预览', apply:'应用到存档', exit:'返回真实进度', next:'NEXT', seen:'已发生', locked:'未发生' },
-    en: { director:'Director Mode', business:'OPEN', inventory:'Glyph inventory', credits:'Workshop credits', meaning:'Meaning', noise:'Noise', systems:'Systems', systemsNote:'Buying faster machines is only the first layer.', log:'Workshop log', export:'Export save', reset:'Start over', save:'Autosaved · this browser · up to 8 hours offline', preview:'Preview only', apply:'Apply to save', exit:'Back to real progress', next:'NEXT', seen:'SEEN', locked:'LOCKED' }
+    zh: { director:'导演模式', business:'营业中', inventory:'库存文字', credits:'工坊资金', meaning:'意义', noise:'噪音', systems:'系统 / SYSTEMS', systemsNote:'只有可用的系统才会出现。', log:'工坊日志', export:'导出存档', reset:'重新开始', save:'已自动保存 · 当前浏览器 · 最多结算离线 8 小时', preview:'只预览', apply:'应用到存档', exit:'返回真实进度', next:'NEXT', seen:'已发生', locked:'未发生' },
+    en: { director:'Director Mode', business:'OPEN', inventory:'Glyph inventory', credits:'Workshop credits', meaning:'Meaning', noise:'Noise', systems:'Systems', systemsNote:'Systems appear only when they become usable.', log:'Workshop log', export:'Export save', reset:'Start over', save:'Autosaved · this browser · up to 8 hours offline', preview:'Preview only', apply:'Apply to save', exit:'Back to real progress', next:'NEXT', seen:'SEEN', locked:'LOCKED' }
   };
   const ACT_EN = { 1:['Hands → Automation','Print by hand. Then make repetition disappear.'], 2:['Words Begin to Grow','Relationships, readers, meaning and noise become machines.'], 3:['Words Change the City','Language stops being inventory and starts changing society.'], 4:['Machines Begin to Write','Delegate judgment, then delegate the ability to create delegates.'], 5:['Machine Language','The system invents symbols that humans did not design.'], 6:['From Growth to Silence','Optimization flips from making more to removing noise.'] };
   const ACT_ZH = { 1:['手工与自动化','先亲手印。然后让机器接管重复劳动。'], 2:['字开始生长','关系、读者、意义和噪音，都开始成为机器。'], 3:['文字改变城市','文字不再是库存，而开始改变社会。'], 4:['机器开始写','把判断交出去，再把“创造代理”的权力交出去。'], 5:['机器语言','系统开始创造人类没有设计过的符号。'], 6:['从增长到沉默','优化目标从“制造更多”翻转成“删除噪音”。'] };
@@ -36,28 +36,114 @@
   function currentAha(s) { if (preview) { const selected = $('director-select').value; return E.AHAS.find((a) => a.id === selected) || E.AHAS[0]; } const seen = new Set(s.ahaSeen || []); let last = E.AHAS[0]; for (const item of E.AHAS) if (seen.has(item.id) || E.ahaUnlocked(s,item.id)) last = item; return last; }
   function actCopy(s) { return (locale === 'en' ? ACT_EN : ACT_ZH)[s.act] || (locale === 'en' ? ACT_EN[1] : ACT_ZH[1]); }
 
-  function renderActs(s) { $('act-strip').replaceChildren(...E.ACTS.map((act) => { const div = document.createElement('div'); div.className = `act-chip ${act.id === s.act ? 'current' : act.id < s.act ? 'done' : ''}`; const name = locale === 'en' ? ACT_EN[act.id][0] : act.name; div.innerHTML = `<b>ACT ${['I','II','III','IV','V','VI'][act.id-1]} · ${name}</b><span>${act.range}</span>`; return div; })); }
+  // Paperclips rule: future systems do not occupy attention before they matter.
+  function renderActs(s) {
+    const visibleActs = preview ? E.ACTS : E.ACTS.filter((act) => act.id <= s.act);
+    $('act-strip').replaceChildren(...visibleActs.map((act) => { const div = document.createElement('div'); div.className = `act-chip ${act.id === s.act ? 'current' : act.id < s.act ? 'done' : ''}`; const name = locale === 'en' ? ACT_EN[act.id][0] : act.name; div.innerHTML = `<b>ACT ${['I','II','III','IV','V','VI'][act.id-1]} · ${name}</b><span>${act.range}</span>`; return div; }));
+  }
   function worldMetric(labelText, value) { const div = document.createElement('div'); const span = document.createElement('span'); const strong = document.createElement('strong'); span.textContent = labelText; strong.textContent = value; div.append(span,strong); return div; }
   function renderWorld(s) { const sets = { 1:[['AUTO / 自动',`${fmt(E.rate(s),1)}/s`],['CONTRACTS / 委托',`${s.contracts}/3`],['TYPISTS / 打字员',fmt(s.typists)],['PRESSES / 印刷机',fmt(s.presses)]], 2:[['READERS / 读者',fmt(s.readers)],['DEMAND / 需求',fmt(s.demand,1)],['COMPOSED / 组合字',fmt(s.composed)],['DELETED / 已删噪音',fmt(s.deletedNoise)]], 3:[['DISTRICTS / 街区',fmt(s.districts)],['CONCEPTS / 概念',fmt(s.concepts)],['EFFECTS / 社会变化',fmt(s.societyEffects)],['SCALE / 地图',s.worldScale>=2?'WORLD':'CITY']], 4:[['AGENTS',fmt(s.agents,1)],['AGENT FACTORIES',fmt(s.agentFactories)],['AUTO ARTICLES',fmt(s.overnightArticles)],['ARCHIVES / 记忆',fmt(s.archives)]], 5:[['MACHINE GLYPHS',fmt(s.machineGlyphs)],['MACHINE USE',fmt(s.machineGlyphUse)],['COMPRESSED',fmt(s.compressedMeaning)],['HUMAN MEANING',fmt(s.meaning)]], 6:[['INFRA / 基础设施',s.infrastructure?'ON':'OFF'],['AMBIGUITY / 歧义',fmt(s.ambiguity)],['DELETED / 删除',fmt(s.deletedNoise)],['COMPRESSED',fmt(s.compressedMeaning)]] }; $('world-metrics').replaceChildren(...sets[s.act].map(([a,b]) => worldMetric(a,b))); $('world-scale').textContent = s.stopped ? 'SILENCE' : ['DESK','CITY','CITY','NETWORK','MACHINE','WORLD'][s.act-1]; $('world-card').classList.toggle('stopped', s.stopped); }
 
-  function actionButton(text, sub, type, enabled = true, props = {}, className = '') { const b = document.createElement('button'); b.type='button'; b.disabled=!enabled; b.className=className; const main = document.createElement('span'); main.textContent=text; b.append(main); if (sub) { const small=document.createElement('span'); small.className='action-sub'; small.textContent=sub; b.append(small); } b.addEventListener('click',()=>perform(type,props)); return b; }
+  function actionButton(text, sub, type, props = {}, className = '') { const b = document.createElement('button'); b.type='button'; b.className=className; const main = document.createElement('span'); main.textContent=text; b.append(main); if (sub) { const small=document.createElement('span'); small.className='action-sub'; small.textContent=sub; b.append(small); } b.addEventListener('click',()=>perform(type,props)); return b; }
   function renderActions(s) {
     const buttons=[]; const en=locale==='en';
-    if (s.act === 1) { buttons.push(actionButton(label(ACTIONS.print),en?'Manual production':'手动生产','print',true,{},'major')); buttons.push(actionButton(label(ACTIONS.sell),`${fmt(Math.floor(s.glyphs)*E.PRICE,1)} ${en?'credits':'资金'}`,'sell',s.glyphs>=1)); if (!s.manualBoost) buttons.push(actionButton(label(ACTIONS.boost),en?'150 total + 45 credits':'累计150字 + 45资金','boost',s.lifetimeGlyphs>=150&&s.credits>=45)); if (!s.autoSellUnlocked) buttons.push(actionButton(label(ACTIONS.autoResearch),en?'300 total + 60 credits':'累计300字 + 60资金','research-auto',s.lifetimeGlyphs>=300&&s.credits>=60)); else buttons.push(actionButton(label(ACTIONS.autoToggle),s.autoSell?'ON':'OFF','toggle-auto',true)); const c=E.CONTRACTS[s.contracts]; if(c) buttons.push(actionButton(label(ACTIONS.contract),`${c.glyphs} → ${c.reward}`,'contract',s.glyphs>=c.glyphs)); buttons.push(actionButton(label(ACTIONS.publish),en?'This opens ACT II.':'这不是结局；它会打开 ACT II。','publish',E.canPublish(s),{},'major')); }
-    else if (s.act === 2) { buttons.push(actionButton(label(ACTIONS.print),en?'Old verbs still work, for now.':'旧玩法还在，但意义开始改变。','print',true,{},'major')); buttons.push(actionButton(label(ACTIONS.compose),en?'2 glyphs → one repeatable relationship':'2 字 → 一条可重复规则','compose-rule',s.glyphs>=2)); buttons.push(actionButton(label(ACTIONS.condense),en?'Volume becomes meaning.':'字数开始变成意义。','condense',s.glyphs>=20)); buttons.push(actionButton(label(ACTIONS.letter),`${en?'readers':'读者'} ${fmt(s.readers)}`,'read-letter',s.readers>=250)); buttons.push(actionButton(label(ACTIONS.organic),en?'The audience writes back.':'让读者也成为作者。','organic-word',s.letters>=1)); buttons.push(actionButton(label(ACTIONS.viral),en?'Propagation > production':'传播速度 > 生产速度','viral-word',s.organicWords>=1)); buttons.push(actionButton(label(ACTIONS.delete),en?'Deletion is now productive.':'删除第一次成为生产行为。','delete-noise',s.noise>=1)); buttons.push(actionButton(label(ACTIONS.city),en?'Needs paper crisis + meaning + one deletion':'需要纸张危机 + 意义 + 一次删除','map-city',s.paperCrisis&&s.meaning>=50&&s.deletedNoise>=1,{},'major')); }
-    else if (s.act === 3) { buttons.push(actionButton(label(ACTIONS.dialect),en?'Another district diverges.':'再观察一个街区。','discover-dialect',true)); buttons.push(actionButton(label(ACTIONS.concept),en?'Spend 25 meaning to change society.':'花25意义，让一个概念进入社会。','make-concept',s.meaning>=25)); buttons.push(actionButton(label(ACTIONS.world),en?'Needs 2 concepts + 3 districts':'需要2概念 + 3街区','map-world',s.concepts>=2&&s.districts>=3)); buttons.push(actionButton(label(ACTIONS.agents),en?'Hand authorship to a system.':'把“写什么”交给系统。','launch-agents',s.worldScale>=2,{},'major')); }
-    else if (s.act === 4) { buttons.push(actionButton(label(ACTIONS.editor),en?'It may reject your headline.':'它可以拒绝你的头条。','editor-autonomy',s.agents>=1)); buttons.push(actionButton(label(ACTIONS.spawn),en?'Delegation becomes self-replication.':'委托变成自我扩张。','spawn-agents',s.editorAutonomy,{},'major')); buttons.push(actionButton(label(ACTIONS.digitize),en?'Physical inventory stops mattering.':'实体库存开始退出舞台。','digitize',s.agentFactories>=1)); buttons.push(actionButton(label(ACTIONS.memory),en?'Past writing becomes model memory.':'过去的文字变成机器记忆。','train-memory',s.digital)); buttons.push(actionButton(label(ACTIONS.machine),en?'Source: unknown.':'来源：未知。','discover-machine-glyph',s.archives>=1&&s.agentFactories>=1,{},'major')); }
-    else if (s.act === 5) { buttons.push(actionButton(label(ACTIONS.compress),en?'100 meaning → 10,000 compressed meaning':'100意义 → 10,000压缩意义','compress-language',s.meaning>=100,{amount:100},'major')); buttons.push(actionButton(label(ACTIONS.infra),en?'Needs 10,000 compressed meaning':'需要10,000压缩意义','infrastructure',s.compressedMeaning>=10000)); }
-    else if (s.act === 6) { buttons.push(actionButton(label(ACTIONS.delete),en?'Remove 500 noise.':'一次删除500噪音。','delete-noise',s.noise>=1,{amount:500},'major')); buttons.push(actionButton(label(ACTIONS.ambiguity),en?'Clarity becomes a resource.':'清晰度变成一种资源。','resolve-ambiguity',s.ambiguity>0)); buttons.push(actionButton(label(ACTIONS.stop),en?'Requires 1,000 deleted + 10,000 compressed':'需要删除1,000 + 压缩10,000','stop-printing',s.deletedNoise>=1000&&s.compressedMeaning>=10000,{},'danger')); }
+    const add = (when, ...args) => { if (when) buttons.push(actionButton(...args)); };
+    if (s.act === 1) {
+      add(true, label(ACTIONS.print), en?'Manual production':'手动生产', 'print', {}, 'major');
+      add(s.glyphs>=1, label(ACTIONS.sell), `${fmt(Math.floor(s.glyphs)*E.PRICE,1)} ${en?'credits':'资金'}`, 'sell');
+      add(!s.manualBoost && s.lifetimeGlyphs>=150 && s.credits>=45, label(ACTIONS.boost), en?'A new production method is ready.':'新的生产方式已经可用。', 'boost');
+      add(!s.autoSellUnlocked && s.lifetimeGlyphs>=300 && s.credits>=60, label(ACTIONS.autoResearch), en?'Repetition can disappear again.':'又一项重复劳动可以消失。', 'research-auto');
+      add(s.autoSellUnlocked, label(ACTIONS.autoToggle), s.autoSell?'ON':'OFF', 'toggle-auto');
+      const c=E.CONTRACTS[s.contracts];
+      add(Boolean(c) && s.glyphs>=c.glyphs, label(ACTIONS.contract), `${c?.glyphs||0} → ${c?.reward||0}`, 'contract');
+      add(E.canPublish(s), label(ACTIONS.publish), en?'This opens ACT II.':'这不是结局；它会打开 ACT II。', 'publish', {}, 'major');
+    }
+    else if (s.act === 2) {
+      add(true, label(ACTIONS.print), en?'Old verbs still work, for now.':'旧玩法还在，但意义开始改变。', 'print', {}, 'major');
+      add(s.glyphs>=2, label(ACTIONS.compose), en?'2 glyphs → one repeatable relationship':'2 字 → 一条可重复规则', 'compose-rule');
+      add(s.glyphs>=20, label(ACTIONS.condense), en?'Volume becomes meaning.':'字数开始变成意义。', 'condense');
+      add(s.readers>=250, label(ACTIONS.letter), `${en?'readers':'读者'} ${fmt(s.readers)}`, 'read-letter');
+      add(s.letters>=1, label(ACTIONS.organic), en?'The audience writes back.':'让读者也成为作者。', 'organic-word');
+      add(s.organicWords>=1, label(ACTIONS.viral), en?'Propagation > production':'传播速度 > 生产速度', 'viral-word');
+      add(s.noise>=1, label(ACTIONS.delete), en?'Deletion is now productive.':'删除第一次成为生产行为。', 'delete-noise');
+      add(s.paperCrisis&&s.meaning>=50&&s.deletedNoise>=1, label(ACTIONS.city), en?'The workshop is no longer the whole world.':'工坊不再是全部世界。', 'map-city', {}, 'major');
+    }
+    else if (s.act === 3) {
+      add(true, label(ACTIONS.dialect), en?'Another district diverges.':'再观察一个街区。', 'discover-dialect');
+      add(s.meaning>=25, label(ACTIONS.concept), en?'Spend 25 meaning to change society.':'花25意义，让一个概念进入社会。', 'make-concept');
+      add(s.concepts>=2&&s.districts>=3, label(ACTIONS.world), en?'The city is only one node.':'城市只是网络中的一个节点。', 'map-world');
+      add(s.worldScale>=2, label(ACTIONS.agents), en?'Hand authorship to a system.':'把“写什么”交给系统。', 'launch-agents', {}, 'major');
+    }
+    else if (s.act === 4) {
+      add(s.agents>=1, label(ACTIONS.editor), en?'It may reject your headline.':'它可以拒绝你的头条。', 'editor-autonomy');
+      add(s.editorAutonomy, label(ACTIONS.spawn), en?'Delegation becomes self-replication.':'委托变成自我扩张。', 'spawn-agents', {}, 'major');
+      add(s.agentFactories>=1, label(ACTIONS.digitize), en?'Physical inventory stops mattering.':'实体库存开始退出舞台。', 'digitize');
+      add(s.digital, label(ACTIONS.memory), en?'Past writing becomes model memory.':'过去的文字变成机器记忆。', 'train-memory');
+      add(s.archives>=1&&s.agentFactories>=1, label(ACTIONS.machine), en?'Source: unknown.':'来源：未知。', 'discover-machine-glyph', {}, 'major');
+    }
+    else if (s.act === 5) {
+      add(s.meaning>=100, label(ACTIONS.compress), en?'100 meaning → 10,000 compressed meaning':'100意义 → 10,000压缩意义', 'compress-language', {amount:100}, 'major');
+      add(s.compressedMeaning>=10000, label(ACTIONS.infra), en?'Language is ready to become infrastructure.':'语言已经可以接管基础设施。', 'infrastructure');
+    }
+    else if (s.act === 6) {
+      add(s.noise>=1, label(ACTIONS.delete), en?'Remove 500 noise.':'一次删除500噪音。', 'delete-noise', {amount:500}, 'major');
+      add(s.ambiguity>0, label(ACTIONS.ambiguity), en?'Clarity becomes a resource.':'清晰度变成一种资源。', 'resolve-ambiguity');
+      add(s.deletedNoise>=1000&&s.compressedMeaning>=10000, label(ACTIONS.stop), en?'The final action is now possible.':'最后一个动作现在才出现。', 'stop-printing', {}, 'danger');
+    }
     $('primary-actions').replaceChildren(...buttons);
   }
 
-  function renderMachines(s) { $('machines').replaceChildren(...E.UNITS.map((u)=>{ const card=document.createElement('div'); card.className='machine'; const owned=s[u.id]; const c=E.cost(s,u.id); const unlocked=s.lifetimeGlyphs>=u.unlock; const title=document.createElement('b'); title.textContent=u.name; const small=document.createElement('small'); small.textContent=`${owned} × +${u.rate}/s · ${unlocked?`${c} credits`:`${u.unlock} total`}`; const b=document.createElement('button'); b.type='button'; b.textContent=locale==='en'?'Buy':'购买'; b.disabled=s.act!==1||!unlocked||s.credits<c; b.addEventListener('click',()=>perform('buy',{id:u.id})); card.append(title,small,b); return card; })); }
+  function renderMachines(s) {
+    const cards=[];
+    if (s.act===1) for (const u of E.UNITS) {
+      const owned=s[u.id]; const c=E.cost(s,u.id); const unlocked=s.lifetimeGlyphs>=u.unlock; const affordable=s.credits>=c;
+      if (!unlocked || (!owned && !affordable)) continue;
+      const card=document.createElement('div'); card.className='machine';
+      const title=document.createElement('b'); title.textContent=u.name;
+      const small=document.createElement('small'); small.textContent=`${owned} × +${u.rate}/s${affordable?` · ${c} credits`:''}`;
+      card.append(title,small);
+      if (affordable) { const b=document.createElement('button'); b.type='button'; b.textContent=locale==='en'?'Buy':'购买'; b.addEventListener('click',()=>perform('buy',{id:u.id})); card.append(b); }
+      cards.push(card);
+    }
+    $('machines').replaceChildren(...cards);
+  }
 
-  function renderAhas(s) { const active=currentAha(s); const seen=new Set(s.ahaSeen||[]); $('aha-list').replaceChildren(...E.AHAS.map((item)=>{ const div=document.createElement('button'); div.type='button'; div.className=`aha-item ${seen.has(item.id)||E.ahaUnlocked(s,item.id)?'seen':'locked'} ${item.id===active.id?'active':''}`; const copy=ahaCopy(item); div.innerHTML=`<b>${item.id} · ${copy[0]}</b><span>ACT ${item.act}</span>`; div.addEventListener('click',()=>{ directorOpen=true; $('director').hidden=false; $('director-select').value=item.id; preview=E.directorState(item.id); render(); }); return div; })); $('aha-count').textContent=`${seen.size} / 28`; const copy=ahaCopy(active); $('aha-id').textContent=`${active.id} · ${seen.has(active.id)?tr('seen'):tr('next')}`; $('aha-title').textContent=copy[0]; $('aha-copy').textContent=copy[1]; }
+  function renderAhas(s) {
+    const active=currentAha(s); const seen=new Set(s.ahaSeen||[]);
+    const visible = preview ? E.AHAS : E.AHAS.filter((item)=>seen.has(item.id));
+    $('aha-list').replaceChildren(...visible.map((item)=>{ const div=document.createElement('button'); div.type='button'; div.className=`aha-item seen ${item.id===active.id?'active':''}`; const copy=ahaCopy(item); div.innerHTML=`<b>${item.id} · ${copy[0]}</b><span>ACT ${item.act}</span>`; div.addEventListener('click',()=>{ directorOpen=true; $('director').hidden=false; $('director-select').value=item.id; preview=E.directorState(item.id); render(); }); return div; }));
+    $('aha-count').textContent=`${seen.size} / 28`;
+    const copy=ahaCopy(active); $('aha-id').textContent=`${active.id} · ${seen.has(active.id)?tr('seen'):tr('next')}`; $('aha-title').textContent=copy[0]; $('aha-copy').textContent=copy[1];
+  }
+
+  function renderDisclosure(s) {
+    const isDirector = Boolean(preview);
+    const metric = (id, show) => { const el=$(id)?.closest('.metric'); if (el) el.hidden=!show; };
+    metric('glyphs', true);
+    metric('credits', isDirector || s.credits>0 || s.manualBoost || s.autoSellUnlocked || s.contracts>0 || s.act>1);
+    metric('meaning', isDirector || s.meaning>0 || s.composed>0 || s.act>2);
+    metric('noise', isDirector || s.noise>0 || s.deletedNoise>0 || s.act>2);
+
+    $('world-card').hidden = !isDirector && s.act < 3;
+
+    const systemsHead=$('systems-title')?.closest('.panel-head');
+    const machines=$('machines');
+    const hasMachines=machines.children.length>0;
+    if (systemsHead) systemsHead.hidden=!hasMachines;
+    machines.hidden=!hasMachines;
+
+    const ahaHead=$('aha-count')?.closest('.panel-head');
+    const ahaList=$('aha-list');
+    const hasAhaHistory=ahaList.children.length>0;
+    if (ahaHead) ahaHead.hidden=!hasAhaHistory;
+    ahaList.hidden=!hasAhaHistory;
+
+    const logPanel=$('log')?.closest('.panel');
+    if (logPanel) logPanel.hidden=!isDirector && !(s.log||[]).length;
+  }
 
   function renderText() { document.documentElement.lang=locale==='en'?'en':'zh-CN'; $('lang-toggle').textContent=locale==='en'?'中文':'EN'; $('director-toggle').textContent=tr('director'); $('glyphs-label').textContent=tr('inventory'); $('credits-label').textContent=tr('credits'); $('meaning-label').textContent=tr('meaning'); $('noise-label').textContent=tr('noise'); $('systems-title').textContent=tr('systems'); $('systems-note').textContent=tr('systemsNote'); $('log-title').textContent=tr('log'); $('export').textContent=tr('export'); $('reset').textContent=tr('reset'); $('director-preview').textContent=tr('preview'); $('director-apply').textContent=tr('apply'); $('director-exit').textContent=tr('exit'); }
-  function render() { const s=shown(); renderText(); const [title,copy]=actCopy(s); $('act-kicker').textContent=`ACT ${['I','II','III','IV','V','VI'][s.act-1]} · ${E.ACTS[s.act-1].range}`; $('act-title').textContent=title; $('act-copy').textContent=copy; $('glyphs').textContent=fmt(s.glyphs,1); $('credits').textContent=fmt(s.credits,1); $('meaning').textContent=fmt(s.meaning,1); $('noise').textContent=fmt(s.noise,1); $('rate').textContent=fmt(E.rate(s),1); $('total').textContent=fmt(s.lifetimeGlyphs); $('status').textContent=`${tr('business')} · ACT ${s.act}/6${preview?' · DIRECTOR PREVIEW':''}`; $('ending').hidden=!s.stopped; $('director').hidden=!directorOpen; renderActs(s); renderWorld(s); renderActions(s); renderMachines(s); renderAhas(s); $('log').textContent=(s.log||[]).map((x,i)=>`${i?'·':'›'} ${x}`).join('\n'); if (!preview) save(); }
+  function render() { const s=shown(); renderText(); const [title,copy]=actCopy(s); $('act-kicker').textContent=`ACT ${['I','II','III','IV','V','VI'][s.act-1]} · ${E.ACTS[s.act-1].range}`; $('act-title').textContent=title; $('act-copy').textContent=copy; $('glyphs').textContent=fmt(s.glyphs,1); $('credits').textContent=fmt(s.credits,1); $('meaning').textContent=fmt(s.meaning,1); $('noise').textContent=fmt(s.noise,1); $('rate').textContent=fmt(E.rate(s),1); $('total').textContent=fmt(s.lifetimeGlyphs); $('status').textContent=`${tr('business')} · ACT ${s.act}/6${preview?' · DIRECTOR PREVIEW':''}`; $('ending').hidden=!s.stopped; $('director').hidden=!directorOpen; renderActs(s); renderWorld(s); renderActions(s); renderMachines(s); renderAhas(s); $('log').textContent=(s.log||[]).map((x,i)=>`${i?'·':'›'} ${x}`).join('\n'); renderDisclosure(s); if (!preview) save(); }
 
   E.AHAS.forEach((item)=>{ const option=document.createElement('option'); option.value=item.id; option.textContent=`${item.id} · ${item.title}`; $('director-select').append(option); });
   $('director-toggle').addEventListener('click',()=>{directorOpen=!directorOpen;$('director').hidden=!directorOpen;});
