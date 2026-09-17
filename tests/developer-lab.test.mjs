@@ -6,6 +6,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
+import vm from 'node:vm';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 
@@ -34,6 +35,9 @@ test('Developer Lab is emitted only for Vercel Preview builds', async (t) => {
   assert.equal(existsSync(lab), true, 'preview must expose Developer Lab');
 
   const html = await readFile(lab, 'utf8');
+  const inlineRuntime = html.match(/<script>([\\s\\S]*?)<\\/script>/);
+  assert.ok(inlineRuntime, 'Developer Lab inline runtime must exist');
+  assert.doesNotThrow(() => new vm.Script(inlineRuntime[1]), 'Developer Lab inline runtime must parse');
   assert.match(html, /<meta name="robots" content="noindex,nofollow">/);
   assert.match(html, /src='\/play\.html\?director=1'|src="\/play\.html\?director=1"|next\.src='\/play\.html\?director=1'/);
   assert.match(html, /data-aha-selector/);
