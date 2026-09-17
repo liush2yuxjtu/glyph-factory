@@ -35,7 +35,7 @@ test('Developer Lab is emitted only for Vercel Preview builds', async (t) => {
   assert.equal(existsSync(lab), true, 'preview must expose Developer Lab');
 
   const html = await readFile(lab, 'utf8');
-  const inlineRuntime = html.match(/<script>([\\s\\S]*?)<\\/script>/);
+  const inlineRuntime = html.match(/<script>([\s\S]*?)<\/script>/);
   assert.ok(inlineRuntime, 'Developer Lab inline runtime must exist');
   assert.doesNotThrow(() => new vm.Script(inlineRuntime[1]), 'Developer Lab inline runtime must parse');
   assert.match(html, /<meta name="robots" content="noindex,nofollow">/);
