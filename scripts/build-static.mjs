@@ -54,10 +54,15 @@ const playerEngine = engine.replace(
   /aha\('([^']+)',(\d+),'[^']*','[^']*'(,'[^']*')?\)/g,
   (_match, id, act, kind = '') => `aha('${id}',${act},'',''${kind})`,
 );
-const playerController = controller.replace(
-  /  const AHA_EN = \{[\s\S]*?\n  \};\n  const ACTIONS =/,
-  '  const AHA_EN = {};\n  const ACTIONS =',
-);
+const playerController = controller
+  .replace(
+    /  const AHA_EN = \{[\s\S]*?\n  \};\n  const ACTIONS =/,
+    '  const AHA_EN = {};\n  const ACTIONS =',
+  )
+  .replace(
+    "localStorage.getItem(LOCALE_KEY) || (navigator.language.toLowerCase().startsWith('zh') ? 'zh-CN' : 'en')",
+    "localStorage.getItem(LOCALE_KEY) || 'zh-CN'",
+  );
 
 // Reused local/CI output must not retain files from an older review build.
 await rm(out, { recursive: true, force: true });
@@ -67,6 +72,8 @@ await writeFile(new URL('play.html', out), playerHtml);
 await writeFile(new URL('glyph-engine-v3.js', out), playerEngine);
 await writeFile(new URL('glyph-game-v3.js', out), playerController);
 await copyFile(new URL('player-privacy-v3.js', publicDir), new URL('player-privacy-v3.js', out));
+await copyFile(new URL('404.html', publicDir), new URL('404.html', out));
+await copyFile(new URL('500.html', publicDir), new URL('500.html', out));
 
 const digest = (text) => createHash('sha256').update(text).digest('hex');
 const manifest = {
