@@ -53,6 +53,7 @@ assert(html.includes("./asset-registry.js"), "index must load the registry");
 assert(html.includes("./gallery.js"), "index must load the gallery runtime");
 assert(galleryJs.includes("three@0.186.0"), "Three.js version must stay pinned");
 assert(galleryJs.includes("setAnimationLoop"), "3D runtime must animate");
+assert(galleryJs.includes("createFallbackRenderer") && galleryJs.includes("supportsWebGL"), "gallery must remain interactive when WebGL is unavailable");
 assert(galleryJs.includes("pointerdown") && galleryJs.includes("pointerup"), "3D stage must support pointer interaction");
 assert(galleryJs.includes("triggerAsset"), "asset interaction path is missing");
 
