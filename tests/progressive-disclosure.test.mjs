@@ -9,7 +9,7 @@ import { createHash } from 'node:crypto';
 import vm from 'node:vm';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
-const allowed = ['build.json', 'glyph-engine-v3.js', 'glyph-game-v3.js', 'index.html', 'play.html', 'player-privacy-v3.js'].sort();
+const allowed = ['404.html', '500.html', 'build.json', 'glyph-engine-v3.js', 'glyph-game-v3.js', 'index.html', 'play.html', 'player-privacy-v3.js'].sort();
 const engine = (source) => vm.runInNewContext(`${source}\nGlyphEngineV3;`, {}, { timeout: 2000 });
 const plainState = (state) => { const copy = JSON.parse(JSON.stringify(state)); delete copy.log; return copy; };
 
