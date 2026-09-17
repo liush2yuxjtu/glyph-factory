@@ -3,5 +3,8 @@
   "framework": null,
   "installCommand": "",
   "buildCommand": "node --test tests/*.test.mjs && node scripts/build-static.mjs",
-  "outputDirectory": "dist"
+  "outputDirectory": "dist",
+  "rewrites": [
+    { "source": "/build.json", "destination": "/404.html" }
+  ]
 }
