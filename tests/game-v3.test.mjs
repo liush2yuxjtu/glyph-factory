@@ -38,7 +38,12 @@ test('director snapshot for A22 is deterministic and machine-language ready', ()
   assert.deepEqual(a, b);
   assert.equal(a.act, 5);
   assert.ok(a.machineGlyphs >= 1);
+  assert.ok(a.meaning >= 100, 'A22 Director snapshot must expose an enabled Act V action');
   assert.ok(E.ahaUnlocked(a, 'A22'));
+
+  const a23 = E.directorState('A23', t);
+  assert.equal(a23.act, 5);
+  assert.ok(a23.meaning >= 100, 'A23 Director snapshot must remain playable');
 });
 
 test('A03 composition turns glyph relationship into an automatic rule', () => {
