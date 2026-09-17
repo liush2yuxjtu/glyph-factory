@@ -5,13 +5,14 @@ const root = new URL('../', import.meta.url);
 const publicDir = new URL('public/', root);
 const out = new URL('dist/', root);
 
-const [html, engine, controller, privacy, preview, intent] = await Promise.all([
+const [html, engine, controller, privacy, preview, intent, developerLab] = await Promise.all([
   readFile(new URL('play.html', publicDir), 'utf8'),
   readFile(new URL('glyph-engine-v3.js', publicDir), 'utf8'),
   readFile(new URL('glyph-game-v3.js', publicDir), 'utf8'),
   readFile(new URL('player-privacy-v3.js', publicDir), 'utf8'),
   readFile(new URL('preview.html', publicDir), 'utf8'),
   readFile(new URL('intent.html', publicDir), 'utf8'),
+  readFile(new URL('developer-lab.html', publicDir), 'utf8'),
 ]);
 
 if (!html.includes('lang="zh-CN"') || !html.includes('/glyph-engine-v3.js') || !html.includes('/glyph-game-v3.js')) {
@@ -32,6 +33,11 @@ if (!preview.includes('glyph-factory-v3-preview.webm') || !preview.includes('A28
 if (!intent.includes('hidden → revealed → persistent') && !intent.includes('出现 → 永久保留')) {
   throw new Error('intent.html 设计契约缺失。');
 }
+if (!developerLab.includes('data-aha-selector') || !developerLab.includes("'A28'") || !developerLab.includes('/play.html?director=1')) {
+  throw new Error('Developer Lab Preview 契约缺失。');
+}
+
+const includeDeveloperLab = process.env.VERCEL_ENV === 'preview';
 
 // Production/player HTML contains no navigation to review materials. Internal review artifacts
 // remain in the repository for designers/developers but are deliberately not copied to dist/.
@@ -74,6 +80,7 @@ await writeFile(new URL('glyph-game-v3.js', out), playerController);
 await copyFile(new URL('player-privacy-v3.js', publicDir), new URL('player-privacy-v3.js', out));
 await copyFile(new URL('404.html', publicDir), new URL('404.html', out));
 await copyFile(new URL('500.html', publicDir), new URL('500.html', out));
+if (includeDeveloperLab) await writeFile(new URL('developer-lab.html', out), developerLab);
 
 const digest = (text) => createHash('sha256').update(text).digest('hex');
 const manifest = {
@@ -82,7 +89,7 @@ const manifest = {
   entry: 'play.html',
   progressiveDisclosure: true,
   playerSpoilers: false,
-  internalReviewArtifactsDeployed: false,
+  internalReviewArtifactsDeployed: includeDeveloperLab,
   sha256: digest(playerHtml + playerEngine + playerController + privacy),
   bytes: Buffer.byteLength(playerHtml) + Buffer.byteLength(playerEngine) + Buffer.byteLength(playerController) + Buffer.byteLength(privacy),
 };
