@@ -34,13 +34,221 @@ let dragMoved = false;
 let yaw = -0.45;
 let pitch = 0.08;
 
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+function createFallbackRenderer(targetCanvas) {
+  const ctx = targetCanvas.getContext("2d");
+  let pixelRatio = 1;
+  let cssWidth = 1;
+  let cssHeight = 1;
+  let frameId = 0;
+
+  targetCanvas.dataset.renderer = "canvas2d";
+
+  function draw(now) {
+    if (!ctx) return;
+    const asset = selectedAsset || { family: "artifact", name: "Glyph", cn: "字形", accent: "#68ddff" };
+    const age = (now - activeAt) / 1000;
+    const pulse = age >= 0 && age <= 1.35 ? 1 - age / 1.35 : 0;
+    const accent = asset.accent || "#68ddff";
+    const w = cssWidth;
+    const h = cssHeight;
+
+    ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+
+    const bg = ctx.createRadialGradient(w * 0.5, h * 0.36, 10, w * 0.5, h * 0.52, Math.max(w, h) * 0.7);
+    bg.addColorStop(0, "rgba(104,221,255,.12)");
+    bg.addColorStop(.45, "rgba(174,124,255,.05)");
+    bg.addColorStop(1, "rgba(5,7,12,0)");
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.save();
+    ctx.translate(w / 2 + Math.sin(yaw) * 26, h * 0.58 + pitch * 36);
+    const scale = Math.min(w, h) / 360;
+    ctx.scale(scale, scale);
+
+    ctx.fillStyle = "rgba(0,0,0,.28)";
+    ctx.beginPath();
+    ctx.ellipse(0, 112, 94, 25, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    const ringRadius = 96 + pulse * 14;
+    ctx.strokeStyle = accent;
+    ctx.globalAlpha = .34 + pulse * .42;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(0, 78, ringRadius, ringRadius * .22, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    if (asset.family === "worker") {
+      ctx.fillStyle = "#2a2d39";
+      ctx.fillRect(-34, 20, 68, 78);
+      ctx.fillStyle = "#e8dac3";
+      ctx.fillRect(-30, 24, 60, 56);
+      ctx.fillStyle = "#f0c2a0";
+      ctx.beginPath();
+      ctx.arc(0, -12, 38, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      ctx.ellipse(0, -42, 42, 13, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillRect(-38, -45, 76, 14);
+      ctx.fillStyle = "#151821";
+      ctx.beginPath();
+      ctx.arc(-12, -10, 3.5, 0, Math.PI * 2);
+      ctx.arc(12, -10, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "#e8dac3";
+      ctx.lineWidth = 13;
+      const armSwing = pulse * 24;
+      ctx.beginPath();
+      ctx.moveTo(-28, 35);
+      ctx.lineTo(-54, 68 - armSwing);
+      ctx.moveTo(28, 35);
+      ctx.lineTo(54, 68 + armSwing);
+      ctx.stroke();
+      ctx.strokeStyle = "#343847";
+      ctx.lineWidth = 14;
+      ctx.beginPath();
+      ctx.moveTo(-18, 92);
+      ctx.lineTo(-24, 126);
+      ctx.moveTo(18, 92);
+      ctx.lineTo(24, 126);
+      ctx.stroke();
+    } else if (asset.id === "lever") {
+      ctx.fillStyle = "#56331f";
+      ctx.fillRect(-72, 50, 144, 48);
+      ctx.fillStyle = "#a96832";
+      ctx.fillRect(-58, 38, 116, 20);
+      ctx.save();
+      ctx.translate(0, 44);
+      ctx.rotate(-0.45 + pulse * 0.95);
+      ctx.fillStyle = "#6c7380";
+      ctx.fillRect(-6, -96, 12, 100);
+      ctx.fillStyle = "#d25c40";
+      ctx.beginPath();
+      ctx.arc(0, -100, 18, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    } else if (asset.id === "crank") {
+      ctx.fillStyle = "#56331f";
+      ctx.fillRect(-70, 40, 140, 64);
+      ctx.strokeStyle = "#d49748";
+      ctx.lineWidth = 13;
+      ctx.beginPath();
+      ctx.arc(0, 22, 48, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.save();
+      ctx.translate(0, 22);
+      ctx.rotate(now / 900 * (pulse > 0 ? 6 : .5));
+      ctx.lineWidth = 6;
+      for (let i = 0; i < 6; i += 1) {
+        ctx.rotate(Math.PI / 3);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(48, 0);
+        ctx.stroke();
+      }
+      ctx.restore();
+    } else if (asset.id === "insight-crystal") {
+      ctx.fillStyle = accent;
+      ctx.shadowColor = accent;
+      ctx.shadowBlur = 34 + pulse * 30;
+      ctx.beginPath();
+      ctx.moveTo(0, -78 - pulse * 12);
+      ctx.lineTo(52, 5);
+      ctx.lineTo(0, 88 + pulse * 12);
+      ctx.lineTo(-52, 5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    } else if (asset.id === "expanding-node-tower") {
+      for (let i = 0; i < 4; i += 1) {
+        const y = 82 - i * (42 + pulse * 5);
+        ctx.fillStyle = i === 3 ? accent : i % 2 ? "#a96832" : "#56331f";
+        ctx.fillRect(-58 + i * 6, y - 28, 116 - i * 12, 30);
+      }
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      ctx.moveTo(0, -105 - pulse * 22);
+      ctx.lineTo(22, -70 - pulse * 12);
+      ctx.lineTo(0, -44 - pulse * 6);
+      ctx.lineTo(-22, -70 - pulse * 12);
+      ctx.closePath();
+      ctx.fill();
+    } else {
+      ctx.fillStyle = "#2a2d39";
+      ctx.fillRect(-72, 38, 144, 64);
+      ctx.fillStyle = accent;
+      ctx.globalAlpha = .85;
+      ctx.fillRect(-48, -34 - pulse * 6, 96, 72);
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = "rgba(255,255,255,.72)";
+      ctx.lineWidth = 3;
+      ctx.strokeRect(-48, -34 - pulse * 6, 96, 72);
+    }
+
+    ctx.fillStyle = "rgba(12,14,20,.76)";
+    ctx.fillRect(-100, 142, 200, 48);
+    ctx.fillStyle = accent;
+    ctx.font = "700 13px system-ui, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(asset.name, 0, 163);
+    ctx.fillStyle = "#d8d8df";
+    ctx.font = "11px system-ui, sans-serif";
+    ctx.fillText(asset.cn, 0, 180);
+    ctx.restore();
+  }
+
+  return {
+    shadowMap: { enabled: false, type: null },
+    setPixelRatio(value) {
+      pixelRatio = Math.max(1, Number(value) || 1);
+    },
+    setSize(width, height) {
+      cssWidth = Math.max(1, width);
+      cssHeight = Math.max(1, height);
+      targetCanvas.width = Math.max(1, Math.round(cssWidth * pixelRatio));
+      targetCanvas.height = Math.max(1, Math.round(cssHeight * pixelRatio));
+    },
+    render() {
+      draw(performance.now());
+    },
+    setAnimationLoop(callback) {
+      if (frameId) cancelAnimationFrame(frameId);
+      const tick = (now) => {
+        callback(now);
+        frameId = requestAnimationFrame(tick);
+      };
+      frameId = requestAnimationFrame(tick);
+    }
+  };
+}
+
+function supportsWebGL() {
+  try {
+    const probe = document.createElement("canvas");
+    return Boolean(probe.getContext("webgl2") || probe.getContext("webgl"));
+  } catch {
+    return false;
+  }
+}
+
+const hasWebGL = supportsWebGL();
+const renderer = hasWebGL
+  ? new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
+  : createFallbackRenderer(canvas);
+
 renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.16;
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+if (hasWebGL) {
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.16;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+}
 
 const scene = new THREE.Scene();
 scene.fog = new THREE.Fog(0x0f1219, 10, 22);
