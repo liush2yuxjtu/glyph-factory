@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>字工厂 · Developer Lab</title>
+<style>
+:root{--ink:#17201a;--paper:#d6d8c8;--panel:#fffaf0;--green:#c8ef70;--rust:#a34e34;--blue:#405b7d}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.5 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}.page{min-height:100vh;padding:24px}.shell{max-width:1500px;margin:auto}.kicker{margin:0;color:var(--rust);font-size:11px;font-weight:900;letter-spacing:.14em}h1{font-size:clamp(38px,6vw,72px);line-height:1;margin:8px 0 14px}.intro{max-width:980px;color:#455047;line-height:1.7}.layout{display:grid;grid-template-columns:minmax(280px,360px) minmax(0,1fr);gap:18px;align-items:start;margin-top:20px}.controls{background:#efe9d8;border:2px solid var(--ink);padding:14px;box-shadow:5px 5px 0 #87917e}.controls section+section{border-top:1px solid #aeb5a4;margin-top:16px;padding-top:16px}.controls h2{font-size:14px;margin:0 0 10px}.stack{display:grid;gap:8px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.metrics{display:grid;gap:6px;margin:0}.metrics div{background:var(--panel);border:1px solid #a9b09d;padding:9px}.metrics dt{font-size:10px;color:#657064}.metrics dd{margin:2px 0 0;font:800 22px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace}.controls button,.controls a,.controls select{min-height:44px;border:1.5px solid var(--ink);background:var(--panel);color:var(--ink);padding:9px 10px;font:800 12px/1.3 inherit;text-decoration:none}.controls button,.controls a{display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:2px 2px 0 var(--ink)}.controls select{width:100%;font-weight:700}.controls button:hover,.controls a:hover{background:var(--green)}.primary{background:var(--ink)!important;color:var(--green)!important}.danger{background:#f1d9ce!important;color:#752f20!important}.warning{margin:16px 0 0;padding:10px;border-left:4px solid var(--rust);background:#f3e6dc;font-size:11px}.status{min-height:38px;margin:10px 0 0;font-size:12px;font-weight:800;color:var(--blue)}.game{background:var(--ink);border:3px solid var(--ink);box-shadow:7px 7px 0 #87917e;min-width:0}.game iframe{display:block;width:100%;height:82vh;min-height:720px;border:0;background:white}@media(max-width:900px){.page{padding:14px}.layout{grid-template-columns:1fr}.game iframe{height:760px;min-height:640px}}@media(max-width:480px){.page{padding:10px}.grid{grid-template-columns:1fr}.controls{padding:10px}.game iframe{height:700px;min-height:600px}h1{font-size:40px}}
+</style>
+</head>
+<body>
+<main class="page"><div class="shell">
+<p class="kicker">INTERNAL · VERCEL PREVIEW ONLY · 真实存档与状态测试</p>
+<h1>Developer Lab</h1>
+<p class="intro">Aha / A01–A28 只属于开发者语言。这里直接驱动同源真实 <code>/play.html</code>，不会复制第二套游戏逻辑。Production 构建不会输出这个页面。</p>
+<div class="layout">
+<aside class="controls" aria-label="开发者测试控制">
+<section><h2>可玩状态 · Internal only</h2><div class="stack"><select aria-label="选择内部 Aha 状态" data-aha-selector></select><button type="button" class="primary" data-load-aha>在右侧游戏中载入 A01</button></div></section>
+<section><h2>当前真实存档</h2><dl class="metrics"><div><dt>工坊资金</dt><dd data-save-metric="credits">0</dd></div><div><dt>库存文字</dt><dd data-save-metric="glyphs">0</dd></div><div><dt>累计文字</dt><dd data-save-metric="lifetimeGlyphs">0</dd></div></dl></section>
+<section><h2>加钱 / 工坊资金</h2><div class="grid"><button data-dev-add="credits:100">+ 100 资金</button><button data-dev-add="credits:1000">+ 1,000 资金</button><button data-dev-add="credits:10000">+ 10,000 资金</button><button data-dev-add="credits:1000000">+ 1,000,000 资金</button></div></section>
+<section><h2>加库存文字</h2><div class="grid"><button data-dev-add="glyphs:100">+ 100 文字</button><button data-dev-add="glyphs:1000">+ 1,000 文字</button><button data-dev-add="glyphs:10000">+ 10,000 文字</button><button data-dev-add="glyphs:1000000">+ 1,000,000 文字</button></div></section>
+<section><h2>快捷操作</h2><div class="stack"><button class="primary" data-add-both>+1,000,000 资金 + 文字</button><button data-refresh-player>刷新真实游戏</button><button class="danger" data-clear-save>清空测试存档</button><a href="/play.html" target="_blank" rel="noreferrer">打开正常玩家页</a></div></section>
+<p class="warning">内部 Aha 选择只存在于 Preview Developer Lab。正式玩家 UI 不应显示 Aha 编号、Director 或设计解释。</p><p class="status" role="status" aria-live="polite" data-status>等待真实游戏引擎载入…</p>
+</aside>
+<section class="game" aria-label="真实字工厂游戏" data-player-host></section>
+</div></div></main>
+<script src="/glyph-engine-v3.js"></script>
+<script>
+(() => {
+'use strict';
+const LIMIT=1e15, REVEAL_KEY='glyph-factory-ui-reveals-v3';
+const AHAS=[['A01','机器替我按按钮'],['A02','员工组成编辑部'],['A03','木 + 木 → 林'],['A04','规则自动运行'],['A05','意义比字数值钱'],['A06','报纸制造需求'],['A07','读者开始回信'],['A08','读者自己造新词'],['A09','一个词突然传播'],['A10','纸张危机：少写'],['A11','删字第一次更值钱'],['A12','街区长出方言'],['A13','概念改变城市'],['A14','城市地图出现'],['A15','地图缩到世界'],['A16','记者 Agent 自己选题'],['A17','编辑第一次说“不”'],['A18','Agent 创造 Agent'],['A19','醒来已有八万篇'],['A20','数字出版：库存消失'],['A21','档案变机器记忆'],['A22','出现一个你没造过的字'],['A23','机器有自己的语言'],['A24','万亿文字 → 一个符号'],['A25','语言成为社会操作系统'],['A26','新资源：歧义'],['A27','目标从生产变删除'],['A28','最后按钮：停止印刷']];
+const $=s=>document.querySelector(s), status=$('[data-status]'), host=$('[data-player-host]'), selector=$('[data-aha-selector]'), loadButton=$('[data-load-aha]');
+let frame=null;
+const engine=()=>window.GlyphEngineV3||null;
+const safe=v=>typeof v==='number'&&Number.isFinite(v)&&v>=0?Math.min(v,LIMIT):0;
+const format=v=>new Intl.NumberFormat('zh-CN',{maximumFractionDigits:1}).format(v);
+const setStatus=m=>{status.textContent=m;};
+function readState(){const e=engine();if(!e)throw new Error('真实游戏引擎尚未就绪。');const raw=localStorage.getItem(e.SAVE_KEY);return raw?e.restore(raw):e.fresh();}
+function syncSnapshot(){const state=readState();for(const key of ['credits','glyphs','lifetimeGlyphs']){$('[data-save-metric="'+key+'"]').textContent=format(safe(state[key]));}return state;}
+function mountPlayer(message){const next=document.createElement('iframe');next.title='字工厂真实游戏开发测试';next.src='/play.html?director=1';next.dataset.playerFrame='';next.addEventListener('load',()=>{frame=next;try{syncSnapshot();setStatus(message||'真实游戏已载入。选择任意内部状态后，可直接在右侧继续玩。');}catch(error){setStatus(error.message);}}, {once:true});host.replaceChildren(next);frame=next;}
+function quiescePlayer(){if(!frame)return;const current=frame;frame=null;current.remove();}
+function withQuiescedPlayer(mutator,successMessage){quiescePlayer();try{mutator();syncSnapshot();setStatus(successMessage);}catch(error){setStatus('写入失败：'+error.message);}finally{mountPlayer();}}
+function persist(mutator,successMessage){withQuiescedPlayer(()=>{const e=engine();if(!e)throw new Error('真实游戏引擎尚未就绪。');const next=mutator(readState());localStorage.setItem(e.SAVE_KEY,JSON.stringify(next));},successMessage);}
+function triggerAha(id){const doc=frame&&frame.contentDocument, directorSelect=doc&&doc.getElementById('director-select'), preview=doc&&doc.getElementById('director-preview');if(!doc||!directorSelect||!preview){setStatus('Aha 触发失败：真实游戏 Director 控件尚未就绪。');return false;}directorSelect.value=id;directorSelect.dispatchEvent(new Event('change',{bubbles:true}));preview.click();loadButton.textContent='在右侧游戏中载入 '+id;requestAnimationFrame(()=>{const enabled=[...doc.querySelectorAll('#primary-actions button')].filter(button=>!button.disabled).length;setStatus(id+' 已载入真实游戏状态；当前可操作按钮 '+enabled+' 个。');});return true;}
+for(const pair of AHAS){const option=document.createElement('option');option.value=pair[0];option.textContent=pair[0]+' · '+pair[1];selector.append(option);}
+selector.addEventListener('change',()=>{loadButton.textContent='在右侧游戏中载入 '+selector.value;triggerAha(selector.value);});
+loadButton.addEventListener('click',()=>triggerAha(selector.value));
+document.querySelectorAll('[data-dev-add]').forEach(button=>button.addEventListener('click',()=>{const parts=button.dataset.devAdd.split(':'),kind=parts[0],amount=Number(parts[1]);if(kind==='credits'){persist(state=>({...state,credits:safe(state.credits+amount),updatedAt:state.updatedAt}),'已给真实存档增加 '+format(amount)+' 工坊资金。');}else{persist(state=>({...state,glyphs:safe(state.glyphs+amount),lifetimeGlyphs:safe(Math.max(state.lifetimeGlyphs,state.glyphs)+amount),updatedAt:state.updatedAt}),'已给真实存档增加 '+format(amount)+' 库存文字，并同步累计文字。');}}));
+$('[data-add-both]').addEventListener('click',()=>{const amount=1000000;persist(state=>({...state,credits:safe(state.credits+amount),glyphs:safe(state.glyphs+amount),lifetimeGlyphs:safe(Math.max(state.lifetimeGlyphs,state.glyphs)+amount),updatedAt:state.updatedAt}),'快速测试包已加入：+1,000,000 工坊资金，+1,000,000 库存文字。');});
+$('[data-clear-save]').addEventListener('click',()=>withQuiescedPlayer(()=>{const e=engine();if(!e)throw new Error('真实游戏引擎尚未就绪。');localStorage.removeItem(e.SAVE_KEY);localStorage.removeItem(REVEAL_KEY);},'真实游戏存档和渐进揭示记录已清空。'));
+$('[data-refresh-player]').addEventListener('click',()=>{quiescePlayer();mountPlayer('真实游戏已手动刷新。');});
+if(!engine()){setStatus('真实游戏引擎载入失败，请刷新页面重试。');}else{syncSnapshot();mountPlayer();}
+})();
+</script>
+</body>
+</html>

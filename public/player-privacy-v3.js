@@ -31,22 +31,24 @@
     node.setAttribute('aria-hidden', 'true');
   });
 
-  // Do not delete DOM nodes owned by the controller: later timer renders still use them.
-  remove('.head-actions a[href="/preview.html"]');
-  hide('#director-toggle');
-  hide('#director');
-
-  // Aha IDs, reveal copy, history and act/meta framing are design language, not player copy.
-  hide('.aha-focus');
-  hide('#aha-list');
-  hide('#aha-count');
-  hide('.panel-head:has(#aha-count)');
-  hide('#act-strip');
-  hide('.act-kicker');
-  hide('.act-title');
-  hide('.act-copy');
-  hide('.eyebrow');
-  hide('#systems-note');
+  const enforcePlayerSurface = () => {
+    // Aha IDs, reveal copy, history and act/meta framing are design language, not player copy.
+    // Never let controller re-renders revive developer/design language in a player surface.
+    // These nodes stay in the DOM because the controller owns them, but they remain hidden.
+    remove('.head-actions a[href="/preview.html"]');
+    hide('#director-toggle');
+    hide('#director');
+    hide('.aha-focus');
+    hide('#aha-list');
+    hide('#aha-count');
+    hide('.panel-head:has(#aha-count)');
+    hide('#act-strip');
+    hide('.act-kicker');
+    hide('.act-title');
+    hide('.act-copy');
+    hide('.eyebrow');
+    hide('#systems-note');
+  };
 
   const scrubStatus = () => {
     const el = document.getElementById('status');
@@ -149,6 +151,7 @@
   };
 
   const refreshPlayerBoundary = () => {
+    enforcePlayerSurface();
     scrubStatus();
     scrubLog();
     updateTitle();

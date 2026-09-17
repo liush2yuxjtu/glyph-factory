@@ -25,7 +25,7 @@ test('production build contracts', async (t) => {
     await writeFile(join(dist, path), 'INTERNAL REVIEW MATERIAL');
   }
   const build = () => {
-    const result = spawnSync(process.execPath, ['scripts/build-static.mjs'], { cwd: fixture, encoding: 'utf8', timeout: 15000 });
+    const result = spawnSync(process.execPath, ['scripts/build-static.mjs'], { cwd: fixture, encoding: 'utf8', timeout: 15000, env: { ...process.env, VERCEL_ENV: 'production' } });
     assert.equal(result.status, 0, result.stderr || result.stdout);
   };
   build();

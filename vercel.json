@@ -5,7 +5,17 @@
   "buildCommand": "node --test tests/*.test.mjs && node scripts/build-static.mjs",
   "outputDirectory": "dist",
   "routes": [
-    { "src": "/build\\.json", "dest": "/404.html", "status": 404 },
-    { "handle": "filesystem" }
+    {
+      "src": "/build\\.json",
+      "dest": "/404.html",
+      "status": 404
+    },
+    {
+      "src": "/developer-lab",
+      "dest": "/developer-lab.html"
+    },
+    {
+      "handle": "filesystem"
+    }
   ]
 }
