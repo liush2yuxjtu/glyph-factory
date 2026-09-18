@@ -82,41 +82,307 @@ function createFallbackRenderer(targetCanvas) {
     ctx.globalAlpha = 1;
 
     if (asset.family === "worker") {
-      ctx.fillStyle = "#2a2d39";
-      ctx.fillRect(-34, 20, 68, 78);
-      ctx.fillStyle = "#e8dac3";
-      ctx.fillRect(-30, 24, 60, 56);
+      const armSwing = pulse * 24;
+      ctx.fillStyle = "#343847";
+      ctx.lineWidth = 14;
+      ctx.strokeStyle = "#343847";
+      ctx.beginPath();
+      ctx.moveTo(-18, 88);
+      ctx.lineTo(-24, 126);
+      ctx.moveTo(18, 88);
+      ctx.lineTo(24, 126);
+      ctx.stroke();
+
+      if (asset.id === "builder") {
+        ctx.fillStyle = "#e8dac3";
+        ctx.fillRect(-44, 18, 88, 76);
+        ctx.fillStyle = "#2a2d39";
+        ctx.fillRect(-48, 66, 96, 24);
+        ctx.fillStyle = "#8c542f";
+        ctx.fillRect(-62, 28, 20, 58);
+        ctx.fillStyle = accent;
+        ctx.fillRect(-56, 38, 10, 22);
+        ctx.strokeStyle = "#e8dac3";
+        ctx.lineWidth = 15;
+        ctx.beginPath();
+        ctx.moveTo(-38, 34);
+        ctx.lineTo(-62, 66);
+        ctx.moveTo(38, 34);
+        ctx.lineTo(58, 62 - armSwing * .45);
+        ctx.stroke();
+        ctx.save();
+        ctx.translate(58, 18 - armSwing * .55);
+        ctx.rotate(-.32 + pulse * .55);
+        ctx.fillStyle = "#d49748";
+        ctx.fillRect(-5, 0, 10, 76);
+        ctx.fillStyle = "#56331f";
+        ctx.fillRect(-32, -12, 64, 28);
+        ctx.fillStyle = accent;
+        ctx.fillRect(-34, -7, 18, 18);
+        ctx.restore();
+        ctx.fillStyle = accent;
+        ctx.beginPath();
+        ctx.ellipse(0, -43, 48, 17, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillRect(-42, -46, 84, 13);
+      } else if (asset.id === "connector") {
+        ctx.fillStyle = "#e8dac3";
+        ctx.fillRect(-28, 16, 56, 82);
+        ctx.strokeStyle = "#e8dac3";
+        ctx.lineWidth = 12;
+        ctx.beginPath();
+        ctx.moveTo(-24, 34);
+        ctx.lineTo(-52, 54 + armSwing * .25);
+        ctx.moveTo(24, 34);
+        ctx.lineTo(54, 48 - armSwing * .3);
+        ctx.stroke();
+        ctx.strokeStyle = "#62e0ff";
+        ctx.lineWidth = 7;
+        ctx.beginPath();
+        ctx.arc(-45, 66, 24, 0, Math.PI * 2);
+        ctx.arc(45, 66, 24, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(-22, 74);
+        ctx.bezierCurveTo(0, 102 + pulse * 8, 18, 48, 46, 66);
+        ctx.stroke();
+        ctx.fillStyle = accent;
+        ctx.beginPath();
+        ctx.ellipse(0, -43, 43, 13, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#d49748";
+        ctx.strokeStyle = "#d49748";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(-16, -38, 12, 0, Math.PI * 2);
+        ctx.arc(16, -38, 12, 0, Math.PI * 2);
+        ctx.stroke();
+      } else if (asset.id === "illuminator") {
+        ctx.fillStyle = "#e8dac3";
+        ctx.beginPath();
+        ctx.moveTo(0, 6);
+        ctx.lineTo(-50, 100);
+        ctx.lineTo(50, 100);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = "#e8dac3";
+        ctx.lineWidth = 12;
+        ctx.beginPath();
+        ctx.moveTo(-22, 34);
+        ctx.lineTo(-46, 62);
+        ctx.moveTo(22, 34);
+        ctx.lineTo(52, 54 - armSwing * .35);
+        ctx.stroke();
+        ctx.strokeStyle = "#d49748";
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.moveTo(54, 70);
+        ctx.lineTo(60, -26);
+        ctx.stroke();
+        ctx.fillStyle = accent;
+        ctx.shadowColor = accent;
+        ctx.shadowBlur = 24 + pulse * 24;
+        ctx.beginPath();
+        ctx.arc(60, -34, 16 + pulse * 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = accent;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.ellipse(0, -61, 54, 14, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      } else if (asset.id === "archivist") {
+        ctx.fillStyle = "#76c9a0";
+        ctx.fillRect(-34, 16, 68, 82);
+        ctx.fillStyle = "#56331f";
+        ctx.fillRect(-58, 24, 22, 74);
+        ctx.fillRect(-54, 20, 14, 10);
+        ctx.fillRect(-54, 38, 14, 10);
+        ctx.fillRect(-54, 56, 14, 10);
+        ctx.strokeStyle = "#76c9a0";
+        ctx.lineWidth = 12;
+        ctx.beginPath();
+        ctx.moveTo(-28, 34);
+        ctx.lineTo(-48, 62);
+        ctx.moveTo(28, 34);
+        ctx.lineTo(48, 62);
+        ctx.stroke();
+        ctx.fillStyle = "#d25c40";
+        ctx.fillRect(-38, 52, 76, 42);
+        ctx.fillStyle = accent;
+        ctx.fillRect(-12, 62, 24, 20);
+        ctx.strokeStyle = "#56331f";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(-16, -9, 13, 0, Math.PI * 2);
+        ctx.arc(16, -9, 13, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.fillStyle = "#76c9a0";
+        ctx.beginPath();
+        ctx.ellipse(0, -43, 44, 12, 0, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (asset.id === "explorer") {
+        ctx.fillStyle = "#343847";
+        ctx.fillRect(-31, 12, 62, 88);
+        ctx.fillStyle = "#5fc8ec";
+        ctx.fillRect(-34, 68, 68, 20);
+        ctx.strokeStyle = "#e8dac3";
+        ctx.lineWidth = 12;
+        ctx.beginPath();
+        ctx.moveTo(-24, 32);
+        ctx.lineTo(-46, 66);
+        ctx.moveTo(24, 32);
+        ctx.lineTo(52, 46 - armSwing * .3);
+        ctx.stroke();
+        ctx.save();
+        ctx.translate(42, 26 - armSwing * .2);
+        ctx.rotate(-.55);
+        ctx.fillStyle = "#d49748";
+        ctx.fillRect(-8, -8, 16, 76);
+        ctx.fillStyle = accent;
+        ctx.fillRect(-13, -14, 26, 18);
+        ctx.restore();
+        ctx.strokeStyle = "#65c9ff";
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.arc(-45, 76, 22, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(-45, 54);
+        ctx.lineTo(-45, 98);
+        ctx.moveTo(-67, 76);
+        ctx.lineTo(-23, 76);
+        ctx.stroke();
+        ctx.fillStyle = "#5fc8ec";
+        ctx.beginPath();
+        ctx.ellipse(0, -43, 45, 12, 0, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.fillStyle = "#e8dac3";
+        ctx.fillRect(-36, 15, 72, 84);
+        ctx.strokeStyle = "#e8dac3";
+        ctx.lineWidth = 12;
+        ctx.beginPath();
+        ctx.moveTo(-28, 34);
+        ctx.lineTo(-48, 64);
+        ctx.moveTo(28, 34);
+        ctx.lineTo(48, 64);
+        ctx.stroke();
+        ctx.fillStyle = "#c9b88e";
+        ctx.fillRect(-48, 50, 96, 48);
+        ctx.strokeStyle = accent;
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(-54, 44, 18, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.fillStyle = accent;
+        ctx.beginPath();
+        ctx.ellipse(0, -43, 45, 11, -.12, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
       ctx.fillStyle = "#f0c2a0";
       ctx.beginPath();
       ctx.arc(0, -12, 38, 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillStyle = accent;
-      ctx.beginPath();
-      ctx.ellipse(0, -42, 42, 13, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillRect(-38, -45, 76, 14);
       ctx.fillStyle = "#151821";
       ctx.beginPath();
       ctx.arc(-12, -10, 3.5, 0, Math.PI * 2);
       ctx.arc(12, -10, 3.5, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = "#e8dac3";
-      ctx.lineWidth = 13;
-      const armSwing = pulse * 24;
+    } else if (asset.id === "magnifier") {
+      ctx.fillStyle = "#56331f";
+      ctx.fillRect(-92, 74, 184, 34);
+      ctx.fillStyle = "#a96832";
+      ctx.fillRect(-76, 58, 152, 22);
+      ctx.strokeStyle = "#d49748";
+      ctx.lineWidth = 8;
       ctx.beginPath();
-      ctx.moveTo(-28, 35);
-      ctx.lineTo(-54, 68 - armSwing);
-      ctx.moveTo(28, 35);
-      ctx.lineTo(54, 68 + armSwing);
+      ctx.moveTo(-82, 60);
+      ctx.lineTo(-82, -48);
+      ctx.moveTo(82, 60);
+      ctx.lineTo(82, -48);
       ctx.stroke();
-      ctx.strokeStyle = "#343847";
-      ctx.lineWidth = 14;
+      ctx.strokeStyle = "#d49748";
+      ctx.lineWidth = 12;
       ctx.beginPath();
-      ctx.moveTo(-18, 92);
-      ctx.lineTo(-24, 126);
-      ctx.moveTo(18, 92);
-      ctx.lineTo(24, 126);
+      ctx.arc(0, -22, 72, 0, Math.PI * 2);
       ctx.stroke();
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.arc(0, -22, 54 + pulse * 5, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.strokeStyle = "#ae7cff";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.ellipse(0, -22, 42, 58, .6 + pulse * .2, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.fillStyle = accent;
+      ctx.globalAlpha = .16;
+      ctx.beginPath();
+      ctx.arc(0, -22, 49, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = "#f7f1dc";
+      ctx.shadowColor = accent;
+      ctx.shadowBlur = 22 + pulse * 26;
+      ctx.beginPath();
+      ctx.moveTo(0, -44 - pulse * 4);
+      ctx.lineTo(16, -22);
+      ctx.lineTo(0, 0 + pulse * 4);
+      ctx.lineTo(-16, -22);
+      ctx.closePath();
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      [[-112,-44],[112,-44],[-104,20],[104,20]].forEach((p,i)=>{
+        ctx.fillStyle = i%2 ? "#ae7cff" : "#68ddff";
+        ctx.globalAlpha = .72;
+        ctx.fillRect(p[0]-18,p[1]-22,36,44);
+      });
+      ctx.globalAlpha = 1;
+    } else if (asset.id === "projector-beacon") {
+      ctx.fillStyle = "#56331f";
+      ctx.fillRect(-118, 72, 236, 34);
+      ctx.fillStyle = "#a96832";
+      ctx.fillRect(-100, 52, 200, 24);
+      ctx.fillStyle = "#222531";
+      ctx.fillRect(-78, 36, 156, 20);
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.ellipse(0, -22, 86 + pulse * 8, 26 + pulse * 3, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.strokeStyle = "#ae7cff";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.ellipse(0, -22, 112 + pulse * 12, 36 + pulse * 4, .34, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.fillStyle = accent;
+      ctx.globalAlpha = .18;
+      ctx.beginPath();
+      ctx.arc(0, -28, 58 + pulse * 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      [[-48,-62],[42,-50],[-8,-8],[14,-82]].forEach((p,i)=>{
+        ctx.fillStyle = i%2 ? "#e8dac3" : "#d49748";
+        ctx.fillRect(p[0]-9,p[1]-10,18,20+i*2);
+        ctx.fillStyle = "#76c9a0";
+        ctx.beginPath();
+        ctx.arc(p[0]+14,p[1]+4,7,0,Math.PI*2);
+        ctx.fill();
+      });
+      ctx.fillStyle = "#b679ff";
+      ctx.shadowColor = "#b679ff";
+      ctx.shadowBlur = 18 + pulse * 24;
+      ctx.beginPath();
+      ctx.moveTo(0, 20 - pulse * 10);
+      ctx.lineTo(14, 40);
+      ctx.lineTo(0, 58 + pulse * 4);
+      ctx.lineTo(-14, 40);
+      ctx.closePath();
+      ctx.fill();
+      ctx.shadowBlur = 0;
     } else if (asset.id === "lever") {
       ctx.fillStyle = "#56331f";
       ctx.fillRect(-72, 50, 144, 48);
@@ -426,31 +692,87 @@ function createWorker(asset) {
   const group = new THREE.Group();
   const accent = glowingMaterial(asset.accent);
   const body = new THREE.Group();
+  const id = asset.id;
   body.position.y = 0.58;
   group.add(body);
 
-  body.add(box([0.75, 0.9, 0.48], materials.ivory, [0, 0.7, 0]));
-  body.add(box([0.8, 0.26, 0.53], materials.dark, [0, 0.46, 0.02]));
+  const torso = new THREE.Group();
+  body.add(torso);
+
+  if (id === "builder") {
+    torso.add(box([0.98, 0.82, 0.58], materials.ivory, [0, 0.7, 0]));
+    torso.add(box([1.08, 0.22, 0.64], materials.dark, [0, 0.47, 0.02]));
+    torso.add(box([0.24, 0.28, 0.68], accent, [-0.56, 0.9, -0.02]));
+    torso.add(box([0.24, 0.28, 0.68], accent, [0.56, 0.9, -0.02]));
+  } else if (id === "connector") {
+    torso.add(box([0.62, 0.96, 0.44], materials.ivory, [0, 0.72, 0]));
+    torso.add(torus(0.35, 0.055, materials.blue, [0, 0.95, 0.28], [Math.PI / 2, 0, 0]));
+  } else if (id === "illuminator") {
+    const robe = mesh(new THREE.ConeGeometry(0.62, 1.3, 28), materials.ivory, [0, 0.72, 0]);
+    robe.rotation.y = Math.PI;
+    torso.add(robe);
+    torso.add(box([0.68, 0.18, 0.46], materials.amber, [0, 0.45, 0.05]));
+  } else if (id === "archivist") {
+    torso.add(box([0.72, 0.94, 0.5], materials.green, [0, 0.7, 0]));
+    torso.add(box([0.76, 0.2, 0.54], materials.darkBronze, [0, 0.46, 0.01]));
+  } else if (id === "explorer") {
+    torso.add(box([0.66, 1.02, 0.46], materials.darkSoft, [0, 0.72, 0]));
+    torso.add(box([0.78, 0.18, 0.52], materials.blue, [0, 0.48, 0.02]));
+    torso.rotation.z = -0.07;
+  } else {
+    torso.add(box([0.76, 0.96, 0.48], materials.ivory, [0, 0.7, 0]));
+    torso.add(box([0.84, 0.2, 0.54], materials.darkSoft, [0, 0.46, 0.02]));
+  }
+
   const head = sphere(0.43, materials.skin, [0, 1.52, 0], 32, 20);
   body.add(head);
 
-  const hair = sphere(0.44, materials.darkBronze, [0, 1.63, -0.03], 28, 16);
-  hair.scale.set(1.02, 0.48, 1.03);
-  body.add(hair);
+  if (id !== "illuminator") {
+    const hair = sphere(0.44, id === "archivist" ? materials.dark : materials.darkBronze, [0, 1.63, -0.03], 28, 16);
+    hair.scale.set(1.02, 0.48, 1.03);
+    body.add(hair);
+  }
 
-  const cap = cyl(0.46, 0.48, 0.18, accent, [0, 1.87, 0], [0, 0, 0], 24);
-  cap.scale.z = 1.08;
-  body.add(cap);
-  const brim = box([0.54, 0.06, 0.24], accent, [0.16, 1.81, 0.34]);
-  brim.rotation.y = -0.14;
-  body.add(brim);
+  if (id === "builder") {
+    const helmet = sphere(0.5, accent, [0, 1.83, 0], 28, 16);
+    helmet.scale.set(1.08, 0.5, 1.05);
+    body.add(helmet);
+    body.add(box([0.82, 0.07, 0.28], accent, [0.08, 1.76, 0.3]));
+  } else if (id === "connector") {
+    const cap = sphere(0.47, accent, [0, 1.82, -0.02], 28, 16);
+    cap.scale.set(1.08, 0.38, 1.02);
+    body.add(cap);
+    body.add(torus(0.18, 0.045, materials.brass, [-0.2, 1.82, 0.35], [0, 0, 0]));
+    body.add(torus(0.18, 0.045, materials.brass, [0.2, 1.82, 0.35], [0, 0, 0]));
+  } else if (id === "illuminator") {
+    const hood = torus(0.48, 0.13, materials.ivory, [0, 1.55, -0.03], [Math.PI / 2, 0, 0]);
+    hood.scale.y = 1.18;
+    body.add(hood);
+    body.add(torus(0.58, 0.025, materials.amber, [0, 2.04, 0], [Math.PI / 2, 0, 0]));
+  } else if (id === "archivist") {
+    const cap = sphere(0.46, materials.green, [0, 1.82, 0], 24, 16);
+    cap.scale.set(1.06, 0.35, 1.02);
+    body.add(cap);
+    body.add(torus(0.16, 0.028, materials.darkBronze, [-0.18, 1.56, 0.39], [0, 0, 0]));
+    body.add(torus(0.16, 0.028, materials.darkBronze, [0.18, 1.56, 0.39], [0, 0, 0]));
+    body.add(box([0.1, 0.025, 0.025], materials.darkBronze, [0, 1.56, 0.41]));
+  } else if (id === "explorer") {
+    const navigatorCap = sphere(0.48, materials.blue, [0, 1.83, -0.02], 28, 16);
+    navigatorCap.scale.set(1.08, 0.36, 1.05);
+    body.add(navigatorCap);
+    body.add(torus(0.21, 0.045, materials.brass, [0.18, 1.82, 0.34], [0, 0, 0]));
+  } else {
+    const beret = cyl(0.49, 0.54, 0.12, accent, [0, 1.86, 0], [0.04, 0, -0.12], 24);
+    beret.scale.z = 1.08;
+    body.add(beret);
+  }
 
   const eyeL = sphere(0.035, materials.black, [-0.14, 1.56, 0.4], 10, 8);
   const eyeR = sphere(0.035, materials.black, [0.14, 1.56, 0.4], 10, 8);
   body.add(eyeL, eyeR);
 
-  const leftArm = addArm(body, -1, 1.14, materials.ivory);
-  const rightArm = addArm(body, 1, 1.14, materials.ivory);
+  const leftArm = addArm(body, -1, 1.14, id === "archivist" ? materials.green : materials.ivory);
+  const rightArm = addArm(body, 1, 1.14, id === "archivist" ? materials.green : materials.ivory);
   const leftLeg = addLeg(body, -1, materials.darkSoft);
   const rightLeg = addLeg(body, 1, materials.darkSoft);
 
@@ -458,41 +780,84 @@ function createWorker(asset) {
   accessory.position.set(0, 0.95, 0.56);
   body.add(accessory);
 
-  if (asset.id === "builder") {
-    accessory.add(box([0.52, 0.52, 0.52], accent, [0.18, 0.05, 0]));
-    accessory.rotation.z = -0.16;
-  } else if (asset.id === "archivist") {
-    const book = box([0.58, 0.42, 0.12], materials.red, [0.06, 0.02, 0]);
+  const backpack = new THREE.Group();
+  backpack.position.set(0, 1.02, -0.43);
+  body.add(backpack);
+
+  let heroPart = null;
+
+  if (id === "builder") {
+    backpack.add(box([0.72, 0.9, 0.38], materials.darkBronze, [0, 0, 0]));
+    backpack.add(box([0.34, 0.34, 0.08], accent, [0, 0.08, -0.24]));
+    const hammer = new THREE.Group();
+    hammer.position.set(0.44, 0.05, 0.08);
+    hammer.add(cyl(0.055, 0.065, 1.34, materials.brass, [0, -0.34, 0], [0, 0, -0.42]));
+    hammer.add(box([0.72, 0.34, 0.38], materials.darkBronze, [-0.28, 0.22, 0]));
+    hammer.add(box([0.34, 0.2, 0.42], accent, [-0.57, 0.22, 0]));
+    accessory.add(hammer);
+    heroPart = hammer;
+  } else if (id === "connector") {
+    backpack.add(torus(0.46, 0.09, materials.darkBronze, [0, 0.05, 0], [0, 0, 0]));
+    backpack.add(torus(0.3, 0.045, materials.blue, [0, 0.05, 0.02], [0, 0, 0]));
+    const clamp = new THREE.Group();
+    clamp.add(torus(0.3, 0.075, accent, [0.22, 0.04, 0], [0, 0, 0]));
+    clamp.add(torus(0.3, 0.075, materials.blue, [-0.22, 0.04, 0], [0, 0, 0]));
+    clamp.add(cyl(0.035, 0.035, 1.0, materials.blue, [0, -0.42, -0.05], [0, 0, Math.PI / 2]));
+    accessory.add(clamp);
+    heroPart = clamp;
+  } else if (id === "illuminator") {
+    const staff = new THREE.Group();
+    staff.position.set(0.42, 0.1, 0.02);
+    staff.add(cyl(0.045, 0.055, 1.62, materials.brass, [0, -0.24, 0], [0, 0, -0.1]));
+    const orb = sphere(0.25, materials.amber, [0.08, 0.62, 0], 24, 16);
+    staff.add(orb);
+    staff.add(torus(0.38, 0.025, materials.amber, [0.08, 0.62, 0], [Math.PI / 2.4, 0.3, 0]));
+    const point = new THREE.PointLight(new THREE.Color(asset.accent), 3.4, 4.2, 2);
+    point.position.set(0.08, 0.62, 0.18);
+    staff.add(point);
+    accessory.add(staff);
+    heroPart = orb;
+  } else if (id === "archivist") {
+    backpack.add(box([0.66, 1.06, 0.38], materials.darkBronze, [0, 0, 0]));
+    for (let i = 0; i < 3; i += 1) {
+      backpack.add(cyl(0.09, 0.09, 0.72, i % 2 ? materials.ivory : materials.brass, [-0.2 + i * 0.2, 0.18 + i * 0.12, -0.24], [0, 0, Math.PI / 2], 14));
+    }
+    const book = box([0.72, 0.5, 0.12], materials.red, [0, 0.02, 0]);
     accessory.add(book);
+    accessory.add(box([0.22, 0.24, 0.02], accent, [0, 0.04, 0.07]));
     accessory.rotation.x = -0.18;
-  } else if (asset.id === "explorer") {
-    const scope = cyl(0.11, 0.16, 0.72, materials.brass, [0.12, 0.12, 0.08], [Math.PI / 2, 0, 0.25], 20);
-    const lens = cyl(0.17, 0.17, 0.05, materials.blue, [0.27, 0.33, 0.37], [Math.PI / 2, 0, 0.25], 20);
-    accessory.add(scope, lens);
-  } else if (asset.id === "connector") {
-    const ringA = torus(0.22, 0.055, materials.blue, [-0.18, 0.06, 0], [0, 0, 0]);
-    const ringB = torus(0.22, 0.055, materials.violet, [0.18, 0.06, 0], [0, 0, 0]);
-    accessory.add(ringA, ringB);
-  } else if (asset.id === "illuminator") {
-    const crystal = mesh(new THREE.OctahedronGeometry(0.28, 0), materials.violet, [0, 0.2, 0]);
-    accessory.add(crystal);
-    const point = new THREE.PointLight(new THREE.Color(asset.accent), 2.8, 3, 2);
-    point.position.set(0, 0.2, 0.2);
-    accessory.add(point);
-  } else if (asset.id === "cartographer") {
-    const map = box([0.72, 0.46, 0.04], mat(0xc9b88e, .9, 0), [0, 0.02, 0]);
+    heroPart = book;
+  } else if (id === "explorer") {
+    backpack.add(box([0.58, 0.84, 0.34], materials.darkBronze, [0, 0, 0]));
+    backpack.add(cyl(0.12, 0.14, 0.6, materials.brass, [-0.24, 0.16, -0.18], [0.2, 0, 0]));
+    const scope = cyl(0.12, 0.18, 0.9, materials.brass, [0.06, 0.12, 0.04], [Math.PI / 2, 0, 0.3], 20);
+    const lens = cyl(0.2, 0.2, 0.06, accent, [0.25, 0.38, 0.42], [Math.PI / 2, 0, 0.3], 20);
+    const compass = torus(0.32, 0.05, materials.blue, [-0.34, -0.1, 0.02], [0, 0, 0]);
+    accessory.add(scope, lens, compass);
+    heroPart = compass;
+  } else {
+    backpack.add(cyl(0.13, 0.13, 0.92, materials.ivory, [0.28, 0.18, -0.12], [0, 0, 0], 14));
+    const map = box([0.88, 0.54, 0.04], mat(0xc9b88e, .9, 0), [0, 0.02, 0]);
     map.rotation.x = -0.12;
     accessory.add(map);
+    accessory.add(torus(0.2, 0.035, accent, [-0.36, 0.3, 0.04], [0, 0, 0]));
+    heroPart = map;
   }
 
   group.userData.motion = (t, pulse) => {
-    body.position.y = 0.58 + Math.sin(t * 2.1) * 0.028;
-    leftArm.rotation.z = -0.18 - Math.sin(t * 2.8) * 0.035 - pulse * 0.34;
-    rightArm.rotation.z = 0.18 + Math.sin(t * 2.8 + 0.5) * 0.035 + pulse * 0.42;
+    const bounce = Math.sin(t * (id === "connector" ? 3.2 : 2.1)) * (id === "builder" ? 0.018 : 0.03);
+    body.position.y = 0.58 + bounce;
+    leftArm.rotation.z = -0.18 - Math.sin(t * 2.8) * 0.035 - pulse * (id === "builder" ? 0.12 : 0.34);
+    rightArm.rotation.z = 0.18 + Math.sin(t * 2.8 + 0.5) * 0.035 + pulse * (id === "builder" ? 0.64 : 0.42);
     leftLeg.rotation.x = Math.sin(t * 2) * 0.018;
     rightLeg.rotation.x = -Math.sin(t * 2) * 0.018;
-    accessory.rotation.y = Math.sin(t * 1.4) * 0.08 + pulse * 0.18;
-    group.rotation.y = Math.sin(t * 0.35) * 0.05;
+    accessory.rotation.y = Math.sin(t * 1.4) * 0.08 + pulse * (id === "connector" ? 0.36 : 0.18);
+    if (id === "builder" && heroPart) heroPart.rotation.z = -0.18 + pulse * 0.62;
+    if (id === "illuminator" && heroPart) heroPart.scale.setScalar(1 + pulse * 0.32 + Math.sin(t * 2) * 0.04);
+    if (id === "explorer" && heroPart) heroPart.rotation.z = t * 0.25 + pulse * 0.5;
+    if (id === "archivist" && heroPart) heroPart.rotation.y = Math.sin(t * 1.2) * 0.08;
+    if (id === "cartographer" && heroPart) heroPart.rotation.x = -0.12 + Math.sin(t * 1.3) * 0.04;
+    group.rotation.y = Math.sin(t * 0.35) * (id === "connector" ? 0.09 : 0.05);
   };
   return group;
 }
@@ -576,54 +941,163 @@ function createAnnotationFlag(asset) {
 
 function createMagnifier(asset) {
   const group = new THREE.Group();
-  const ring = torus(0.68, 0.11, glowingMaterial(asset.accent), [0, 1.55, 0], [0, 0, 0]);
-  const glass = mesh(
-    new THREE.CircleGeometry(0.59, 48),
-    new THREE.MeshPhysicalMaterial({
-      color: 0xa9eaff,
-      transparent: true,
-      opacity: 0.22,
-      roughness: 0.08,
-      transmission: 0.35,
-      side: THREE.DoubleSide
-    }),
-    [0, 1.55, 0.01]
-  );
-  const handle = cyl(0.1, 0.13, 1.4, materials.brass, [0.63, 0.67, 0], [0, 0, -0.73]);
-  group.add(ring, glass, handle);
+  const glow = glowingMaterial(asset.accent);
+  const glassMaterial = new THREE.MeshPhysicalMaterial({
+    color: 0xa9eaff,
+    transparent: true,
+    opacity: 0.18,
+    roughness: 0.05,
+    transmission: 0.48,
+    side: THREE.DoubleSide
+  });
+
+  group.add(cyl(1.3, 1.48, 0.34, materials.darkBronze, [0, 0.36, 0]));
+  group.add(cyl(1.05, 1.18, 0.22, materials.bronze, [0, 0.62, 0]));
+  group.add(cyl(0.7, 0.82, 0.18, materials.dark, [0, 0.82, 0]));
+
+  const yoke = new THREE.Group();
+  yoke.position.y = 1.7;
+  yoke.add(box([0.18, 1.82, 0.22], materials.brass, [-1.12, 0, 0]));
+  yoke.add(box([0.18, 1.82, 0.22], materials.brass, [1.12, 0, 0]));
+  yoke.add(box([2.34, 0.18, 0.22], materials.brass, [0, 0.88, 0]));
+  group.add(yoke);
+
+  const lensRig = new THREE.Group();
+  lensRig.position.set(0, 1.75, 0);
+  const outer = torus(0.98, 0.11, materials.brass, [0, 0, 0], [0, 0, 0]);
+  const mid = torus(0.75, 0.055, glow, [0, 0, 0.02], [0.15, 0.2, 0]);
+  const inner = torus(0.54, 0.035, materials.violet, [0, 0, 0.05], [-0.18, 0.28, 0]);
+  const glass = mesh(new THREE.CircleGeometry(0.86, 64), glassMaterial, [0, 0, 0.01]);
+  const focus = mesh(new THREE.OctahedronGeometry(0.2, 0), materials.whiteGlow, [0, 0, 0.24]);
+  lensRig.add(outer, mid, inner, glass, focus);
+  group.add(lensRig);
+
+  const panels = [];
+  const panelPositions = [
+    [-1.48, 1.9, 0.12],
+    [1.48, 1.94, 0.08],
+    [-1.16, 0.95, 0.22],
+    [1.18, 0.96, 0.2]
+  ];
+  panelPositions.forEach((position, index) => {
+    const panel = box([0.5, 0.68, 0.055], index % 2 ? materials.violet : materials.blue, position);
+    panel.rotation.y = index % 2 ? -0.25 : 0.25;
+    group.add(panel);
+    panels.push(panel);
+  });
+
+  const opticL = cyl(0.22, 0.28, 0.56, materials.steel, [-1.02, 1.45, 0.3], [Math.PI / 2, 0, 0], 20);
+  const opticR = cyl(0.22, 0.28, 0.56, materials.steel, [1.02, 1.45, 0.3], [Math.PI / 2, 0, 0], 20);
+  group.add(opticL, opticR);
+
+  const point = new THREE.PointLight(new THREE.Color(asset.accent), 3.6, 5.2, 2);
+  point.position.set(0, 1.75, 0.8);
+  group.add(point);
+
   group.userData.motion = (t, pulse) => {
-    group.rotation.y = Math.sin(t * 0.8) * 0.18;
-    group.rotation.z = Math.sin(t * 0.65) * 0.04 - pulse * 0.14;
-    group.position.y = Math.sin(t * 1.7) * 0.04;
-    ring.scale.setScalar(1 + pulse * 0.12);
+    lensRig.rotation.y = Math.sin(t * 0.35) * 0.18;
+    mid.rotation.z = t * 0.32 + pulse * 0.6;
+    inner.rotation.z = -t * 0.48 - pulse * 0.8;
+    outer.rotation.z = Math.sin(t * 0.4) * 0.05;
+    focus.rotation.x = t * 0.7;
+    focus.rotation.y = t * 0.9;
+    focus.scale.setScalar(1 + pulse * 0.34 + Math.sin(t * 2.2) * 0.04);
+    panels.forEach((panel, index) => {
+      panel.position.y += Math.sin(t * 1.4 + index) * 0.0015;
+      panel.scale.setScalar(1 + pulse * 0.08 * (1 + index * 0.15));
+    });
+    point.intensity = 3.2 + pulse * 4.4 + Math.sin(t * 2.4) * 0.35;
+    group.position.y = Math.sin(t * 0.8) * 0.025;
   };
   return group;
 }
 
 function createProjector(asset) {
   const group = new THREE.Group();
-  group.add(cyl(1.0, 1.15, 0.34, materials.darkBronze, [0, 0.46, 0]));
-  group.add(cyl(0.72, 0.8, 0.28, materials.bronze, [0, 0.75, 0]));
-  const lens = new THREE.Group();
-  lens.position.set(0, 1.25, 0.05);
-  lens.add(cyl(0.44, 0.52, 0.74, materials.steel, [0, 0, 0], [Math.PI / 2, 0, 0]));
-  lens.add(cyl(0.34, 0.34, 0.08, glowingMaterial(asset.accent), [0, 0, 0.42], [Math.PI / 2, 0, 0]));
-  group.add(lens);
-
-  const beamMaterial = new THREE.MeshBasicMaterial({
+  const glow = glowingMaterial(asset.accent);
+  const holoMaterial = new THREE.MeshStandardMaterial({
     color: new THREE.Color(asset.accent),
     transparent: true,
-    opacity: 0.08,
-    side: THREE.DoubleSide,
-    depthWrite: false
+    opacity: 0.24,
+    roughness: 0.2,
+    metalness: 0.05,
+    emissive: new THREE.Color(asset.accent),
+    emissiveIntensity: 0.58
   });
-  const beam = mesh(new THREE.ConeGeometry(1.25, 3.4, 36, 1, true), beamMaterial, [0, 2.6, 1.72], [Math.PI / 2, 0, 0]);
-  beam.scale.z = 0.9;
-  group.add(beam);
+
+  group.add(cyl(1.72, 1.95, 0.34, materials.darkBronze, [0, 0.34, 0], null, 48));
+  group.add(cyl(1.48, 1.66, 0.22, materials.bronze, [0, 0.61, 0], null, 48));
+  group.add(cyl(1.16, 1.28, 0.18, materials.dark, [0, 0.83, 0], null, 48));
+
+  const core = mesh(new THREE.OctahedronGeometry(0.34, 0), materials.violet, [0, 1.12, 0]);
+  group.add(core);
+
+  const world = new THREE.Group();
+  world.position.set(0, 2.02, 0);
+  const globe = sphere(0.72, holoMaterial, [0, 0, 0], 36, 24);
+  world.add(globe);
+  const ringA = torus(0.98, 0.035, glow, [0, 0, 0], [Math.PI / 2.6, 0.22, 0]);
+  const ringB = torus(1.28, 0.028, materials.violet, [0, 0, 0], [Math.PI / 2, 0, 0.45]);
+  const ringC = torus(1.52, 0.022, materials.blue, [0, 0, 0], [Math.PI / 2.2, -0.35, -0.2]);
+  world.add(ringA, ringB, ringC);
+
+  const islands = [];
+  const islandSpecs = [
+    [-0.82, 0.48, 0.05, 0.34],
+    [0.74, 0.34, 0.16, 0.3],
+    [0.18, -0.42, 0.54, 0.26],
+    [0.2, 0.7, -0.42, 0.22]
+  ];
+  islandSpecs.forEach((spec, index) => {
+    const island = new THREE.Group();
+    island.position.set(spec[0], spec[1], spec[2]);
+    island.add(cyl(spec[3], spec[3] * 1.15, 0.13, materials.darkSoft, [0, 0, 0], null, 20));
+    island.add(box([0.16, 0.22 + index * 0.03, 0.16], index % 2 ? materials.ivory : materials.brass, [0, 0.16, 0]));
+    island.add(sphere(0.08, materials.green, [spec[3] * 0.55, 0.16, 0], 12, 8));
+    world.add(island);
+    islands.push(island);
+  });
+  group.add(world);
+
+  const consoles = [];
+  for (let i = 0; i < 4; i += 1) {
+    const angle = i * Math.PI / 2 + Math.PI / 4;
+    const consoleGroup = new THREE.Group();
+    consoleGroup.position.set(Math.cos(angle) * 1.48, 0.88, Math.sin(angle) * 1.48);
+    consoleGroup.rotation.y = -angle + Math.PI / 2;
+    consoleGroup.add(box([0.54, 0.42, 0.42], materials.darkBronze, [0, 0, 0]));
+    consoleGroup.add(box([0.38, 0.24, 0.04], i % 2 ? materials.violet : materials.blue, [0, 0.1, 0.23], [-0.22, 0, 0]));
+    group.add(consoleGroup);
+    consoles.push(consoleGroup);
+  }
+
+  const beacon = new THREE.Group();
+  beacon.position.set(0, 1.1, -1.54);
+  beacon.add(cyl(0.12, 0.16, 1.35, materials.brass, [0, 0.55, 0]));
+  beacon.add(torus(0.24, 0.045, glow, [0, 1.24, 0], [Math.PI / 2, 0, 0]));
+  beacon.add(mesh(new THREE.OctahedronGeometry(0.16, 0), materials.whiteGlow, [0, 1.24, 0]));
+  group.add(beacon);
+
+  const point = new THREE.PointLight(new THREE.Color(asset.accent), 4.8, 7, 2);
+  point.position.set(0, 2.1, 0.6);
+  group.add(point);
+
   group.userData.motion = (t, pulse) => {
-    lens.rotation.y = Math.sin(t * 0.7) * 0.3;
-    beam.material.opacity = 0.06 + pulse * 0.22 + (Math.sin(t * 2) + 1) * 0.01;
-    beam.scale.setScalar(0.96 + pulse * 0.08);
+    world.rotation.y = t * 0.16;
+    globe.scale.setScalar(1 + pulse * 0.08 + Math.sin(t * 1.2) * 0.018);
+    ringA.rotation.z = t * 0.34;
+    ringB.rotation.z = -t * 0.22;
+    ringC.rotation.z = t * 0.14;
+    islands.forEach((island, index) => {
+      island.position.y += Math.sin(t * 1.4 + index) * 0.0018;
+      island.scale.setScalar(1 + pulse * (0.12 + index * 0.025));
+    });
+    core.rotation.y = t * 0.8;
+    core.position.y = 1.12 + pulse * 0.18;
+    consoles.forEach((consoleGroup, index) => {
+      consoleGroup.rotation.z = Math.sin(t * 0.7 + index) * 0.02;
+    });
+    point.intensity = 4.2 + pulse * 5.6 + Math.sin(t * 2) * 0.3;
   };
   return group;
 }
@@ -784,10 +1258,20 @@ function getFamilyLabel(asset) {
 }
 
 function getOrbSymbol(asset) {
-  if (asset.family === "worker") return "●";
+  const signatures = {
+    builder: "⬡",
+    archivist: "▤",
+    explorer: "⌖",
+    connector: "∞",
+    illuminator: "✦",
+    cartographer: "⌁",
+    magnifier: "◎",
+    "projector-beacon": "◉"
+  };
+  if (signatures[asset.id]) return signatures[asset.id];
   if (asset.family === "machine") return "⌁";
   if (asset.family === "artifact") return "◇";
-  if (asset.family === "instrument") return "⌕";
+  if (asset.family === "instrument") return "◎";
   return "⌂";
 }
 
@@ -799,6 +1283,7 @@ function renderAssetList() {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "asset-card" + (selectedAsset && selectedAsset.id === asset.id ? " is-active" : "");
+      button.dataset.assetId = asset.id;
       button.style.setProperty("--asset-accent", asset.accent);
       button.setAttribute("aria-pressed", selectedAsset && selectedAsset.id === asset.id ? "true" : "false");
       button.innerHTML =
