@@ -3,167 +3,124 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Glyph Factory · Aha Screen Flow</title>
+<title>Glyph Factory · Standalone Aha Flows</title>
 <style>
-:root{--ink:#182018;--paper:#eee8d6;--panel:#fffaf0;--muted:#657064;--line:#aab39d;--lime:#c9f26d;--rust:#9c4a31;--dark:#253026}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;background:#cbd1bf;color:var(--ink);font:14px/1.45 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
-button{font:inherit;color:inherit}
-.shell{max-width:1500px;margin:auto;min-height:100vh;background:var(--paper)}
-header{padding:28px clamp(18px,4vw,56px) 24px;border-bottom:2px solid var(--ink);background:linear-gradient(180deg,#f4efdf,var(--paper))}
+:root{--ink:#172019;--paper:#eee8d6;--panel:#fffaf0;--muted:#667166;--line:#adb5a2;--lime:#c9f26d;--rust:#9d4a31;--soft:#e5dfce}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:#cbd1bf;color:var(--ink);font:14px/1.5 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+button{font:inherit;color:inherit}.shell{max-width:1500px;margin:auto;min-height:100vh;background:var(--paper)}
+header{padding:28px clamp(18px,4vw,58px) 24px;border-bottom:2px solid var(--ink)}
 .eyebrow{font:900 11px/1.2 ui-monospace,monospace;letter-spacing:.14em;color:var(--rust)}
-h1{font-size:clamp(34px,6vw,72px);line-height:.94;letter-spacing:-.045em;margin:.18em 0 .18em;max-width:1050px}
-.lead{font-size:clamp(16px,2vw,21px);max-width:920px;margin:0;color:#334037}
-.meta{display:flex;flex-wrap:wrap;gap:7px;margin-top:18px}
-.pill{border:1px solid var(--ink);background:var(--panel);padding:6px 8px;font:800 11px/1 ui-monospace,monospace}
-.pill.real{background:var(--lime)}
-nav{position:sticky;top:0;z-index:10;display:flex;gap:6px;padding:10px clamp(12px,3vw,36px);overflow:auto;border-bottom:1.5px solid var(--ink);background:rgba(238,232,214,.94);backdrop-filter:blur(8px)}
-nav a{white-space:nowrap;text-decoration:none;border:1px solid var(--ink);background:var(--panel);padding:7px 9px;font-weight:800}
-main{padding:20px clamp(12px,3vw,36px) 70px}
-.rule{border:2px solid var(--ink);background:var(--lime);padding:12px 14px;font-size:16px;font-weight:850;box-shadow:3px 3px 0 var(--ink);margin-bottom:28px}
-.act{margin:0 0 38px;scroll-margin-top:70px}
-.acthead{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:12px}
-.acthead h2{font-size:clamp(24px,3.4vw,42px);line-height:1;margin:4px 0 0}
-.acthead p{margin:0;max-width:520px;color:var(--muted)}
-.flow{display:flex;gap:0;overflow-x:auto;padding:5px 5px 18px;scroll-snap-type:x proximity}
-.node{display:flex;align-items:center;flex:0 0 auto}
-.screen{width:min(76vw,390px);padding:0;border:2px solid var(--ink);background:var(--panel);box-shadow:4px 4px 0 var(--ink);text-align:left;cursor:zoom-in;scroll-snap-align:start}
-.screen.context{opacity:.72}
-.screen:hover{transform:translate(-1px,-1px)}
-.screen img{display:block;width:100%;height:auto;background:#111;border-bottom:1.5px solid var(--ink)}
-.cap{padding:10px 11px 11px}
-.cap-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.sid{font:900 11px/1 ui-monospace,monospace;color:var(--rust)}
-.kind{font:900 9px/1 ui-monospace,monospace;border:1px solid var(--ink);padding:3px 4px;background:#e3e7dc}
-.kind.core{background:var(--lime)}
-.cap strong{display:block;font-size:16px;line-height:1.18;margin-top:7px}
-.cap small{display:block;color:var(--muted);margin-top:5px}
-.arrow{width:150px;flex:0 0 150px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px;text-align:center}
-.arrow-line{width:100%;display:flex;align-items:center;color:var(--dark)}
-.arrow-line:before{content:"";height:2px;background:currentColor;flex:1}
-.arrow-line:after{content:"▶";font-size:11px;margin-left:-2px}
-.arrow b{font-size:11px;line-height:1.25;margin-top:7px}
-.arrow small{color:var(--muted);font-size:10px;line-height:1.25;margin-top:3px}
-.collision{margin-top:7px;color:var(--rust);font-weight:800;font-size:10px}
-.footer-note{border-top:1px solid var(--line);padding-top:18px;color:var(--muted);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
-dialog{width:min(96vw,1180px);max-height:94vh;border:2px solid var(--ink);padding:0;background:var(--paper);box-shadow:8px 8px 0 rgba(0,0,0,.45)}
-dialog::backdrop{background:rgba(15,20,16,.75)}
-.modalhead{position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 12px;background:var(--paper);border-bottom:1.5px solid var(--ink)}
-.modalhead strong{font-size:16px}
-.close{border:1.5px solid var(--ink);background:var(--panel);padding:7px 10px;font-weight:850;cursor:pointer}
-#modalImg{display:block;width:100%;height:auto;background:#111}
-@media(max-width:700px){
-  header{padding-top:20px}
-  .acthead{display:block}
-  .acthead p{margin-top:8px}
-  .screen{width:84vw}
-  .arrow{width:88px;flex-basis:88px}
-  .arrow b{font-size:10px}
-}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.screen:hover{transform:none}}
+h1{font-size:clamp(36px,6vw,74px);line-height:.93;letter-spacing:-.045em;margin:.18em 0 .2em;max-width:1080px}
+.lead{font-size:clamp(16px,2vw,21px);max-width:930px;margin:0;color:#334037}
+.meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:18px}.pill{border:1px solid var(--ink);background:var(--panel);padding:6px 8px;font:800 11px/1 ui-monospace,monospace}.pill.real{background:var(--lime)}
+nav{position:sticky;top:0;z-index:10;display:flex;gap:6px;padding:10px clamp(12px,3vw,36px);overflow:auto;background:rgba(238,232,214,.95);backdrop-filter:blur(8px);border-bottom:1.5px solid var(--ink)}
+nav a{white-space:nowrap;text-decoration:none;border:1px solid var(--ink);background:var(--panel);padding:7px 9px;font-weight:850}
+main{padding:22px clamp(12px,3vw,38px) 70px}
+.rule{border:2px solid var(--ink);background:var(--lime);padding:13px 15px;box-shadow:3px 3px 0 var(--ink);font-size:16px;font-weight:850;margin-bottom:26px}
+.act-title{margin:42px 0 14px;padding-top:12px;border-top:2px solid var(--ink);scroll-margin-top:68px}.act-title:first-of-type{margin-top:8px}.act-title h2{font-size:clamp(26px,3.8vw,44px);line-height:1;margin:4px 0}.act-title p{margin:0;color:var(--muted)}
+.aha-flow{border:2px solid var(--ink);background:var(--panel);box-shadow:4px 4px 0 var(--ink);margin:0 0 20px;scroll-margin-top:70px}
+.flow-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:13px 15px;border-bottom:1.5px solid var(--ink);background:var(--soft)}
+.flow-head h3{font-size:clamp(20px,2.5vw,30px);line-height:1.08;margin:3px 0 0}.badges{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.badge{font:900 10px/1 ui-monospace,monospace;border:1px solid var(--ink);background:#f6f2e5;padding:5px 6px}.badge.core{background:var(--lime)}.badge.warn{background:#f1d7cd;color:#7c321e;border-color:#7c321e}
+.flow-body{display:grid;grid-template-columns:minmax(0,1fr) 170px minmax(0,1fr);align-items:stretch}
+.screen-pane{padding:14px}.screen-label{font:900 10px/1 ui-monospace,monospace;letter-spacing:.12em;color:var(--muted);margin-bottom:8px}
+.screen-btn{display:block;width:100%;padding:0;border:1.5px solid var(--ink);background:#111;box-shadow:3px 3px 0 var(--ink);cursor:zoom-in;text-align:left}
+.screen-btn img{display:block;width:100%;height:auto}.screen-meta{padding:8px 9px;background:var(--panel);border-top:1.5px solid var(--ink);font-size:12px}
+.screen-meta b{font-family:ui-monospace,monospace;color:var(--rust)}
+.action{border-inline:1px solid var(--line);background:#dce3d1;padding:14px 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.action .arrow{font-size:34px;line-height:1}.action strong{font-size:13px;line-height:1.25;margin-top:8px}.action small{font-size:10px;line-height:1.3;color:var(--muted);margin-top:5px}
+.outcome{display:grid;grid-template-columns:130px 1fr;gap:14px;padding:13px 15px;border-top:1.5px solid var(--ink);background:#fff}
+.outcome .k{font:900 10px/1.25 ui-monospace,monospace;color:var(--rust);letter-spacing:.1em}.outcome blockquote{margin:0;font-size:clamp(16px,2vw,23px);line-height:1.2;font-weight:800}
+.runtime-note{padding:9px 15px;border-top:1px dashed var(--rust);background:#f7e6df;color:#813a26;font-weight:750;font-size:12px}
+dialog{width:min(96vw,1180px);max-height:94vh;border:2px solid var(--ink);padding:0;background:var(--paper);box-shadow:8px 8px 0 rgba(0,0,0,.45)}dialog::backdrop{background:rgba(15,20,16,.76)}
+.modal-head{position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 12px;background:var(--paper);border-bottom:1.5px solid var(--ink)}.modal-head strong{font-size:16px}.close{border:1.5px solid var(--ink);background:var(--panel);padding:7px 10px;font-weight:850;cursor:pointer}#modalImg{display:block;width:100%;height:auto;background:#111}
+footer{margin-top:32px;padding-top:16px;border-top:1.5px solid var(--ink);color:var(--muted)}
+@media(max-width:860px){.flow-body{grid-template-columns:1fr}.action{border-inline:0;border-block:1px solid var(--line);min-height:120px}.action .arrow{transform:rotate(90deg)}.outcome{grid-template-columns:1fr}}
 </style>
 </head>
-<body>
-<div class="shell">
+<body><div class="shell">
 <header>
-  <div class="eyebrow">GLYPH FACTORY · REAL RUNTIME SCREEN FLOW</div>
-  <h1>Aha Flow = 真正的游戏 Screens 按时间组合</h1>
-  <p class="lead">每个节点都是从 PR #6 Developer Lab 驱动真实 <code>/play.html?director=1</code> 后截取的完整玩家界面。箭头只说明触发动作；Flow 的主体是游戏 Screen 本身。</p>
-  <div class="meta">
-    <span class="pill real">29 REAL SCREENS</span>
-    <span class="pill">S00 + A01–A28</span>
-    <span class="pill">6 ACTS</span>
-    <span class="pill">SOURCE · REAL /play.html RUNTIME</span>
-    <span class="pill">CAPTURED · 2026-09-18</span>
-  </div>
+  <div class="eyebrow">GLYPH FACTORY · 28 STANDALONE AHA FLOWS</div>
+  <h1>每一个 Aha 都是一条独立、完整的 Screen Flow</h1>
+  <p class="lead">每条 Flow 自己带齐 <strong>Before Screen → 真实触发动作 → After Screen → Aha Outcome</strong>。不需要先看上一条 Flow，也不把 28 个 Aha 串成一条长时间线。</p>
+  <div class="meta"><span class="pill real">28 STANDALONE FLOWS</span><span class="pill">29 REAL RUNTIME SCREENS</span><span class="pill">REAL /play.html</span><span class="pill">PR #6 DEVELOPER LAB</span></div>
 </header>
 <nav id="nav"></nav>
 <main>
-  <div class="rule">正确阅读方式：看 Screen 怎么变，而不是读解释。每个 Act 都从前一幕的最后一个真实 Screen 开始，再沿箭头进入新的游戏状态。</div>
-  <div id="acts"></div>
-  <div class="footer-note"><span>内部设计评审 artifact；Aha ID 与 Director 语言不进入 Production 玩家 UI。</span><span>点击任何 Screen 可放大检查完整界面。</span></div>
-</main>
-</div>
-<dialog id="modal">
-  <div class="modalhead"><strong id="modalTitle"></strong><button class="close" id="closeBtn">关闭 ×</button></div>
-  <img id="modalImg" alt="">
-</dialog>
+  <div class="rule">审阅单位 = 单个 Aha。每一条都能单独回答：“玩家之前看到什么？做了什么？之后完整游戏界面变成什么？Aha 是什么？”</div>
+  <div id="content"></div>
+  <footer>所有 Screen 都来自真实 Developer Lab 驱动的玩家 runtime；Aha 编号与内部触发条件仅用于设计评审，不进入 Production 玩家 UI。</footer>
+</main></div>
+<dialog id="modal"><div class="modal-head"><strong id="modalTitle"></strong><button class="close" id="close">关闭 ×</button></div><img id="modalImg" alt=""></dialog>
 <script>
 const CORE=new Set(['A01','A03','A06','A10','A13','A16','A18','A22','A24','A27','A28']);
-const COLLISION=new Set(['A12','A14','A19','A20','A22','A23','A25','A26']);
-const screens={
-S00:{title:'初始工坊',act:1},
-A01:{title:'机器替我按按钮',act:1,action:'购入第一台自动生产单元',trigger:'rate > 0'},
-A02:{title:'员工组成编辑部',act:1,action:'继续扩张夜班打字员',trigger:'typists ≥ 5'},
-A03:{title:'木 + 木 → 林',act:2,action:'发行《明日》',trigger:'published = true'},
-A04:{title:'规则开始自动运行',act:2,action:'让组合规则持续运行',trigger:'composed ≥ 3'},
-A05:{title:'意义比字数值钱',act:2,action:'把字凝练成意义',trigger:'meaning ≥ 10'},
-A06:{title:'报纸制造需求',act:2,action:'扩大真实读者',trigger:'readers ≥ 100'},
-A07:{title:'读者开始回信',act:2,action:'阅读第一封来信',trigger:'letters ≥ 1'},
-A08:{title:'读者自己造新词',act:2,action:'接纳自然生长的新词',trigger:'organicWords ≥ 1'},
-A09:{title:'一个词突然传播',act:2,action:'让新词进入传播',trigger:'viralWords ≥ 1'},
-A10:{title:'纸张危机：少写',act:2,action:'读者规模触发纸张危机',trigger:'paperCrisis = true'},
-A11:{title:'删字第一次更值钱',act:2,action:'删除第一批噪音',trigger:'deletedNoise ≥ 1'},
-A12:{title:'街区长出方言',act:3,action:'展开城市地图',trigger:'districts ≥ 2'},
-A13:{title:'概念改变城市',act:3,action:'制造第一个社会概念',trigger:'concepts ≥ 1'},
-A14:{title:'城市地图出现',act:3,action:'把视角拉到城市',trigger:'worldScale ≥ 1'},
-A15:{title:'地图缩到世界',act:3,action:'继续缩放到世界',trigger:'worldScale ≥ 2'},
-A16:{title:'记者 Agent 自己选题',act:4,action:'上线第一名记者 Agent',trigger:'agents ≥ 1'},
-A17:{title:'编辑第一次说“不”',act:4,action:'把判断权交给编辑',trigger:'editorAutonomy = true'},
-A18:{title:'Agent 创造 Agent',act:4,action:'启动 Agent 工厂',trigger:'agentFactories ≥ 1'},
-A19:{title:'醒来已有八万篇文章',act:4,action:'让系统持续自治运行',trigger:'overnightArticles ≥ 100'},
-A20:{title:'数字出版：库存消失',act:4,action:'切换数字出版',trigger:'digital = true'},
-A21:{title:'档案变机器记忆',act:4,action:'训练机器记忆',trigger:'archives ≥ 1'},
-A22:{title:'出现一个你没造过的字',act:5,action:'发现未知机器字形',trigger:'machineGlyphs ≥ 1'},
-A23:{title:'机器之间有自己的语言',act:5,action:'观察机器间持续使用',trigger:'machineGlyphUse ≥ 1000'},
-A24:{title:'万亿文字压成一个符号',act:5,action:'压缩语言',trigger:'compressedMeaning ≥ 10000'},
-A25:{title:'语言成为社会操作系统',act:6,action:'把语言接入基础设施',trigger:'infrastructure = true'},
-A26:{title:'新资源：歧义',act:6,action:'面对系统性歧义',trigger:'ambiguity ≥ 100'},
-A27:{title:'目标从生产变成删除',act:6,action:'持续删除噪音',trigger:'deletedNoise ≥ 1000'},
-A28:{title:'最后一个按钮：停止印刷',act:6,action:'停止印刷',trigger:'stopped = true'}
-};
-const acts=[
-{id:1,name:'手工与自动化',sub:'点击器 → 自动化组织',seq:['S00','A01','A02']},
-{id:2,name:'字开始生长',sub:'字数 → 关系 → 意义 → 删除',seq:['A02','A03','A04','A05','A06','A07','A08','A09','A10','A11']},
-{id:3,name:'文字改变城市',sub:'内容 → 方言 / 概念 → 城市 → 世界',seq:['A11','A12','A13','A14','A15']},
-{id:4,name:'机器开始写',sub:'作者 → 自主 Agent → 自扩张组织',seq:['A15','A16','A17','A18','A19','A20','A21']},
-{id:5,name:'机器语言',sub:'人类语言 → 未知字形 → 机器通信 → 压缩语义',seq:['A21','A22','A23','A24']},
-{id:6,name:'从增长到沉默',sub:'基础设施 → 歧义 → 删除 → 停止',seq:['A24','A25','A26','A27','A28']}
+const collision=new Set(['A12','A14','A19','A20','A22','A23','A25','A26']);
+const data=[
+['A01',1,'机器替我按按钮','S00','购入第一台自动生产单元','rate > 0','我的工作不是点，是设计增长。'],
+['A02',1,'员工组成编辑部','A01','继续扩张夜班打字员','typists ≥ 5','人不是数字，组织才是机器。'],
+['A03',2,'木 + 木 → 林','A02','发行《明日》','published = true','字与字之间的关系，也能做成机器。'],
+['A04',2,'规则开始自动运行','A03','让组合规则持续运行','composed ≥ 3','机器生产的不只是字，而是文字机器。'],
+['A05',2,'意义比字数值钱','A04','把字凝练成意义','meaning ≥ 10','一千个废字，不如一句重要的话。'],
+['A06',2,'报纸制造需求','A05','扩大真实读者','readers ≥ 100','文字会制造更多文字。'],
+['A07',2,'读者开始回信','A06','阅读第一封来信','letters ≥ 1','消费者变成生产者。'],
+['A08',2,'读者自己造新词','A07','接纳自然生长的新词','organicWords ≥ 1','语言开始脱离工厂。'],
+['A09',2,'一个词突然传播','A08','让新词进入传播','viralWords ≥ 1','生产速度退场，传播速度登场。'],
+['A10',2,'纸张危机：少写','A09','让读者规模触发纸张危机','paperCrisis = true','目标从 字/秒 翻成 意义/字。'],
+['A11',2,'删字第一次更值钱','A10','删除第一批噪音','deletedNoise ≥ 1','最大的敌人不是缺字，而是噪音。'],
+['A12',3,'街区长出方言','A11','展开城市地图','districts ≥ 2','同一个字，在不同地方不再同义。'],
+['A13',3,'概念改变城市','A12','制造第一个社会概念','concepts ≥ 1','文字从商品变成世界规则。'],
+['A14',3,'城市地图出现','A11','展开城市地图','worldScale ≥ 1','工坊原来只是世界里的一个点。'],
+['A15',3,'地图缩到世界','A14','继续缩放到世界','worldScale ≥ 2','真正的工厂，是整个传播网络。'],
+['A16',4,'记者 Agent 自己选题','A15','上线第一名记者 Agent','agents ≥ 1','我已经不是作者了。'],
+['A17',4,'编辑第一次说“不”','A16','把判断权交给编辑','editorAutonomy = true','自动化不是快按钮，而是被委托的判断。'],
+['A18',4,'Agent 创造 Agent','A17','启动 Agent 工厂','agentFactories ≥ 1','工厂开始扩张自己。'],
+['A19',4,'醒来已有八万篇文章','A18','切换数字出版','overnightArticles ≥ 100','系统不再需要我值夜班。'],
+['A20',4,'数字出版：库存消失','A18','切换数字出版','digital = true','经营多年的仓库突然不重要了。'],
+['A21',4,'档案变机器记忆','A20','训练机器记忆','archives ≥ 1','过去的每个字，都是训练材料。'],
+['A22',5,'出现一个你没造过的字','A21','发现未知机器字形','machineGlyphs ≥ 1','这个字，不是我造的。'],
+['A23',5,'机器之间有自己的语言','A21','发现未知机器字形','machineGlyphUse ≥ 1000','有些语言已经不是给人看的。'],
+['A24',5,'万亿文字压成一个符号','A23','压缩语言','compressedMeaning ≥ 10000','增长最终折叠回一个字。'],
+['A25',6,'语言成为社会操作系统','A24','把语言接入基础设施','infrastructure = true','我不是出版商，我在运行基础设施。'],
+['A26',6,'新资源：歧义','A24','把语言接入基础设施','ambiguity ≥ 100','文字越多，世界也可能越混乱。'],
+['A27',6,'目标从生产变成删除','A26','持续消解歧义 / 删除噪音','deletedNoise ≥ 1000','无限生产的终点可能是噪音。'],
+['A28',6,'最后一个按钮：停止印刷','A27','停止印刷','stopped = true','世界已经写完了。现在，去读它。']
 ];
-function imgPath(id){return './screens/'+id+'.jpg'}
-function node(id,isContext){
-  const s=screens[id];
-  const core=CORE.has(id);
-  const collision=COLLISION.has(id);
-  return '<div class="node"><button class="screen '+(isContext?'context':'')+'" data-id="'+id+'">'+
-    '<img loading="lazy" src="'+imgPath(id)+'" alt="'+id+' '+s.title+' 的真实游戏 Screen">'+
-    '<div class="cap"><div class="cap-top"><span class="sid">'+id+(isContext?' · ENTRY CONTEXT':'')+'</span>'+
-    (id==='S00'?'':('<span class="kind '+(core?'core':'')+'">'+(core?'MECHANICAL':'STATE')+'</span>'))+
-    '</div><strong>'+s.title+'</strong>'+
-    (collision?'<div class="collision">⚠ 当前 runtime 与相邻 Aha 有同动作触发碰撞</div>':'')+
-    '</div></button></div>'
+const actNames={1:'手工与自动化',2:'字开始生长',3:'文字改变城市',4:'机器开始写',5:'机器语言',6:'从增长到沉默'};
+const collNote={
+A12:'当前 runtime 中，map-city 同时满足 A12 与 A14；本 Flow 单独展示 A12 的认知变化。',
+A14:'当前 runtime 中，map-city 同时满足 A12 与 A14；因此本 Flow 与 A12 共享同一个真实 Before Screen / 触发动作。',
+A19:'当前 runtime 中，digitize 同时满足 A19 与 A20；本 Flow 单独展示“离线自治”这一 Aha。',
+A20:'当前 runtime 中，digitize 同时满足 A19 与 A20；本 Flow 单独展示“库存消失”这一 Aha。',
+A22:'当前 runtime 中，发现机器字形同时满足 A22 与 A23；本 Flow 单独展示“机器创造新字形”。',
+A23:'当前 runtime 中，发现机器字形同时满足 A22 与 A23；本 Flow 单独展示“机器间语言”。',
+A25:'当前 runtime 中，infrastructure 同时满足 A25 与 A26；本 Flow 单独展示“语言成为基础设施”。',
+A26:'当前 runtime 中，infrastructure 同时满足 A25 与 A26；本 Flow 单独展示“歧义成为新资源”。'
+};
+function img(id){return './screens/'+id+'.jpg'}
+document.getElementById('nav').innerHTML=Object.entries(actNames).map(([id,n])=>'<a href="#act-'+id+'">ACT '+id+' · '+n+'</a>').join('');
+let html='';
+for(let act=1;act<=6;act++){
+  html+='<section class="act-title" id="act-'+act+'"><div class="eyebrow">ACT '+act+'</div><h2>'+actNames[act]+'</h2><p>下面每一个 Aha 都是一条独立 Flow。</p></section>';
+  data.filter(x=>x[1]===act).forEach(x=>{
+    const [id,,title,before,action,trigger,reveal]=x;
+    html+='<article class="aha-flow" id="flow-'+id+'">'+
+      '<div class="flow-head"><div><div class="eyebrow">'+id+' · STANDALONE FLOW</div><h3>'+title+'</h3></div><div class="badges">'+
+      (CORE.has(id)?'<span class="badge core">MECHANICAL</span>':'<span class="badge">STATE / REVEAL</span>')+
+      (collision.has(id)?'<span class="badge warn">SHARED TRIGGER</span>':'')+'</div></div>'+
+      '<div class="flow-body">'+
+        '<div class="screen-pane"><div class="screen-label">BEFORE · 完整游戏 Screen</div><button class="screen-btn" data-img="'+before+'" data-title="'+id+' Before · '+before+'"><img loading="lazy" src="'+img(before)+'" alt="'+id+' Before Screen"><div class="screen-meta"><b>'+before+'</b> · 触发前真实玩家界面</div></button></div>'+
+        '<div class="action"><div class="arrow">→</div><strong>'+action+'</strong><small>'+trigger+'</small></div>'+
+        '<div class="screen-pane"><div class="screen-label">AFTER · 完整游戏 Screen</div><button class="screen-btn" data-img="'+id+'" data-title="'+id+' After · '+title+'"><img loading="lazy" src="'+img(id)+'" alt="'+id+' After Screen"><div class="screen-meta"><b>'+id+'</b> · 触发后真实玩家界面</div></button></div>'+
+      '</div>'+
+      '<div class="outcome"><div class="k">AHA OUTCOME</div><blockquote>“'+reveal+'”</blockquote></div>'+
+      (collNote[id]?'<div class="runtime-note">'+collNote[id]+'</div>':'')+
+    '</article>';
+  });
 }
-function arrow(to){
-  const s=screens[to];
-  return '<div class="arrow"><div class="arrow-line"></div><b>'+s.action+'</b><small>'+s.trigger+'</small></div>'
-}
-document.getElementById('nav').innerHTML=acts.map(a=>'<a href="#act-'+a.id+'">ACT '+a.id+' · '+a.name+'</a>').join('');
-document.getElementById('acts').innerHTML=acts.map(a=>{
-  const seq=a.seq;
-  let flow='';
-  seq.forEach((id,i)=>{if(i>0)flow+=arrow(id);flow+=node(id,i===0&&a.id>1)});
-  return '<section class="act" id="act-'+a.id+'"><div class="acthead"><div><div class="eyebrow">ACT '+a.id+'</div><h2>'+a.name+'</h2></div><p>'+a.sub+'</p></div><div class="flow">'+flow+'</div></section>';
-}).join('');
-const modal=document.getElementById('modal'), modalImg=document.getElementById('modalImg'), modalTitle=document.getElementById('modalTitle');
-document.addEventListener('click',e=>{
-  const card=e.target.closest('.screen');
-  if(!card)return;
-  const id=card.dataset.id,s=screens[id];
-  modalImg.src=imgPath(id); modalImg.alt=id+' '+s.title; modalTitle.textContent=id+' · '+s.title; modal.showModal();
-});
-document.getElementById('closeBtn').onclick=()=>modal.close();
-modal.addEventListener('click',e=>{if(e.target===modal)modal.close()});
+document.getElementById('content').innerHTML=html;
+const modal=document.getElementById('modal'),mi=document.getElementById('modalImg'),mt=document.getElementById('modalTitle');
+document.addEventListener('click',e=>{const b=e.target.closest('.screen-btn');if(!b)return;mi.src=img(b.dataset.img);mi.alt=b.dataset.title;mt.textContent=b.dataset.title;modal.showModal()});
+document.getElementById('close').onclick=()=>modal.close();modal.addEventListener('click',e=>{if(e.target===modal)modal.close()});
 </script>
-</body>
-</html>
+</body></html>
