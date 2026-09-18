@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1720" role="img" aria-label="Glyph Factory Aha flows 05–08">
+  <style>
+  .bg{fill:#f3eedf}.row{fill:#f8f2e4;stroke:#c5bdab;stroke-width:2}.screen{fill:#fffaf0;stroke:#173125;stroke-width:2}.bar{fill:#184d38}.sidebar{fill:#ece5d3;stroke:#d5cdb9}.sidebar.active{fill:#dbe8cd}.idbox{fill:#235b43}.id{font:700 25px Georgia,serif;fill:#fff}.title{font:700 29px Georgia,serif;fill:#172019}.brand{font:700 17px Georgia,serif;fill:#fff}.nav{font:14px system-ui;fill:#365342}.panel{font:700 18px Georgia,serif;fill:#172019}.line{font:15px system-ui;fill:#4f5f55}.action{font:700 18px Georgia,serif;fill:#172019}.arrow{stroke:#3b7455;stroke-width:14}.arrowfill{fill:#3b7455}.out{font:italic 700 18px Georgia,serif;fill:#245b42}.h1{font:700 42px Georgia,serif;fill:#173125}.sub{font:17px system-ui;fill:#526158}
+  </style><rect class="bg" width="1200" height="1720"/><text x="28" y="58" class="h1">Glyph Factory — Standalone Aha Flows 05–08</text><text x="30" y="91" class="sub">Each Aha is a standalone Before → Action → After visual flow.</text><g transform="translate(0 125)">
+      <rect x="20" y="0" width="1160" height="360" rx="12" class="row"/>
+      <rect x="38" y="22" width="72" height="42" rx="6" class="idbox"/><text x="74" y="51" class="id" text-anchor="middle">A05</text>
+      <text x="128" y="53" class="title">Meaning beats quantity</text>
+      <g transform="translate(38 84)">
+        <rect width="430" height="228" rx="7" class="screen"/>
+        <rect width="430" height="34" rx="7" class="bar"/><text x="15" y="23" class="brand">Glyph Factory</text>
+        <rect x="16" y="52" width="94" height="154" class="sidebar"/>
+        <text x="31" y="76" class="nav">Workshop</text><text x="31" y="104" class="nav">Inventory</text><text x="31" y="132" class="nav">Research</text><text x="31" y="160" class="nav">Map</text>
+        <text x="130" y="79" class="panel">PRODUCTION FOCUS</text><text x="130" y="112" class="line">Total Glyphs 4,120</text><text x="130" y="147" class="line">+680 per min</text><text x="130" y="182" class="line">Keep Producing</text>
+      </g>
+      <g transform="translate(485 119)"><text x="115" y="0" text-anchor="middle" class="action">Condense words into meaning</text><path d="M15 64 H190" class="arrow"/><polygon points="190,50 220,64 190,78" class="arrowfill"/></g>
+      <g transform="translate(732 84)">
+        <rect width="430" height="228" rx="7" class="screen"/>
+        <rect width="430" height="34" rx="7" class="bar"/><text x="15" y="23" class="brand">Glyph Factory</text>
+        <rect x="16" y="52" width="94" height="154" class="sidebar active"/>
+        <text x="31" y="76" class="nav">System</text><text x="31" y="104" class="nav">Metrics</text><text x="31" y="132" class="nav">World</text><text x="31" y="160" class="nav">Archive</text>
+        <text x="130" y="79" class="panel">MEANING FOCUS</text><text x="130" y="112" class="line">Meaning 128</text><text x="130" y="147" class="line">Quality +60%</text><text x="130" y="182" class="line">Word count −70%</text>
+      </g>
+      <text x="600" y="338" text-anchor="middle" class="out">A thousand useless words are worth less than one important idea.</text>
+    </g><g transform="translate(0 515)">
+      <rect x="20" y="0" width="1160" height="360" rx="12" class="row"/>
+      <rect x="38" y="22" width="72" height="42" rx="6" class="idbox"/><text x="74" y="51" class="id" text-anchor="middle">A06</text>
+      <text x="128" y="53" class="title">Newspapers create demand</text>
+      <g transform="translate(38 84)">
+        <rect width="430" height="228" rx="7" class="screen"/>
+        <rect width="430" height="34" rx="7" class="bar"/><text x="15" y="23" class="brand">Glyph Factory</text>
+        <rect x="16" y="52" width="94" height="154" class="sidebar"/>
+        <text x="31" y="76" class="nav">Workshop</text><text x="31" y="104" class="nav">Inventory</text><text x="31" y="132" class="nav">Research</text><text x="31" y="160" class="nav">Map</text>
+        <text x="130" y="79" class="panel">SELL PUBLICATION</text><text x="130" y="112" class="line">Copies sold 42</text><text x="130" y="147" class="line">Revenue 42</text><text x="130" y="182" class="line">Sell to Readers</text>
+      </g>
+      <g transform="translate(485 119)"><text x="115" y="0" text-anchor="middle" class="action">Reach 100 readers</text><path d="M15 64 H190" class="arrow"/><polygon points="190,50 220,64 190,78" class="arrowfill"/></g>
+      <g transform="translate(732 84)">
+        <rect width="430" height="228" rx="7" class="screen"/>
+        <rect width="430" height="34" rx="7" class="bar"/><text x="15" y="23" class="brand">Glyph Factory</text>
+        <rect x="16" y="52" width="94" height="154" class="sidebar active"/>
+        <text x="31" y="76" class="nav">System</text><text x="31" y="104" class="nav">Metrics</text><text x="31" y="132" class="nav">World</text><text x="31" y="160" class="nav">Archive</text>
+        <text x="130" y="79" class="panel">GROWING DEMAND</text><text x="130" y="112" class="line">Readers 312</text><text x="130" y="147" class="line">New requests +60%</text><text x="130" y="182" class="line">Reorders +45%</text>
+      </g>
+      <text x="600" y="338" text-anchor="middle" class="out">Writing starts creating the need for more writing.</text>
+    </g><g transform="translate(0 905)">
+      <rect x="20" y="0" width="1160" height="360" rx="12" class="row"/>
+      <rect x="38" y="22" width="72" height="42" rx="6" class="idbox"/><text x="74" y="51" class="id" text-anchor="middle">A07</text>
+      <text x="128" y="53" class="title">Readers write back</text>
+      <g transform="translate(38 84)">
+        <rect width="430" height="228" rx="7" class="screen"/>
+        <rect width="430" height="34" rx="7" class="bar"/><text x="15" y="23" class="brand">Glyph Factory</text>
+        <rect x="16" y="52" width="94" height="154" class="sidebar"/>
+        <text x="31" y="76" class="nav">Workshop</text><text x="31" y="104" class="nav">Inventory</text><text x="31" y="132" class="nav">Research</text><text x="31" y="160" class="nav">Map</text>
+        <text x="130" y="79" class="panel">OUR READERS</text><text x="130" y="112" class="line">Total readers 482</text><text x="130" y="147" class="line">Return rate 38%</text><text x="130" y="182" class="line">Passive audience</text>
+      </g>
+      <g transform="translate(485 119)"><text x="115" y="0" text-anchor="middle" class="action">Open first letter</text><path d="M15 64 H190" class="arrow"/><polygon points="190,50 220,64 190,78" class="arrowfill"/></g>
+      <g transform="translate(732 84)">
+        <rect width="430" height="228" rx="7" class="screen"/>
+        <rect width="430" height="34" rx="7" class="bar"/><text x="15" y="23" class="brand">Glyph Factory</text>
+        <rect x="16" y="52" width="94" height="154" class="sidebar active"/>
+        <text x="31" y="76" class="nav">System</text><text x="31" y="104" class="nav">Metrics</text><text x="31" y="132" class="nav">World</text><text x="31" y="160" class="nav">Archive</text>
+        <text x="130" y="79" class="panel">LETTERS FROM READERS</text><text x="130" y="112" class="line">Letters 12 · Ideas 7</text><text x="130" y="147" class="line">Word tips 5</text><text x="130" y="182" class="line">Reply to Readers</text>
+      </g>
+      <text x="600" y="338" text-anchor="middle" class="out">Consumers become producers.</text>
+    </g><g transform="translate(0 1295)">
+      <rect x="20" y="0" width="1160" height="360" rx="12" class="row"/>
+      <rect x="38" y="22" width="72" height="42" rx="6" class="idbox"/><text x="74" y="51" class="id" text-anchor="middle">A08</text>
+      <text x="128" y="53" class="title">Readers coin new words</text>
+      <g transform="translate(38 84)">
+        <rect width="430" height="228" rx="7" class="screen"/>
+        <rect width="430" height="34" rx="7" class="bar"/><text x="15" y="23" class="brand">Glyph Factory</text>
+        <rect x="16" y="52" width="94" height="154" class="sidebar"/>
+        <text x="31" y="76" class="nav">Workshop</text><text x="31" y="104" class="nav">Inventory</text><text x="31" y="132" class="nav">Research</text><text x="31" y="160" class="nav">Map</text>
+        <text x="130" y="79" class="panel">CREATE NEW WORD</text><text x="130" y="112" class="line">moon + path → moonpath</text><text x="130" y="147" class="line">Factory Words 128</text><text x="130" y="182" class="line">Add to Dictionary</text>
+      </g>
+      <g transform="translate(485 119)"><text x="115" y="0" text-anchor="middle" class="action">Accept organic new words</text><path d="M15 64 H190" class="arrow"/><polygon points="190,50 220,64 190,78" class="arrowfill"/></g>
+      <g transform="translate(732 84)">
+        <rect width="430" height="228" rx="7" class="screen"/>
+        <rect width="430" height="34" rx="7" class="bar"/><text x="15" y="23" class="brand">Glyph Factory</text>
+        <rect x="16" y="52" width="94" height="154" class="sidebar active"/>
+        <text x="31" y="76" class="nav">System</text><text x="31" y="104" class="nav">Metrics</text><text x="31" y="132" class="nav">World</text><text x="31" y="160" class="nav">Archive</text>
+        <text x="130" y="79" class="panel">WORDS FROM THE WORLD</text><text x="130" y="112" class="line">“sunpath” 324 uses</text><text x="130" y="147" class="line">“kindling” 287 uses</text><text x="130" y="182" class="line">Community growth +4</text>
+      </g>
+      <text x="600" y="338" text-anchor="middle" class="out">Language starts growing beyond the factory.</text>
+    </g><text x="30" y="1700" class="sub">GLYPH FACTORY · Mock-screen design explanation · A brighter tomorrow.</text></svg>
