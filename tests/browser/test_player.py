@@ -142,13 +142,33 @@ class PlayerContract(unittest.TestCase):
     def test_fresh_game_is_small_and_survives_timer_renders(self):
         self.open()
         expect(self.page.locator("#primary-actions button")).to_have_count(1)
-        for selector in ("#world-card", "#machines", "#systems-title"):
+        for selector in ("#world-card", "#machines", "#systems-title", "#systems-panel"):
             expect(self.page.locator(selector)).to_be_hidden()
+        expect(self.page.locator("#hero-layout")).to_have_class(re.compile(r"\bsingle\b"))
+        expect(self.page.locator("#below-layout")).to_have_class(re.compile(r"\bsingle\b"))
         for metric in ("credits", "meaning", "noise"):
             expect(self.page.locator(f"#{metric}").locator("..")).to_be_hidden()
         self.page.clock.run_for(3000)
         self.button("印字").click()
         expect(self.page.locator("#glyphs")).to_have_text("1")
+        self.assert_no_spoilers()
+
+    def test_layout_expands_only_when_world_is_discovered(self):
+        self.seed({"version": 3, "act": 2, "published": True, "glyphs": 30, "readers": 50})
+        self.open()
+        expect(self.page.locator("#world-card")).to_be_hidden()
+        expect(self.page.locator("#hero-layout")).to_have_class(re.compile(r"\bsingle\b"))
+        expect(self.page.locator("#systems-panel")).to_be_hidden()
+        expect(self.page.locator("#below-layout")).to_have_class(re.compile(r"\bsingle\b"))
+
+        self.page.evaluate("""() => {
+          const state = {...window.GlyphEngineV3.fresh(), version:3, act:3, published:true,
+            districts:2, worldScale:1, meaning:25};
+          sessionStorage.setItem('next-state-fixture', JSON.stringify(state));
+        }""")
+        self.page.reload()
+        expect(self.page.locator("#world-card")).to_be_visible()
+        expect(self.page.locator("#hero-layout")).not_to_have_class(re.compile(r"\bsingle\b"))
         self.assert_no_spoilers()
 
     def test_sell_stays_visible_disabled_and_persistent_after_zero_and_reload(self):

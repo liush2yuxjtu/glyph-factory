@@ -138,6 +138,8 @@
     metric('noise','noise',s.noise>0||s.deletedNoise>0||seen.has('A10')||seen.has('A11')||s.act>2);
 
     $('world-card').hidden = !isDirector && s.act < 3;
+    // Intent contract: undiscovered systems do not occupy layout space.
+    $('hero-layout')?.classList.toggle('single', $('world-card').hidden);
 
     const systemsHead=$('systems-title')?.closest('.panel-head');
     const machines=$('machines');
@@ -151,8 +153,16 @@
     if (ahaHead) ahaHead.hidden=!hasAhaHistory;
     ahaList.hidden=!hasAhaHistory;
 
+    // A hidden discovery surface must not leave an empty player-facing panel.
+    const playerAudience=document.documentElement.dataset.audience==='player';
+    const systemsPanel=$('systems-panel');
+    const hasPlayerSystems=hasMachines || (!playerAudience && hasAhaHistory);
+    if (systemsPanel) systemsPanel.hidden=!hasPlayerSystems;
+
     const logPanel=$('log')?.closest('.panel');
     if (logPanel) logPanel.hidden=!isDirector && !(s.log||[]).length;
+    const visibleBelow=[systemsPanel,logPanel].filter((node)=>node && !node.hidden).length;
+    $('below-layout')?.classList.toggle('single', visibleBelow <= 1);
   }
 
   function renderText() { document.documentElement.lang=locale==='en'?'en':'zh-CN'; $('lang-toggle').textContent=locale==='en'?'中文':'EN'; $('director-toggle').textContent=tr('director'); $('glyphs-label').textContent=tr('inventory'); $('credits-label').textContent=tr('credits'); $('meaning-label').textContent=tr('meaning'); $('noise-label').textContent=tr('noise'); $('systems-title').textContent=tr('systems'); $('systems-note').textContent=tr('systemsNote'); $('log-title').textContent=tr('log'); $('export').textContent=tr('export'); $('reset').textContent=tr('reset'); $('director-preview').textContent=tr('preview'); $('director-apply').textContent=tr('apply'); $('director-exit').textContent=tr('exit'); }

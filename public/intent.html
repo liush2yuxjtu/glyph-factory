@@ -19,6 +19,16 @@
   <article class="card"><h2>玩家与设计师看到不同内容</h2><p>玩家只看到世界内的动作、资源和结果。A01–A28、Director、未来系统说明和 reveal 文案只存在于设计/开发材料。生产构建不会发布本页、Aha Preview 或预告视频。</p></article>
 </section>
 <section class="demo"><h2>交互预览（设计师用）</h2><p class="small">点击“刻一个字”，再卖掉它。注意：“卖出”不会因为库存回到 0 而消失，只会暂时不可用。这个 demo 解释的是界面规则，不是最终玩家教程。</p><div class="screen"><div class="count"><span id="n">0</span> 字</div><button id="print">刻一个字</button><div id="sell" class="reveal"><button id="sellBtn">卖出这个字</button><p id="sellState" class="small"></p></div><div id="auto" class="reveal"><strong>新的问题出现了：</strong><p>重复劳动是否应该交给机器？</p><button id="autoBtn">启用自动刻字</button><p id="autoState" class="small"></p></div></div></section>
+<section class="demo"><h2>Screens + Flows · Aha 必须发生在产品里</h2>
+<p class="small">不是把 A01–A28 解释给玩家，而是让界面在玩家行动后改变自己的规模、资源与目标。</p>
+<div class="steps">
+<div class="step"><b>S01 · Fresh</b><span class="small">只有库存文字 + 印字；没有世界卡，没有空系统栏。</span></div>
+<div class="step"><b>S02 · Discover</b><span class="small">出售/机器第一次真实可用时出现；暂时不可用时保留。</span></div>
+<div class="step"><b>S11 · City</b><span class="small">世界被发现后，hero 才从单栏扩成双栏；空间变化本身就是反馈。</span></div>
+<div class="step"><b>S22 · Silence</b><span class="small">目标从生产翻成删除，最后停止印刷让生产率归零。</span></div>
+</div>
+<p><strong>Flow F01：</strong>手工 → 出售 → 自动化。<br><strong>Flow F02：</strong>工坊 → 城市 → 世界。<br><strong>Flow F03：</strong>增长 → 删除噪音 → 停止印刷。</p>
+</section>
 <section class="grid"><article class="card"><h2>玩家验收标准</h2><p>生产玩家界面不能出现 Aha、A01–A28、Director、未来章节路线图、设计解释或内部 reveal 日志。未来功能在首次发现前不可见；发现后的按钮、资源框和机器卡片不会因为当前资源下降而消失。</p></article><article class="card"><h2>内部文档入口</h2><p><code>docs/design/aha-moments-internal.zh-CN.md</code></p><p><code>docs/development/aha-spoiler-boundary.md</code></p><p class="small">本文件与 <code>public/preview.html</code> 保留在源码仓库供本地评审，但不进入 Vercel 玩家构建。</p></article></section>
 <script>
 let n=0,money=0,auto=false,sellRevealed=false,autoRevealed=false;
