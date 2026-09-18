@@ -112,7 +112,7 @@ class PlayerContract(unittest.TestCase):
                 self.context.close()
 
     def open(self, query=""):
-        response = self.page.goto(f"{self.origin}/play.html{query}")
+        response = self.page.goto(f"{self.origin}/play.html{query}", wait_until="networkidle")
         self.assertEqual(response.status, 200)
         expect(self.page.locator("html")).to_have_attribute("data-audience", "player")
         expect(self.page.locator("#primary-actions button").first).to_be_visible()
@@ -142,13 +142,33 @@ class PlayerContract(unittest.TestCase):
     def test_fresh_game_is_small_and_survives_timer_renders(self):
         self.open()
         expect(self.page.locator("#primary-actions button")).to_have_count(1)
-        for selector in ("#world-card", "#machines", "#systems-title"):
+        for selector in ("#world-card", "#machines", "#systems-title", "#systems-panel"):
             expect(self.page.locator(selector)).to_be_hidden()
+        expect(self.page.locator("#hero-layout")).to_have_class(re.compile(r"\bsingle\b"))
+        expect(self.page.locator("#below-layout")).to_have_class(re.compile(r"\bsingle\b"))
         for metric in ("credits", "meaning", "noise"):
             expect(self.page.locator(f"#{metric}").locator("..")).to_be_hidden()
         self.page.clock.run_for(3000)
         self.button("印字").click()
         expect(self.page.locator("#glyphs")).to_have_text("1")
+        self.assert_no_spoilers()
+
+    def test_layout_expands_only_when_world_is_discovered(self):
+        self.seed({"version": 3, "act": 2, "published": True, "glyphs": 30, "readers": 50})
+        self.open()
+        expect(self.page.locator("#world-card")).to_be_hidden()
+        expect(self.page.locator("#hero-layout")).to_have_class(re.compile(r"\bsingle\b"))
+        expect(self.page.locator("#systems-panel")).to_be_hidden()
+        expect(self.page.locator("#below-layout")).to_have_class(re.compile(r"\bsingle\b"))
+
+        self.page.evaluate("""() => {
+          const state = {...window.GlyphEngineV3.fresh(), version:3, act:3, published:true,
+            districts:2, worldScale:1, meaning:25};
+          sessionStorage.setItem('next-state-fixture', JSON.stringify(state));
+        }""")
+        self.page.reload()
+        expect(self.page.locator("#world-card")).to_be_visible()
+        expect(self.page.locator("#hero-layout")).not_to_have_class(re.compile(r"\bsingle\b"))
         self.assert_no_spoilers()
 
     def test_sell_stays_visible_disabled_and_persistent_after_zero_and_reload(self):
@@ -283,7 +303,7 @@ class PlayerContract(unittest.TestCase):
 
     def test_internal_review_routes_are_not_in_player_artifact(self):
         self.open()
-        for path in ("/intent.html", "/preview.html", "/eli5-aha.html", "/glyph-factory-v3-preview.webm", "/docs/design/aha-moments-internal.zh-CN.md"):
+        for path in ("/aha.html", "/aha.md", "/aha-lab/", "/review/play.html", "/aha-review-contract.js", "/aha-review-ui.js", "/intent.html", "/preview.html", "/eli5-aha.html", "/glyph-factory-v3-preview.webm", "/docs/design/aha-moments-internal.zh-CN.md"):
             with self.subTest(path=path):
                 self.assertEqual(self.context.request.get(self.origin + path).status, 404)
         self.assertEqual(self.context.request.get(self.origin + "/").status, 200)
@@ -295,6 +315,41 @@ class PlayerContract(unittest.TestCase):
         self.assertLessEqual(self.page.evaluate("document.documentElement.scrollWidth - innerWidth"), 1)
         for label in ("印字", "出售全部库存", "重新开始", "导出存档"):
             expect(self.button(label)).to_be_visible()
+
+    def test_intent_single_discovery_uses_available_width(self):
+        for width in (390, 1280):
+            with self.subTest(width=width):
+                self.page.set_viewport_size({"width": width, "height": 900})
+                self.open()
+                for parent, child in ((".metrics", ".metric.primary"), ("#primary-actions", "button")):
+                    widths = self.page.locator(parent).evaluate("(el, child) => [el.clientWidth, el.querySelector(child).getBoundingClientRect().width]", child)
+                    self.assertLessEqual(abs(widths[0] - widths[1]), 2, f"{parent} leaves an undiscovered empty column")
+
+    def test_intent_digital_publishing_replaces_inventory(self):
+        self.seed({"version":3,"act":4,"published":True,"agents":5,"agentFactories":1,"glyphs":30,"meaning":100})
+        self.open()
+        expect(self.page.locator("#glyphs").locator("..")).to_be_visible()
+        self.button("切换数字出版").click()
+        expect(self.page.locator("#glyphs").locator("..")).to_be_hidden()
+        self.page.reload(wait_until="networkidle")
+        expect(self.page.locator("#glyphs").locator("..")).to_be_hidden()
+        self.assert_no_spoilers()
+
+    def test_intent_stop_is_terminal_in_the_actual_ui(self):
+        self.seed({"version":3,"act":6,"published":True,"infrastructure":True,"compressedMeaning":10000,"deletedNoise":500,"noise":1000,"ambiguity":100,"keyboards":1})
+        self.open()
+        expect(self.button("停止印刷")).to_have_count(0)
+        self.button("删除噪音").click()
+        self.button("停止印刷").click()
+        expect(self.page.locator("#ending")).to_be_visible()
+        expect(self.page.locator("#rate")).to_have_text("0")
+        self.assertEqual(self.page.locator("#primary-actions button:enabled").count(), 0, "Terminal UI still offers productive actions")
+        before = self.page.evaluate(f"JSON.parse(localStorage.getItem('{SAVE}')).glyphs")
+        self.page.clock.run_for(10000)
+        self.page.keyboard.press("Space")
+        self.page.reload(wait_until="networkidle")
+        self.assertEqual(self.page.evaluate(f"JSON.parse(localStorage.getItem('{SAVE}')).glyphs"), before)
+        self.assert_no_spoilers()
 
     def test_detector_rejects_original_removed_node_regression(self):
         # Negative control: deliberately reintroduce the exact removed-node defect

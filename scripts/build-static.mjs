@@ -29,7 +29,7 @@ if (!privacy.includes('Aha IDs, reveal copy') || !privacy.includes('scrubLog')) 
 if (!preview.includes('glyph-factory-v3-preview.webm') || !preview.includes('A28')) {
   throw new Error('设计评审源文件缺失。');
 }
-if (!intent.includes('hidden → revealed → persistent') && !intent.includes('出现 → 永久保留')) {
+if (!intent.includes('hidden → discovered → persistent') && !intent.includes('出现 → 永久保留')) {
   throw new Error('intent.html 设计契约缺失。');
 }
 
@@ -47,7 +47,7 @@ let playerHtml = html
   .replace(/<section class="aha-focus" aria-live="polite">[\s\S]*?<\/section>/, '<section class="aha-focus" hidden aria-hidden="true"><small id="aha-id"></small><h2 id="aha-title"></h2><p id="aha-copy"></p></section>')
   .replace('<div class="panel-head" style="margin-top:16px"><h2>AHA MOMENTS · 28</h2><span id="aha-count">0 / 28</span></div>', '<div class="panel-head" style="margin-top:16px" hidden aria-hidden="true"><h2></h2><span id="aha-count"></span></div>')
   .replace('<div class="aha-list" id="aha-list" aria-label="Aha moments"></div>', '<div class="aha-list" id="aha-list" hidden aria-hidden="true"></div>')
-  .replace('</body>', '<script src="/player-privacy-v3.js"></script>\n</body>');
+;
 
 // Strip designer reveal copy from the deployed JS payload as a second line of defense.
 const playerEngine = engine.replace(

@@ -25,6 +25,8 @@
 
   let g = load();
   let preview = null;
+  let previewId = null;
+  function selectPreview(id) { preview = E.directorState(id); previewId = id; }
   let directorOpen = new URLSearchParams(location.search).get('director') === '1';
   let lastSaved = 0;
   let revealed = loadReveals();
@@ -39,7 +41,7 @@
   function notice(text) { $('notice').textContent = text || ''; }
   function perform(type, props = {}) { if (preview) preview = E.act(preview, { type, ...props }); else { g = E.act(g, { type, ...props }); save(true); } render(); }
   function ahaCopy(item) { if (locale === 'en' && AHA_EN[item.id]) return AHA_EN[item.id]; return [item.title, item.reveal]; }
-  function currentAha(s) { if (preview) { const selected = $('director-select').value; return E.AHAS.find((a) => a.id === selected) || E.AHAS[0]; } const seen = new Set(s.ahaSeen || []); let last = E.AHAS[0]; for (const item of E.AHAS) if (seen.has(item.id) || E.ahaUnlocked(s,item.id)) last = item; return last; }
+  function currentAha(s) { if (preview) { const selected = previewId; return E.AHAS.find((a) => a.id === selected) || E.AHAS[0]; } const seen = new Set(s.ahaSeen || []); let last = E.AHAS[0]; for (const item of E.AHAS) if (seen.has(item.id) || E.ahaUnlocked(s,item.id)) last = item; return last; }
   function actCopy(s) { return (locale === 'en' ? ACT_EN : ACT_ZH)[s.act] || (locale === 'en' ? ACT_EN[1] : ACT_ZH[1]); }
 
   // Paperclips rule: hidden -> revealed -> persistent. Temporary scarcity never hides a discovered surface.
@@ -48,9 +50,9 @@
     $('act-strip').replaceChildren(...visibleActs.map((act) => { const div = document.createElement('div'); div.className = `act-chip ${act.id === s.act ? 'current' : act.id < s.act ? 'done' : ''}`; const name = locale === 'en' ? ACT_EN[act.id][0] : act.name; div.innerHTML = `<b>ACT ${['I','II','III','IV','V','VI'][act.id-1]} · ${name}</b><span>${act.range}</span>`; return div; }));
   }
   function worldMetric(labelText, value) { const div = document.createElement('div'); const span = document.createElement('span'); const strong = document.createElement('strong'); span.textContent = labelText; strong.textContent = value; div.append(span,strong); return div; }
-  function renderWorld(s) { const sets = { 1:[['AUTO / 自动',`${fmt(E.rate(s),1)}/s`],['CONTRACTS / 委托',`${s.contracts}/3`],['TYPISTS / 打字员',fmt(s.typists)],['PRESSES / 印刷机',fmt(s.presses)]], 2:[['READERS / 读者',fmt(s.readers)],['DEMAND / 需求',fmt(s.demand,1)],['COMPOSED / 组合字',fmt(s.composed)],['DELETED / 已删噪音',fmt(s.deletedNoise)]], 3:[['DISTRICTS / 街区',fmt(s.districts)],['CONCEPTS / 概念',fmt(s.concepts)],['EFFECTS / 社会变化',fmt(s.societyEffects)],['SCALE / 地图',s.worldScale>=2?'WORLD':'CITY']], 4:[['AGENTS',fmt(s.agents,1)],['AGENT FACTORIES',fmt(s.agentFactories)],['AUTO ARTICLES',fmt(s.overnightArticles)],['ARCHIVES / 记忆',fmt(s.archives)]], 5:[['MACHINE GLYPHS',fmt(s.machineGlyphs)],['MACHINE USE',fmt(s.machineGlyphUse)],['COMPRESSED',fmt(s.compressedMeaning)],['HUMAN MEANING',fmt(s.meaning)]], 6:[['INFRA / 基础设施',s.infrastructure?'ON':'OFF'],['AMBIGUITY / 歧义',fmt(s.ambiguity)],['DELETED / 删除',fmt(s.deletedNoise)],['COMPRESSED',fmt(s.compressedMeaning)]] }; $('world-metrics').replaceChildren(...sets[s.act].map(([a,b]) => worldMetric(a,b))); $('world-scale').textContent = s.stopped ? 'SILENCE' : ['DESK','CITY','CITY','NETWORK','MACHINE','WORLD'][s.act-1]; $('world-card').classList.toggle('stopped', s.stopped); }
+  function renderWorld(s) { const sets = { 1:[['AUTO / 自动',`${fmt(E.rate(s),1)}/s`],['CONTRACTS / 委托',`${s.contracts}/3`],['TYPISTS / 打字员',fmt(s.typists)],['PRESSES / 印刷机',fmt(s.presses)]], 2:[['READERS / 读者',fmt(s.readers)],['DEMAND / 需求',fmt(s.demand,1)],['COMPOSED / 组合字',fmt(s.composed)],['DELETED / 已删噪音',fmt(s.deletedNoise)]], 3:[['DISTRICTS / 街区',fmt(s.districts)],['CONCEPTS / 概念',fmt(s.concepts)],['EFFECTS / 社会变化',fmt(s.societyEffects)],['SCALE / 地图',s.worldScale>=2?'WORLD':'CITY']], 4:[['AGENTS',fmt(s.agents,1)],['AGENT FACTORIES',fmt(s.agentFactories)],['AUTO ARTICLES',fmt(s.overnightArticles)],['ARCHIVES / 记忆',fmt(s.archives)]], 5:[['MACHINE GLYPHS',fmt(s.machineGlyphs)],['MACHINE USE',fmt(s.machineGlyphUse)],['COMPRESSED',fmt(s.compressedMeaning)],['HUMAN MEANING',fmt(s.meaning)]], 6:[['INFRA / 基础设施',s.infrastructure?'ON':'OFF'],['AMBIGUITY / 歧义',fmt(s.ambiguity)],['DELETED / 删除',fmt(s.deletedNoise)],['COMPRESSED',fmt(s.compressedMeaning)]] }; $('world-metrics').replaceChildren(...sets[s.act].map(([a,b]) => worldMetric(a,b))); $('world-scale').textContent = s.stopped ? 'SILENCE' : s.act===3 && s.worldScale>=2 ? 'NETWORK' : ['DESK','CITY','CITY','NETWORK','MACHINE','WORLD'][s.act-1]; $('world-card').classList.toggle('stopped', s.stopped); }
 
-  function actionButton(text, sub, type, enabled = true, props = {}, className = '') { const b = document.createElement('button'); b.type='button'; b.disabled=!enabled; b.className=className; const main = document.createElement('span'); main.textContent=text; b.append(main); if (sub) { const small=document.createElement('span'); small.className='action-sub'; small.textContent=sub; b.append(small); } b.addEventListener('click',()=>perform(type,props)); return b; }
+  function actionButton(text, sub, type, enabled = true, props = {}, className = '') { const b = document.createElement('button'); b.type='button'; b.dataset.command=type; b.disabled=!enabled; b.className=className; const main = document.createElement('span'); main.textContent=text; b.append(main); if (sub) { const small=document.createElement('span'); small.className='action-sub'; small.textContent=sub; b.append(small); } b.addEventListener('click',()=>perform(type,props)); return b; }
   function renderActions(s) {
     const buttons=[]; const en=locale==='en'; const seen=new Set(s.ahaSeen||[]);
     const add = (key, revealWhen, enabled, text, sub, type, props = {}, className = '') => { if (rememberReveal(`action:${key}`, revealWhen)) buttons.push(actionButton(text, sub, type, enabled, props, className)); };
@@ -104,6 +106,7 @@
       const stopReady=s.deletedNoise>=1000&&s.compressedMeaning>=10000;
       add('stop', s.stopped||stopReady, !s.stopped&&stopReady, label(ACTIONS.stop), s.stopped?tr('done'):(en?'The final action is now possible.':'最后一个动作现在才出现。'), 'stop-printing', {}, 'danger');
     }
+    if (s.stopped) buttons.forEach((button) => { button.disabled=true; });
     $('primary-actions').replaceChildren(...buttons);
   }
 
@@ -124,7 +127,7 @@
   function renderAhas(s) {
     const active=currentAha(s); const seen=new Set(s.ahaSeen||[]);
     const visible = preview ? E.AHAS : E.AHAS.filter((item)=>seen.has(item.id));
-    $('aha-list').replaceChildren(...visible.map((item)=>{ const div=document.createElement('button'); div.type='button'; div.className=`aha-item seen ${item.id===active.id?'active':''}`; const copy=ahaCopy(item); div.innerHTML=`<b>${item.id} · ${copy[0]}</b><span>ACT ${item.act}</span>`; div.addEventListener('click',()=>{ directorOpen=true; $('director').hidden=false; $('director-select').value=item.id; preview=E.directorState(item.id); render(); }); return div; }));
+    $('aha-list').replaceChildren(...visible.map((item)=>{ const div=document.createElement('button'); div.type='button'; div.className=`aha-item seen ${item.id===active.id?'active':''}`; const copy=ahaCopy(item); div.innerHTML=`<b>${item.id} · ${copy[0]}</b><span>ACT ${item.act}</span>`; div.addEventListener('click',()=>{ directorOpen=true; $('director').hidden=false; $('director-select').value=item.id; selectPreview(item.id); render(); }); return div; }));
     $('aha-count').textContent=`${seen.size} / 28`;
     const copy=ahaCopy(active); $('aha-id').textContent=`${active.id} · ${seen.has(active.id)?tr('seen'):tr('next')}`; $('aha-title').textContent=copy[0]; $('aha-copy').textContent=copy[1];
   }
@@ -133,11 +136,15 @@
     const isDirector = Boolean(preview); const seen=new Set(s.ahaSeen||[]);
     const metric = (id, key, condition) => { const el=$(id)?.closest('.metric'); if (el) el.hidden=!(isDirector || rememberReveal(`metric:${key}`, condition)); };
     metric('glyphs','glyphs',true);
+    // Digital publishing intentionally replaces physical inventory; scarcity never does.
+    $('glyphs').closest('.metric').hidden=Boolean(s.digital);
     metric('credits','credits',s.credits>0||s.manualBoost||s.autoSellUnlocked||s.contracts>0||s.keyboards>0||s.typists>0||s.presses>0||s.act>1);
     metric('meaning','meaning',s.meaning>0||s.composed>0||seen.has('A05')||s.act>2);
     metric('noise','noise',s.noise>0||s.deletedNoise>0||seen.has('A10')||seen.has('A11')||s.act>2);
 
     $('world-card').hidden = !isDirector && s.act < 3;
+    // Intent contract: undiscovered systems do not occupy layout space.
+    $('hero-layout')?.classList.toggle('single', $('world-card').hidden);
 
     const systemsHead=$('systems-title')?.closest('.panel-head');
     const machines=$('machines');
@@ -151,8 +158,16 @@
     if (ahaHead) ahaHead.hidden=!hasAhaHistory;
     ahaList.hidden=!hasAhaHistory;
 
+    // A hidden discovery surface must not leave an empty player-facing panel.
+    const playerAudience=document.documentElement.dataset.audience==='player';
+    const systemsPanel=$('systems-panel');
+    const hasPlayerSystems=hasMachines || (!playerAudience && hasAhaHistory);
+    if (systemsPanel) systemsPanel.hidden=!hasPlayerSystems;
+
     const logPanel=$('log')?.closest('.panel');
     if (logPanel) logPanel.hidden=!isDirector && !(s.log||[]).length;
+    const visibleBelow=[systemsPanel,logPanel].filter((node)=>node && !node.hidden).length;
+    $('below-layout')?.classList.toggle('single', visibleBelow <= 1);
   }
 
   function renderText() { document.documentElement.lang=locale==='en'?'en':'zh-CN'; $('lang-toggle').textContent=locale==='en'?'中文':'EN'; $('director-toggle').textContent=tr('director'); $('glyphs-label').textContent=tr('inventory'); $('credits-label').textContent=tr('credits'); $('meaning-label').textContent=tr('meaning'); $('noise-label').textContent=tr('noise'); $('systems-title').textContent=tr('systems'); $('systems-note').textContent=tr('systemsNote'); $('log-title').textContent=tr('log'); $('export').textContent=tr('export'); $('reset').textContent=tr('reset'); $('director-preview').textContent=tr('preview'); $('director-apply').textContent=tr('apply'); $('director-exit').textContent=tr('exit'); }
@@ -160,8 +175,8 @@
 
   E.AHAS.forEach((item)=>{ const option=document.createElement('option'); option.value=item.id; option.textContent=`${item.id} · ${item.title}`; $('director-select').append(option); });
   $('director-toggle').addEventListener('click',()=>{directorOpen=!directorOpen;$('director').hidden=!directorOpen;});
-  $('director-preview').addEventListener('click',()=>{ preview=E.directorState($('director-select').value); notice(locale==='en'?'Preview only. Real save unchanged.':'仅预览：真实存档未改变。'); render(); });
-  $('director-select').addEventListener('change',()=>{ if(preview){preview=E.directorState($('director-select').value);render();} });
+  $('director-preview').addEventListener('click',()=>{ selectPreview($('director-select').value); notice(locale==='en'?'Preview only. Real save unchanged.':'仅预览：真实存档未改变。'); render(); });
+  $('director-select').addEventListener('change',()=>{ if(preview){selectPreview($('director-select').value);render();} });
   $('director-apply').addEventListener('click',()=>{ g=preview||E.directorState($('director-select').value); g={...g,director:false}; preview=null; save(true); notice(locale==='en'?'Director state applied to your save.':'已把导演状态应用到存档。'); render(); });
   $('director-exit').addEventListener('click',()=>{preview=null;notice('');render();});
   $('lang-toggle').addEventListener('click',()=>{locale=locale==='en'?'zh-CN':'en';try{localStorage.setItem(LOCALE_KEY,locale);}catch{}render();});
@@ -170,5 +185,10 @@
   document.addEventListener('keydown',(event)=>{if(event.code==='Space'&&!event.repeat&&!/INPUT|SELECT|BUTTON|A|TEXTAREA/.test(document.activeElement?.tagName||'')){event.preventDefault();perform('print');}});
   const tick=()=>{if(preview) preview=E.advance(preview); else g=E.advance(g); render();};
   window.setInterval(tick,500); window.addEventListener('pagehide',()=>save(true)); document.addEventListener('visibilitychange',()=>{if(!document.hidden){if(!preview)g=E.advance(g);render();save(true);}});
+  // Read-only review evidence. Production/player pages cannot expose a review snapshot.
+  window.GlyphReview = Object.freeze({ snapshot: () => {
+    if (!preview || document.documentElement.dataset.audience === 'player') return null;
+    return { id: previewId, state: JSON.parse(JSON.stringify(preview)) };
+  }});
   render(); save(true);
 })();

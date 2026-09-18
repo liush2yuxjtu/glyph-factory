@@ -3,7 +3,7 @@
 
   const LOCALE_KEY = 'glyph-factory-locale-v3';
   const params = new URLSearchParams(location.search);
-  const localReviewHost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+  const localReviewHost = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || document.documentElement.dataset.audience === 'review';
   // A built player artifact stays a player artifact even when served on localhost.
   const reviewMode = document.documentElement.dataset.audience !== 'player' && localReviewHost && (params.get('review') === '1' || params.get('director') === '1');
   if (reviewMode) return;
