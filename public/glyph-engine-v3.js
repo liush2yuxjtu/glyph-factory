@@ -275,7 +275,7 @@ const GlyphEngineV3 = (() => {
       { paperCrisis:true, readers:1200, meaning:60 }, { noise:10, deletedNoise:1 },
       { act:3, districts:2, worldScale:1 }, { concepts:1, societyEffects:1 }, { worldScale:1 }, { worldScale:2, districts:4, concepts:2 },
       { act:4, agents:1 }, { editorAutonomy:true }, { agentFactories:1, agents:5 }, { overnightArticles:100 }, { digital:true }, { archives:1 },
-      { act:5, machineGlyphs:1 }, { machineGlyphUse:1000 }, { compressedMeaning:10000 },
+      { act:5, machineGlyphs:1, meaning:100 }, { machineGlyphUse:1000 }, { compressedMeaning:10000 },
       { act:6, infrastructure:true }, { ambiguity:100 }, { deletedNoise:1000, noise:50 }, { stopped:true },
     ];
     for (let i = 0; i <= target; i++) g = { ...g, ...patches[i] };

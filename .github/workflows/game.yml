@@ -24,6 +24,14 @@ jobs:
       - name: Run the same fast gate used locally
         shell: bash
         run: node scripts/verify-player.mjs --fast 2>&1 | tee verification-fast.log
+      - name: Build the separate internal review artifact
+        run: node scripts/build-aha-review.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aha-review-${{ github.sha }}
+          path: review-dist/
+          if-no-files-found: error
+          retention-days: 7
       - name: Validate internal review video without deploying it
         shell: bash
         run: |
@@ -68,6 +76,10 @@ jobs:
         with:
           name: player-build-${{ github.sha }}
           path: dist/
+      - uses: actions/download-artifact@v4
+        with:
+          name: aha-review-${{ github.sha }}
+          path: review-dist/
       - name: Install pinned browser tooling
         run: |
           python -m pip install -r tests/browser/requirements.txt
@@ -76,7 +88,10 @@ jobs:
         shell: bash
         env:
           GLYPH_BROWSER: ${{ matrix.browser }}
-        run: python -m unittest discover -s tests/browser -p 'test_*.py' -v 2>&1 | tee browser-results.log
+        run: |
+          set -euo pipefail
+          python scripts/run-browser-contracts.py player 2>&1 | tee browser-results.log
+          python scripts/run-browser-contracts.py aha 2>&1 | tee aha-results.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -84,6 +99,7 @@ jobs:
           path: |
             test-results/
             browser-results.log
+            aha-results.log
           retention-days: 7
 
   merge_gate:

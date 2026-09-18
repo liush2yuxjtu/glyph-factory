@@ -1,28 +1,55 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import {readFileSync} from 'node:fs';
+import vm from 'node:vm';
+const read=(path)=>readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
+const ctx=vm.createContext({});
+vm.runInContext(read('public/glyph-engine-v3.js')+';globalThis.engine=GlyphEngineV3;',ctx);
+vm.runInContext(read('public/aha-review-contract.js'),ctx);
+const E=ctx.engine, audit=ctx.GlyphAhaAudit;
+const expected=Array.from({length:28},(_,i)=>`A${String(i+1).padStart(2,'0')}`);
 
-const client = readFileSync(new URL('../src/app/aha-lab/AhaLabClient.tsx', import.meta.url), 'utf8');
-const route = readFileSync(new URL('../src/app/aha-lab/page.tsx', import.meta.url), 'utf8');
+test('shared Aha catalog is exactly the full ordered engine catalog, not a copied title list',()=>{
+  assert.deepEqual(Array.from(audit.ids),expected);
+  assert.deepEqual(Array.from(E.AHAS,a=>a.id),expected);
+  assert.match(read('public/aha-review-ui.js'),/for\(const item of E\.AHAS\)/);
+});
+for(const id of expected) {
+  test(`${id}: independent state invariant accepts the real snapshot and rejects its corruption`,()=>{
+    const state=E.directorState(id,1000);
+    assert.equal(audit.stateErrors(id,{id,state}).length,0);
+    const [,key,minimum]=audit.rules.find(r=>r[0]===id);
+    const broken={...state,[key]:typeof minimum==='boolean'?false:minimum-1};
+    assert.ok(audit.stateErrors(id,{id,state:broken}).length>0,`${id} missing invariant was silently accepted`);
+    assert.ok(audit.stateErrors(id,{id:'invalid',state}).length>0);
+    assert.ok(audit.stateErrors(id,{id,state:{...state,ahaSeen:[]}}).length>0);
+    assert.ok(audit.stateErrors(id,null).length>0);
+  });
+}
 
-const expected = Array.from({ length: 28 }, (_, index) => `A${String(index + 1).padStart(2, '0')}`);
-
-test('Aha Lab includes exactly A01 through A28', () => {
-  for (const id of expected) assert.match(client, new RegExp(`\\[\\"${id}\\"`), `${id} trigger is missing`);
-  const declared = [...client.matchAll(/\["(A\d{2})",/g)].map((match) => match[1]);
-  assert.deepEqual(declared, expected);
+test('action-effect detector rejects no-op clicks for every supported action',()=>{
+  for(const [name,predicate] of Object.entries(audit.transitions)) {
+    const state=E.directorState('A27',1000);
+    assert.equal(predicate(state,{...state}),false,name);
+  }
 });
 
-test('Aha Lab drives the real game director controls', () => {
-  assert.match(client, /contentDocument/);
-  assert.match(client, /director-select/);
-  assert.match(client, /director-preview/);
-  assert.match(client, /\/play\.html\?director=1/);
-  assert.match(client, /验证全部 28 个 Aha/);
+test('Next Aha Lab delegates to the canonical browser-tested page',()=>{
+  const client=read('src/app/aha-lab/AhaLabClient.tsx');
+  assert.match(client,/src="\/aha\.html"/);
+  assert.doesNotMatch(client,/const AHAS|actions > 0|28 \/ 28 已通过/);
+  const html=read('public/aha.html');
+  assert.match(html,/id="review-frame"/);
+  assert.match(html,/id="verify-all"[^>]*disabled/);
+  assert.match(html,/aha-review-contract\.js/);
+  assert.match(html,/aha-review-ui\.js/);
+  assert.match(read('public/aha-review-ui.js'),/audit\.exercise\(trigger\(id\),id\)/);
 });
 
-test('Aha Lab stays out of production', () => {
-  assert.match(route, /process\.env\.VERCEL_ENV === "production"/);
-  assert.match(route, /notFound\(\)/);
-  assert.match(route, /index: false/);
+test('Aha Lab route remains preview-only and non-indexable',()=>{
+  const route=read('src/app/aha-lab/page.tsx');
+  assert.match(route,/process\.env\.VERCEL_ENV === "production"/);
+  assert.match(route,/notFound\(\)/);
+  assert.match(route,/index: false/);
+  assert.match(read('public/aha.html'),/name="robots" content="noindex,nofollow"/);
 });
