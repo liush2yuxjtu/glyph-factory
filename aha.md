@@ -7,6 +7,10 @@
 
 https://liush2yuxjtu.github.io/glyph-factory/aha.html
 
+## GitHub Gist
+
+https://gist.github.com/liush2yuxjtu/d2c39331cfd3161337dedf573b7b72d2
+
 ## Visual boards
 
 ### A01–A04
