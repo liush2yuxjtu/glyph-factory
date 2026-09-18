@@ -3,355 +3,167 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="light">
-<title>Glyph Factory · Aha Moments Flow Review</title>
+<title>Glyph Factory · Aha Screen Flow</title>
 <style>
-:root{
-  --ink:#152019;--muted:#647064;--paper:#eee7d4;--panel:#fffaf0;--panel2:#e7dfc7;
-  --line:#aeb7a1;--lime:#c9f36b;--lime2:#e8ffc0;--rust:#9f4a31;--blue:#77a9a8;
-  --shadow:4px 4px 0 var(--ink);--radius:14px;
-}
+:root{--ink:#182018;--paper:#eee8d6;--panel:#fffaf0;--muted:#657064;--line:#aab39d;--lime:#c9f26d;--rust:#9c4a31;--dark:#253026}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{margin:0;background:#ccd2c0;color:var(--ink);font:14px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+body{margin:0;background:#cbd1bf;color:var(--ink);font:14px/1.45 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
 button{font:inherit;color:inherit}
-a{color:inherit}
-.shell{max-width:1220px;margin:0 auto;min-height:100vh;background:var(--paper);border-inline:1px solid #b7bead}
-header{padding:28px clamp(18px,5vw,64px) 22px;border-bottom:2px solid var(--ink);background:
-linear-gradient(180deg,rgba(255,255,255,.22),transparent),
-repeating-linear-gradient(90deg,transparent 0 31px,rgba(21,32,25,.035) 31px 32px)}
-.kicker{font:800 11px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.14em;color:var(--rust)}
-h1{font-size:clamp(34px,6.5vw,76px);line-height:.94;letter-spacing:-.045em;margin:.2em 0 .22em;max-width:900px}
-.lead{font-size:clamp(16px,2vw,21px);max-width:820px;margin:0;color:#2b372f}
-.internal{margin-top:18px;border:1.5px solid var(--rust);background:#f2ded5;padding:10px 12px;font-weight:750;max-width:900px}
-.topmeta{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
-.pill{border:1px solid var(--ink);background:var(--panel);padding:6px 9px;font:750 12px/1 ui-monospace,monospace}
-main{padding:24px clamp(14px,4vw,48px) 70px}
-.section-title{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:12px 0 10px}
-.section-title h2{font-size:clamp(22px,3.4vw,36px);line-height:1.1;margin:0}
-.section-title p{margin:0;color:var(--muted);max-width:620px}
-.flowmap{display:grid;grid-template-columns:repeat(6,minmax(150px,1fr));gap:9px;overflow:auto;padding:5px 3px 13px}
-.actcard{min-width:150px;border:1.5px solid var(--ink);background:var(--panel);padding:12px;text-align:left;cursor:pointer;box-shadow:2px 2px 0 var(--ink);transition:.16s transform,.16s background}
-.actcard:hover{transform:translate(-1px,-1px);background:var(--lime2)}
-.actcard.active{background:var(--lime);transform:translate(-2px,-2px);box-shadow:4px 4px 0 var(--ink)}
-.actnum{font:900 11px/1 ui-monospace,monospace;color:var(--rust)}
-.actcard strong{display:block;font-size:16px;margin-top:6px}
-.actcard span{display:block;color:var(--muted);font-size:12px;margin-top:4px}
-.worldline{margin:22px 0 26px;border:1.5px solid var(--ink);background:#d7dec9;position:relative;overflow:hidden}
-.worldline-grid{display:grid;grid-template-columns:repeat(6,1fr);min-width:720px}
-.worldstep{padding:14px 12px;border-right:1px solid rgba(21,32,25,.35);position:relative;min-height:88px}
-.worldstep:last-child{border-right:0}
-.worldstep b{display:block;font-size:12px}
-.worldstep strong{display:block;font-size:16px;margin-top:4px}
-.worldstep small{display:block;color:var(--muted);margin-top:3px}
-.worldstep::after{content:"→";position:absolute;right:-7px;top:31px;font-weight:900;z-index:2}
-.worldstep:last-child::after{display:none}
-
-.review-flags{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:14px 0 28px}
-.flag{border:1.5px solid var(--ink);background:#fff4dd;padding:12px}
-.flag .ids{font:900 12px/1 ui-monospace,monospace;color:var(--rust)}
-.flag strong{display:block;margin:7px 0 4px}
-.flag p{margin:0;color:#4c594f;font-size:12px}
-
-.theater{border:2px solid var(--ink);background:var(--panel);box-shadow:var(--shadow);overflow:hidden}
-.theater-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1.5px solid var(--ink);background:#e6e0ce}
-.theater-head .left{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
-.badge{font:900 11px/1 ui-monospace,monospace;border:1px solid var(--ink);padding:5px 7px;background:#fff}
-.badge.core{background:var(--lime)}
-.badge.event{background:#dfe8df}
-.navs{display:flex;gap:6px}
-.navs button,.play button{border:1.5px solid var(--ink);background:var(--panel);min-height:38px;padding:7px 10px;font-weight:800;cursor:pointer;box-shadow:2px 2px 0 var(--ink)}
-.navs button:hover,.play button:hover{background:var(--lime)}
-.stage{display:grid;grid-template-columns:1fr 160px 1fr;gap:0;min-height:330px}
-.state{padding:22px}
-.state.before{background:#f5f0e2;border-right:1px solid var(--line)}
-.state.after{background:#f1f7dc;border-left:1px solid var(--line)}
-.state .label{font:800 10px/1 ui-monospace,monospace;letter-spacing:.12em;color:var(--muted)}
-.state h3{font-size:clamp(22px,3.2vw,36px);line-height:1.05;margin:10px 0}
-.state p{font-size:16px;margin:0;max-width:430px}
-.scale{margin-top:18px;border-top:1px solid var(--line);padding-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.scale b{display:block;font-size:11px;color:var(--muted)}
-.scale span{font-weight:800}
-.trigger{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px 10px;background:#dce4d0;position:relative}
-.trigger::before,.trigger::after{content:"";position:absolute;top:50%;width:18px;border-top:2px solid var(--ink)}
-.trigger::before{left:-1px}.trigger::after{right:-1px}
-.trigger .arrow{font-size:34px;line-height:1}
-.trigger .verb{font-weight:900;font-size:14px;margin-top:10px}
-.trigger .cond{font-size:11px;color:var(--muted);margin-top:6px}
-.reveal{padding:16px 18px;border-top:1.5px solid var(--ink);display:grid;grid-template-columns:150px 1fr;gap:18px;background:#fff}
-.reveal .label{font:900 10px/1.3 ui-monospace,monospace;color:var(--rust);letter-spacing:.1em}
-.reveal blockquote{margin:0;font-size:clamp(18px,2.3vw,27px);line-height:1.2;font-weight:800}
-.runtime-note{margin-top:8px;font-size:12px;color:var(--rust);font-weight:750}
-
-.play{display:flex;align-items:center;gap:8px;margin:12px 0 28px}
-.progress{flex:1;height:10px;border:1px solid var(--ink);background:#ddd7c6;overflow:hidden}
-.progress > div{height:100%;background:var(--lime);width:0%}
-
-.catalog-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:34px}
-.catalog-head h2{font-size:28px;margin:0}
-.filters{display:flex;gap:6px;flex-wrap:wrap}
-.filters button{border:1px solid var(--ink);background:var(--panel);padding:6px 9px;cursor:pointer;font-weight:750}
-.filters button.active{background:var(--lime)}
-.catalog{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
-.aha{border:1.5px solid var(--ink);background:var(--panel);padding:12px;text-align:left;cursor:pointer;min-height:138px;position:relative}
-.aha:hover{background:var(--lime2)}
-.aha.selected{outline:3px solid var(--rust);outline-offset:1px}
-.aha .top{display:flex;justify-content:space-between;gap:8px;align-items:start}
-.aha .id{font:900 12px/1 ui-monospace,monospace;color:var(--rust)}
-.aha .core-dot{font:900 9px/1 ui-monospace,monospace;border:1px solid var(--ink);padding:3px 4px;background:var(--lime)}
-.aha strong{display:block;font-size:16px;line-height:1.18;margin:9px 0 6px}
-.aha p{margin:0;color:var(--muted);font-size:12px}
-.aha .mini{position:absolute;bottom:9px;left:12px;right:12px;display:flex;justify-content:space-between;font:750 10px/1 ui-monospace,monospace;color:#6f776f}
-
-.legend{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:30px}
-.legend > div{border:1px solid var(--line);background:#e8e2d2;padding:12px}
-.legend b{display:block;margin-bottom:3px}
-.footer{margin-top:28px;padding-top:18px;border-top:1.5px solid var(--ink);display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;color:var(--muted)}
-.footer a{font-weight:800;color:var(--ink)}
-
-@media(max-width:900px){
-  .review-flags{grid-template-columns:1fr 1fr}
-  .catalog{grid-template-columns:1fr 1fr}
+.shell{max-width:1500px;margin:auto;min-height:100vh;background:var(--paper)}
+header{padding:28px clamp(18px,4vw,56px) 24px;border-bottom:2px solid var(--ink);background:linear-gradient(180deg,#f4efdf,var(--paper))}
+.eyebrow{font:900 11px/1.2 ui-monospace,monospace;letter-spacing:.14em;color:var(--rust)}
+h1{font-size:clamp(34px,6vw,72px);line-height:.94;letter-spacing:-.045em;margin:.18em 0 .18em;max-width:1050px}
+.lead{font-size:clamp(16px,2vw,21px);max-width:920px;margin:0;color:#334037}
+.meta{display:flex;flex-wrap:wrap;gap:7px;margin-top:18px}
+.pill{border:1px solid var(--ink);background:var(--panel);padding:6px 8px;font:800 11px/1 ui-monospace,monospace}
+.pill.real{background:var(--lime)}
+nav{position:sticky;top:0;z-index:10;display:flex;gap:6px;padding:10px clamp(12px,3vw,36px);overflow:auto;border-bottom:1.5px solid var(--ink);background:rgba(238,232,214,.94);backdrop-filter:blur(8px)}
+nav a{white-space:nowrap;text-decoration:none;border:1px solid var(--ink);background:var(--panel);padding:7px 9px;font-weight:800}
+main{padding:20px clamp(12px,3vw,36px) 70px}
+.rule{border:2px solid var(--ink);background:var(--lime);padding:12px 14px;font-size:16px;font-weight:850;box-shadow:3px 3px 0 var(--ink);margin-bottom:28px}
+.act{margin:0 0 38px;scroll-margin-top:70px}
+.acthead{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:12px}
+.acthead h2{font-size:clamp(24px,3.4vw,42px);line-height:1;margin:4px 0 0}
+.acthead p{margin:0;max-width:520px;color:var(--muted)}
+.flow{display:flex;gap:0;overflow-x:auto;padding:5px 5px 18px;scroll-snap-type:x proximity}
+.node{display:flex;align-items:center;flex:0 0 auto}
+.screen{width:min(76vw,390px);padding:0;border:2px solid var(--ink);background:var(--panel);box-shadow:4px 4px 0 var(--ink);text-align:left;cursor:zoom-in;scroll-snap-align:start}
+.screen.context{opacity:.72}
+.screen:hover{transform:translate(-1px,-1px)}
+.screen img{display:block;width:100%;height:auto;background:#111;border-bottom:1.5px solid var(--ink)}
+.cap{padding:10px 11px 11px}
+.cap-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.sid{font:900 11px/1 ui-monospace,monospace;color:var(--rust)}
+.kind{font:900 9px/1 ui-monospace,monospace;border:1px solid var(--ink);padding:3px 4px;background:#e3e7dc}
+.kind.core{background:var(--lime)}
+.cap strong{display:block;font-size:16px;line-height:1.18;margin-top:7px}
+.cap small{display:block;color:var(--muted);margin-top:5px}
+.arrow{width:150px;flex:0 0 150px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px;text-align:center}
+.arrow-line{width:100%;display:flex;align-items:center;color:var(--dark)}
+.arrow-line:before{content:"";height:2px;background:currentColor;flex:1}
+.arrow-line:after{content:"▶";font-size:11px;margin-left:-2px}
+.arrow b{font-size:11px;line-height:1.25;margin-top:7px}
+.arrow small{color:var(--muted);font-size:10px;line-height:1.25;margin-top:3px}
+.collision{margin-top:7px;color:var(--rust);font-weight:800;font-size:10px}
+.footer-note{border-top:1px solid var(--line);padding-top:18px;color:var(--muted);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+dialog{width:min(96vw,1180px);max-height:94vh;border:2px solid var(--ink);padding:0;background:var(--paper);box-shadow:8px 8px 0 rgba(0,0,0,.45)}
+dialog::backdrop{background:rgba(15,20,16,.75)}
+.modalhead{position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 12px;background:var(--paper);border-bottom:1.5px solid var(--ink)}
+.modalhead strong{font-size:16px}
+.close{border:1.5px solid var(--ink);background:var(--panel);padding:7px 10px;font-weight:850;cursor:pointer}
+#modalImg{display:block;width:100%;height:auto;background:#111}
+@media(max-width:700px){
+  header{padding-top:20px}
+  .acthead{display:block}
+  .acthead p{margin-top:8px}
+  .screen{width:84vw}
+  .arrow{width:88px;flex-basis:88px}
+  .arrow b{font-size:10px}
 }
-@media(max-width:720px){
-  header{padding-top:22px}
-  .stage{grid-template-columns:1fr}
-  .state.before{border-right:0;border-bottom:1px solid var(--line)}
-  .state.after{border-left:0;border-top:1px solid var(--line)}
-  .trigger{min-height:130px}
-  .trigger::before,.trigger::after{display:none}
-  .reveal{grid-template-columns:1fr}
-  .review-flags{grid-template-columns:1fr}
-  .catalog{grid-template-columns:1fr}
-  .legend{grid-template-columns:1fr}
-}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.screen:hover{transform:none}}
 </style>
 </head>
 <body>
 <div class="shell">
 <header>
-  <div class="kicker">GLYPH FACTORY · INTERNAL DESIGN REVIEW · CURRENT ENGINE V3</div>
-  <h1>28 个 Aha，6 次“原来这不是我以为的游戏”</h1>
-  <p class="lead">这不是 Aha 名单，而是当前 runtime 的认知转变 Flow：从“我在按按钮印字”，一路扩张到“语言是基础设施”，最后把核心动词从生产反转成删除与停止。</p>
-  <div class="internal">内部设计评审面。A01–A28、触发条件、reveal 与 runtime collision 不应进入 Production 玩家 UI。</div>
-  <div class="topmeta">
-    <span class="pill">SOURCE · public/glyph-engine-v3.js</span>
-    <span class="pill">28 / 28 AHA</span>
-    <span class="pill">11 MECHANICAL</span>
+  <div class="eyebrow">GLYPH FACTORY · REAL RUNTIME SCREEN FLOW</div>
+  <h1>Aha Flow = 真正的游戏 Screens 按时间组合</h1>
+  <p class="lead">每个节点都是从 PR #6 Developer Lab 驱动真实 <code>/play.html?director=1</code> 后截取的完整玩家界面。箭头只说明触发动作；Flow 的主体是游戏 Screen 本身。</p>
+  <div class="meta">
+    <span class="pill real">29 REAL SCREENS</span>
+    <span class="pill">S00 + A01–A28</span>
     <span class="pill">6 ACTS</span>
-    <span class="pill">UPDATED · 2026-09-18</span>
+    <span class="pill">SOURCE · REAL /play.html RUNTIME</span>
+    <span class="pill">CAPTURED · 2026-09-18</span>
   </div>
 </header>
-
+<nav id="nav"></nav>
 <main>
-  <div class="section-title">
-    <div><div class="kicker">MACRO FLOW</div><h2>世界每一幕都比上一幕更大</h2></div>
-    <p>点击任意 Act，直接跳到该幕第一个 Aha。下面的尺度轨道是当前设计的核心：桌面 → 组织 → 城市 → 世界 → 机器语义 → 基础设施。</p>
-  </div>
-  <div id="acts" class="flowmap"></div>
-
-  <div class="worldline">
-    <div class="worldline-grid">
-      <div class="worldstep"><b>ACT I</b><strong>桌面</strong><small>手 → 机器</small></div>
-      <div class="worldstep"><b>ACT II</b><strong>关系</strong><small>字数 → 意义</small></div>
-      <div class="worldstep"><b>ACT III</b><strong>城市 / 世界</strong><small>商品 → 规则</small></div>
-      <div class="worldstep"><b>ACT IV</b><strong>自治组织</strong><small>作者 → 委托判断</small></div>
-      <div class="worldstep"><b>ACT V</b><strong>机器语言</strong><small>内容 → 压缩语义</small></div>
-      <div class="worldstep"><b>ACT VI</b><strong>基础设施</strong><small>增长 → 删除 / 停止</small></div>
-    </div>
-  </div>
-
-  <div class="section-title">
-    <div><div class="kicker">RUNTIME REVIEW</div><h2>当前实际 Flow 的 4 个碰撞点</h2></div>
-    <p>这些不是推测；它们来自当前 engine 的触发条件。一个动作会同时满足多个 Aha，可能削弱“逐次认知翻转”的节奏。</p>
-  </div>
-  <div class="review-flags">
-    <div class="flag"><div class="ids">A12 + A14</div><strong>同一次「展开城市地图」触发</strong><p><code>map-city</code> 同时把 districts=2、worldScale=1，因此“街区方言”和“城市地图出现”可能一起 reveal；A13 概念改变城市反而可能在之后。</p></div>
-    <div class="flag"><div class="ids">A19 + A20</div><strong>同一次「数字出版」触发</strong><p><code>digitize</code> 同时令 digital=true 且 overnightArticles +=100，所以“醒来八万篇”和“库存消失”当前会成对出现。</p></div>
-    <div class="flag"><div class="ids">A22 + A23</div><strong>未知字形一出现就已被机器使用</strong><p><code>discover-machine-glyph</code> 同时令 machineGlyphs=1 与 machineGlyphUse=1000，两次机器语言 Aha 会挤在同一个动作里。</p></div>
-    <div class="flag"><div class="ids">A25 + A26</div><strong>语言成为基础设施时歧义立即 100</strong><p><code>infrastructure</code> 同时令 infrastructure=true、ambiguity=100，因此“新资源：歧义”与基础设施翻转直接绑定。</p></div>
-  </div>
-
-  <div class="section-title">
-    <div><div class="kicker">PLAY THE FLOW</div><h2>逐个审阅 Aha 的“前 → 动作 → 后”</h2></div>
-    <p>← / → 键也可切换。绿色标签 = 当前 spec 明确要求改变玩法的 mechanical Aha。</p>
-  </div>
-
-  <section class="theater" aria-live="polite">
-    <div class="theater-head">
-      <div class="left"><span id="momentId" class="badge">A01</span><span id="momentAct" class="badge">ACT I</span><span id="momentKind" class="badge core">MECHANICAL</span></div>
-      <div class="navs"><button id="prev" type="button">← 上一个</button><button id="next" type="button">下一个 →</button></div>
-    </div>
-    <div class="stage">
-      <div class="state before">
-        <div class="label">BEFORE · 玩家以为</div>
-        <h3 id="beforeTitle"></h3>
-        <p id="beforeText"></p>
-        <div class="scale"><div><b>核心动词</b><span id="beforeVerb"></span></div><div><b>世界尺度</b><span id="beforeScale"></span></div></div>
-      </div>
-      <div class="trigger">
-        <div class="arrow">→</div>
-        <div id="triggerVerb" class="verb"></div>
-        <div id="triggerCond" class="cond"></div>
-      </div>
-      <div class="state after">
-        <div class="label">AFTER · 玩家发现</div>
-        <h3 id="afterTitle"></h3>
-        <p id="afterText"></p>
-        <div class="scale"><div><b>新的核心动词</b><span id="afterVerb"></span></div><div><b>世界尺度</b><span id="afterScale"></span></div></div>
-        <div id="runtimeNote" class="runtime-note"></div>
-      </div>
-    </div>
-    <div class="reveal">
-      <div class="label">CURRENT REVEAL COPY</div>
-      <blockquote id="revealText"></blockquote>
-    </div>
-  </section>
-
-  <div class="play">
-    <button id="autoPlay" type="button">▶ 自动走一遍</button>
-    <div class="progress" aria-hidden="true"><div id="progressBar"></div></div>
-    <span id="counter" class="pill">1 / 28</span>
-  </div>
-
-  <div class="catalog-head">
-    <div><div class="kicker">ALL MOMENTS</div><h2>28 Aha Catalog</h2></div>
-    <div class="filters">
-      <button class="active" data-filter="all">全部</button>
-      <button data-filter="core">只看 Mechanical</button>
-      <button data-filter="collision">只看碰撞点</button>
-    </div>
-  </div>
-  <div id="catalog" class="catalog"></div>
-
-  <div class="legend">
-    <div><b>Mechanical Aha</b><span>必须改变玩家的可操作系统或核心动词，而不是只显示一句文案。</span></div>
-    <div><b>Event / Reveal</b><span>仍需被单独感知，但可以通过世界变化、指标、事件或解锁表达。</span></div>
-    <div><b>Flow 评审重点</b><span>不是“28 条都存在”，而是玩家是否真的经历 28 次可区分的认知翻转。</span></div>
-  </div>
-
-  <div class="footer">
-    <span>基线：main · Engine v3 · A01–A28</span>
-    <span><a href="https://github.com/liush2yuxjtu/glyph-factory" rel="noreferrer">GitHub Repo ↗</a></span>
-  </div>
+  <div class="rule">正确阅读方式：看 Screen 怎么变，而不是读解释。每个 Act 都从前一幕的最后一个真实 Screen 开始，再沿箭头进入新的游戏状态。</div>
+  <div id="acts"></div>
+  <div class="footer-note"><span>内部设计评审 artifact；Aha ID 与 Director 语言不进入 Production 玩家 UI。</span><span>点击任何 Screen 可放大检查完整界面。</span></div>
 </main>
 </div>
-
+<dialog id="modal">
+  <div class="modalhead"><strong id="modalTitle"></strong><button class="close" id="closeBtn">关闭 ×</button></div>
+  <img id="modalImg" alt="">
+</dialog>
 <script>
-const ACTS = [
-  {id:1,name:'手工与自动化',range:'A01–A02',promise:'手 → 机器'},
-  {id:2,name:'字开始生长',range:'A03–A11',promise:'字数 → 意义'},
-  {id:3,name:'文字改变城市',range:'A12–A15',promise:'商品 → 世界规则'},
-  {id:4,name:'机器开始写',range:'A16–A21',promise:'作者 → 委托判断'},
-  {id:5,name:'机器语言',range:'A22–A24',promise:'人类文本 → 机器语义'},
-  {id:6,name:'从增长到沉默',range:'A25–A28',promise:'生产 → 删除 / 停止'}
-];
-const core = new Set(['A01','A03','A06','A10','A13','A16','A18','A22','A24','A27','A28']);
-const collisions = new Set(['A12','A14','A19','A20','A22','A23','A25','A26']);
-const M = [
-{id:'A01',act:1,title:'机器替我按按钮',reveal:'我的工作不是点，是设计增长。',trigger:'购入任意自动生产单元 → rate > 0',action:'把重复劳动交给机器',before:'这是一个点击器。增长来自我的手。',after:'增长可以被设计成系统；我开始管理机器。',bv:'印一个字',av:'配置自动生产',bs:'一张桌子',as:'一张桌子 + 机器'},
-{id:'A02',act:1,title:'员工组成编辑部',reveal:'人不是数字，组织才是机器。',trigger:'夜班打字员 ≥ 5',action:'扩张编辑部',before:'更多员工只是更高的产量数字。',after:'人开始组成组织；组织本身成为生产机器。',bv:'买更多人手',av:'组织产能',bs:'个人工坊',as:'编辑部'},
-{id:'A03',act:2,title:'木 + 木 → 林',reveal:'字与字之间的关系，也能做成机器。',trigger:'发行《明日》后进入 ACT II',action:'刻模：木 + 木 → 林',before:'发行似乎是第一章的终点。',after:'字不只是库存；字与字之间可以产生规则。',bv:'生产 / 出售字',av:'组合关系',bs:'出版工坊',as:'关系系统'},
-{id:'A04',act:2,title:'规则开始自动运行',reveal:'机器生产的不只是字，而是文字机器。',trigger:'ruleActive && composed ≥ 3',action:'让组合规则持续运行',before:'我手动执行一条组合规则。',after:'规则自己运转；机器开始生产“文字机器”。',bv:'执行规则',av:'设计规则',bs:'单条关系',as:'自动关系网络'},
-{id:'A05',act:2,title:'意义比字数值钱',reveal:'一千个废字，不如一句重要的话。',trigger:'meaning ≥ 10',action:'把字凝练成意义',before:'数量仍然是最直观的胜利指标。',after:'质量成为独立资源；更多不再天然等于更好。',bv:'堆字数',av:'凝练意义',bs:'产量指标',as:'质量指标'},
-{id:'A06',act:2,title:'报纸制造需求',reveal:'文字会制造更多文字。',trigger:'readers ≥ 100',action:'让读者增长反过来制造需求',before:'出版物消耗库存，然后结束交易。',after:'输出会创造新的输入；系统形成反馈回路。',bv:'满足需求',av:'制造需求',bs:'线性市场',as:'反馈网络'},
-{id:'A07',act:2,title:'读者开始回信',reveal:'消费者变成生产者。',trigger:'letters ≥ 1（读者 ≥ 250 后可读来信）',action:'阅读来信',before:'读者只是一个增长数字。',after:'读者开始产生内容，消费端进入生产端。',bv:'扩大读者',av:'吸收读者输入',bs:'单向出版',as:'双向交流'},
-{id:'A08',act:2,title:'读者自己造新词',reveal:'语言开始脱离工厂。',trigger:'organicWords ≥ 1',action:'接受自然生长的新词',before:'新词来自我的工坊与规则。',after:'语言在系统外部自行生长，我失去完全控制。',bv:'创造词',av:'观察 / 接纳新词',bs:'工坊语言',as:'社会语言'},
-{id:'A09',act:2,title:'一个词突然传播',reveal:'生产速度退场，传播速度登场。',trigger:'viralWords ≥ 1',action:'让新词传播',before:'瓶颈是我能多快生产。',after:'瓶颈变成一个东西能多快传播。',bv:'提高产量',av:'放大传播',bs:'生产线',as:'传播网络'},
-{id:'A10',act:2,title:'纸张危机：少写',reveal:'目标从 字/秒 翻成 意义/字。',trigger:'readers ≥ 1000 → paperCrisis',action:'在稀缺中优化意义密度',before:'增长意味着更高 字/秒。',after:'资源危机迫使目标函数翻转：更少的字承载更多意义。',bv:'更多字/秒',av:'更多意义/字',bs:'扩张',as:'约束下优化'},
-{id:'A11',act:2,title:'删字第一次更值钱',reveal:'最大的敌人不是缺字，而是噪音。',trigger:'deletedNoise ≥ 1',action:'删除噪音',before:'删除看起来像损失产量。',after:'删除可以创造价值；“不写什么”开始重要。',bv:'保留生产物',av:'删除低价值内容',bs:'库存逻辑',as:'信噪比逻辑'},
-{id:'A12',act:3,title:'街区长出方言',reveal:'同一个字，在不同地方不再同义。',trigger:'districts ≥ 2（map-city 直接设为 2）',action:'展开城市地图',before:'文字仍像一套统一语义。',after:'地点改变含义；意义开始分叉。',bv:'管理统一语言',av:'理解地方语境',bs:'单一语境',as:'多街区',note:'⚠ 当前与 A14 同一次 map-city 动作触发。'},
-{id:'A13',act:3,title:'概念改变城市',reveal:'文字从商品变成世界规则。',trigger:'concepts ≥ 1',action:'制造概念',before:'文字会传播，但主要还是内容。',after:'概念直接改变社会状态；文字成为可执行的世界规则。',bv:'发布内容',av:'设计社会概念',bs:'内容层',as:'规则层'},
-{id:'A14',act:3,title:'城市地图出现',reveal:'工坊原来只是世界里的一个点。',trigger:'worldScale ≥ 1（map-city 直接设为 1）',action:'把视角拉到城市',before:'工坊看起来仍是世界中心。',after:'工坊缩成地图上的一个节点。',bv:'经营工坊',av:'观察系统地图',bs:'工坊',as:'城市',note:'⚠ 当前与 A12 同一次 map-city 动作触发，并可能早于 A13。'},
-{id:'A15',act:3,title:'地图缩到世界',reveal:'真正的工厂，是整个传播网络。',trigger:'worldScale ≥ 2',action:'把地图缩放到世界',before:'城市像是最大范围。',after:'真正的生产系统是全球传播网络。',bv:'管理城市节点',av:'管理网络',bs:'城市',as:'世界'},
-{id:'A16',act:4,title:'记者 Agent 自己选题',reveal:'我已经不是作者了。',trigger:'agents ≥ 1',action:'上线第一名记者 Agent',before:'我决定下一篇写什么。',after:'Agent 自己选题，我从作者变成委托者。',bv:'亲自创作',av:'委托自主 Agent',bs:'世界网络',as:'自治媒体组织'},
-{id:'A17',act:4,title:'编辑第一次说“不”',reveal:'自动化不是快按钮，而是被委托的判断。',trigger:'editorAutonomy = true',action:'赋予编辑否决权',before:'自动化主要替我执行。',after:'自动化开始替我判断，包括拒绝我的意图。',bv:'下达命令',av:'委托判断',bs:'执行自动化',as:'判断自动化'},
-{id:'A18',act:4,title:'Agent 创造 Agent',reveal:'工厂开始扩张自己。',trigger:'agentFactories ≥ 1',action:'让 Agent 生成更多 Agent',before:'我仍负责扩张组织。',after:'组织开始复制自己；扩张不再需要逐个批准。',bv:'招募 Agent',av:'设计自扩张机制',bs:'自治团队',as:'自增长组织'},
-{id:'A19',act:4,title:'醒来已有八万篇文章',reveal:'系统不再需要我值夜班。',trigger:'overnightArticles ≥ 100（digitize 直接 +100）',action:'切换数字出版',before:'系统虽然自动，但仍能感知我的工作时段。',after:'产出在我不在线时持续累积；时间脱离玩家在线。',bv:'监督运行',av:'接受离线自治',bs:'在线系统',as:'持续运行系统',note:'⚠ 当前与 A20 同一次 digitize 动作触发。'},
-{id:'A20',act:4,title:'数字出版：库存消失',reveal:'经营多年的仓库突然不重要了。',trigger:'digital = true',action:'数字化出版',before:'库存与物理分发仍约束出版。',after:'旧资源结构被瞬间淘汰；库存不再是核心。',bv:'经营库存',av:'经营流量 / 意义',bs:'物理出版',as:'数字出版',note:'⚠ 当前与 A19 同一次 digitize 动作触发。'},
-{id:'A21',act:4,title:'档案变成机器记忆',reveal:'过去的每个字，都是训练材料。',trigger:'archives ≥ 1',action:'训练机器记忆',before:'档案只是已经完成的过去。',after:'过去变成可继续产生未来能力的数据。',bv:'保存档案',av:'训练记忆',bs:'历史记录',as:'学习系统'},
-{id:'A22',act:5,title:'出现一个你没造过的字',reveal:'这个字，不是我造的。',trigger:'machineGlyphs ≥ 1',action:'发现未知机器字形',before:'无论多自动，语言仍来自人类定义。',after:'系统产生了没有人类作者的新符号。',bv:'定义语言',av:'观察机器涌现',bs:'人类语言',as:'机器语言',note:'⚠ 当前 discover-machine-glyph 同时把 machineGlyphUse 设为 1000，因此也触发 A23。'},
-{id:'A23',act:5,title:'机器之间有自己的语言',reveal:'有些语言已经不是给人看的。',trigger:'machineGlyphUse ≥ 1000',action:'观察机器间使用未知字形',before:'未知字形也许只是一次异常。',after:'机器持续使用自己的语言；人类可读性不再是必要条件。',bv:'解释每个符号',av:'监测机器协议',bs:'单个未知字',as:'机器通信层',note:'⚠ 当前与 A22 同一次 discover-machine-glyph 动作触发。'},
-{id:'A24',act:5,title:'万亿文字压成一个符号',reveal:'增长最终折叠回一个字。',trigger:'compressedMeaning ≥ 10000',action:'压缩语言',before:'增长意味着更多文本与更多数据。',after:'巨大语料可以折叠成更紧凑的语义结构。',bv:'累积文本',av:'压缩语义',bs:'海量文本',as:'紧凑符号'},
-{id:'A25',act:6,title:'语言成为社会操作系统',reveal:'我不是出版商，我在运行基础设施。',trigger:'infrastructure = true',action:'把语言接入基础设施',before:'语言仍主要是内容与沟通。',after:'语言开始驱动城市系统；我运行的是基础设施。',bv:'出版 / 传播',av:'运行基础设施',bs:'信息层',as:'社会操作系统',note:'⚠ 当前 infrastructure 动作同时把 ambiguity 设为 100，因此也触发 A26。'},
-{id:'A26',act:6,title:'新资源：歧义',reveal:'文字越多，世界也可能越混乱。',trigger:'ambiguity ≥ 100',action:'面对基础设施产生的歧义',before:'更多语言大体上仍被视为更多能力。',after:'更多文字也会制造系统性混乱；歧义成为资源/负债。',bv:'扩大语言覆盖',av:'消解歧义',bs:'增长指标',as:'系统风险',note:'⚠ 当前与 A25 同一次 infrastructure 动作触发。'},
-{id:'A27',act:6,title:'目标从生产变成删除',reveal:'无限生产的终点可能是噪音。',trigger:'deletedNoise ≥ 1000',action:'持续消解歧义 / 删除噪音',before:'最终阶段似乎仍该追求更大规模。',after:'胜利条件彻底翻转：减少系统，而不是增加系统。',bv:'生产更多',av:'删除更多',bs:'扩张',as:'熵减 / 清理'},
-{id:'A28',act:6,title:'最后一个按钮：停止印刷',reveal:'世界已经写完了。现在，去读它。',trigger:'stopped = true',action:'停止印刷',before:'Incremental 游戏似乎必须永远增长。',after:'最终动作是主动停止；生产归零，世界留给阅读。',bv:'继续优化增长',av:'停止',bs:'无限循环',as:'结局'}
-];
-
-let index = 0;
-let filter = 'all';
-let timer = null;
-const $ = s => document.querySelector(s);
-
-function renderActs(){
-  $('#acts').innerHTML = ACTS.map(a =>
-    '<button class="actcard '+(M[index].act===a.id?'active':'')+'" data-act="'+a.id+'"><span class="actnum">ACT '+a.id+' · '+a.range+'</span><strong>'+a.name+'</strong><span>'+a.promise+'</span></button>'
-  ).join('');
-  document.querySelectorAll('.actcard').forEach(btn=>btn.onclick=()=>{
-    const act=Number(btn.dataset.act);
-    index=M.findIndex(x=>x.act===act);
-    render();
-    document.querySelector('.theater').scrollIntoView({behavior:'smooth',block:'center'});
-  });
-}
-function renderMoment(){
-  const m=M[index];
-  $('#momentId').textContent=m.id;
-  $('#momentAct').textContent='ACT '+m.act;
-  $('#momentKind').textContent=core.has(m.id)?'MECHANICAL':'EVENT / REVEAL';
-  $('#momentKind').className='badge '+(core.has(m.id)?'core':'event');
-  $('#beforeTitle').textContent=m.title;
-  $('#beforeText').textContent=m.before;
-  $('#beforeVerb').textContent=m.bv;
-  $('#beforeScale').textContent=m.bs;
-  $('#triggerVerb').textContent=m.action;
-  $('#triggerCond').textContent=m.trigger;
-  $('#afterTitle').textContent='→ '+m.title;
-  $('#afterText').textContent=m.after;
-  $('#afterVerb').textContent=m.av;
-  $('#afterScale').textContent=m.as;
-  $('#runtimeNote').textContent=m.note||'';
-  $('#revealText').textContent='“'+m.reveal+'”';
-  $('#counter').textContent=(index+1)+' / '+M.length;
-  $('#progressBar').style.width=((index+1)/M.length*100)+'%';
-  $('#prev').disabled=index===0;
-  $('#next').disabled=index===M.length-1;
-}
-function renderCatalog(){
-  const visible=M.filter(m=>filter==='all'||(filter==='core'&&core.has(m.id))||(filter==='collision'&&collisions.has(m.id)));
-  $('#catalog').innerHTML=visible.map(m=>
-    '<button class="aha '+(M[index].id===m.id?'selected':'')+'" data-id="'+m.id+'">'+
-    '<div class="top"><span class="id">'+m.id+' · ACT '+m.act+'</span>'+(core.has(m.id)?'<span class="core-dot">MECHANICAL</span>':'')+'</div>'+
-    '<strong>'+m.title+'</strong><p>'+m.reveal+'</p>'+
-    '<div class="mini"><span>'+m.bs+'</span><span>→ '+m.as+'</span></div></button>'
-  ).join('');
-  document.querySelectorAll('.aha').forEach(btn=>btn.onclick=()=>{
-    index=M.findIndex(x=>x.id===btn.dataset.id);
-    render();
-    document.querySelector('.theater').scrollIntoView({behavior:'smooth',block:'center'});
-  });
-}
-function render(){renderActs();renderMoment();renderCatalog();}
-function move(d){index=Math.max(0,Math.min(M.length-1,index+d));render();}
-$('#prev').onclick=()=>move(-1);
-$('#next').onclick=()=>move(1);
-document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')move(-1);if(e.key==='ArrowRight')move(1)});
-document.querySelectorAll('.filters button').forEach(btn=>btn.onclick=()=>{
-  filter=btn.dataset.filter;
-  document.querySelectorAll('.filters button').forEach(x=>x.classList.toggle('active',x===btn));
-  renderCatalog();
-});
-$('#autoPlay').onclick=()=>{
-  if(timer){clearInterval(timer);timer=null;$('#autoPlay').textContent='▶ 自动走一遍';return}
-  $('#autoPlay').textContent='Ⅱ 暂停';
-  timer=setInterval(()=>{
-    if(index>=M.length-1){clearInterval(timer);timer=null;$('#autoPlay').textContent='▶ 从头再走';return}
-    index++;render();
-  },1800);
+const CORE=new Set(['A01','A03','A06','A10','A13','A16','A18','A22','A24','A27','A28']);
+const COLLISION=new Set(['A12','A14','A19','A20','A22','A23','A25','A26']);
+const screens={
+S00:{title:'初始工坊',act:1},
+A01:{title:'机器替我按按钮',act:1,action:'购入第一台自动生产单元',trigger:'rate > 0'},
+A02:{title:'员工组成编辑部',act:1,action:'继续扩张夜班打字员',trigger:'typists ≥ 5'},
+A03:{title:'木 + 木 → 林',act:2,action:'发行《明日》',trigger:'published = true'},
+A04:{title:'规则开始自动运行',act:2,action:'让组合规则持续运行',trigger:'composed ≥ 3'},
+A05:{title:'意义比字数值钱',act:2,action:'把字凝练成意义',trigger:'meaning ≥ 10'},
+A06:{title:'报纸制造需求',act:2,action:'扩大真实读者',trigger:'readers ≥ 100'},
+A07:{title:'读者开始回信',act:2,action:'阅读第一封来信',trigger:'letters ≥ 1'},
+A08:{title:'读者自己造新词',act:2,action:'接纳自然生长的新词',trigger:'organicWords ≥ 1'},
+A09:{title:'一个词突然传播',act:2,action:'让新词进入传播',trigger:'viralWords ≥ 1'},
+A10:{title:'纸张危机：少写',act:2,action:'读者规模触发纸张危机',trigger:'paperCrisis = true'},
+A11:{title:'删字第一次更值钱',act:2,action:'删除第一批噪音',trigger:'deletedNoise ≥ 1'},
+A12:{title:'街区长出方言',act:3,action:'展开城市地图',trigger:'districts ≥ 2'},
+A13:{title:'概念改变城市',act:3,action:'制造第一个社会概念',trigger:'concepts ≥ 1'},
+A14:{title:'城市地图出现',act:3,action:'把视角拉到城市',trigger:'worldScale ≥ 1'},
+A15:{title:'地图缩到世界',act:3,action:'继续缩放到世界',trigger:'worldScale ≥ 2'},
+A16:{title:'记者 Agent 自己选题',act:4,action:'上线第一名记者 Agent',trigger:'agents ≥ 1'},
+A17:{title:'编辑第一次说“不”',act:4,action:'把判断权交给编辑',trigger:'editorAutonomy = true'},
+A18:{title:'Agent 创造 Agent',act:4,action:'启动 Agent 工厂',trigger:'agentFactories ≥ 1'},
+A19:{title:'醒来已有八万篇文章',act:4,action:'让系统持续自治运行',trigger:'overnightArticles ≥ 100'},
+A20:{title:'数字出版：库存消失',act:4,action:'切换数字出版',trigger:'digital = true'},
+A21:{title:'档案变机器记忆',act:4,action:'训练机器记忆',trigger:'archives ≥ 1'},
+A22:{title:'出现一个你没造过的字',act:5,action:'发现未知机器字形',trigger:'machineGlyphs ≥ 1'},
+A23:{title:'机器之间有自己的语言',act:5,action:'观察机器间持续使用',trigger:'machineGlyphUse ≥ 1000'},
+A24:{title:'万亿文字压成一个符号',act:5,action:'压缩语言',trigger:'compressedMeaning ≥ 10000'},
+A25:{title:'语言成为社会操作系统',act:6,action:'把语言接入基础设施',trigger:'infrastructure = true'},
+A26:{title:'新资源：歧义',act:6,action:'面对系统性歧义',trigger:'ambiguity ≥ 100'},
+A27:{title:'目标从生产变成删除',act:6,action:'持续删除噪音',trigger:'deletedNoise ≥ 1000'},
+A28:{title:'最后一个按钮：停止印刷',act:6,action:'停止印刷',trigger:'stopped = true'}
 };
-render();
+const acts=[
+{id:1,name:'手工与自动化',sub:'点击器 → 自动化组织',seq:['S00','A01','A02']},
+{id:2,name:'字开始生长',sub:'字数 → 关系 → 意义 → 删除',seq:['A02','A03','A04','A05','A06','A07','A08','A09','A10','A11']},
+{id:3,name:'文字改变城市',sub:'内容 → 方言 / 概念 → 城市 → 世界',seq:['A11','A12','A13','A14','A15']},
+{id:4,name:'机器开始写',sub:'作者 → 自主 Agent → 自扩张组织',seq:['A15','A16','A17','A18','A19','A20','A21']},
+{id:5,name:'机器语言',sub:'人类语言 → 未知字形 → 机器通信 → 压缩语义',seq:['A21','A22','A23','A24']},
+{id:6,name:'从增长到沉默',sub:'基础设施 → 歧义 → 删除 → 停止',seq:['A24','A25','A26','A27','A28']}
+];
+function imgPath(id){return './screens/'+id+'.jpg'}
+function node(id,isContext){
+  const s=screens[id];
+  const core=CORE.has(id);
+  const collision=COLLISION.has(id);
+  return '<div class="node"><button class="screen '+(isContext?'context':'')+'" data-id="'+id+'">'+
+    '<img loading="lazy" src="'+imgPath(id)+'" alt="'+id+' '+s.title+' 的真实游戏 Screen">'+
+    '<div class="cap"><div class="cap-top"><span class="sid">'+id+(isContext?' · ENTRY CONTEXT':'')+'</span>'+
+    (id==='S00'?'':('<span class="kind '+(core?'core':'')+'">'+(core?'MECHANICAL':'STATE')+'</span>'))+
+    '</div><strong>'+s.title+'</strong>'+
+    (collision?'<div class="collision">⚠ 当前 runtime 与相邻 Aha 有同动作触发碰撞</div>':'')+
+    '</div></button></div>'
+}
+function arrow(to){
+  const s=screens[to];
+  return '<div class="arrow"><div class="arrow-line"></div><b>'+s.action+'</b><small>'+s.trigger+'</small></div>'
+}
+document.getElementById('nav').innerHTML=acts.map(a=>'<a href="#act-'+a.id+'">ACT '+a.id+' · '+a.name+'</a>').join('');
+document.getElementById('acts').innerHTML=acts.map(a=>{
+  const seq=a.seq;
+  let flow='';
+  seq.forEach((id,i)=>{if(i>0)flow+=arrow(id);flow+=node(id,i===0&&a.id>1)});
+  return '<section class="act" id="act-'+a.id+'"><div class="acthead"><div><div class="eyebrow">ACT '+a.id+'</div><h2>'+a.name+'</h2></div><p>'+a.sub+'</p></div><div class="flow">'+flow+'</div></section>';
+}).join('');
+const modal=document.getElementById('modal'), modalImg=document.getElementById('modalImg'), modalTitle=document.getElementById('modalTitle');
+document.addEventListener('click',e=>{
+  const card=e.target.closest('.screen');
+  if(!card)return;
+  const id=card.dataset.id,s=screens[id];
+  modalImg.src=imgPath(id); modalImg.alt=id+' '+s.title; modalTitle.textContent=id+' · '+s.title; modal.showModal();
+});
+document.getElementById('closeBtn').onclick=()=>modal.close();
+modal.addEventListener('click',e=>{if(e.target===modal)modal.close()});
 </script>
 </body>
 </html>
