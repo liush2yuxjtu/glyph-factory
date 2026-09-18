@@ -1299,6 +1299,8 @@ function selectAsset(id) {
   const asset = assetById.get(id);
   if (!asset) return;
   selectedAsset = asset;
+  const conceptLink = document.getElementById("asset-concept-link");
+  if (conceptLink) conceptLink.href = "./concepts/ui.html#" + asset.id;
   renderAssetList();
   stageTitle.textContent = asset.name + " · " + asset.cn;
   stageFamily.textContent = getFamilyLabel(asset);
