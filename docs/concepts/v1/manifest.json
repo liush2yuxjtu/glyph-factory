@@ -1,0 +1,336 @@
+{
+  "version": 1,
+  "created": "2026-09-18",
+  "generator": "OpenAI built-in image_gen",
+  "kind": "AI-generated 2D concept art for 3D modeling",
+  "sourceRepository": "liush2yuxjtu/glyph-factory",
+  "sourceBranch": "feat/3d-asset-gallery",
+  "sourceCommit": "d164ffde13e024ebaa3bae178b0533d1628a0cc0",
+  "prompts": "prompts.json",
+  "assets": [
+    {
+      "id": "builder",
+      "file": "builder.png",
+      "status": "polished-concept",
+      "sourceAssetId": "builder",
+      "aha": "A01",
+      "views": [
+        "front",
+        "right-side",
+        "rear-three-quarter"
+      ],
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2289690,
+      "sha256": "91667be255b685782b8019770e2c969fec4d3a6108f505855dc7089c1f810fc1",
+      "promptId": "builder",
+      "review": "Illustrative three-angle concept; not dimensionally exact orthographic geometry. Reconcile asymmetry, fittings and camera alignment before modeling."
+    },
+    {
+      "id": "archivist",
+      "file": "archivist.png",
+      "status": "polished-concept",
+      "sourceAssetId": "archivist",
+      "aha": "A21",
+      "views": [
+        "front",
+        "right-side",
+        "rear-three-quarter"
+      ],
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2300780,
+      "sha256": "4ac4a92e6f7e1c34545a7dfabbe8d742a16d1da05b2d9fbca608b81b206765de",
+      "promptId": "archivist",
+      "review": "Illustrative three-angle concept; not dimensionally exact orthographic geometry. Reconcile asymmetry, fittings and camera alignment before modeling."
+    },
+    {
+      "id": "explorer",
+      "file": "explorer.png",
+      "status": "polished-concept",
+      "sourceAssetId": "explorer",
+      "aha": "A14",
+      "views": [
+        "front",
+        "right-side",
+        "rear-three-quarter"
+      ],
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2381304,
+      "sha256": "2463e97aa06739ab04df2d379b7c31df33ae214023f5993ab615899d51001a75",
+      "promptId": "explorer",
+      "review": "Illustrative three-angle concept; not dimensionally exact orthographic geometry. Reconcile asymmetry, fittings and camera alignment before modeling."
+    },
+    {
+      "id": "connector",
+      "file": "connector.png",
+      "status": "polished-concept",
+      "sourceAssetId": "connector",
+      "aha": "A03",
+      "views": [
+        "front",
+        "right-side",
+        "rear-three-quarter"
+      ],
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2288789,
+      "sha256": "7ea1db25699ddf8378e942eb8f1c6d6b17db209aec28679e5b00c2479fcf49b7",
+      "promptId": "connector",
+      "review": "Illustrative three-angle concept; not dimensionally exact orthographic geometry. Reconcile asymmetry, fittings and camera alignment before modeling."
+    },
+    {
+      "id": "illuminator",
+      "file": "illuminator.png",
+      "status": "polished-concept",
+      "sourceAssetId": "illuminator",
+      "aha": "A24",
+      "views": [
+        "front",
+        "right-side",
+        "rear-three-quarter"
+      ],
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2203348,
+      "sha256": "0f54b63d2b7e6f280069a872a08a6fa14aa7e82c2a8d9959f740d1a6579ec12f",
+      "promptId": "illuminator",
+      "review": "Illustrative three-angle concept; not dimensionally exact orthographic geometry. Reconcile asymmetry, fittings and camera alignment before modeling."
+    },
+    {
+      "id": "cartographer",
+      "file": "cartographer.png",
+      "status": "polished-concept",
+      "sourceAssetId": "cartographer",
+      "aha": "A15",
+      "views": [
+        "front",
+        "right-side",
+        "rear-three-quarter"
+      ],
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2325107,
+      "sha256": "370d6330d60fa2a9bc5357c378e6e69adfaf47bdc584169ec06a6013ceff8ffc",
+      "promptId": "cartographer",
+      "review": "Illustrative three-angle concept; not dimensionally exact orthographic geometry. Reconcile asymmetry, fittings and camera alignment before modeling."
+    },
+    {
+      "id": "lever",
+      "file": "lever.png",
+      "status": "polished-concept",
+      "sourceAssetId": "lever",
+      "aha": "A01",
+      "views": [
+        "front",
+        "right-side",
+        "rear-three-quarter"
+      ],
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2072373,
+      "sha256": "19208ac08574054726cdce5768d9715519022bd9a2d2b59a3f6536adaafce725",
+      "promptId": "lever",
+      "review": "Illustrative three-angle concept; not dimensionally exact orthographic geometry. Reconcile asymmetry, fittings and camera alignment before modeling."
+    },
+    {
+      "id": "crank",
+      "file": "crank.png",
+      "status": "polished-concept",
+      "sourceAssetId": "crank",
+      "aha": "A04",
+      "views": [
+        "front",
+        "right-side",
+        "rear-three-quarter"
+      ],
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2281107,
+      "sha256": "84210ffb0f420eb7056a38d4baa1f1ad4c2a4ed731dcb646945040a50911dd9d",
+      "promptId": "crank",
+      "review": "Illustrative three-angle concept; not dimensionally exact orthographic geometry. Reconcile asymmetry, fittings and camera alignment before modeling."
+    },
+    {
+      "id": "glyph-cube",
+      "file": "glyph-cube.png",
+      "status": "polished-concept",
+      "sourceAssetId": "glyph-cube",
+      "aha": "A03",
+      "views": [
+        "front",
+        "right-side",
+        "rear-three-quarter"
+      ],
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2394146,
+      "sha256": "feee79ce87cf73bcf74db95b6f308a51bad0990cd04339aee22253e25bb99f9b",
+      "promptId": "glyph-cube",
+      "review": "Illustrative three-angle concept; not dimensionally exact orthographic geometry. Reconcile asymmetry, fittings and camera alignment before modeling."
+    },
+    {
+      "id": "annotation-flag",
+      "file": "annotation-flag.png",
+      "status": "polished-concept",
+      "sourceAssetId": "annotation-flag",
+      "aha": "A07",
+      "views": [
+        "front",
+        "right-side",
+        "rear-three-quarter"
+      ],
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2078049,
+      "sha256": "3557f52e83c3706ab38f425fc034c68298fea431dcd3e1617a339adedbb33309",
+      "promptId": "annotation-flag",
+      "review": "Illustrative three-angle concept; not dimensionally exact orthographic geometry. Reconcile asymmetry, fittings and camera alignment before modeling."
+    },
+    {
+      "id": "magnifier",
+      "file": "magnifier.png",
+      "status": "polished-concept",
+      "sourceAssetId": "magnifier",
+      "aha": "A05",
+      "views": [
+        "front",
+        "right-side",
+        "rear-three-quarter"
+      ],
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2488943,
+      "sha256": "8f29e26f8b6e134920e804166599646366ed9e18916fa2a53bba9803c2b2e32e",
+      "promptId": "magnifier",
+      "review": "Illustrative three-angle concept; not dimensionally exact orthographic geometry. Reconcile asymmetry, fittings and camera alignment before modeling."
+    },
+    {
+      "id": "projector-beacon",
+      "file": "projector-beacon.png",
+      "status": "polished-concept",
+      "sourceAssetId": "projector-beacon",
+      "aha": "A13",
+      "views": [
+        "front",
+        "right-side",
+        "rear-three-quarter"
+      ],
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2262977,
+      "sha256": "1678ecd88e1f4b907996485487eb0b7294fd474943041061c56e164f5fc20261",
+      "promptId": "projector-beacon",
+      "review": "Illustrative three-angle concept; not dimensionally exact orthographic geometry. Reconcile asymmetry, fittings and camera alignment before modeling."
+    },
+    {
+      "id": "conveyor",
+      "file": "conveyor.png",
+      "status": "polished-concept",
+      "sourceAssetId": "conveyor",
+      "aha": "A06",
+      "views": [
+        "front",
+        "right-side",
+        "rear-three-quarter"
+      ],
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2076988,
+      "sha256": "652c8f91ec73fdeed63da9ad50dd09909203fd4f59be390bcc3b7144d8b3cd8c",
+      "promptId": "conveyor",
+      "review": "Illustrative three-angle concept; not dimensionally exact orthographic geometry. Reconcile asymmetry, fittings and camera alignment before modeling."
+    },
+    {
+      "id": "stamp-machine",
+      "file": "stamp-machine.png",
+      "status": "polished-concept",
+      "sourceAssetId": "stamp-machine",
+      "aha": "A03",
+      "views": [
+        "front",
+        "right-side",
+        "rear-three-quarter"
+      ],
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2083696,
+      "sha256": "ac3cc1187e0c1d2c260571480e8e16346772bd58ddda990b24efb716163568f6",
+      "promptId": "stamp-machine",
+      "review": "Illustrative three-angle concept; not dimensionally exact orthographic geometry. Reconcile asymmetry, fittings and camera alignment before modeling."
+    },
+    {
+      "id": "insight-crystal",
+      "file": "insight-crystal.png",
+      "status": "polished-concept",
+      "sourceAssetId": "insight-crystal",
+      "aha": "A22",
+      "views": [
+        "front",
+        "right-side",
+        "rear-three-quarter"
+      ],
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2285372,
+      "sha256": "b0c254129801d4005fdbd4c7ef9b0e55677c291e0591417e61a09030999f26c4",
+      "promptId": "insight-crystal",
+      "review": "Illustrative three-angle concept; not dimensionally exact orthographic geometry. Reconcile asymmetry, fittings and camera alignment before modeling."
+    },
+    {
+      "id": "expanding-node-tower",
+      "file": "expanding-node-tower.png",
+      "status": "polished-concept",
+      "sourceAssetId": "expanding-node-tower",
+      "aha": "A18",
+      "views": [
+        "front",
+        "right-side",
+        "rear-three-quarter"
+      ],
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2346359,
+      "sha256": "6011e09cfc768b928b69288f45a1b75b9bd91773b57576a028f6dfaac132d57d",
+      "promptId": "expanding-node-tower",
+      "review": "Illustrative three-angle concept; not dimensionally exact orthographic geometry. Reconcile asymmetry, fittings and camera alignment before modeling."
+    },
+    {
+      "id": "semantic-compressor",
+      "file": "semantic-compressor.png",
+      "status": "new-proposal",
+      "sourceAssetId": null,
+      "aha": "A24",
+      "views": [
+        "front",
+        "right-side",
+        "rear-three-quarter"
+      ],
+      "width": 1774,
+      "height": 887,
+      "bytes": 2124065,
+      "sha256": "620563efa9dc1d900d5afba01ce195af97184f43c0fd63468002739b44908d30",
+      "promptId": "semantic-compressor",
+      "review": "Illustrative three-angle concept; not dimensionally exact orthographic geometry. Reconcile asymmetry, fittings and camera alignment before modeling."
+    },
+    {
+      "id": "quiet-switch",
+      "file": "quiet-switch.png",
+      "status": "new-proposal",
+      "sourceAssetId": null,
+      "aha": "A28",
+      "views": [
+        "front",
+        "right-side",
+        "rear-three-quarter"
+      ],
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2259572,
+      "sha256": "e0c66f4268d124b72b06276af057582bac1eeda3643eb181b2c56cbcfb38f768",
+      "promptId": "quiet-switch",
+      "review": "Illustrative three-angle concept; not dimensionally exact orthographic geometry. Reconcile asymmetry, fittings and camera alignment before modeling."
+    }
+  ]
+}
