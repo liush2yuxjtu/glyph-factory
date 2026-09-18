@@ -783,3 +783,42 @@ footer {
     transition-duration: .01ms !important;
   }
 }
+
+
+/* Art direction v2: role identity is visible before opening the 3D stage. */
+.asset-card[data-asset-id="builder"] .asset-orb {
+  border-radius: 9px;
+  box-shadow: inset 0 0 20px rgba(255,177,90,.2), 0 0 20px rgba(255,177,90,.08);
+}
+.asset-card[data-asset-id="connector"] .asset-orb {
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 5px rgba(98,224,255,.09), 0 0 20px rgba(98,224,255,.13);
+}
+.asset-card[data-asset-id="illuminator"] .asset-orb {
+  border-radius: 50% 50% 42% 42%;
+  box-shadow: inset 0 0 24px rgba(255,214,110,.18), 0 0 24px rgba(255,214,110,.12);
+}
+.asset-card[data-asset-id="archivist"] .asset-orb {
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 4px rgba(118,201,160,.08);
+}
+.asset-card[data-asset-id="explorer"] .asset-orb {
+  border-radius: 50% 50% 30% 30%;
+  box-shadow: inset 0 0 20px rgba(101,201,255,.16);
+}
+.asset-card[data-asset-id="cartographer"] .asset-orb {
+  border-radius: 45% 45% 12px 12px;
+}
+.asset-card[data-asset-id="magnifier"],
+.asset-card[data-asset-id="projector-beacon"] {
+  background:
+    radial-gradient(circle at 10% 50%, color-mix(in srgb, var(--asset-accent) 11%, transparent), transparent 44%),
+    rgba(255,255,255,.025);
+}
+.asset-card[data-asset-id="magnifier"] .asset-orb,
+.asset-card[data-asset-id="projector-beacon"] .asset-orb {
+  border-radius: 50%;
+  box-shadow:
+    inset 0 0 0 4px color-mix(in srgb, var(--asset-accent) 9%, transparent),
+    0 0 22px color-mix(in srgb, var(--asset-accent) 12%, transparent);
+}
