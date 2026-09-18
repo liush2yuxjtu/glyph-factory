@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1720" role="img" aria-label="Glyph Factory Aha flows 17–20">
+  <style>
+  .bg{fill:#f3eedf}.row{fill:#f8f2e4;stroke:#c5bdab;stroke-width:2}.screen{fill:#fffaf0;stroke:#173125;stroke-width:2}.bar{fill:#184d38}.sidebar{fill:#ece5d3;stroke:#d5cdb9}.sidebar.active{fill:#dbe8cd}.idbox{fill:#235b43}.id{font:700 25px Georgia,serif;fill:#fff}.title{font:700 29px Georgia,serif;fill:#172019}.brand{font:700 17px Georgia,serif;fill:#fff}.nav{font:14px system-ui;fill:#365342}.panel{font:700 18px Georgia,serif;fill:#172019}.line{font:15px system-ui;fill:#4f5f55}.action{font:700 18px Georgia,serif;fill:#172019}.arrow{stroke:#3b7455;stroke-width:14}.arrowfill{fill:#3b7455}.out{font:italic 700 18px Georgia,serif;fill:#245b42}.h1{font:700 42px Georgia,serif;fill:#173125}.sub{font:17px system-ui;fill:#526158}
+  </style><rect class="bg" width="1200" height="1720"/><text x="28" y="58" class="h1">Glyph Factory — Standalone Aha Flows 17–20</text><text x="30" y="91" class="sub">Each Aha is a standalone Before → Action → After visual flow.</text><g transform="translate(0 125)">
+      <rect x="20" y="0" width="1160" height="360" rx="12" class="row"/>
+      <rect x="38" y="22" width="72" height="42" rx="6" class="idbox"/><text x="74" y="51" class="id" text-anchor="middle">A17</text>
+      <text x="128" y="53" class="title">The editor says no</text>
+      <g transform="translate(38 84)">
+        <rect width="430" height="228" rx="7" class="screen"/>
+        <rect width="430" height="34" rx="7" class="bar"/><text x="15" y="23" class="brand">Glyph Factory</text>
+        <rect x="16" y="52" width="94" height="154" class="sidebar"/>
+        <text x="31" y="76" class="nav">Workshop</text><text x="31" y="104" class="nav">Inventory</text><text x="31" y="132" class="nav">Research</text><text x="31" y="160" class="nav">Map</text>
+        <text x="130" y="79" class="panel">SUBMISSION QUEUE</text><text x="130" y="112" class="line">Everything auto-publishes</text><text x="130" y="147" class="line">5 pending articles</text><text x="130" y="182" class="line">System executes</text>
+      </g>
+      <g transform="translate(485 119)"><text x="115" y="0" text-anchor="middle" class="action">Grant editorial autonomy</text><path d="M15 64 H190" class="arrow"/><polygon points="190,50 220,64 190,78" class="arrowfill"/></g>
+      <g transform="translate(732 84)">
+        <rect width="430" height="228" rx="7" class="screen"/>
+        <rect width="430" height="34" rx="7" class="bar"/><text x="15" y="23" class="brand">Glyph Factory</text>
+        <rect x="16" y="52" width="94" height="154" class="sidebar active"/>
+        <text x="31" y="76" class="nav">System</text><text x="31" y="104" class="nav">Metrics</text><text x="31" y="132" class="nav">World</text><text x="31" y="160" class="nav">Archive</text>
+        <text x="130" y="79" class="panel">EDITORIAL REVIEW</text><text x="130" y="112" class="line">Approved · Revised · Rejected</text><text x="130" y="147" class="line">System judges quality</text><text x="130" y="182" class="line">Some ideas get a red X</text>
+      </g>
+      <text x="600" y="338" text-anchor="middle" class="out">Automation starts making judgments, not just following orders.</text>
+    </g><g transform="translate(0 515)">
+      <rect x="20" y="0" width="1160" height="360" rx="12" class="row"/>
+      <rect x="38" y="22" width="72" height="42" rx="6" class="idbox"/><text x="74" y="51" class="id" text-anchor="middle">A18</text>
+      <text x="128" y="53" class="title">Agents create agents</text>
+      <g transform="translate(38 84)">
+        <rect width="430" height="228" rx="7" class="screen"/>
+        <rect width="430" height="34" rx="7" class="bar"/><text x="15" y="23" class="brand">Glyph Factory</text>
+        <rect x="16" y="52" width="94" height="154" class="sidebar"/>
+        <text x="31" y="76" class="nav">Workshop</text><text x="31" y="104" class="nav">Inventory</text><text x="31" y="132" class="nav">Research</text><text x="31" y="160" class="nav">Map</text>
+        <text x="130" y="79" class="panel">ORGANIZATION</text><text x="130" y="112" class="line">You → Research / Writing / Editing</text><text x="130" y="147" class="line">Manual expansion</text><text x="130" y="182" class="line">10 agents</text>
+      </g>
+      <g transform="translate(485 119)"><text x="115" y="0" text-anchor="middle" class="action">Start agent factory</text><path d="M15 64 H190" class="arrow"/><polygon points="190,50 220,64 190,78" class="arrowfill"/></g>
+      <g transform="translate(732 84)">
+        <rect width="430" height="228" rx="7" class="screen"/>
+        <rect width="430" height="34" rx="7" class="bar"/><text x="15" y="23" class="brand">Glyph Factory</text>
+        <rect x="16" y="52" width="94" height="154" class="sidebar active"/>
+        <text x="31" y="76" class="nav">System</text><text x="31" y="104" class="nav">Metrics</text><text x="31" y="132" class="nav">World</text><text x="31" y="160" class="nav">Archive</text>
+        <text x="130" y="79" class="panel">AGENT FACTORY</text><text x="130" y="112" class="line">Generating new agents…</text><text x="130" y="147" class="line">Research 24 · Writing 31</text><text x="130" y="182" class="line">Editing 18 · Marketing 12</text>
+      </g>
+      <text x="600" y="338" text-anchor="middle" class="out">The factory begins expanding itself.</text>
+    </g><g transform="translate(0 905)">
+      <rect x="20" y="0" width="1160" height="360" rx="12" class="row"/>
+      <rect x="38" y="22" width="72" height="42" rx="6" class="idbox"/><text x="74" y="51" class="id" text-anchor="middle">A19</text>
+      <text x="128" y="53" class="title">You wake up to 80,000 articles</text>
+      <g transform="translate(38 84)">
+        <rect width="430" height="228" rx="7" class="screen"/>
+        <rect width="430" height="34" rx="7" class="bar"/><text x="15" y="23" class="brand">Glyph Factory</text>
+        <rect x="16" y="52" width="94" height="154" class="sidebar"/>
+        <text x="31" y="76" class="nav">Workshop</text><text x="31" y="104" class="nav">Inventory</text><text x="31" y="132" class="nav">Research</text><text x="31" y="160" class="nav">Map</text>
+        <text x="130" y="79" class="panel">LIVE ACTIVITY</text><text x="130" y="112" class="line">Online feed</text><text x="130" y="147" class="line">1 article every few minutes</text><text x="130" y="182" class="line">You are still watching</text>
+      </g>
+      <g transform="translate(485 119)"><text x="115" y="0" text-anchor="middle" class="action">Let system run overnight</text><path d="M15 64 H190" class="arrow"/><polygon points="190,50 220,64 190,78" class="arrowfill"/></g>
+      <g transform="translate(732 84)">
+        <rect width="430" height="228" rx="7" class="screen"/>
+        <rect width="430" height="34" rx="7" class="bar"/><text x="15" y="23" class="brand">Glyph Factory</text>
+        <rect x="16" y="52" width="94" height="154" class="sidebar active"/>
+        <text x="31" y="76" class="nav">System</text><text x="31" y="104" class="nav">Metrics</text><text x="31" y="132" class="nav">World</text><text x="31" y="160" class="nav">Archive</text>
+        <text x="130" y="79" class="panel">OVERNIGHT RESULTS</text><text x="130" y="112" class="line">80,317 articles</text><text x="130" y="147" class="line">12.4M reads</text><text x="130" y="182" class="line">+36 new agents</text>
+      </g>
+      <text x="600" y="338" text-anchor="middle" class="out">The system no longer needs the player on night shift.</text>
+    </g><g transform="translate(0 1295)">
+      <rect x="20" y="0" width="1160" height="360" rx="12" class="row"/>
+      <rect x="38" y="22" width="72" height="42" rx="6" class="idbox"/><text x="74" y="51" class="id" text-anchor="middle">A20</text>
+      <text x="128" y="53" class="title">Digital publishing makes inventory vanish</text>
+      <g transform="translate(38 84)">
+        <rect width="430" height="228" rx="7" class="screen"/>
+        <rect width="430" height="34" rx="7" class="bar"/><text x="15" y="23" class="brand">Glyph Factory</text>
+        <rect x="16" y="52" width="94" height="154" class="sidebar"/>
+        <text x="31" y="76" class="nav">Workshop</text><text x="31" y="104" class="nav">Inventory</text><text x="31" y="132" class="nav">Research</text><text x="31" y="160" class="nav">Map</text>
+        <text x="130" y="79" class="panel">PHYSICAL INVENTORY</text><text x="130" y="112" class="line">12,480 books</text><text x="130" y="147" class="line">Warehouse 78%</text><text x="130" y="182" class="line">Holding cost $12,400</text>
+      </g>
+      <g transform="translate(485 119)"><text x="115" y="0" text-anchor="middle" class="action">Switch to digital</text><path d="M15 64 H190" class="arrow"/><polygon points="190,50 220,64 190,78" class="arrowfill"/></g>
+      <g transform="translate(732 84)">
+        <rect width="430" height="228" rx="7" class="screen"/>
+        <rect width="430" height="34" rx="7" class="bar"/><text x="15" y="23" class="brand">Glyph Factory</text>
+        <rect x="16" y="52" width="94" height="154" class="sidebar active"/>
+        <text x="31" y="76" class="nav">System</text><text x="31" y="104" class="nav">Metrics</text><text x="31" y="132" class="nav">World</text><text x="31" y="160" class="nav">Archive</text>
+        <text x="130" y="79" class="panel">DIGITAL PUBLISHING</text><text x="130" y="112" class="line">195 countries</text><text x="130" y="147" class="line">Delivery &lt;1 sec</text><text x="130" y="182" class="line">Inventory cost $0</text>
+      </g>
+      <text x="600" y="338" text-anchor="middle" class="out">Years of inventory suddenly stop mattering.</text>
+    </g><text x="30" y="1700" class="sub">GLYPH FACTORY · Mock-screen design explanation · A brighter tomorrow.</text></svg>
