@@ -155,6 +155,18 @@ test('affordability never hides a discovered action', async () => {
     assert.doesNotMatch(call.reveal, /\bs\.(?:glyphs|credits)\b/, `${call.key}: reveal reads spendable stock or credits`);
   }
 
+  // The same invariant for reveals registered directly, outside the add() helper. `contract` used
+  // `rememberReveal('action:contract', c && s.glyphs>=c.glyphs)`, which the loop above never saw
+  // because it never matched `add(` — auto-sell kept stock under 1 and the button stayed hidden.
+  const direct = [...source.matchAll(/rememberReveal\('action:([^']+)',\s*([^;]+?)\)\)/g)];
+  assert.ok(direct.length >= 1, 'expected at least one directly registered action reveal');
+  for (const [, key, reveal] of direct) {
+    assert.doesNotMatch(reveal, /\bs\.(?:glyphs|credits)\b/, `${key}: reveal reads spendable stock or credits`);
+  }
+  // Negative control: the detector has to reject the exact shape this replaced, or a green run here
+  // would only mean the pattern stopped matching anything.
+  assert.match('s.contracts>0 || Boolean(c && s.glyphs>=c.glyphs)', /\bs\.(?:glyphs|credits)\b/);
+
   // One toggle for every act: publishing with auto-sell on must not strand the player.
   assert.equal(source.match(/'toggle-auto'/g).length, 1);
 });

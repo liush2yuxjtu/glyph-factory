@@ -219,6 +219,26 @@ class PlayerContract(unittest.TestCase):
         self.button("印字").click()
         expect(self.button("出售全部库存")).to_be_enabled()
 
+    def test_contract_survives_auto_sell_stranding_the_one_stock_cost_it_has(self):
+        # The contract is the only ACT I action whose enable-gate is a stock cost, and auto-sell
+        # floors stock below 1 on every tick. Its reveal used to read `s.glyphs` too, so a player
+        # who turned auto-sell on before ever holding the first contract's 20 at once saw no
+        # contract button at all — verified as the pre-fix behaviour of this exact fixture.
+        self.seed({"version": 3, "act": 1, "glyphs": 0.4, "credits": 90, "lifetimeGlyphs": 320,
+                   "contracts": 0, "autoSellUnlocked": True, "autoSell": True, "presses": 1})
+        self.open()
+        for _ in range(6):
+            self.page.clock.run_for(600)
+            self.button("印字").click()
+        self.page.clock.run_for(2000)
+        contract = self.button("交付街角委托")
+        expect(contract).to_be_visible()
+        expect(contract).to_be_disabled()
+        expect(contract).to_contain_text("自动出售正在清空库存")
+        self.page.reload()
+        expect(contract).to_be_visible()
+        self.assert_no_spoilers()
+
     def test_machine_and_credits_remain_after_spending_last_money(self):
         self.open()
         for _ in range(10):

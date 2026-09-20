@@ -68,10 +68,18 @@
       add('boost', s.manualBoost || s.lifetimeGlyphs>=150, !s.manualBoost && s.lifetimeGlyphs>=150&&s.credits>=45, label(ACTIONS.boost), s.manualBoost?tr('done'):(s.credits>=45?(en?'150 total + 45 credits':'累计150字 + 45资金'):lack(en?'45 credits':'45 资金', fmt(s.credits,1))), 'boost');
       if (!s.autoSellUnlocked) add('autoResearch', s.lifetimeGlyphs>=300, s.lifetimeGlyphs>=300&&s.credits>=60, label(ACTIONS.autoResearch), s.credits>=60?(en?'300 total + 60 credits':'累计300字 + 60资金'):lack(en?'60 credits':'60 资金', fmt(s.credits,1)), 'research-auto');
       const c=E.CONTRACTS[s.contracts];
-      const contractEver = s.contracts>0 || Boolean(c && s.glyphs>=c.glyphs);
+      // Not `c && s.glyphs>=c.glyphs`: that reads spendable stock, which auto-sell floors below 1 on
+      // every tick, so a player who turned auto-sell on before ever holding 20 glyphs at once would
+      // never see the first contract at all. `lifetimeGlyphs` is monotonic and crosses the same 20.
+      const contractEver = s.contracts>0 || s.lifetimeGlyphs>=E.CONTRACTS[0].glyphs;
       if (rememberReveal('action:contract', contractEver)) {
-        if (c) buttons.push(actionButton(label(ACTIONS.contract), `${c.glyphs} → ${c.reward}`, 'contract', s.glyphs>=c.glyphs));
-        else buttons.push(actionButton(label(ACTIONS.contract), tr('done'), 'contract', false));
+        if (c) {
+          // The one action here whose enable-gate is a stock cost. Without the shortfall it is a
+          // grey button reading "20 → 20" and nothing says why the 20 never arrives — `lack` adds
+          // 「自动出售正在清空库存」 when auto-sell is the reason.
+          const sub = s.glyphs>=c.glyphs ? `${c.glyphs} → ${c.reward}` : lack(en?`${c.glyphs} stock`:`${c.glyphs} 库存字`, fmt(s.glyphs,1));
+          buttons.push(actionButton(label(ACTIONS.contract), sub, 'contract', s.glyphs>=c.glyphs));
+        } else buttons.push(actionButton(label(ACTIONS.contract), tr('done'), 'contract', false));
       }
       add('publish', s.lifetimeGlyphs>=5000, E.canPublish(s), label(ACTIONS.publish), E.canPublish(s)?(en?'This opens ACT II.':'这不是结局；它会打开 ACT II。'):lack(en?'200 stock + 300 credits':'库存 200 字 + 300 资金', `${fmt(s.glyphs,1)} / ${fmt(s.credits,1)}`), 'publish', {}, 'major');
     }

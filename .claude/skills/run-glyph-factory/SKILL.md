@@ -116,7 +116,7 @@ The heavier harnesses in `scripts/verify-player.mjs`, `scripts/run-browser-contr
 - **Auto-sell floors stock below 1 every tick, so no stock-cost action is reachable while
   it is on.** `advance()` does `sold = Math.floor(g.glyphs)`, which strands `canPublish`
   (`glyphs>=200`) in ACT I and `compose-rule` (`glyphs>=2`) / `condense` (`glyphs>=20`) in
-  ACT II. Measured by `driver.py publish`: 332s of real play satisfied the other four
+  ACT II. Measured by `driver.py publish`: 332s of real play satisfied the other three
   conditions at 5.0K lifetime / 301.5 credits / 1 press / 0.3 stock — turning auto-sell off
   took stock to 203.3 in 10s. This used to be silent (`publish`'s reveal *was* `canPublish`,
   so the button simply never appeared). Since 2026-09-20 the renderer separates reveal from
@@ -134,7 +134,7 @@ The heavier harnesses in `scripts/verify-player.mjs`, `scripts/run-browser-contr
   `刻模` reports `已刻 N 条 · 读者 +X/秒` once its rule is running instead of repeating
   discovery copy forever. `#world-card` itself stays hidden until ACT III — two tests pin
   that, so do not "fix" a stalled ACT II by unhiding it. Diagnostic script for the reported
-  dead state and its 14-assertion road to ACT III: see `.claude/skills/verify/SKILL.md` →
+  dead state and its 15-assertion road to ACT III: see `.claude/skills/verify/SKILL.md` →
   "progression contract".
 
 - **`advance()`'s ACT II rule runs on its own clock, so never compare a stepped run to a

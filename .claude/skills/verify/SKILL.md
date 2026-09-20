@@ -67,7 +67,8 @@ stages: [{ name: "fast", status: "PASS", exitCode: 0 }]
 ```
 
 The fast stage *passes*; the audit's parser then rejects it. `verify-player.mjs` shells out
-to `node --test`, and Node ≥ 20 prints `ℹ tests 83` where the audit's regex requires
+to `node --test`, and Node ≥ 20 prints `ℹ tests 83` (an illustrative count, not this repo's
+total) where the audit's regex requires
 `# tests (\d+)`. This is a Node-reporter-format drift, not a product regression. It is not
 count- or content-dependent — the regex matches the reporter's *prefix*, so a clean
 checkout fails the same way; verified directly with
@@ -184,10 +185,19 @@ must render in every act, or publishing with auto-sell on strands the player wit
 stop it). Negative control — restore `add('publish', E.canPublish(s), E.canPublish(s), …)`
 and it must fail naming `'publish'`.
 
-**Browser (for any stock-cost action you changed).** The player suite's pre-existing
-`test_sell_stays_visible_disabled_and_persistent_after_zero_and_reload` covers the *sell*
-case only; nothing covers publish/compose/condense. Seed the stranded state and assert on
-`/` — the privacy-stripped player route — not just `play.html`:
+It parses **both** registration forms: the `add(…)` helper and direct
+`rememberReveal('action:<key>', <reveal>)` calls. The second form was a blind spot —
+`contract` used it and kept `c && s.glyphs>=c.glyphs`, so a player who turned auto-sell on
+before ever holding the first contract's 20 glyphs never saw the button, and the suite was
+green throughout. It now asserts its own detector still rejects that exact shape, so a green
+run cannot just mean the pattern stopped matching anything.
+
+**Browser (for any stock-cost action you changed).** Two committed cases cover this:
+`test_sell_stays_visible_disabled_and_persistent_after_zero_and_reload` (*sell*) and
+`test_contract_survives_auto_sell_stranding_the_one_stock_cost_it_has` (*contract*, seeded
+with auto-sell on and 320 lifetime glyphs). Nothing covers publish/compose/condense. Seed
+the stranded state and assert on `/` — the privacy-stripped player route — not just
+`play.html`:
 
 ```js
 // add_init_script, NOT a post-goto evaluate: the page autosaves on `pagehide`,
@@ -417,7 +427,7 @@ The player suite is the other half of the leak boundary — run it too when the 
 `build-static.mjs`, the privacy layer, or `play.html`:
 
 ```bash
-GLYPH_BROWSER=chromium python3 scripts/run-browser-contracts.py player   # floor 19, currently 25
+GLYPH_BROWSER=chromium python3 scripts/run-browser-contracts.py player   # floor 19, currently 26
 ```
 
 ### Run — in-app 28/28
@@ -491,12 +501,13 @@ overclaimed verdict.
   `!important` hide rules into `dist/`, which `test_player.py` then asserts on the real
   artifact. Do not quote the 28/28 as a player-package claim.
 - **The disclosure contract test is static.** `affordability never hides a discovered
-  action` reads source text. It proves reveal ≠ enable and that no reveal reads
-  `s.glyphs`/`s.credits`; it does **not** prove the button actually renders visible, that
+  action` reads source text. It proves reveal ≠ enable and that no reveal in either parsed
+  form reads `s.glyphs`/`s.credits`; a reveal registered by some third form is still
+  invisible to it. It does **not** prove the button actually renders visible, that
   `rememberReveal` latches it, that `enabled` is correct, or that the shortfall copy says
   the right thing. Only the seeded browser recipe above covers that, and only for the
   actions you actually seed.
-- **The Act II progression recipe is not a committed suite.** The fourteen-assertion
+- **The Act II progression recipe is not a committed suite.** The fifteen-assertion
   end-to-end run (dead state → `map-city` → Act III) lives in `/tmp`, not in `tests/`. The
   committed coverage is narrower: the Node cadence identity, and one browser test asserting
   readership is visible and `composed` grows. Nothing committed proves the *whole* gate is
