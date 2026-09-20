@@ -99,6 +99,13 @@ The heavier harnesses in `scripts/verify-player.mjs`, `scripts/run-browser-contr
   **The escape hatch is `localhost` + `?review=1` or `?director=1` on `play.html`** — the
   guard returns early only then. Without it you cannot see acts, ahas, or Director Mode.
 
+  The strip is not one-shot: it re-asserts on every controller render, and the reveal rule
+  in `glyph-game-v3.js` is audience-gated (`isPlayerAudience()`), so `/` must stay
+  spoiler-free **after** the first Aha lands too — that is where it used to leak the Aha
+  list and the `AHA MOMENTS · 28` heading back onto the player surface. If you ever see an
+  `A01 · …` card or an AHA heading on `/`, that is a regression, not a render bug.
+  `tests/browser/test_player_source_privacy.py` owns it (`run-browser-contracts.py player`).
+
 - **`#primary-actions` is destroyed and rebuilt every 500ms.** The controller calls
   `replaceChildren(...)` on each tick, so a Playwright locator can resolve a node and
   then click a detached one — you get `element was detached from the DOM` /

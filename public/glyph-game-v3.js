@@ -3,6 +3,8 @@
   const E = window.GlyphEngineV3;
   if (!E) throw new Error('GlyphEngineV3 failed to load');
   const $ = (id) => document.getElementById(id);
+  // Read lazily: the privacy layer marks the audience when it runs, which can be after this script.
+  const isPlayerAudience = () => document.documentElement.dataset.audience === 'player';
   const LOCALE_KEY = 'glyph-factory-locale-v3';
   const OLD_SAVE_KEY = 'glyph-factory-save-v1';
   const REVEAL_KEY = 'glyph-factory-ui-reveals-v3';
@@ -155,11 +157,14 @@
     const ahaHead=$('aha-count')?.closest('.panel-head');
     const ahaList=$('aha-list');
     const hasAhaHistory=ahaList.children.length>0;
-    if (ahaHead) ahaHead.hidden=!hasAhaHistory;
-    ahaList.hidden=!hasAhaHistory;
+    // The privacy layer removes the disclosure surface for the player audience. The reveal
+    // rule must not put it back on the next timer render, so the gate is applied here too.
+    const playerAudience=isPlayerAudience();
+    const showAhaHistory=hasAhaHistory && !playerAudience;
+    if (ahaHead) ahaHead.hidden=!showAhaHistory;
+    ahaList.hidden=!showAhaHistory;
 
     // A hidden discovery surface must not leave an empty player-facing panel.
-    const playerAudience=document.documentElement.dataset.audience==='player';
     const systemsPanel=$('systems-panel');
     const hasPlayerSystems=hasMachines || (!playerAudience && hasAhaHistory);
     if (systemsPanel) systemsPanel.hidden=!hasPlayerSystems;
@@ -171,7 +176,7 @@
   }
 
   function renderText() { document.documentElement.lang=locale==='en'?'en':'zh-CN'; $('lang-toggle').textContent=locale==='en'?'中文':'EN'; $('director-toggle').textContent=tr('director'); $('glyphs-label').textContent=tr('inventory'); $('credits-label').textContent=tr('credits'); $('meaning-label').textContent=tr('meaning'); $('noise-label').textContent=tr('noise'); $('systems-title').textContent=tr('systems'); $('systems-note').textContent=tr('systemsNote'); $('log-title').textContent=tr('log'); $('export').textContent=tr('export'); $('reset').textContent=tr('reset'); $('director-preview').textContent=tr('preview'); $('director-apply').textContent=tr('apply'); $('director-exit').textContent=tr('exit'); }
-  function render() { const s=shown(); renderText(); const [title,copy]=actCopy(s); $('act-kicker').textContent=`ACT ${['I','II','III','IV','V','VI'][s.act-1]} · ${E.ACTS[s.act-1].range}`; $('act-title').textContent=title; $('act-copy').textContent=copy; $('glyphs').textContent=fmt(s.glyphs,1); $('credits').textContent=fmt(s.credits,1); $('meaning').textContent=fmt(s.meaning,1); $('noise').textContent=fmt(s.noise,1); $('rate').textContent=fmt(E.rate(s),1); $('total').textContent=fmt(s.lifetimeGlyphs); $('status').textContent=`${tr('business')} · ACT ${s.act}/6${preview?' · DIRECTOR PREVIEW':''}`; $('ending').hidden=!s.stopped; $('director').hidden=!directorOpen; renderActs(s); renderWorld(s); renderActions(s); renderMachines(s); renderAhas(s); $('log').textContent=(s.log||[]).map((x,i)=>`${i?'·':'›'} ${x}`).join('\n'); renderDisclosure(s); if (!preview) save(); }
+  function render() { const s=shown(); renderText(); const [title,copy]=actCopy(s); $('act-kicker').textContent=`ACT ${['I','II','III','IV','V','VI'][s.act-1]} · ${E.ACTS[s.act-1].range}`; $('act-title').textContent=title; $('act-copy').textContent=copy; $('glyphs').textContent=fmt(s.glyphs,1); $('credits').textContent=fmt(s.credits,1); $('meaning').textContent=fmt(s.meaning,1); $('noise').textContent=fmt(s.noise,1); $('rate').textContent=fmt(E.rate(s),1); $('total').textContent=fmt(s.lifetimeGlyphs); $('status').textContent=`${tr('business')} · ACT ${s.act}/6${preview?' · DIRECTOR PREVIEW':''}`; $('ending').hidden=!s.stopped; $('director').hidden=!directorOpen || isPlayerAudience(); renderActs(s); renderWorld(s); renderActions(s); renderMachines(s); renderAhas(s); $('log').textContent=(s.log||[]).map((x,i)=>`${i?'·':'›'} ${x}`).join('\n'); renderDisclosure(s); if (!preview) save(); }
 
   E.AHAS.forEach((item)=>{ const option=document.createElement('option'); option.value=item.id; option.textContent=`${item.id} · ${item.title}`; $('director-select').append(option); });
   $('director-toggle').addEventListener('click',()=>{directorOpen=!directorOpen;$('director').hidden=!directorOpen;});
