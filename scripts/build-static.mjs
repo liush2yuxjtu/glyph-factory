@@ -54,6 +54,22 @@ const playerEngine = engine.replace(
   /aha\('([^']+)',(\d+),'[^']*','[^']*'(,'[^']*')?\)/g,
   (_match, id, act, kind = '') => `aha('${id}',${act},'',''${kind})`,
 );
+// The strip above is a regex over `aha(...)`, so a designer copy string added anywhere else in
+// that call would survive into the player bundle. The world lines are meant to survive — they
+// are the only reason an Aha is perceptible — but the design copy must not. Assert both halves
+// against the actual stripped payload instead of trusting the pattern.
+const designCopy = [...engine.matchAll(/aha\('[^']+',\d+,'([^']*)','([^']*)'/g)];
+if (designCopy.length !== 28) throw new Error(`预期 28 条 Aha 设计文案，实际 ${designCopy.length} 条。`);
+for (const [, title] of designCopy) {
+  if (title && playerEngine.includes(`'${title}'`)) throw new Error(`Aha 设计标题泄漏进玩家包：${title}`);
+}
+const worldCopy = [...engine.matchAll(/^ {4}A\d{2}: '([^']+)',$/gm)].map((match) => match[1]);
+if (worldCopy.length !== 28) throw new Error(`预期 28 条玩家向世界线，实际 ${worldCopy.length} 条。`);
+for (const line of worldCopy) {
+  if (!playerEngine.includes(line)) throw new Error(`玩家向世界线在构建中被剥离：${line}`);
+  if (/A\d{2}|AHA|ACT/i.test(line)) throw new Error(`玩家向世界线含内部术语：${line}`);
+}
+
 const playerController = controller
   .replace(
     /  const AHA_EN = \{[\s\S]*?\n  \};\n  const ACTIONS =/,

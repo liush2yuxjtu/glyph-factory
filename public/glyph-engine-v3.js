@@ -6,6 +6,10 @@ const GlyphEngineV3 = (() => {
   const OFFLINE_CAP = 8 * 60 * 60;
   const PRICE = 0.5;
   const LIMIT = 1e15;
+  // Cadence of an active composition rule, and how much readership each composition adds
+  // per second. Exported so the renderer reports the real number instead of a second copy.
+  const RULE_PERIOD = 4;
+  const RULE_READERS = 0.015;
 
   const UNITS = [
     { id: 'keyboards', name: '机械键盘', rate: 0.5, cost: 5, growth: 1.34, unlock: 10 },
@@ -54,8 +58,48 @@ const GlyphEngineV3 = (() => {
     aha('A25',6,'语言成为社会操作系统','我不是出版商，我在运行基础设施。'),
     aha('A26',6,'新资源：歧义','文字越多，世界也可能越混乱。'),
     aha('A27',6,'目标从生产变成删除','无限生产的终点可能是噪音。','mechanic'),
-    aha('A28',6,'最后一个按钮：停止印刷','世界已经写完了。现在，去读它。','mechanic'),
+    // Not the same sentence as the stop-printing action's own log line: the reveal states the
+    // insight, the action note says goodbye in the world's voice. Identical copy would ship
+    // design text into the player bundle, where that note is player-facing.
+    aha('A28',6,'最后一个按钮：停止印刷','最后一个动作不是生产，是停止——增长到此为止。','mechanic'),
   ];
+
+  // The player never sees the line above: an Aha's title and reveal are design copy, and the
+  // privacy layer strips every `A## ·` line out of the log. So this second line is the only
+  // thing that makes an Aha perceptible at all — the world announcing the same event in the
+  // player's own language, with no ID, no act number and no explanation of the mechanic.
+  // Keep them separate from `aha(...)`: scripts/build-static.mjs blanks that call's copy by
+  // regex, and folding this text into it would silently strip the player's version too.
+  const AHA_WORLD = {
+    A01: '机械键盘开始自己动。你不再是唯一在按按钮的人。',
+    A02: '打字员开始互相校对。他们不只是数字了，他们成了一个部门。',
+    A03: '木和木之间长出了林。这不只是一个新字，这是一条可以重复的规则。',
+    A04: '刻好的模子在自己转动。你没有碰它，它也在出字。',
+    A05: '有人愿意用一千个废字的价钱，换一句重要的话。',
+    A06: '读过报纸的人，开始想要下一份。文字在制造对文字的需求。',
+    A07: '信箱里出现第一封回信：「你们印的那篇，我读了三遍。」写信的人，昨天还是读者。',
+    A08: '读者自己造了一个词。它不在你的字表里，但它已经在被使用。',
+    A09: '那个词自己跑了起来。今天它在街上，明天它会在别的城市。',
+    A10: '纸不够了。再提高产量只会更糟——现在要比的是每张纸上写了什么。',
+    A11: '删掉一句废话，剩下的那句就贵了。删除第一次成为生产。',
+    A12: '隔着两条街，同一个字已经不是同一个意思了。',
+    A13: '一个词不再只是描述世界，它开始规定世界。',
+    A14: '地图展开了。你的工坊在里面，只是一个小方块。',
+    A15: '地图还在缩小。真正的工厂不是这间屋子，是整张传播网络。',
+    A16: '记者 Agent 交来了它自己选的题目。这一篇不是你布置的。',
+    A17: '编辑 Agent 退回了你今天的头条：「这条不该发。」',
+    A18: 'Agent 开始自己招募 Agent。工厂在扩张自己。',
+    A19: '你不在的时候，系统也没有停。第二天早上，文章已经堆满了桌子。',
+    A20: '书不再堆在仓库里。库存这个概念开始过时了。',
+    A21: '过去写下的每一个字，都成了它的教材。',
+    A22: '这个字不是你造的。字表第一次向外长了一格。',
+    A23: '机器之间的对话，已经不再需要翻译成人话。',
+    A24: '一万亿个字被压成了一个符号。它还在继续变小。',
+    A25: '城市开始按你的语法运转。你不是出版商，你是它的运行层。',
+    A26: '文字太多，同一句话开始有两种意思。含混不清第一次有了代价。',
+    A27: '目标翻过来了：不再是写更多，而是删掉更多。',
+    A28: '车间安静下来。第一次，没有新的字被造出来。',
+  };
 
   const num = (v, max = LIMIT) => typeof v === 'number' && Number.isFinite(v) && v >= 0 ? Math.min(v, max) : 0;
   const integer = (v, max = 1e9) => Math.floor(num(v, max));
@@ -73,7 +117,7 @@ const GlyphEngineV3 = (() => {
       glyphs: 0, credits: 0, lifetimeGlyphs: 0,
       keyboards: 0, typists: 0, presses: 0, contracts: 0,
       manualBoost: false, autoSellUnlocked: false, autoSell: false,
-      published: false, act: 1, ruleActive: false, composed: 0,
+      published: false, act: 1, ruleActive: false, composed: 0, ruleCredit: 0,
       readers: 0, demand: 0, meaning: 0, noise: 0,
       letters: 0, organicWords: 0, viralWords: 0, paperCrisis: false,
       concepts: 0, societyEffects: 0, districts: 0, worldScale: 0,
@@ -128,6 +172,10 @@ const GlyphEngineV3 = (() => {
       if (!seen.has(item.id) && trigger(g, item.id)) {
         seen.add(item.id);
         g = note({ ...g, ahaSeen: [...seen] }, `${item.id} · ${item.title}：${item.reveal}`);
+        // Prepend after the design line so the world's sentence is the newest entry the
+        // player reads, and so the scrub leaves it at the top of the log.
+        const world = AHA_WORLD[item.id];
+        if (world) g = note(g, world);
       }
     }
     g = { ...g, ahaSeen: [...seen] };
@@ -136,7 +184,8 @@ const GlyphEngineV3 = (() => {
 
   function sanitizeV3(value, now) {
     const g = fresh(now);
-    for (const key of ['glyphs','credits','lifetimeGlyphs','composed','readers','demand','meaning','noise','letters','organicWords','viralWords','concepts','societyEffects','districts','worldScale','agents','agentFactories','overnightArticles','archives','machineGlyphs','machineGlyphUse','compressedMeaning','ambiguity','deletedNoise']) g[key] = num(value[key]);
+    for (const key of ['glyphs','credits','lifetimeGlyphs','composed','ruleCredit','readers','demand','meaning','noise','letters','organicWords','viralWords','concepts','societyEffects','districts','worldScale','agents','agentFactories','overnightArticles','archives','machineGlyphs','machineGlyphUse','compressedMeaning','ambiguity','deletedNoise']) g[key] = num(value[key]);
+    g.ruleCredit = Math.min(g.ruleCredit, RULE_PERIOD);
     for (const key of ['keyboards','typists','presses','contracts']) g[key] = integer(value[key], 10000);
     for (const key of ['manualBoost','autoSellUnlocked','autoSell','published','ruleActive','paperCrisis','editorAutonomy','digital','infrastructure','stopped','director']) g[key] = value[key] === true;
     g.autoSell = g.autoSellUnlocked && g.autoSell;
@@ -172,12 +221,17 @@ const GlyphEngineV3 = (() => {
     if (!g.stopped) {
       const made = rate(g) * elapsed;
       g.glyphs = num(g.glyphs + made); g.lifetimeGlyphs = num(g.lifetimeGlyphs + made);
-      if (g.ruleActive && g.glyphs >= 2) {
-        const pairs = Math.min(Math.floor(g.glyphs / 2), Math.floor(elapsed / 4));
+      if (g.ruleActive) {
+        // An active rule runs on its own clock, so the remainder has to be carried across
+        // ticks. floor(elapsed / RULE_PERIOD) is 0 for every 500ms live tick, which meant the
+        // rule only ever fired on an offline catch-up — the opposite of what A04 promises.
+        const credit = g.ruleCredit + elapsed;
+        const pairs = Math.min(Math.floor(g.glyphs / 2), Math.floor(credit / RULE_PERIOD));
+        g.ruleCredit = Math.min(credit - pairs * RULE_PERIOD, RULE_PERIOD);
         if (pairs > 0) { g.glyphs -= pairs * 2; g.composed = num(g.composed + pairs); }
       }
       if (g.published) {
-        g.readers = num(g.readers + elapsed * (0.35 + g.composed * 0.015 + g.agents * 1.5));
+        g.readers = num(g.readers + elapsed * (0.35 + g.composed * RULE_READERS + g.agents * 1.5));
         g.demand = num(Math.max(g.demand, 1 + g.readers / 500));
         g.noise = num(g.noise + elapsed * (g.digital ? 0.8 : 0.08) * Math.max(1, g.agents));
         if (g.readers >= 1000) g.paperCrisis = true;
@@ -232,7 +286,10 @@ const GlyphEngineV3 = (() => {
     } else if (type === 'delete-noise' && g.noise >= 1) {
       const amount = Math.min(g.noise, command.amount || (g.act >= 6 ? 500 : 5)); g = { ...g, noise:g.noise-amount, deletedNoise:num(g.deletedNoise+amount), meaning:num(g.meaning+amount*0.05) };
     } else if (type === 'map-city' && g.act === 2 && g.paperCrisis && g.meaning >= 50 && g.deletedNoise >= 1) {
-      g = note({ ...g, act:3, districts:2, worldScale:1 }, '城市地图展开：每个街区开始长出自己的语言。');
+      // One district, not two. Granting a second fired A12 (districts>=2) together with A14
+      // (worldScale>=1), so "the map appeared" and "districts grow dialects" arrived as one
+      // announcement. A dialect is supposed to be something the player goes and observes.
+      g = note({ ...g, act:3, districts:1, worldScale:1 }, '城市地图展开：你终于看见了工坊外面的部分。');
     } else if (type === 'discover-dialect' && g.act >= 3) {
       g = { ...g, districts:num(g.districts+1,1000), meaning:num(g.meaning+25) };
     } else if (type === 'make-concept' && g.act >= 3 && g.meaning >= 25) {
@@ -246,15 +303,22 @@ const GlyphEngineV3 = (() => {
     } else if (type === 'spawn-agents' && g.act >= 4 && g.editorAutonomy) {
       g = { ...g, agentFactories:g.agentFactories+1, agents:num(g.agents+4,1e7) };
     } else if (type === 'digitize' && g.act >= 4 && g.agentFactories >= 1) {
-      g = { ...g, digital:true, overnightArticles:num(g.overnightArticles+100) };
+      // No article grant here: handing over +100 made A19 and A20 fire on the same click, so
+      // the player got two world announcements for one decision and could not tell them apart.
+      // The agents write on their own clock, so A19 arrives when it actually becomes true.
+      g = { ...g, digital:true };
     } else if (type === 'train-memory' && g.act >= 4 && g.digital) {
       g = { ...g, archives:g.archives+1, meaning:num(g.meaning+500) };
     } else if (type === 'discover-machine-glyph' && g.act === 4 && g.archives >= 1 && g.agentFactories >= 1) {
-      g = note({ ...g, act:5, machineGlyphs:1, machineGlyphUse:1000 }, '03:17:42 · 发现未知字形。来源：机器之间。');
+      // Seeding machineGlyphUse at 1000 fired A22 and A23 on the same click. The glyph's use
+      // is supposed to accumulate after the discovery, so it starts at zero and grows by itself.
+      g = note({ ...g, act:5, machineGlyphs:1, machineGlyphUse:0 }, '03:17:42 · 发现未知字形。来源：机器之间。');
     } else if (type === 'compress-language' && g.act >= 5 && g.meaning >= 100) {
       const moved = Math.min(g.meaning, command.amount || 10000); g = { ...g, meaning:g.meaning-moved, compressedMeaning:num(g.compressedMeaning+moved*100) };
     } else if (type === 'infrastructure' && g.act === 5 && g.compressedMeaning >= 10000) {
-      g = note({ ...g, act:6, infrastructure:true, ambiguity:100, noise:num(g.noise+1500) }, '语言不再只是内容，它开始驱动城市的系统。');
+      // Ambiguity starts below its own threshold: seeding it at 100 fired A25 and A26 together,
+      // and "ambiguity is now a resource" only reads as a separate insight once it accumulates.
+      g = note({ ...g, act:6, infrastructure:true, ambiguity:60, noise:num(g.noise+1500) }, '语言不再只是内容，它开始驱动城市的系统。');
     } else if (type === 'resolve-ambiguity' && g.act >= 6 && g.ambiguity > 0) {
       const cut = Math.min(g.ambiguity, 25); g = { ...g, ambiguity:g.ambiguity-cut, deletedNoise:num(g.deletedNoise+250) };
     } else if (type === 'stop-printing' && g.act === 6 && g.deletedNoise >= 1000 && g.compressedMeaning >= 10000) {
@@ -283,6 +347,6 @@ const GlyphEngineV3 = (() => {
     return syncAhas(g);
   }
 
-  return { VERSION,SAVE_KEY,OFFLINE_CAP,PRICE,UNITS,CONTRACTS,ACTS,AHAS,fresh,restore,advance,act,rate,cost,actIndex,ahaUnlocked,directorState,canPublish };
+  return { VERSION,SAVE_KEY,OFFLINE_CAP,PRICE,RULE_PERIOD,RULE_READERS,UNITS,CONTRACTS,ACTS,AHAS,AHA_WORLD,fresh,restore,advance,act,rate,cost,actIndex,ahaUnlocked,directorState,canPublish };
 })();
 if (typeof window !== 'undefined') window.GlyphEngineV3 = GlyphEngineV3;

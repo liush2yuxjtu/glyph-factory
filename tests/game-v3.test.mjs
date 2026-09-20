@@ -51,6 +51,17 @@ test('A03 composition turns glyph relationship into an automatic rule', () => {
   assert.ok(E.ahaUnlocked(g, 'A04'));
 });
 
+test('an active rule composes on the live 500ms tick, not only on a catch-up', () => {
+  const base = { ...E.fresh(t), act: 2, published: true, glyphs: 100, ruleActive: true, composed: 1 };
+  // floor(elapsed / 4) is 0 on every 500ms live tick, so the old formula left a running rule
+  // inert for the whole session and fired it only when the player came back from offline.
+  let stepped = base;
+  for (let i = 1; i <= 40; i++) stepped = E.advance(stepped, t + i * 500);
+  const leap = E.advance(base, t + 20000);
+  assert.equal(leap.composed, 6, '20s in one jump is 5 compositions plus the manual one');
+  assert.equal(stepped.composed, leap.composed, 'live ticks must produce the same rule output as one jump');
+});
+
 test('A06 readership creates demand after publication', () => {
   const g = E.advance({ ...E.fresh(t), act: 2, published: true, readers: 99, composed: 20 }, t + 10000);
   assert.ok(g.readers > 100);
@@ -91,7 +102,12 @@ test('A22 machine glyph emerges from autonomous digital archive', () => {
   assert.equal(g.act, 5);
   assert.equal(g.machineGlyphs, 1);
   assert.ok(E.ahaUnlocked(g, 'A22'));
-  assert.ok(E.ahaUnlocked(g, 'A23'));
+  // Finding a glyph and the machines adopting it are two separate moments. Seeding the use
+  // counter at its own threshold fired both on one click and the player saw two
+  // announcements for a single decision.
+  assert.equal(g.machineGlyphUse, 0, 'the glyph is not in use the moment it is found');
+  assert.ok(!E.ahaUnlocked(g, 'A23'), 'adoption must not be granted by the discovery click');
+  assert.ok(E.ahaUnlocked(E.advance(g, t + 40000), 'A23'), 'machines adopt the glyph as they use it');
 });
 
 test('A24 compression can turn meaning into a massive compact representation', () => {
@@ -123,5 +139,64 @@ test('director snapshots cover every Aha and land in the correct act', () => {
     const g = E.directorState(item.id, t);
     assert.equal(g.act, item.act, item.id);
     assert.ok(E.ahaUnlocked(g, item.id), item.id);
+  }
+});
+
+test('every Aha carries a player-facing world line with no internal vocabulary', () => {
+  assert.equal(Object.keys(E.AHA_WORLD).length, 28);
+  const seen = new Set();
+  for (const item of E.AHAS) {
+    const line = E.AHA_WORLD[item.id];
+    assert.equal(typeof line, 'string', item.id);
+    assert.ok(line.length >= 12, `${item.id}: too short to say anything`);
+    assert.doesNotMatch(line, /\bA\d{2}\b|\bAHA\b|\bACT\b|Director|导演/i, item.id);
+    assert.notEqual(line, item.title, item.id);
+    assert.notEqual(line, item.reveal, item.id);
+    assert.ok(!seen.has(line), `${item.id}: duplicate world line`);
+    seen.add(line);
+  }
+});
+
+// The defect this guards: an Aha's only trace was a `A## ·` line, and the privacy layer
+// strips those from the player log. So the moment fired and the player saw nothing at all.
+test('an Aha that fires always announces itself in the log the player can read', () => {
+  for (const item of E.AHAS) {
+    const seeded = E.directorState(item.id, t);
+    const before = { ...seeded, log: [], ahaSeen: seeded.ahaSeen.filter((id) => id !== item.id) };
+    const after = E.advance(before, t + 1000);
+    assert.ok(after.ahaSeen.includes(item.id), `${item.id} did not fire`);
+    const added = after.log.filter((line) => !before.log.includes(line));
+    assert.ok(added.includes(E.AHA_WORLD[item.id]), `${item.id}: the world never announced it`);
+    const fired = added.filter((line) => /^A\d{2} · /.test(line));
+    assert.equal(fired.length, added.length - fired.length, `${item.id}: every recognition needs exactly one announcement`);
+    // A fixture that also crosses a later threshold is allowed to announce both; what must
+    // never happen is the player reading the newest line and it belonging to the other Aha.
+    if (fired.length === 1) assert.equal(after.log[0], E.AHA_WORLD[item.id], `${item.id}: the announcement is not the newest line`);
+  }
+});
+
+// One click, one insight. Three pairs used to fire together because the action granted the
+// second Aha's threshold outright (digitize granted 100 articles, the glyph discovery granted
+// 1000 uses, infrastructure granted 100 ambiguity), so the player got two announcements for
+// one decision and could not tell which change caused which. An idle stretch may cross two
+// thresholds at once — that is what offline catch-up means — so this pins actions only.
+test('no single real action fires two Aha moments at once', () => {
+  const commands = [
+    { type: 'print' }, { type: 'sell' }, { type: 'buy', id: 'keyboards' }, { type: 'buy', id: 'typists' },
+    { type: 'buy', id: 'presses' }, { type: 'boost' }, { type: 'research-auto' }, { type: 'toggle-auto' },
+    { type: 'contract' }, { type: 'publish' }, { type: 'compose-rule' }, { type: 'condense' },
+    { type: 'read-letter' }, { type: 'organic-word' }, { type: 'viral-word' }, { type: 'delete-noise' },
+    { type: 'map-city' }, { type: 'discover-dialect' }, { type: 'make-concept' }, { type: 'map-world' },
+    { type: 'launch-agents' }, { type: 'editor-autonomy' }, { type: 'spawn-agents' }, { type: 'digitize' },
+    { type: 'train-memory' }, { type: 'discover-machine-glyph' }, { type: 'compress-language' },
+    { type: 'infrastructure' }, { type: 'resolve-ambiguity' }, { type: 'stop-printing' },
+  ];
+  for (const item of E.AHAS) {
+    const before = E.directorState(item.id, t);
+    for (const command of commands) {
+      const next = { ...E.act(before, command, t.updatedAt ?? t), updatedAt: t };
+      const fired = next.ahaSeen.filter((id) => !before.ahaSeen.includes(id));
+      assert.ok(fired.length <= 1, `${item.id} + ${command.type}: fired ${fired.join(' + ')}`);
+    }
   }
 });
