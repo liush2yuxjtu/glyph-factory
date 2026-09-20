@@ -1,0 +1,155 @@
+---
+name: run-glyph-factory
+description: Build, run, and drive Glyph Factory (Next.js shell + static pixel-art incremental game). Use when asked to start glyph-factory, run the game, screenshot it, drive the player loop, reach ACT II, run the Aha Lab's 28-trigger audit, or interact with the running app.
+---
+
+Glyph Factory is a mobile-first incremental game. The Next.js app under `src/app/` is
+only a shell: `/` and `/aha-lab` are ~15-line React components whose entire job is an
+`<iframe>` pointing at `public/play.html` and `public/aha.html`. **The game itself is
+static files under `public/`** — `glyph-engine-v3.js` is the state machine,
+`glyph-game-v3.js` is the renderer. Only `/product-demo` is a real React page.
+
+Drive it with `.claude/skills/run-glyph-factory/driver.py` (Playwright/Chromium).
+All paths below are relative to the repo root.
+
+## Prerequisites
+
+No `apt-get` line — this runs as-is on macOS. Verified on this machine:
+
+- Node v24.19.0, npm 11.16.0
+- python3 3.12.13 with playwright 1.62.0 and a populated browser cache
+
+```bash
+python3 -c "import playwright, importlib.metadata as m; print('playwright', m.version('playwright'))"
+```
+
+The repo's own browser tests pin a *different* version — `tests/browser/requirements.txt`
+says `playwright==1.57.0`. The driver only uses the sync API, so either works.
+
+## Setup
+
+```bash
+npm install
+```
+
+That is the whole setup. No env vars, no feature gates to patch, no build step for the
+dev loop — the game persists only to `localStorage`.
+
+## Run (agent path)
+
+The driver starts `npm run dev` itself when nothing answers on the port, waits for
+readiness, and tears the server down (whole process group) on exit. If a server is
+already up it reuses it and leaves it running.
+
+```bash
+python3 .claude/skills/run-glyph-factory/driver.py smoke
+```
+
+| command | what it does | wall time (warm) |
+|---|---|---|
+| `smoke` | loads all four surfaces; 10 assertions covering the privacy strip, the 28 director states, the 28 lab triggers, the demo shell | 3.1s |
+| `shot <player\|review\|aha-lab\|demo>` | one screenshot of one surface | ~3s |
+| `play [--seconds N]` | prints, sells, buys automation for N seconds (default 45), samples state every 20s | N + ~15s |
+| `publish [--budget S]` | plays a cold save through the ACT I → ACT II gate, then fires the compose verb (default budget 420s) | ~345s |
+| `review` | 28 director states; jumps to A28 and a mid state; applies one and reloads to prove it persisted | 6.1s |
+| `aha` | opens the Aha Lab, fires one trigger, then clicks its own `验证全部 28 个 Aha` | 13.7s |
+| `demo` | the three-phase product demo end to end, including the running mold | 7.8s |
+
+"Warm" means a dev server was already answering. Each command boots `npm run dev` itself
+otherwise; that adds a few seconds (the server itself reports ready in ~215ms, but the
+first request pays Turbopack's compile).
+
+Flags: `--base http://localhost:3000` (point at a server you started), `--out DIR`
+(default `/tmp/glyph-factory-run/<command>-<timestamp>/`), `--width`/`--height`,
+`--headed` (watch it play).
+
+Every step prints one JSON line to stdout, prefixed `PASS` or `FAIL` when it is an
+assertion. Screenshots, `report.json`, and `dev-server.log` land in `--out`. The exit
+code is non-zero if any check failed, so it is safe to gate on.
+
+## Run (human path)
+
+```bash
+npm run dev    # -> http://localhost:3000, Ctrl-C to stop
+```
+
+Open `/` to play. Add `?review=1` to `play.html` for the full act/aha surface.
+
+## Test
+
+```bash
+npm test        # node --test tests/*.test.mjs
+```
+
+82 tests, 82 pass, 0 fail, ~0.4s. This is the Node contract suite: it covers the engine,
+the privacy boundary, and a byte-identical production build.
+
+The heavier harnesses in `scripts/verify-player.mjs`, `scripts/run-browser-contracts.py`,
+`tests/browser/`, and `tests/intent-browser/` are not exercised here — they drive a
+`dist/` build rather than the dev server. `.claude/skills/verify/SKILL.md` owns those.
+
+## Gotchas
+
+- **The player build is privacy-stripped at runtime, on localhost too.**
+  `public/player-privacy-v3.js` deletes the preview link and hides `#director-toggle`,
+  `#director`, `.aha-focus`, `#aha-list`, `#aha-count`, `#act-strip`, `.act-kicker`,
+  `.act-title`, `.act-copy`, `.eyebrow`, `#systems-note`; it also scrubs `ACT n/6` out of
+  `#status` and `A01 ·` lines out of `#log`, rewrites the title, and forces zh-CN. So `/`
+  on a fresh save shows one metric and one button. That is correct, not a broken render.
+  **The escape hatch is `localhost` + `?review=1` or `?director=1` on `play.html`** — the
+  guard returns early only then. Without it you cannot see acts, ahas, or Director Mode.
+
+- **`#primary-actions` is destroyed and rebuilt every 500ms.** The controller calls
+  `replaceChildren(...)` on each tick, so a Playwright locator can resolve a node and
+  then click a detached one — you get `element was detached from the DOM` /
+  `<html> intercepts pointer events` followed by a 30s timeout. Dispatch the click
+  inside the page against a freshly queried node instead (that is what `CLICK` in the
+  driver does). Locator clicks are fine on `/product-demo`; it is React and stable.
+
+- **`publish` can stay invisible forever, and the game never says why.** The button's
+  reveal condition *is* `canPublish`, which needs `lifetimeGlyphs>=5000 && presses>=1 &&
+  glyphs>=200 && credits>=300`. Auto-sell (unlocked by `research-auto`, toggled by
+  `切换自动出售`) sells the whole stock every tick, so `glyphs>=200` never holds. Measured
+  by `driver.py publish`: 332s of real play satisfied the other four conditions at 5.0K
+  lifetime / 301.5 credits / 1 press / 0.3 stock — then turning auto-sell off took stock
+  from 0.3 to 203.3 in 10s and the button appeared. If you replay ACT I yourself and stop
+  seeing publish, read `autoSellSub` before concluding the run is stalled.
+
+- **Don't assert on the 28 aha *cards*; assert on the 28 director *options*.** A fresh
+  save starts with one act chip and `0 / 28` aha items — progressive disclosure, not a
+  bug. The `<select>` carries all 28 from the start, and previewing A28 flips the list
+  to 28 seen.
+
+- **The review surface follows `navigator.language`; the player build does not.** Only the
+  privacy layer writes `zh-CN` into `localStorage`, and it never runs under `?review=1`. So
+  a *fresh* context renders `?review=1` in English ("Hands → Automation") because headless
+  Chromium reports `en-US`, while `/` renders Chinese. A context that visited `/` first
+  carries the saved locale over and stays Chinese. Assert on ids and `data-command`, never
+  on copy.
+
+- **`#total` and friends are printed with K/M/B suffixes** (`31.5K`). `float()` on the
+  text raises `ValueError: could not convert string to float: '1.0K'` — parse the suffix.
+
+- **`npm run dev` prints a Turbopack warning about a `package-lock.json` outside the repo**
+  (`/Users/<you>/package-lock.json`). It is noise; the server boots in ~215ms regardless.
+
+- **macOS has no GNU `timeout`.** `timeout 120 python3 ...` fails with
+  `command not found: timeout`. Pass `--budget`/`--seconds` to the driver instead.
+
+## Troubleshooting
+
+- **`Locator.click: Timeout 30000ms exceeded` / `element was detached from the DOM`** —
+  you clicked a node the 500ms re-render replaced. Move the click in-page (see Gotchas).
+- **`ValueError: could not convert string to float: '1.0K'`** — the HUD formats large
+  numbers with a suffix. Parse `K`/`M`/`B` before comparing.
+- **`play.html` frame never appeared** — the `/` shell had not mounted its iframe yet, or
+  the dev server was still compiling on a cold start. The driver retries for 15s; a cold
+  `npm install` followed by the very first `npm run dev` can exceed that once.
+- **`npm install` needed** — a fresh clone has no `node_modules`; the driver's server
+  start will fail before the port opens.
+
+## Maintaining this skill
+
+Re-run every command in the table above before changing this file. The overlap with
+`.claude/skills/verify/` is deliberate: that skill owns candidate/PR verification and
+evidence layout, this one owns launching and driving.

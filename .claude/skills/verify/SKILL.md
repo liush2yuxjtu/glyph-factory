@@ -33,7 +33,16 @@ npm run verify
 
 ## Drive
 
-Use Playwright/Chromium (and WebKit when cross-engine behavior is relevant).
+Use the committed driver rather than hand-rolling Playwright —
+`.claude/skills/run-glyph-factory/driver.py` (`smoke`, `shot <surface>`, `play`,
+`publish`, `review`, `aha`, `demo`). It starts and stops the dev server itself, writes
+screenshots plus `report.json` to `--out`, and exits non-zero on a failed check. See
+`.claude/skills/run-glyph-factory/SKILL.md` for the full contract and the gotchas that
+make raw locator clicks fail here (the 500ms `replaceChildren` re-render, the runtime
+privacy strip on `/`, the auto-sell deadlock on the publish button).
+
+Use Playwright/Chromium directly (and WebKit when cross-engine behavior is relevant) only
+for something the driver does not cover.
 
 Important user surfaces:
 - `/`
