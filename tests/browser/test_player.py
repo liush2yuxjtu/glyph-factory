@@ -25,6 +25,41 @@ REVEALS = "glyph-factory-ui-reveals-v3"
 FIXED = datetime(2026, 9, 16, 12, 0, tzinfo=timezone.utc)
 META_COPY = re.compile(r"\bA(?:0[1-9]|1[0-9]|2[0-8])\b|\bAHA\b|\bACT\s+(?:[IVX]+|\d)|Director Mode|导演模式|ACTS ENGINE", re.I)
 
+# One real action per Aha, from the state a player is in just before it. Seeds below are state
+# boundaries, not playthrough claims: they exist so all 28 moments can be observed on the real
+# surface in one run. ("clock" advances time and clicks nothing.)
+AHA_CASES = (
+    ("A01", {"act": 1, "published": False, "glyphs": 0, "credits": 50, "lifetimeGlyphs": 10,
+             "keyboards": 0, "typists": 0, "presses": 0}, "buy:机械键盘", 1),
+    ("A02", {"act": 1, "published": False, "typists": 4, "credits": 100000, "lifetimeGlyphs": 500}, "buy:夜班打字员", 1),
+    ("A03", {"published": False, "act": 1, "glyphs": 400, "credits": 400, "lifetimeGlyphs": 6000, "presses": 1}, "click:发行《明日》", 1),
+    ("A04", {"ruleActive": True, "composed": 0, "glyphs": 500}, "clickx3:刻模", 2),
+    ("A05", {"meaning": 0, "glyphs": 500, "composed": 1}, "click:压缩", 1),
+    ("A06", {"readers": 99}, "clock", 10),
+    ("A07", {"readers": 250}, "click:打开一封读者来信", 1),
+    ("A08", {"letters": 1}, "click:允许读者造一个新词", 1),
+    ("A09", {"organicWords": 1}, "click:让这个词传播", 1),
+    ("A10", {"readers": 999, "demand": 2}, "clock", 10),
+    ("A11", {"noise": 2}, "click:删除噪音", 1),
+    ("A12", {"act": 3, "districts": 1, "worldScale": 1, "paperCrisis": True}, "click:观察一个新方言", 1),
+    ("A13", {"act": 3, "districts": 2, "worldScale": 1, "meaning": 30}, "click:创造一个概念", 1),
+    ("A14", {"act": 2, "paperCrisis": True, "meaning": 60, "deletedNoise": 2}, "click:展开城市地图", 1),
+    ("A15", {"act": 3, "districts": 3, "concepts": 2, "worldScale": 1}, "click:把地图缩到世界", 1),
+    ("A16", {"act": 3, "worldScale": 2, "districts": 3, "concepts": 2}, "click:上线记者", 1),
+    ("A17", {"act": 4, "agents": 1}, "click:给编辑", 1),
+    ("A18", {"act": 4, "agents": 1, "editorAutonomy": True}, "click:允许", 1),
+    ("A19", {"act": 4, "agents": 2, "editorAutonomy": True, "agentFactories": 1, "overnightArticles": 95}, "clock", 30),
+    ("A20", {"act": 4, "agents": 2, "editorAutonomy": True, "agentFactories": 1, "overnightArticles": 200}, "click:切换数字出版", 1),
+    ("A21", {"act": 4, "agents": 2, "agentFactories": 1, "digital": True}, "click:用档案训练机器", 1),
+    ("A22", {"act": 4, "agents": 2, "agentFactories": 1, "digital": True, "archives": 1}, "click:检查未知字形", 1),
+    ("A23", {"act": 5, "machineGlyphs": 1, "machineGlyphUse": 0, "meaning": 100}, "clock", 70),
+    ("A24", {"act": 5, "machineGlyphs": 1, "machineGlyphUse": 1000, "meaning": 200}, "click:语义压缩", 1),
+    ("A25", {"act": 5, "compressedMeaning": 20000}, "click:让语言接管基础设施", 1),
+    ("A26", {"act": 6, "infrastructure": True, "ambiguity": 99}, "clock", 10),
+    ("A27", {"act": 6, "infrastructure": True, "compressedMeaning": 20000, "deletedNoise": 500, "noise": 600}, "click:删除噪音", 1),
+    ("A28", {"act": 6, "infrastructure": True, "compressedMeaning": 20000, "deletedNoise": 1200, "noise": 100}, "click:停止印刷", 1),
+)
+
 
 class PlayerHandler(SimpleHTTPRequestHandler):
     def log_message(self, *_args):
@@ -146,7 +181,7 @@ class PlayerContract(unittest.TestCase):
             expect(self.page.locator(selector)).to_be_hidden()
         expect(self.page.locator("#hero-layout")).to_have_class(re.compile(r"\bsingle\b"))
         expect(self.page.locator("#below-layout")).to_have_class(re.compile(r"\bsingle\b"))
-        for metric in ("credits", "meaning", "noise"):
+        for metric in ("credits", "readers", "meaning", "noise"):
             expect(self.page.locator(f"#{metric}").locator("..")).to_be_hidden()
         self.page.clock.run_for(3000)
         self.button("印字").click()
@@ -224,6 +259,30 @@ class PlayerContract(unittest.TestCase):
         self.page.reload()
         expect(self.button("删除噪音")).to_be_visible()
         expect(self.page.locator("#noise").locator("..")).to_be_visible()
+
+    def test_act_two_shows_readership_and_a_rule_that_is_really_running(self):
+        # Act II gates on readership, which used to live only in the world card — hidden until
+        # Act III. A player therefore could not see the one number the act turns on, and 刻模
+        # repeated its discovery copy forever while the rule produced nothing during live play.
+        self.seed({"version": 3, "act": 2, "published": True, "readers": 20, "demand": 1,
+                   "glyphs": 2700, "credits": 97700, "lifetimeGlyphs": 214600,
+                   "meaning": 457.8, "noise": 5.2, "composed": 14,
+                   "ruleActive": True, "autoSellUnlocked": True,
+                   "keyboards": 11, "typists": 10, "presses": 8})
+        self.open()
+        expect(self.page.locator("#world-card")).to_be_hidden()
+        expect(self.page.locator("#readers").locator("..")).to_be_visible()
+        expect(self.page.locator("#readers")).to_have_text("20")
+        expect(self.button("刻模")).to_contain_text("已刻 14 条")
+        expect(self.button("刻模")).to_contain_text("读者 +")
+        self.page.clock.run_for(8000)
+        saved = self.page.evaluate(f"JSON.parse(localStorage.getItem('{SAVE}'))")
+        self.assertGreater(saved["composed"], 14, "the active rule produced nothing during live play")
+        self.assertGreater(float(self.page.locator("#readers").inner_text()), 20)
+        self.button("刻模").click()
+        self.page.clock.run_for(1000)
+        self.assertGreater(self.page.evaluate(f"JSON.parse(localStorage.getItem('{SAVE}'))")["composed"], saved["composed"])
+        self.assert_no_spoilers()
 
     def test_reset_clears_progress_and_discovery_history(self):
         self.open()
@@ -350,6 +409,105 @@ class PlayerContract(unittest.TestCase):
         self.page.reload(wait_until="networkidle")
         self.assertEqual(self.page.evaluate(f"JSON.parse(localStorage.getItem('{SAVE}')).glyphs"), before)
         self.assert_no_spoilers()
+
+    def test_every_aha_reaches_the_player_as_a_visible_world_change(self):
+        """All 28 moments, on the real player surface, one real action each.
+
+        The defect this replaces: an Aha's only trace was an `A## ·` line in the log, and the
+        privacy layer strips exactly those, so the moment fired and the player saw nothing. The
+        player now gets a world-language sentence with no ID and no mechanic explanation, and it
+        must be the newest line in the log every single time. Expected copy is read from the
+        source engine, so this asserts source -> built bundle -> visible DOM, not self-agreement.
+        """
+        source = (ROOT / "public" / "glyph-engine-v3.js").read_text()
+        world = dict(re.findall(r"^ {4}(A\d{2}): '([^']+)',$", source, re.M))
+        self.assertEqual(len(world), 28, "the source world lines moved or changed shape")
+        self.open()  # a real document first: localStorage is denied on about:blank
+        # Each case needs its own save, and writing localStorage then reloading loses the race:
+        # the outgoing page's pagehide handler saves its own state over it. Stage the fixture in
+        # sessionStorage and let an init script apply it on the next document instead.
+        self.context.add_init_script("""(() => {
+          const next = sessionStorage.getItem('aha-sweep-fixture');
+          if (!next) return;
+          sessionStorage.removeItem('aha-sweep-fixture');
+          localStorage.setItem('glyph-factory-save-v3', next);
+          localStorage.removeItem('glyph-factory-ui-reveals-v3');
+        })();""")
+
+        for aid, overrides, action, seconds in AHA_CASES:
+            with self.subTest(aha=aid):
+                state = {"version": 3, "published": True, "act": 2, "readers": 20, "demand": 1,
+                         "glyphs": 500, "credits": 100000, "lifetimeGlyphs": 200000,
+                         "keyboards": 5, "typists": 5, "presses": 2,
+                         "ahaSeen": [f"A{i:02d}" for i in range(1, int(aid[1:]))], "log": []}
+                state.update(overrides)
+                self.page.evaluate("(payload) => sessionStorage.setItem('aha-sweep-fixture', payload)",
+                                   json.dumps(state, ensure_ascii=False))
+                self.page.reload(wait_until="load")
+                expect(self.page.locator("#primary-actions button").first).to_be_visible()
+                self.page.clock.run_for(1600)
+
+                kind, _, label = action.partition(":")
+                if kind != "clock":
+                    # In-page dispatch on a freshly queried node: the controller replaces
+                    # #primary-actions wholesale every 500ms, so a locator can resolve a node
+                    # and then click a detached one.
+                    click = """([kind, label]) => {
+                      const root = kind === 'buy' ? document.querySelectorAll('.machine') : document.querySelectorAll('#primary-actions button');
+                      const node = [...root].find((el) => (kind === 'buy' ? el.querySelector('b') : el.children[0]).textContent.includes(label));
+                      if (!node) throw new Error('missing target: ' + label);
+                      (kind === 'buy' ? node.querySelector('button') : node).click();
+                    }"""
+                    for _ in range(3 if kind == "clickx3" else 1):
+                        self.page.evaluate(click, ["buy" if kind == "buy" else "click", label])
+                        self.page.clock.run_for(600)
+                self.page.clock.run_for(max(seconds, 1) * 1000)
+                self.page.wait_for_timeout(300)
+
+                saved = self.page.evaluate(f"JSON.parse(localStorage.getItem('{SAVE}'))")
+                self.assertIn(aid, saved["ahaSeen"], f"{aid} never fired")
+                # renderDisclosure hides the whole log panel when it has nothing to show, so
+                # "#log is visible" is the player-can-read-it assertion.
+                expect(self.page.locator("#log")).to_be_visible()
+                # The controller prefixes the newest line with › and older ones with ·.
+                lines = [line.lstrip("›·").strip()
+                         for line in (self.page.locator("#log").text_content() or "").splitlines() if line.strip()]
+                self.assertTrue(lines, f"{aid}: the log is empty")
+                self.assertIn(world[aid], lines, f"{aid}: the world never announced it")
+                self.assertEqual(lines[0], world[aid],
+                                 f"{aid}: the announcement is not the newest line the player reads")
+                self.assert_no_spoilers()
+
+    def test_aha_announcement_detector_rejects_an_engine_without_world_lines(self):
+        # Negative control for the sweep above: an engine that still records the Aha but says
+        # nothing must fail the same assertion, or a green sweep proves nothing.
+        engine = (DIST / "glyph-engine-v3.js").read_text()
+        self.assertIn("const AHA_WORLD = {", engine)
+        mutated = re.sub(r"const AHA_WORLD = \{[\s\S]*?\n  \};", "const AHA_WORLD = {};", engine, count=1)
+        self.assertNotIn("机械键盘开始自己动", mutated)
+        with self.browser.new_context(locale="zh-CN") as control:
+            control.route("**/glyph-engine-v3.js", lambda route: route.fulfill(status=200, content_type="application/javascript", body=mutated))
+            page = control.new_page()
+            page.clock.install(time=FIXED)
+            page.clock.pause_at(FIXED + timedelta(seconds=1))
+            page.add_init_script("""(() => {
+              localStorage.setItem('glyph-factory-save-v3', JSON.stringify({
+                version: 3, published: false, act: 1, glyphs: 0, credits: 50, lifetimeGlyphs: 10,
+                keyboards: 0, typists: 0, presses: 0, ahaSeen: [], log: [] }));
+              localStorage.removeItem('glyph-factory-ui-reveals-v3');
+            })();""")
+            page.goto(self.origin + "/play.html", wait_until="load")
+            expect(page.locator("#primary-actions button").first).to_be_visible()
+            page.clock.run_for(1600)
+            page.evaluate("""() => {
+              const card = [...document.querySelectorAll('.machine')].find((c) => c.querySelector('b').textContent.includes('机械键盘'));
+              card.querySelector('button').click();
+            }""")
+            page.clock.run_for(2000)
+            saved = page.evaluate(f"JSON.parse(localStorage.getItem('{SAVE}'))")
+            self.assertIn("A01", saved["ahaSeen"], "the control engine stopped recording the Aha too")
+            self.assertNotIn("机械键盘开始自己动", page.locator("#log").text_content() or "",
+                             "the sweep would pass against an engine that never speaks")
 
     def test_detector_rejects_original_removed_node_regression(self):
         # Negative control: deliberately reintroduce the exact removed-node defect

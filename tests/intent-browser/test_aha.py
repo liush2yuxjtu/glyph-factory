@@ -129,6 +129,9 @@ class AhaReview(unittest.TestCase):
         expect(self.real_frame().locator('#world-card')).to_be_visible()
         self.assertEqual(self.saved()['act'],3)
         self.assertEqual(self.saved()['worldScale'],1)
+        # The city opens with one district. A dialect has to be observed, twice, before the
+        # city is wide enough to be zoomed out to the world.
+        self.button('观察一个新方言').click()
         self.button('观察一个新方言').click()
         self.button('创造一个概念').click(); self.button('创造一个概念').click()
         self.button('把地图缩到世界').click()

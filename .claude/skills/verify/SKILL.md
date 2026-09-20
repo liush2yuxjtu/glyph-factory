@@ -1,6 +1,6 @@
 ---
 name: verify
-description: Verify Glyph Factory changes against the exact candidate SHA — launch the dev server, drive the real browser surfaces with the committed driver, run the 28-case Aha invariant/transition suite on chromium and webkit, and capture visual and interaction evidence. Use for general verification, and for proving an Aha change is safe or checking the 28/28 claim.
+description: Verify Glyph Factory changes against the exact candidate SHA — launch the dev server, drive the real browser surfaces with the committed driver, run the 28-case Aha invariant/transition suite on chromium and webkit, check the action disclosure contract (affordability disables, never hides), the progression contract (an active rule must run, and its gating resource must be on screen) and the Aha legibility contract (every one of A01–A28 must announce itself in the player's log), and capture visual and interaction evidence. Use for general verification, proving an Aha change is safe, checking the 28/28 claim, verifying an action reveal/enable change, verifying an advance() cadence / Act II progression change, or verifying that an Aha is perceivable on the player surface.
 ---
 
 # Verify Glyph Factory
@@ -36,11 +36,72 @@ Default Next.js readiness is the local URL printed by the dev server.
 The repository also provides:
 
 ```bash
-npm run verify:fast
-npm run verify
+npm run verify:fast     # Node contract suite + build-static.mjs
+npm run verify          # the above + unittest discover tests/browser
+npm run intent-audit    # the canonical aggregate gate — see below
 ```
 
-`npm run verify` runs the Node contract suite, static build, and browser unittest layer. Treat those as supporting harness evidence; still drive the user-facing surface for UI changes.
+`npm run verify` runs the Node contract suite, static build, and the player browser layer
+through **raw `unittest discover`**, which does not enforce a nonempty/unskipped floor. A
+green `npm run verify` is therefore supporting evidence only; the fail-closed runner below
+is the authoritative form of the same suite. Still drive the user-facing surface for UI
+changes.
+
+### `npm run intent-audit` — the canonical gate, and its current defect
+
+`public/aha.md` ("Non-negotiable result semantics") makes `npm run intent-audit` the
+authoritative acceptance run: static contract + player Chromium/WebKit + Aha
+Chromium/WebKit + negative controls, with **any** failure, skip, zero-case run, missing
+dependency, or stage that did not execute counting as not-ALL-PASS. It records `commit`,
+`dirty`, and a `sourceSha256` over `public/ src/ scripts/ tests/ .github/ aha.md intent.md
+package.json package-lock.json vercel.json` into
+`test-results/intent-audit/report.json`, and its stages are, in order:
+`fast` → `review-build` → `player-chromium` → `player-webkit` → `aha-chromium` →
+`aha-webkit` → `diff-check`.
+
+**As of 2026-09-20 it aborts on the first stage on this machine** (`scripts/intent-audit.mjs:40-42`):
+
+```
+error: "Fast gate did not prove nonempty, unskipped success"
+stages: [{ name: "fast", status: "PASS", exitCode: 0 }]
+```
+
+The fast stage *passes*; the audit's parser then rejects it. `verify-player.mjs` shells out
+to `node --test`, and Node ≥ 20 prints `ℹ tests 83` where the audit's regex requires
+`# tests (\d+)`. This is a Node-reporter-format drift, not a product regression. It is not
+count- or content-dependent — the regex matches the reporter's *prefix*, so a clean
+checkout fails the same way; verified directly with
+`/^# tests (\d+)$/m.test('ℹ tests 83') === false`. Fixing it is a one-line regex change in
+`scripts/intent-audit.mjs`; until then, reproduce the audit by running its five substantive
+stages by hand and reporting them individually:
+
+```bash
+npm run verify:fast
+npm run build:review
+GLYPH_BROWSER=chromium python3 scripts/run-browser-contracts.py player
+GLYPH_BROWSER=webkit   python3 scripts/run-browser-contracts.py player
+GLYPH_BROWSER=chromium python3 scripts/run-browser-contracts.py aha
+GLYPH_BROWSER=webkit   python3 scripts/run-browser-contracts.py aha
+git diff --check
+```
+
+Say plainly that this is the hand-run equivalent, not `intent-audit` itself.
+
+### Build before any browser suite
+
+Every browser suite serves a built artifact, so `dist/` must exist first or the run dies in
+`setUpClass` rather than failing a test:
+
+- `run-browser-contracts.py player` → `test_player.PlayerContract` raises
+  `Build the player bundle first: node scripts/build-static.mjs`.
+- `run-browser-contracts.py aha` → the review suite raises
+  `Build review-dist with node scripts/build-aha-review.mjs first.`
+- `test_player.py` also refuses to run against a review build
+  (`playerSpoilers is not False`).
+
+`npm run verify:fast` and `npm run build:review` both write `dist/`; `npm run build:review`
+additionally writes `review-dist/` and is the one to use when you need the Aha suite. A
+cold `run-browser-contracts.py player` on a fresh clone fails for this reason alone.
 
 ## Drive
 
@@ -50,7 +111,7 @@ Use the committed driver rather than hand-rolling Playwright —
 screenshots plus `report.json` to `--out`, and exits non-zero on a failed check. See
 `.claude/skills/run-glyph-factory/SKILL.md` for the full contract and the gotchas that
 make raw locator clicks fail here (the 500ms `replaceChildren` re-render, the runtime
-privacy strip on `/`, the auto-sell deadlock on the publish button).
+privacy strip on `/`, the auto-sell deadlock on stock-cost actions).
 
 Use Playwright/Chromium directly (and WebKit when cross-engine behavior is relevant) only
 for something the driver does not cover.
@@ -95,6 +156,209 @@ green run proves the assertions can fail rather than that they are vacuous.
 If you touch `player-privacy-v3.js`, `glyph-game-v3.js`, or `play.html`, this suite is the
 gate. `npm run verify` and the `dist/` suite will not catch you.
 
+### The disclosure contract: affordability disables, it never hides
+
+`renderActions()` in `public/glyph-game-v3.js` splits every action into **reveal** and
+**enable**. Reveal decides whether the button exists at all and is latched in
+`glyph-factory-ui-reveals-v3`; enable decides whether it is clickable. The rule, stated in
+the function itself and in `aha.md`'s `hidden → discovered → persistent` contract:
+
+> Reveal conditions must use latched or monotonic facts. Affordability only disables a
+> discovered action; it never hides it.
+
+This is not stylistic. With auto-sell on, `advance()` runs `sold = Math.floor(g.glyphs)`, so
+`s.glyphs` sits in `[0, 1)` permanently. **Any reveal condition reading `s.glyphs` or
+`s.credits` is unreachable for exactly the players who engaged with the automation the game
+rewarded them for** — `publish` needs 200 stock, `compose-rule` needs 2, `condense` needs
+20. A reveal that also gates on stock produces a button that never appears, with no
+in-game explanation. That was the state before 2026-09-20, when `publish` used
+`E.canPublish(s)` for reveal *and* enable.
+
+Verify a disclosure change at both layers:
+
+**Node (always).** `tests/progressive-disclosure.test.mjs` →
+`affordability never hides a discovered action` statically parses every `add('key', reveal,
+enable, ...)` call and asserts reveal ≠ enable, that reveal matches nothing for
+`\bs\.(?:glyphs|credits)\b`, and that `'toggle-auto'` is emitted exactly once (the toggle
+must render in every act, or publishing with auto-sell on strands the player with no way to
+stop it). Negative control — restore `add('publish', E.canPublish(s), E.canPublish(s), …)`
+and it must fail naming `'publish'`.
+
+**Browser (for any stock-cost action you changed).** The player suite's pre-existing
+`test_sell_stays_visible_disabled_and_persistent_after_zero_and_reload` covers the *sell*
+case only; nothing covers publish/compose/condense. Seed the stranded state and assert on
+`/` — the privacy-stripped player route — not just `play.html`:
+
+```js
+// add_init_script, NOT a post-goto evaluate: the page autosaves on `pagehide`,
+// so writing localStorage after a goto and then reloading is clobbered by the
+// in-memory state on the way out.
+{ version: 3, glyphs: 0.8, credits: 478.5, lifetimeGlyphs: 12800,
+  keyboards: 11, typists: 10, presses: 8, contracts: 3, act: 1,
+  manualBoost: true, autoSellUnlocked: true, autoSell: true,
+  published: false, ahaSeen: ['A01','A02'] }
+```
+
+Assert all four, then toggle auto-sell off and assert the button flips to enabled within
+~4s (≈120 glyphs/s):
+
+1. the button is present in `#primary-actions`;
+2. it is `disabled`;
+3. its `.action-sub` states the shortfall;
+4. when auto-sell is the cause, `.action-sub` contains `自动出售正在清空库存`.
+
+Also assert the privacy boundary still holds in the same pass — the iframe body text must
+contain no match for `AHA`, `ACT `, `A01`, `导演模式`, `Director`.
+
+### The progression contract: a running rule must run, and its resource must be on screen
+
+Act II is the one act whose pacing is not "click the thing you can see". Its gates are
+`readers` (A06 at 100, A07's letter at 250, A10's paper crisis at 1000) and `composed`. Both
+numbers do exist in the DOM — `renderWorld()`'s Act II panel is exactly
+`READERS / DEMAND / COMPOSED / DELETED` — but `renderDisclosure()` hides the world card
+until `s.act >= 3`, so until 2026-09-20 **nothing on the player surface showed either one**.
+Two defects compounded into a reportable dead state ("i cannot trigger more aha moments"):
+
+1. **An active rule produced nothing while the player watched.** `advance()` used
+   `Math.floor(elapsed / RULE_PERIOD)`, which is `0` for every 500 ms live tick — `tick()`
+   calls `advance` twice a second with ~0.5 s of elapsed time, so only a multi-second
+   catch-up (offline return, `visibilitychange`) could ever cross the 4 s boundary. A04's
+   own title is 「规则开始自动运行」. The engine's unit test passed anyway because it
+   advanced 8 s in a single call. So the rule only ever ran when the player was *away*.
+2. **The only feedback was a lie.** `刻模`'s `.action-sub` was static discovery copy
+   (`2 字 → 一条可重复规则`), so every click re-logged `刻模成功：木 + 木 → 林。` and changed
+   nothing visible — `composed` (its only output) was itself hidden. A working button reads
+   as broken.
+
+The fix is one engine change and two renderer changes, and the invariant to verify is the
+one that was violated: **a running rule must produce the same output from many short ticks
+as from one long jump.**
+
+**Node (always).**
+
+```bash
+npm test    # tests/game-v3.test.mjs → "an active rule composes on the live 500ms tick…"
+```
+
+The test asserts the identity rather than a magic number: 40 × 500 ms ticks and one 20 s
+jump must both yield `composed === 6` from `composed: 1`. Pre-fix the stepped run yields
+**1** — the manual click only. Negative control: restore
+`Math.floor(elapsed / RULE_PERIOD)` with no remainder carried and the assertion must fail;
+verified at `7ebd57b+`, stepped `composed=1` vs leap `composed=6`.
+
+**Browser (for any `advance()` cadence or Act II surface change).**
+`tests/browser/test_player.py::test_act_two_shows_readership_and_a_rule_that_is_really_running`
+seeds the reported dead state and asserts readership is visible while the world card is
+*not*, that the button says `已刻 14 条` / `读者 +`, and that `composed` grows under
+`clock.run_for` with no clicks. To prove the act actually *completes* rather than merely
+moves, drive the whole gate on the player route — this is the end-to-end recipe, seed the
+state, then `clock.run_for`, click by `data-command`, and read back `localStorage`:
+
+```js
+{ version: 3, act: 2, published: true, readers: 137, demand: 1.2, glyphs: 2700,
+  credits: 97700, lifetimeGlyphs: 214600, meaning: 457.8, noise: 5.2,
+  composed: 14, ruleActive: true, autoSellUnlocked: true, autoSell: false,
+  keyboards: 11, typists: 10, presses: 8, contracts: 3, manualBoost: true,
+  ahaSeen: ['A01','A02','A03','A04','A05'] }
+```
+
+Must reach, in order: `readers` visible on the metric row; `read-letter` appears once
+`readers >= 250`; A07 → A08 → A09 → A11 fire on real clicks; A10 fires from readership
+alone; `map-city` appears; clicking it gives `act === 3, worldScale === 1, districts === 1`
+and fires **A14 only** — A12 needs the first 观察一个新方言, because `map-city` no longer
+grants the second district (see the legibility contract below); **and only then** does
+`#world-card` become visible. Fifteen assertions, all passing at `7ebd57b+` — the run is
+reproducible but the script lives in `/tmp`, so treat it as a recipe to re-drive, not a
+committed suite. Say that when you report it.
+
+Two boundaries this must not cross, both pinned by existing tests:
+
+- **`#world-card` stays hidden until Act III.** `test_layout_expands_only_when_world_is_discovered`
+  (`test_player.py:156`) and `test_F02_city_and_world_require_real_actions`
+  (`test_aha.py:124`) assert it hidden at Act II *even with `paperCrisis` and `meaning: 75`
+  already true*. Putting readership on the metric row instead of unhiding the world card is
+  what keeps `aha.md`'s S10/S11 intact.
+- **Reveal is still behavioral.** The 读者 metric appears when readership first exists
+  (`s.readers > 0 || s.published`) and then persists — it is not a "show everything at
+  Act II" switch. A fresh save must still render exactly one metric: `test_fresh_game_is_small_and_survives_timer_renders`
+  now lists `readers` beside `credits`/`meaning`/`noise` in its hidden-on-fresh loop.
+
+The engine exports `RULE_PERIOD` (4) and `RULE_READERS` (0.015) so the renderer reports the
+real coefficient instead of a second copy; if you change the cadence, change it there.
+
+### The Aha legibility contract: every moment must be said out loud
+
+`aha.md` forbids the player from ever seeing `A01–A28`, `AHA`, `ACT`, Director Mode or any
+explanation of a mechanic. The privacy layer enforces it by stripping every `A## ·` line out
+of the log (`player-privacy-v3.js`, `scrubLog`). The consequence was not noticed until
+2026-09-20: **an Aha's only trace in the engine was exactly that line**, so on the player
+surface all 28 moments fired and produced nothing at all. What the player actually saw was
+the threshold crossing itself, which is indistinguishable from drift — `readers 99 → 103`
+is not a statement, and for the five time-driven moments (A06, A10, A19, A23, A26) the
+player was looking at an idle screen when the game recorded an insight.
+
+The fix is `AHA_WORLD` in `glyph-engine-v3.js`: one world-language sentence per Aha, emitted
+by `syncAhas()` immediately after the design line, containing no ID, no act number and no
+mechanic explanation. It is the thing the player reads, and it is the only reason an Aha is
+perceptible. Four invariants follow, and all four are committed tests:
+
+1. **Every Aha has exactly one announcement**, distinct, ≥12 characters, containing no
+   `A\d\d` / `AHA` / `ACT` / `导演` / `Director`, and equal to neither the title nor the
+   reveal — `tests/game-v3.test.mjs::every Aha carries a player-facing world line…`.
+2. **At the moment it fires, the announcement is the newest line the player reads.** The
+   design line goes in first, the world line second, so after `scrubLog` the world line is
+   index 0 of the rendered log. Node asserts `after.log[0]` whenever the fixture fires
+   exactly one Aha (a fixture that also crosses a later threshold announces both, which is
+   what offline catch-up legitimately does); the browser asserts it on the real DOM for all
+   28, no exceptions.
+3. **The player build keeps the world lines while the design copy is blanked.**
+   `scripts/build-static.mjs` strips `aha(...)` titles/reveals by regex; `AHA_WORLD` is a
+   separate literal so it survives. The build now fails closed if any of the 28 lines is
+   missing from the stripped payload, or if a design title leaked into it. Keep world copy
+   **out of the `aha(...)` call** — folding it in would silently strip the player's version.
+4. **One real action never fires two Ahas.** Four pairs used to, because the action granted
+   the second Aha's threshold outright: `digitize` added 100 articles (A19+A20),
+   `discover-machine-glyph` seeded `machineGlyphUse: 1000` (A22+A23), `infrastructure`
+   seeded `ambiguity: 100` (A25+A26), and `map-city` granted `districts: 2` (A12+A14). Each
+   now starts below its own threshold and the moment arrives when it becomes true. The city
+   therefore opens with `districts: 1`, and `test_F02_city_and_world_require_real_actions`
+   clicks 观察一个新方言 twice before 把地图缩到世界.
+
+**Node (always).**
+
+```bash
+npm test
+```
+
+`tests/game-v3.test.mjs` carries invariants 1, 2 and 4, plus the existing cadence identity.
+Invariant 4 runs all 28 director states × all 30 real commands.
+
+**Browser (for any `AHA_WORLD`, `syncAhas`, log, or player-surface change).**
+
+```bash
+node scripts/build-static.mjs
+GLYPH_BROWSER=chromium python3 -m unittest \
+  tests.browser.test_player.PlayerContract.test_every_aha_reaches_the_player_as_a_visible_world_change -v
+```
+
+The sweep seeds each Aha's predecessor state, performs the real action on the real player
+build, and asserts the expected sentence — read from `public/glyph-engine-v3.js`, so this
+checks source → built bundle → visible DOM rather than agreeing with itself — is present in
+`#log` **and is its first line**, with `assert_no_spoilers()` on every one of the 28.
+Expected copy is parsed with `^ {4}(A\d{2}): '([^']+)',$`, the same shape the build guard
+uses; if you reformat `AHA_WORLD`, both break together, which is the point.
+
+Its negative control is `test_aha_announcement_detector_rejects_an_engine_without_world_lines`:
+it serves an engine whose `AHA_WORLD` is `{}` via `context.route`, requires the Aha to still
+be recorded, and requires the announcement to be absent. A green sweep is only meaningful
+alongside it.
+
+Two seeding traps this suite already handles, both of which silently produce a *false green*
+rather than an error: writing `localStorage` and then reloading loses the race against the
+outgoing page's `pagehide` save — stage the fixture in `sessionStorage` and let an init
+script apply it on the next document; and the log renders a leading `›` / `·` marker, so
+compare against `line.lstrip("›·").strip()`, not the raw line.
+
 ## The 28 Aha moments (A01–A28)
 
 ### What "verifying one Aha" means here
@@ -123,8 +387,8 @@ than silently passing it. The only intentional coupling is catalogue identity an
 ### Build
 
 The suite serves `review-dist/` from a thread-local origin, so the artifacts you test are
-the ones you just built from that SHA's working tree. `review-dist/` must exist first, or
-the suite raises `Build review-dist with node scripts/build-aha-review.mjs first.`
+the ones you just built from that SHA's working tree. See "Build before any browser suite"
+above for the prerequisite and its failure mode; in short:
 
 ```bash
 npm run build:review      # build-static.mjs (writes dist/) + build-aha-review.mjs (writes review-dist/)
@@ -153,7 +417,7 @@ The player suite is the other half of the leak boundary — run it too when the 
 `build-static.mjs`, the privacy layer, or `play.html`:
 
 ```bash
-GLYPH_BROWSER=chromium python3 scripts/run-browser-contracts.py player   # minimum 19
+GLYPH_BROWSER=chromium python3 scripts/run-browser-contracts.py player   # floor 19, currently 25
 ```
 
 ### Run — in-app 28/28
@@ -226,11 +490,68 @@ overclaimed verdict.
   guarantee comes from `build-static.mjs` baking `data-audience="player"` and the
   `!important` hide rules into `dist/`, which `test_player.py` then asserts on the real
   artifact. Do not quote the 28/28 as a player-package claim.
+- **The disclosure contract test is static.** `affordability never hides a discovered
+  action` reads source text. It proves reveal ≠ enable and that no reveal reads
+  `s.glyphs`/`s.credits`; it does **not** prove the button actually renders visible, that
+  `rememberReveal` latches it, that `enabled` is correct, or that the shortfall copy says
+  the right thing. Only the seeded browser recipe above covers that, and only for the
+  actions you actually seed.
+- **The Act II progression recipe is not a committed suite.** The fourteen-assertion
+  end-to-end run (dead state → `map-city` → Act III) lives in `/tmp`, not in `tests/`. The
+  committed coverage is narrower: the Node cadence identity, and one browser test asserting
+  readership is visible and `composed` grows. Nothing committed proves the *whole* gate is
+  completable, so a green suite does not by itself license "Act II is unstuck".
+- **The cadence test proves tick-equivalence, not pacing.** `live ticks == one jump` says
+  the rule's output is no longer lost to tick granularity. It says nothing about whether
+  the resulting curves are balanced — readership is quadratic in time once `composed`
+  grows, and no test bounds that.
+- **The Aha legibility sweep proves transport, not quality.** It asserts the authored
+  sentence reaches the newest line of the player's log with no meta leak. It does not judge
+  whether the sentence is *good*, and nothing asserts the announcement is still on screen
+  later — `log` is a 40-entry ring, so in a busy stretch it can scroll away.
+- **The sweep seeds boundary states, not a playthrough.** All 28 are driven from
+  `AHA_CASES` in `test_player.py`, one action each, with the prior IDs pre-recorded in
+  `ahaSeen`. It proves every moment is reachable and legible from the state just before it;
+  it does **not** prove a player playing normally arrives at those states in that order.
+- **Aha ordering is still only partly tested.** Invariant 4 forbids two Ahas from one
+  *action*; nothing forbids a later Aha from being reachable before an earlier one, and the
+  `directorState` fixtures bypass the ordering question entirely.
+- **`AHA_WORLD` ships in the player bundle and is readable in devtools.** That is inherent —
+  the engine has to write the sentence into the log — and it is a weaker disclosure than the
+  stripped title/reveal, which are blanked precisely so the payload carries no designer copy.
+  Do not describe the player package as "carries no Aha text"; it carries the world lines
+  and nothing else. `tests/progressive-disclosure.test.mjs` still pins title/reveal to `''`.
+- **`demand` is a dead field and A06 rests on it.** `g.demand` is set by `advance()` and by
+  two actions, but nothing reads it and the only panel that renders it (`renderWorld()`'s
+  Act II set) is unreachable on the player surface, because `#world-card` is hidden until
+  Act III and by then the panel shows the Act III set. A06's world line describes reader
+  growth instead, which is real and visible, but the resource the Aha is named after has no
+  carrier anywhere. Reported, not fixed — rebalancing it is a pacing decision.
+- **`npm run intent-audit` did not run.** While its regex defect stands, there is no
+  single command whose green means "all layers passed". Report the five hand-run stages
+  individually and say that is what you did — do not present them as `intent-audit` PASS.
+- **No run in this session executed the Aha suite against a deployment.** Every result here
+  is a local artifact built from the working tree; `report.json` says so in its own `scope`
+  field. A local green is not a Preview or production claim.
 
 ## Gotchas
 
 - **`review-dist/` is required and is not built by `npm run dev`.** A fresh clone fails the
-  suite with a build error, not a test failure.
+  suite with a build error, not a test failure. Same for `dist/` — see "Build before any
+  browser suite" above; the failure reads as `setUpClass ERROR`, not as a test failure, so
+  a run showing `discovered 22, run 3, errors 1` is a missing build, not a product defect.
+- **Seeding `localStorage` needs `add_init_script`, not a post-`goto` evaluate.** The
+  controller registers `pagehide → save(true)`, so writing a fixture save after `goto` and
+  then calling `reload()` has it overwritten by the in-memory state on the way out. The
+  page then loads your fixture's *absence* and autosaves a fresh game — which looks exactly
+  like "the fixture didn't apply". Also `restore()` only takes the full path when
+  `value.version === 3`; an unversioned fixture silently degrades to the legacy migration
+  branch and discards every field it does not name.
+- **Act II's world card is hidden on purpose — do not "fix" it by unhiding.** The natural
+  reading of `aha.md` S11 is "the world surface appears when the city condition holds", but
+  `test_F02_city_and_world_require_real_actions` pins the stricter behavior: hidden until
+  `act === 3`, even at `cityReady`. Legibility for Act II belongs on the metric row and in
+  `#primary-actions`, which is where `renderActions()` already carries the shortfall idiom.
 - **Playwright version drift.** `tests/browser/requirements.txt` pins `1.57.0`; a machine
   may have a newer one. CI installs the pin. Only the sync API is used, so either works,
   but a version-only difference is not a candidate regression.

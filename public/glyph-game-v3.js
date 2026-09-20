@@ -12,8 +12,8 @@
   try { locale = localStorage.getItem(LOCALE_KEY) || (navigator.language.toLowerCase().startsWith('zh') ? 'zh-CN' : 'en'); } catch { locale = 'zh-CN'; }
 
   const I18N = {
-    zh: { director:'导演模式', business:'营业中', inventory:'库存文字', credits:'工坊资金', meaning:'意义', noise:'噪音', systems:'系统 / SYSTEMS', systemsNote:'系统一旦出现，就留在桌面上。', log:'工坊日志', export:'导出存档', reset:'重新开始', save:'已自动保存 · 当前浏览器 · 最多结算离线 8 小时', preview:'只预览', apply:'应用到存档', exit:'返回真实进度', next:'NEXT', seen:'已发生', locked:'未发生', done:'已完成', need:'暂不可用' },
-    en: { director:'Director Mode', business:'OPEN', inventory:'Glyph inventory', credits:'Workshop credits', meaning:'Meaning', noise:'Noise', systems:'Systems', systemsNote:'Once a system appears, it stays on the table.', log:'Workshop log', export:'Export save', reset:'Start over', save:'Autosaved · this browser · up to 8 hours offline', preview:'Preview only', apply:'Apply to save', exit:'Back to real progress', next:'NEXT', seen:'SEEN', locked:'LOCKED', done:'Done', need:'Not ready' }
+    zh: { director:'导演模式', business:'营业中', inventory:'库存文字', credits:'工坊资金', readers:'读者', meaning:'意义', noise:'噪音', systems:'系统 / SYSTEMS', systemsNote:'系统一旦出现，就留在桌面上。', log:'工坊日志', export:'导出存档', reset:'重新开始', save:'已自动保存 · 当前浏览器 · 最多结算离线 8 小时', preview:'只预览', apply:'应用到存档', exit:'返回真实进度', next:'NEXT', seen:'已发生', locked:'未发生', done:'已完成', need:'暂不可用' },
+    en: { director:'Director Mode', business:'OPEN', inventory:'Glyph inventory', credits:'Workshop credits', readers:'Readers', meaning:'Meaning', noise:'Noise', systems:'Systems', systemsNote:'Once a system appears, it stays on the table.', log:'Workshop log', export:'Export save', reset:'Start over', save:'Autosaved · this browser · up to 8 hours offline', preview:'Preview only', apply:'Apply to save', exit:'Back to real progress', next:'NEXT', seen:'SEEN', locked:'LOCKED', done:'Done', need:'Not ready' }
   };
   const ACT_EN = { 1:['Hands → Automation','Print by hand. Then make repetition disappear.'], 2:['Words Begin to Grow','Relationships, readers, meaning and noise become machines.'], 3:['Words Change the City','Language stops being inventory and starts changing society.'], 4:['Machines Begin to Write','Delegate judgment, then delegate the ability to create delegates.'], 5:['Machine Language','The system invents symbols that humans did not design.'], 6:['From Growth to Silence','Optimization flips from making more to removing noise.'] };
   const ACT_ZH = { 1:['手工与自动化','先亲手印。然后让机器接管重复劳动。'], 2:['字开始生长','关系、读者、意义和噪音，都开始成为机器。'], 3:['文字改变城市','文字不再是库存，而开始改变社会。'], 4:['机器开始写','把判断交出去，再把“创造代理”的权力交出去。'], 5:['机器语言','系统开始创造人类没有设计过的符号。'], 6:['从增长到沉默','优化目标从“制造更多”翻转成“删除噪音”。'] };
@@ -58,24 +58,33 @@
   function renderActions(s) {
     const buttons=[]; const en=locale==='en'; const seen=new Set(s.ahaSeen||[]);
     const add = (key, revealWhen, enabled, text, sub, type, props = {}, className = '') => { if (rememberReveal(`action:${key}`, revealWhen)) buttons.push(actionButton(text, sub, type, enabled, props, className)); };
+    // Affordability only disables a discovered action; it never hides it. Reveal conditions must use latched or monotonic facts, because a player who leaves auto-sell on keeps stock below 1 forever.
+    const draining = s.autoSell && !s.digital;
+    const drainNote = draining ? (en?' · auto-sell is emptying stock':' · 自动出售正在清空库存') : '';
+    const lack = (what, now) => en ? `Needs ${what} (${now})${drainNote}` : `还差 ${what}（${now}）${drainNote}`;
     if (s.act === 1) {
       buttons.push(actionButton(label(ACTIONS.print), en?'Manual production':'手动生产', 'print', true, {}, 'major'));
       add('sell', s.lifetimeGlyphs>=1, s.glyphs>=1, label(ACTIONS.sell), `${fmt(Math.floor(s.glyphs)*E.PRICE,1)} ${en?'credits':'资金'}`, 'sell');
-      add('boost', s.manualBoost || (s.lifetimeGlyphs>=150&&s.credits>=45), !s.manualBoost && s.lifetimeGlyphs>=150&&s.credits>=45, label(ACTIONS.boost), s.manualBoost?tr('done'):(en?'150 total + 45 credits':'累计150字 + 45资金'), 'boost');
-      if (s.autoSellUnlocked) buttons.push(actionButton(label(ACTIONS.autoToggle), s.autoSell?'ON':'OFF', 'toggle-auto', true));
-      else add('autoResearch', s.lifetimeGlyphs>=300&&s.credits>=60, s.lifetimeGlyphs>=300&&s.credits>=60, label(ACTIONS.autoResearch), en?'300 total + 60 credits':'累计300字 + 60资金', 'research-auto');
+      add('boost', s.manualBoost || s.lifetimeGlyphs>=150, !s.manualBoost && s.lifetimeGlyphs>=150&&s.credits>=45, label(ACTIONS.boost), s.manualBoost?tr('done'):(s.credits>=45?(en?'150 total + 45 credits':'累计150字 + 45资金'):lack(en?'45 credits':'45 资金', fmt(s.credits,1))), 'boost');
+      if (!s.autoSellUnlocked) add('autoResearch', s.lifetimeGlyphs>=300, s.lifetimeGlyphs>=300&&s.credits>=60, label(ACTIONS.autoResearch), s.credits>=60?(en?'300 total + 60 credits':'累计300字 + 60资金'):lack(en?'60 credits':'60 资金', fmt(s.credits,1)), 'research-auto');
       const c=E.CONTRACTS[s.contracts];
       const contractEver = s.contracts>0 || Boolean(c && s.glyphs>=c.glyphs);
       if (rememberReveal('action:contract', contractEver)) {
         if (c) buttons.push(actionButton(label(ACTIONS.contract), `${c.glyphs} → ${c.reward}`, 'contract', s.glyphs>=c.glyphs));
         else buttons.push(actionButton(label(ACTIONS.contract), tr('done'), 'contract', false));
       }
-      add('publish', E.canPublish(s), E.canPublish(s), label(ACTIONS.publish), en?'This opens ACT II.':'这不是结局；它会打开 ACT II。', 'publish', {}, 'major');
+      add('publish', s.lifetimeGlyphs>=5000, E.canPublish(s), label(ACTIONS.publish), E.canPublish(s)?(en?'This opens ACT II.':'这不是结局；它会打开 ACT II。'):lack(en?'200 stock + 300 credits':'库存 200 字 + 300 资金', `${fmt(s.glyphs,1)} / ${fmt(s.credits,1)}`), 'publish', {}, 'major');
     }
     else if (s.act === 2) {
       buttons.push(actionButton(label(ACTIONS.print), en?'Old verbs still work, for now.':'旧玩法还在，但意义开始改变。', 'print', true, {}, 'major'));
-      add('compose', s.ruleActive||s.composed>0||s.glyphs>=2, s.glyphs>=2, label(ACTIONS.compose), en?'2 glyphs → one repeatable relationship':'2 字 → 一条可重复规则', 'compose-rule');
-      add('condense', s.meaning>0||seen.has('A05')||s.glyphs>=20, s.glyphs>=20, label(ACTIONS.condense), en?'Volume becomes meaning.':'字数开始变成意义。', 'condense');
+      // Once the rule is running, the button must report what it is producing. Repeating the
+      // discovery copy forever is how a working button reads as broken.
+      const ruleReaders = (s.composed * E.RULE_READERS).toFixed(2);
+      const composeSub = s.glyphs < 2 ? lack(en?'2 stock':'2 库存字', fmt(s.glyphs,1))
+        : s.ruleActive ? (en?`Carved ${fmt(s.composed)} · readers +${ruleReaders}/s`:`已刻 ${fmt(s.composed)} 条 · 读者 +${ruleReaders}/秒`)
+        : (en?'2 glyphs → one repeatable relationship':'2 字 → 一条可重复规则');
+      add('compose', true, s.glyphs>=2, label(ACTIONS.compose), composeSub, 'compose-rule');
+      add('condense', s.meaning>0||seen.has('A05')||s.composed>0, s.glyphs>=20, label(ACTIONS.condense), s.glyphs>=20?(en?'Volume becomes meaning.':'字数开始变成意义。'):lack(en?'20 stock':'20 库存字', fmt(s.glyphs,1)), 'condense');
       add('letter', s.letters>0||seen.has('A07')||s.readers>=250, s.readers>=250, label(ACTIONS.letter), `${en?'readers':'读者'} ${fmt(s.readers)}`, 'read-letter');
       add('organic', s.organicWords>0||seen.has('A08')||s.letters>=1, s.letters>=1, label(ACTIONS.organic), en?'The audience writes back.':'让读者也成为作者。', 'organic-word');
       add('viral', s.viralWords>0||seen.has('A09')||s.organicWords>=1, s.organicWords>=1, label(ACTIONS.viral), en?'Propagation > production':'传播速度 > 生产速度', 'viral-word');
@@ -108,6 +117,8 @@
       const stopReady=s.deletedNoise>=1000&&s.compressedMeaning>=10000;
       add('stop', s.stopped||stopReady, !s.stopped&&stopReady, label(ACTIONS.stop), s.stopped?tr('done'):(en?'The final action is now possible.':'最后一个动作现在才出现。'), 'stop-printing', {}, 'danger');
     }
+    // Auto-sell is a permanent setting, not an Act I verb: keep its toggle beside the primary action in every act, or publishing with it on strands the player with no way to stop it draining stock.
+    if (s.autoSellUnlocked && !s.stopped) buttons.splice(1, 0, actionButton(label(ACTIONS.autoToggle), s.autoSell?'ON':'OFF', 'toggle-auto', true));
     if (s.stopped) buttons.forEach((button) => { button.disabled=true; });
     $('primary-actions').replaceChildren(...buttons);
   }
@@ -141,6 +152,10 @@
     // Digital publishing intentionally replaces physical inventory; scarcity never does.
     $('glyphs').closest('.metric').hidden=Boolean(s.digital);
     metric('credits','credits',s.credits>0||s.manualBoost||s.autoSellUnlocked||s.contracts>0||s.keyboards>0||s.typists>0||s.presses>0||s.act>1);
+    // Act II gates on readership (A06/A07/A10 and the city map). It used to live only in the
+    // world card, which stays hidden until Act III, so the one number the act turns on was
+    // never on screen. Readership exists from publication, so it appears from there.
+    metric('readers','readers',s.readers>0||s.published);
     metric('meaning','meaning',s.meaning>0||s.composed>0||seen.has('A05')||s.act>2);
     metric('noise','noise',s.noise>0||s.deletedNoise>0||seen.has('A10')||seen.has('A11')||s.act>2);
 
@@ -175,8 +190,8 @@
     $('below-layout')?.classList.toggle('single', visibleBelow <= 1);
   }
 
-  function renderText() { document.documentElement.lang=locale==='en'?'en':'zh-CN'; $('lang-toggle').textContent=locale==='en'?'中文':'EN'; $('director-toggle').textContent=tr('director'); $('glyphs-label').textContent=tr('inventory'); $('credits-label').textContent=tr('credits'); $('meaning-label').textContent=tr('meaning'); $('noise-label').textContent=tr('noise'); $('systems-title').textContent=tr('systems'); $('systems-note').textContent=tr('systemsNote'); $('log-title').textContent=tr('log'); $('export').textContent=tr('export'); $('reset').textContent=tr('reset'); $('director-preview').textContent=tr('preview'); $('director-apply').textContent=tr('apply'); $('director-exit').textContent=tr('exit'); }
-  function render() { const s=shown(); renderText(); const [title,copy]=actCopy(s); $('act-kicker').textContent=`ACT ${['I','II','III','IV','V','VI'][s.act-1]} · ${E.ACTS[s.act-1].range}`; $('act-title').textContent=title; $('act-copy').textContent=copy; $('glyphs').textContent=fmt(s.glyphs,1); $('credits').textContent=fmt(s.credits,1); $('meaning').textContent=fmt(s.meaning,1); $('noise').textContent=fmt(s.noise,1); $('rate').textContent=fmt(E.rate(s),1); $('total').textContent=fmt(s.lifetimeGlyphs); $('status').textContent=`${tr('business')} · ACT ${s.act}/6${preview?' · DIRECTOR PREVIEW':''}`; $('ending').hidden=!s.stopped; $('director').hidden=!directorOpen || isPlayerAudience(); renderActs(s); renderWorld(s); renderActions(s); renderMachines(s); renderAhas(s); $('log').textContent=(s.log||[]).map((x,i)=>`${i?'·':'›'} ${x}`).join('\n'); renderDisclosure(s); if (!preview) save(); }
+  function renderText() { document.documentElement.lang=locale==='en'?'en':'zh-CN'; $('lang-toggle').textContent=locale==='en'?'中文':'EN'; $('director-toggle').textContent=tr('director'); $('glyphs-label').textContent=tr('inventory'); $('credits-label').textContent=tr('credits'); $('readers-label').textContent=tr('readers'); $('meaning-label').textContent=tr('meaning'); $('noise-label').textContent=tr('noise'); $('systems-title').textContent=tr('systems'); $('systems-note').textContent=tr('systemsNote'); $('log-title').textContent=tr('log'); $('export').textContent=tr('export'); $('reset').textContent=tr('reset'); $('director-preview').textContent=tr('preview'); $('director-apply').textContent=tr('apply'); $('director-exit').textContent=tr('exit'); }
+  function render() { const s=shown(); renderText(); const [title,copy]=actCopy(s); $('act-kicker').textContent=`ACT ${['I','II','III','IV','V','VI'][s.act-1]} · ${E.ACTS[s.act-1].range}`; $('act-title').textContent=title; $('act-copy').textContent=copy; $('glyphs').textContent=fmt(s.glyphs,1); $('credits').textContent=fmt(s.credits,1); $('readers').textContent=fmt(s.readers); $('meaning').textContent=fmt(s.meaning,1); $('noise').textContent=fmt(s.noise,1); $('rate').textContent=fmt(E.rate(s),1); $('total').textContent=fmt(s.lifetimeGlyphs); $('status').textContent=`${tr('business')} · ACT ${s.act}/6${preview?' · DIRECTOR PREVIEW':''}`; $('ending').hidden=!s.stopped; $('director').hidden=!directorOpen || isPlayerAudience(); renderActs(s); renderWorld(s); renderActions(s); renderMachines(s); renderAhas(s); $('log').textContent=(s.log||[]).map((x,i)=>`${i?'·':'›'} ${x}`).join('\n'); renderDisclosure(s); if (!preview) save(); }
 
   E.AHAS.forEach((item)=>{ const option=document.createElement('option'); option.value=item.id; option.textContent=`${item.id} · ${item.title}`; $('director-select').append(option); });
   $('director-toggle').addEventListener('click',()=>{directorOpen=!directorOpen;$('director').hidden=!directorOpen;});

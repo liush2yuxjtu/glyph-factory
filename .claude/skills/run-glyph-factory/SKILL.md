@@ -81,7 +81,7 @@ Open `/` to play. Add `?review=1` to `play.html` for the full act/aha surface.
 npm test        # node --test tests/*.test.mjs
 ```
 
-82 tests, 82 pass, 0 fail, ~0.4s. This is the Node contract suite: it covers the engine,
+87 tests, 87 pass, 0 fail, ~0.4s. This is the Node contract suite: it covers the engine,
 the privacy boundary, and a byte-identical production build.
 
 The heavier harnesses in `scripts/verify-player.mjs`, `scripts/run-browser-contracts.py`,
@@ -113,14 +113,45 @@ The heavier harnesses in `scripts/verify-player.mjs`, `scripts/run-browser-contr
   inside the page against a freshly queried node instead (that is what `CLICK` in the
   driver does). Locator clicks are fine on `/product-demo`; it is React and stable.
 
-- **`publish` can stay invisible forever, and the game never says why.** The button's
-  reveal condition *is* `canPublish`, which needs `lifetimeGlyphs>=5000 && presses>=1 &&
-  glyphs>=200 && credits>=300`. Auto-sell (unlocked by `research-auto`, toggled by
-  `切换自动出售`) sells the whole stock every tick, so `glyphs>=200` never holds. Measured
-  by `driver.py publish`: 332s of real play satisfied the other four conditions at 5.0K
-  lifetime / 301.5 credits / 1 press / 0.3 stock — then turning auto-sell off took stock
-  from 0.3 to 203.3 in 10s and the button appeared. If you replay ACT I yourself and stop
-  seeing publish, read `autoSellSub` before concluding the run is stalled.
+- **Auto-sell floors stock below 1 every tick, so no stock-cost action is reachable while
+  it is on.** `advance()` does `sold = Math.floor(g.glyphs)`, which strands `canPublish`
+  (`glyphs>=200`) in ACT I and `compose-rule` (`glyphs>=2`) / `condense` (`glyphs>=20`) in
+  ACT II. Measured by `driver.py publish`: 332s of real play satisfied the other four
+  conditions at 5.0K lifetime / 301.5 credits / 1 press / 0.3 stock — turning auto-sell off
+  took stock to 203.3 in 10s. This used to be silent (`publish`'s reveal *was* `canPublish`,
+  so the button simply never appeared). Since 2026-09-20 the renderer separates reveal from
+  enable: reveal uses only latched/monotonic facts, and an unaffordable action renders
+  **disabled with its shortfall** — plus `· 自动出售正在清空库存` when auto-sell is the cause.
+  `toggle-auto` now renders in **every** act, not just ACT I. If a run stalls anyway, read
+  `autoSellSub` and diff `#primary-actions` against the state before blaming the driver.
+
+- **ACT II's gate is `readers`, and the world card that shows it is hidden until ACT III.**
+  Readership drives A06 (100), A07's reader letter (250), A10's paper crisis (1000) and the
+  `paperCrisis` half of the city map — and `renderWorld()`'s ACT II panel, which holds
+  `READERS / DEMAND / COMPOSED / DELETED`, is gated by `renderDisclosure()` at `s.act < 3`.
+  A player could therefore sit in ACT II with no way to see the number the act turns on.
+  Since 2026-09-20 readership is a metric on the player surface from publication onward, and
+  `刻模` reports `已刻 N 条 · 读者 +X/秒` once its rule is running instead of repeating
+  discovery copy forever. `#world-card` itself stays hidden until ACT III — two tests pin
+  that, so do not "fix" a stalled ACT II by unhiding it. Diagnostic script for the reported
+  dead state and its 14-assertion road to ACT III: see `.claude/skills/verify/SKILL.md` →
+  "progression contract".
+
+- **`advance()`'s ACT II rule runs on its own clock, so never compare a stepped run to a
+  jumped one by eye.** `ruleCredit` carries the sub-4-second remainder across ticks; a
+  change that drops it makes a running rule produce nothing during live play while still
+  passing any test that jumps time in one call. `tests/game-v3.test.mjs` asserts the
+  identity — 40 × 500 ms ticks must equal one 20 s jump.
+
+- **The player never sees an Aha's title or reveal, so the `A## ·` log line is not
+  player-facing.** `player-privacy-v3.js` strips every `A## ·` line out of `#log`, which
+  means an Aha's only *engine* trace is invisible by design. What the player reads is
+  `AHA_WORLD[id]` — a separate world-language sentence `syncAhas()` prepends right after
+  the design line, with no ID and no act number. If you add or rename an Aha, add its world
+  line too; if you fold world copy into the `aha(...)` call, `build-static.mjs`'s strip
+  regex will silently remove it from the player bundle (the build now fails closed on this).
+  `driver.py aha` opens the **review** surface, where the design copy is visible — do not
+  read that page as evidence of what a player sees.
 
 - **Don't assert on the 28 aha *cards*; assert on the 28 director *options*.** A fresh
   save starts with one act chip and `0 / 28` aha items — progressive disclosure, not a
