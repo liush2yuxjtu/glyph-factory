@@ -47,6 +47,9 @@ GLYPH_BROWSER=webkit npm run verify
 `tests/progressive-disclosure.test.mjs` 在临时目录执行真实 builder，验证输出白名单、
 旧文件清理、可解析脚本、实际事件目录剥离、源码/部署引擎行为一致、校验和与重复构建确定性。
 `tests/browser/test_player.py` 使用真实的 `dist/`，不依赖外部预览地址。
+`tests/browser/test_player_source_privacy.py` 以 `public/` 为静态根，覆盖 `dist/` 覆盖不到的开发服播放器表面：
+构建产物被烤入 `data-audience="player"` 与 `!important` 隐藏规则，源码表面的边界只靠运行时剥离，
+因此「首个 Aha 触发后、定时渲染与重载之后边界仍成立」必须单独验证。
 
 ## 防止测试本身“假绿”
 
@@ -54,6 +57,8 @@ GLYPH_BROWSER=webkit npm run verify
 存档夹具只安装一次，不能每次 reload 都重新注入原数据，否则无法验证持久化。
 跨阶段夹具在下一次导航启动时写入，避免被旧页面的 pagehide 自动保存覆盖，且断言实际阶段。
 额外的负向对照会在隔离页面重现“删除控制器依赖节点”的原始故障，确认错误检测器会拒绝它。
+源码表面的隐私套件带三层：正向用例（真实首个 Aha 之后边界成立）、负向对照（还原修复前的两处代码，
+要求泄漏必须复现）、保险用例（摘掉控制器闸门，要求运行时剥离仍然兜住）。只有一层正向断言不算验证。
 
 ## CI 与发布
 

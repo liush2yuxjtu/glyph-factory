@@ -26,27 +26,23 @@
   updateTitle();
 
   const remove = (selector) => document.querySelectorAll(selector).forEach((node) => node.remove());
+  // Idempotent on purpose: a re-assert must not touch an already-hidden node, or the
+  // observer below would keep re-entering on its own writes.
   const hide = (selector) => document.querySelectorAll(selector).forEach((node) => {
+    if (node.hidden === true && node.getAttribute('aria-hidden') === 'true') return;
     node.hidden = true;
     node.setAttribute('aria-hidden', 'true');
   });
 
   // Do not delete DOM nodes owned by the controller: later timer renders still use them.
   remove('.head-actions a[href="/preview.html"]');
-  hide('#director-toggle');
-  hide('#director');
 
   // Aha IDs, reveal copy, history and act/meta framing are design language, not player copy.
-  hide('.aha-focus');
-  hide('#aha-list');
-  hide('#aha-count');
-  hide('.panel-head:has(#aha-count)');
-  hide('#act-strip');
-  hide('.act-kicker');
-  hide('.act-title');
-  hide('.act-copy');
-  hide('.eyebrow');
-  hide('#systems-note');
+  const BOUNDARY_SELECTORS = ['#director-toggle', '#director', '.aha-focus', '#aha-list',
+    '#aha-count', '.panel-head:has(#aha-count)', '#act-strip', '.act-kicker', '.act-title',
+    '.act-copy', '.eyebrow', '#systems-note'];
+  const assertPlayerBoundary = () => BOUNDARY_SELECTORS.forEach(hide);
+  assertPlayerBoundary();
 
   const scrubStatus = () => {
     const el = document.getElementById('status');
@@ -149,6 +145,7 @@
   };
 
   const refreshPlayerBoundary = () => {
+    assertPlayerBoundary(); // a timer render must not undo the strip applied above
     scrubStatus();
     scrubLog();
     updateTitle();
@@ -157,7 +154,9 @@
 
   const observer = new MutationObserver(refreshPlayerBoundary);
   const mainGame = document.getElementById('main-game');
-  if (mainGame) observer.observe(mainGame, { childList: true, characterData: true, subtree: true });
+  // attributeFilter ['hidden'] matters: the controller can un-hide a boundary surface
+  // without touching the DOM text or children around it.
+  if (mainGame) observer.observe(mainGame, { childList: true, characterData: true, subtree: true, attributes: true, attributeFilter: ['hidden'] });
   observer.observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
 
   refreshPlayerBoundary();

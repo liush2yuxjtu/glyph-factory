@@ -355,9 +355,11 @@ class PlayerContract(unittest.TestCase):
         # Negative control: deliberately reintroduce the exact removed-node defect
         # in an isolated browser context. The real player tests never allow errors.
         source = (DIST / "player-privacy-v3.js").read_text()
-        needle = "hide('#director-toggle');"
+        # Poison the hide() helper itself, so the boundary nodes are deleted rather than
+        # hidden. The controller still calls textContent on them on its next timer render.
+        needle = "node.hidden = true;\n    node.setAttribute('aria-hidden', 'true');"
         self.assertIn(needle, source)
-        mutated = source.replace(needle, "remove('#director-toggle');", 1)
+        mutated = source.replace(needle, "node.remove();", 1)
         with self.browser.new_context(locale="zh-CN") as control:
             control.route("**/player-privacy-v3.js", lambda route: route.fulfill(status=200, content_type="application/javascript", body=mutated))
             page = control.new_page()
