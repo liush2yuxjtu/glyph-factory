@@ -1,6 +1,6 @@
 ---
 name: verify
-description: Verify Glyph Factory changes against the exact candidate SHA — launch the dev server, drive the real browser surfaces with the committed driver, run the 28-case Aha invariant/transition suite on chromium and webkit, check the action disclosure contract (affordability disables, never hides), the progression contract (an active rule must run, and its gating resource must be on screen), the Aha legibility contract (every one of A01–A28 must announce itself in the player's log) and the rhythm contract (the seconds, decision-click and raw-click gaps between consecutive Aha moments: firing order, no same-click pairs, total play time ≥ 2 hours, time CV, and — per section, never as one figure — the mean/std of the decision and click gaps, with Act I read separately as the tutorial), and capture visual and interaction evidence. Use for general verification, proving an Aha change is safe, checking the 28/28 claim, verifying an action reveal/enable change, verifying an advance() cadence / Act II progression change, verifying that an Aha is perceivable on the player surface, verifying game pacing / rhythm after a threshold, cost or gate change (two-hour play-time rebuild: tests/pacing-baseline.json), and verifying user intent itself against intent.md / public/intent.html — including the competitor-critique triage of which genre-wide faults this game does and does not have.
+description: Verify Glyph Factory changes against the exact candidate SHA — launch the dev server, drive the real browser surfaces with the committed driver, run the 28-case Aha invariant/transition suite on chromium and webkit, check the action disclosure contract (affordability disables, never hides), the progression contract (an active rule must run, and its gating resource must be on screen), the Aha legibility contract (every one of A01–A28 must announce itself in the player's log) and the rhythm contract (the seconds, decision-click and raw-click gaps between consecutive Aha moments: firing order, no same-click pairs, total play time ≥ 2 hours, time CV, and — per section, never as one figure — the mean/std of the decision and click gaps, with Act I read separately as the tutorial), and capture visual and interaction evidence. Use for general verification, proving an Aha change is safe, checking the 28/28 claim, verifying an action reveal/enable change, verifying an advance() cadence / Act II progression change, verifying that an Aha is perceivable on the player surface, verifying game pacing / rhythm after a threshold, cost or gate change (two-hour play-time rebuild: tests/pacing-baseline.json), and verifying user intent itself — the intent document is an argument ({{INTENT}}, default intent.md), never hard-coded here.
 ---
 
 # Verify Glyph Factory
@@ -144,6 +144,9 @@ change, and say so in the commit message).
 `npm run verify:fast` runs the same playthrough inside the suite
 (`tests/game-v3.test.mjs`, "a plain playthrough reaches the ending, and the rhythm between Aha
 moments holds"), so a threshold change that wrecks the rhythm fails the fast gate as well.
+
+下表里的**阈值**对应 `{{INTENT}}` 里那几条带数字的需求——真源在那份文档，这里只是当前读数。
+改判据先改那份文档（见「用户意图」一节的唯一硬规则），再改这里的表和 `tests/` 里的断言。
 
 | Assertion | Why it is a contract and not taste |
 |---|---|
@@ -307,69 +310,51 @@ image: "there is nothing to click here" must never be an all-purpose excuse, so 
 name its clock.
 
 
-### 用户意图这一节怎么验
+### 用户意图：这一节验的是 `{{INTENT}}`，不是这份技能里写死的需求
 
 前几节验的是**实现**（披露契约、推进契约、Aha 可感知、节奏）。这一节验的是**需求本身**：
-`intent.md` 里那六条 U 是真的做到了，还是只是写在文档里。
+那个需求文档里的每一条，是真做到了，还是只是写在纸上。
 
-| 层 | 验什么 | 证据 |
+**需求文档是这一节的参数，不是常量。** 调用时把它作为参数传进来：
+
+```
+/verify intent.md              # 默认
+/verify INTENT=docs/roadmap.md # 换一份需求文档
+{{INTENT}}                     # 参数占位符；不传就取仓库根的 intent.md
+```
+
+技能里**不许写死任何具体需求、数字或已决方案**。原因很实在：需求会变，而写进技能的那份
+不会跟着变，于是验证器会继续守护一个已经被否掉的方向——比没有验证器更糟，因为它看起来
+一切正常。所有「当前要验什么」的内容住在需求文档里，这一节只写**怎么验**。
+
+#### 四层证据，缺一层就不算
+
+| 层 | 验什么 | 证据长什么样 |
 |---|---|---|
-| 文档 | 意图单独存档，且不是 Aha 契约的副本；每条 U 都有原话、怎么验、状态 | `tests/intent-audit.test.mjs`（非同一性 + 完整性） |
-| 数值 | U1/U2 的读数 | `node scripts/pacing.mjs` + `tests/game-v3.test.mjs` 节奏断言 |
-| 表面 | U3 的按钮在真实浏览器里可见、可点、真的推进当阶段的钟 | `run-browser-contracts.py player` |
-| 负对照 | 把某个机制拿掉，对应断言必须变红 | 见下面每条 U 的「负对照」栏 |
+| 文档 | 需求单独存档、不与其他契约互为副本；每条都有「原话 / 怎么验 / 状态」 | `tests/intent-audit.test.mjs`（非同一性 + 完整性断言） |
+| 数值 | 需求里带数字的那几条 | `node scripts/pacing.mjs` 等读数 + `tests/*.test.mjs` 里对应的断言 |
+| 表面 | 需求里要求玩家能看见/能按到的东西 | 真实浏览器契约（`run-browser-contracts.py`）或 driver |
+| 负对照 | 把该机制拿掉，对应断言必须变红 | 需求文档里每条自带的「负对照」栏 |
 
-**改判定口径之前先改 `intent.md`。** 反过来（先改断言让数字好看）是这份契约唯一能腐烂的方式，
-所以在代码评审里看到断言松动、而 `intent.md` 没动，就该问一句。
+**每一条需求都要自带负对照**，否则它是不可证伪的。写法：说出「关掉什么，什么必须坏」。
+说不出来的那条，要么在文档里补，要么就别声称它被验证了。
 
-#### 竞品批评：这三种毛病我们有没有
+#### 竞品批评怎么查（方法，不是结论）
 
-建 U3 之前先查了这个类型的公开批评，避免闭门造车。八处来源里能追溯到具体游戏和具体
-毛病的，对照如下（**自查结果写在最后一列**）：
+给一个类型做验证时，先查这个类型的公开批评，别闭门造车。做法：
 
-| 类型通病 | 谁被点名 | 反例/解法 | 字工厂自查 |
-|---|---|---|---|
-| **自动化抽走能动性**：解锁自动收入后「游戏在玩自己」 | 全部纯点击类；`twoaveragegamers`「automation, by definition, removes player agency」；Alharthi CHI'18 承认「重复机制可能诱发点击疲劳」 | 每阶段换一种手部动词（UP）；Automation 解锁要像升职不像开关 | **有**：第一章之后四个钟全被动，点击贡献 ≤11% |
-| **均质无纹理**：一路「中等强度」，进度变成跑步机 | Clicker Heroes，`Pixel Poppers`：「a treadmill, doling out progression on longer and longer schedules... the only way to win is not to play」 | 有设计的快慢段；阈值倍率（每 25/50 翻倍）给等待可见地标 | **有**：27 段全是 273±19 秒，CV 0.069 |
-| **旧动词死掉** | AdVenture Capitalist 及多数同类：新层一出，旧生成器就没意义了 | AdCap 的 Newspapers 加成其他投资；Derivative Clicker 用「买过的数量」给同层永久加成 | **有**：第一章的 印字/卖字 进第二章即死；`condense` 活到最后但只是刷钱 |
-| 中后期墙 + 逼氪 | AdVenture Capitalist：后期「days or weeks between significant upgrades」，`BuzzVerdict` 认为节奏「deliberately calibrated to make that purchase attractive」 | 转生；离线收益设上限保护节奏 | **无**（本作免费、有结局、离线有 8 小时上限） |
-| 事件疲劳 | AdCap：「the mechanics are identical to the main game with different art」 | —— | **无**（目前没有事件系统；这条是**别加**的依据） |
-| 没有结局 → 流失 | 多数无结局的放置游戏 | Universal Paperclips 的四小时作者式结局被公认为高点 | **无**（A28 停止印刷是真结局） |
-| 231 小时却毫无喜爱 | Clicker Heroes，`Eurogamer` Jon Blyth：「symptoms of loving a game, without ever feeling a scrap of fondness」 | 数字之外要有可回收的东西 | 部分：日志/世界线给了叙事回收，但没有把玩家的操作回收进叙事 |
-| 加法没有减法 = 等待不是决定 | `SoloDevStack` 的 Orchard Deck：「addition with no subtraction is a wait, not a decision」；卡片收 9 次就变成下一系统的燃料 | 让产出可消耗、可转化 | **有**：四个钟只涨不消耗（歧义是唯一的例外） |
+1. 只收**能追溯到具体游戏和具体毛病**的批评。泛泛的「放置游戏很无聊」不进表。
+   优先设计师自述、开发者复盘、同行评审论文；纯聚合站只当线索不当依据。
+2. 每条批评写成一行，四列：**通病 · 谁被点名 · 反例/解法 · 我们在不在其中**。
+3. 「我们在其中」的每一条，都必须对应需求文档里的一个决定（做或不做，都要写下来）。
+4. **「我们不在其中」和「我们在其中」一样重要**——它同样是一条被守住的性质，也得有负对照。
 
-**注意这张表里有一条是「别做」**：定时事件在这个类型里有明确的反例（AdCap 事件疲劳），
-所以「加事件活跃气氛」不是默认答案。多钟并行（Orchard Deck 的「几只不同速度的钟」）
-比事件更契合本作：它不需要新的叙事皮肤，只需要让两件事同时在跑。
+查出来的表、以及由它产生的决定，**写进需求文档**（`{{INTENT}}`），不写在这里。
 
-#### 已决：上面三条「有」怎么修（2026-09-21 用户拍板）
+#### 唯一的硬规则
 
-候选解法来自同一批来源，四个问题都问了用户，四条答复如下。**这份表是决定，不是菜单**；
-要改先改这里，再改实现。
-
-| 毛病 | 用户选的 | 落成什么 | 被否掉的候选与理由 |
-|---|---|---|---|
-| 均质（27 段全 273±19 秒） | **改成有设计的快慢** | 恢复拍 60–90 秒（每次大发现之后）· 铺垫拍 400–500 秒（幕高潮之前）· 其余 250–300 秒。**U1 的判据随之改**：`CV ≤ 0.25` → 「有快慢结构 + 跨度有界 + 无 <60 秒碎拍」 | C5 阈值地标（只改呈现，治不了根） |
-| 点击不累积（点击贡献 ≤11%） | **不加手部动作，改成计划型** | 接受 Alharthi 的 playing→planning：等待期要有真正可权衡的空间 | C1 按次永久加成、C2 可储存有上限——**都否了**，所以「每章一个可重复推钟动作」这个方向不再做 |
-| 旧动词死掉（印字/卖字 进第二章即死） | **换意义（Orchard Deck 式）** | 旧动作的产出变成新系统的燃料：第一章印的字成为第五章机器的训练材料 | C6 旧动作给新层加成（AdCap Newspapers 式）——被否 |
-| 等待期要不要加东西 | **不加事件，用多钟并行** | Orchard Deck 的「几只不同速度的钟」：让两件事同时在跑，玩家永远至少有一件没空的事 | C3 定时事件（AdCap 事件疲劳的反例）、限时倍率、叙事微事件——都被否 |
-
-**合并起来其实是同一件事**：均质要靠「有多条不同速度的钟在跑」来破，计划型要靠
-「两条钟并行、玩家决定先推哪条」来落地。所以这一轮的实现目标可以合成一句话——
-
-> **让每一幕同时有两条速度不同的钟在跑，玩家永远在选先推哪条；旧动作的产出变成新钟的燃料。**
-
-推论两条，实现时别忘：
-- **U1 的断言要改**（CV → 结构 + 跨度有界）。改之前先改 `intent.md`，别先松断言。
-- **`intent.md` 的 U3 已被这条覆盖**（原文是「每一章都要有第一章那种可重复的手部动作」，
-  用户改选「不加动作、改成计划型」）。U3 的原文是用户原话，按登记表的规矩**不改写**——
-  要加一条 U7 记这次改向，或在 U3 的状态栏写明已被哪条取代。
-
-负对照（每条都要能证伪自己）：
-- 快慢结构：把曲线拉平回 CV≈0，断言仍须全绿，**但**要能指出哪一段是恢复拍、哪一段是铺垫拍——
-  说不出来就说明结构是装出来的。
-- 多钟并行：把第二条钟关掉，玩家在等待期应该重新变成「无事可权衡」，对应断言须变红。
-- 旧动作供新层：把燃料链路断开，旧动词的点击次数必须掉下来。
+**改判定口径之前先改需求文档。** 反过来（先改断言让数字好看）是这套契约唯一能腐烂的方式。
+代码评审里看到断言松动、而需求文档没动，就该问一句。
 
 ### Build before any browser suite
 
