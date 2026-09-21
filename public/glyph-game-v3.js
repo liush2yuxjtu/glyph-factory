@@ -18,7 +18,7 @@
   const ACT_EN = { 1:['Hands → Automation','Print by hand. Then make repetition disappear.'], 2:['Words Begin to Grow','Relationships, readers, meaning and noise become machines.'], 3:['Words Change the City','Language stops being inventory and starts changing society.'], 4:['Machines Begin to Write','Delegate judgment, then delegate the ability to create delegates.'], 5:['Machine Language','The system invents symbols that humans did not design.'], 6:['From Growth to Silence','Optimization flips from making more to removing noise.'] };
   const ACT_ZH = { 1:['手工与自动化','先亲手印。然后让机器接管重复劳动。'], 2:['字开始生长','关系、读者、意义和噪音，都开始成为机器。'], 3:['文字改变城市','文字不再是库存，而开始改变社会。'], 4:['机器开始写','把判断交出去，再把“创造代理”的权力交出去。'], 5:['机器语言','系统开始创造人类没有设计过的符号。'], 6:['从增长到沉默','优化目标从“制造更多”翻转成“删除噪音”。'] };
   const AHA_EN = {
-    A01:['The machine clicks for me','My job is not clicking. It is designing growth.'], A02:['Workers become an institution','People are not numbers. Organization is a machine.'], A03:['木 + 木 → 林','Relationships between glyphs can become machines.'], A04:['Rules run themselves','Machines now manufacture writing-machines.'], A05:['Meaning beats volume','A thousand empty glyphs can be worth less than one important sentence.'], A06:['The newspaper creates demand','Words manufacture the need for more words.'], A07:['Readers write back','Consumers become producers.'], A08:['Readers invent words','Language starts leaving the factory.'], A09:['A word goes viral','Propagation replaces production speed.'], A10:['Paper crisis: write less','The metric flips from glyphs/sec to meaning/glyph.'], A11:['Deletion becomes valuable','The enemy is no longer scarcity. It is noise.'], A12:['Districts grow dialects','The same glyph no longer means the same thing everywhere.'], A13:['A concept changes the city','Words turn from products into world rules.'], A14:['The city map appears','The workshop was only one point in the world.'], A15:['The map zooms out','The real factory is the communication network.'], A16:['Reporter Agent chooses a story','I am no longer the author.'], A17:['The editor says “no”','Automation is delegated judgment, not a faster button.'], A18:['Agents create agents','The factory expands itself.'], A19:['Wake up to 80,000 articles','The system no longer needs the night shift.'], A20:['Digital publishing removes inventory','The warehouse suddenly stops mattering.'], A21:['Archives become memory','Everything written before becomes training material.'], A22:['A glyph you never made appears','This glyph was not made by me.'], A23:['Machines have their own language','Some language is no longer written for humans.'], A24:['A trillion words become one symbol','Growth folds back into a single glyph.'], A25:['Language becomes infrastructure','I am not a publisher. I am running an operating layer.'], A26:['New resource: ambiguity','More words can make the world less clear.'], A27:['The objective flips to deletion','Infinite production can end in noise.'], A28:['The last button: stop printing','The world has been written. Now go read it.']
+    A01:['The machine clicks for me','My job is not clicking. It is designing growth.'], A02:['Workers become an institution','People are not numbers. Organization is a machine.'], A03:['木 + 木 → 林','Relationships between glyphs can become machines.'], A04:['Rules run themselves','Machines now manufacture writing-machines.'], A05:['Meaning beats volume','A thousand empty glyphs can be worth less than one important sentence.'], A06:['The newspaper creates demand','Words manufacture the need for more words.'], A07:['Readers write back','Consumers become producers.'], A08:['Readers invent words','Language starts leaving the factory.'], A09:['A word goes viral','Propagation replaces production speed.'], A10:['Paper crisis: write less','The metric flips from glyphs/sec to meaning/glyph.'], A11:['Deletion becomes valuable','The enemy is no longer scarcity. It is noise.'], A12:['Districts grow dialects','The same glyph no longer means the same thing everywhere.'], A13:['A concept changes the city','Words turn from products into world rules.'], A14:['The city map appears','The workshop was only one point in the world.'], A15:['The map zooms out','The real factory is the communication network.'], A16:['Reporter Agent chooses a story','I am no longer the author.'], A17:['The editor says “no”','Automation is delegated judgment, not a faster button.'], A18:['Agents create agents','The factory expands itself.'], A19:['Wake up to a desk full of articles','The system no longer needs the night shift.'], A20:['Digital publishing removes inventory','The warehouse suddenly stops mattering.'], A21:['Archives become memory','Everything written before becomes training material.'], A22:['A glyph you never made appears','This glyph was not made by me.'], A23:['Machines have their own language','Some language is no longer written for humans.'], A24:['Meaning folds into one symbol','Growth folds back into a single glyph.'], A25:['Language becomes infrastructure','I am not a publisher. I am running an operating layer.'], A26:['New resource: ambiguity','More words can make the world less clear.'], A27:['The objective flips to deletion','Infinite production can end in noise.'], A28:['The last button: stop printing','The world has been written. Now go read it.']
   };
   const ACTIONS = { print:['印字','Print glyphs'], sell:['出售全部库存','Sell all inventory'], boost:['研发复写纸','Research carbon paper'], autoResearch:['研发自动出售','Research auto-sell'], autoToggle:['切换自动出售','Toggle auto-sell'], contract:['交付街角委托','Deliver street order'], publish:['发行《明日》','Publish Tomorrow'], compose:['刻模：木 + 木 → 林','Carve rule: 木 + 木 → 林'], condense:['压缩 20 字 → 12 意义','Condense 20 glyphs → 12 meaning'], letter:['打开一封读者来信','Open a reader letter'], organic:['允许读者造一个新词','Let readers coin a word'], viral:['让这个词传播','Let the word spread'], delete:['删除噪音','Delete noise'], city:['展开城市地图','Open city map'], dialect:['观察一个新方言','Discover a dialect'], concept:['创造一个概念','Create a concept'], world:['把地图缩到世界','Zoom out to the world'], agents:['上线记者 Agent','Launch reporter Agent'], editor:['给编辑 Agent 否决权','Give editor veto power'], spawn:['允许 Agent 创建 Agent','Let agents create agents'], digitize:['切换数字出版','Switch to digital publishing'], memory:['用档案训练机器','Train on the archive'], machine:['检查未知字形 ◫','Inspect unknown glyph ◫'], compress:['语义压缩','Semantic compression'], infra:['让语言接管基础设施','Make language infrastructure'], ambiguity:['消解 25 歧义','Resolve 25 ambiguity'], stop:['停止印刷','STOP PRINTING'] };
   const tr = (key) => I18N[locale === 'en' ? 'en' : 'zh'][key] || key;
@@ -43,7 +43,17 @@
   function notice(text) { $('notice').textContent = text || ''; }
   function perform(type, props = {}) { if (preview) preview = E.act(preview, { type, ...props }); else { g = E.act(g, { type, ...props }); save(true); } render(); }
   function ahaCopy(item) { if (locale === 'en' && AHA_EN[item.id]) return AHA_EN[item.id]; return [item.title, item.reveal]; }
-  function currentAha(s) { if (preview) { const selected = previewId; return E.AHAS.find((a) => a.id === selected) || E.AHAS[0]; } const seen = new Set(s.ahaSeen || []); let last = E.AHAS[0]; for (const item of E.AHAS) if (seen.has(item.id) || E.ahaUnlocked(s,item.id)) last = item; return last; }
+  // The focus card answers "what just happened", not "what is the highest-numbered thing you
+  // have ever seen". Scanning catalogue order and keeping the last hit meant a later-numbered
+  // Aha permanently shadowed an earlier one that fired seconds after it — 11 of the 28 never
+  // appeared here at all. `ahaSeen` is appended in firing order by syncAhas(), so its tail is
+  // the most recent one.
+  function currentAha(s) {
+    if (preview) { const selected = previewId; return E.AHAS.find((a) => a.id === selected) || E.AHAS[0]; }
+    const seen = Array.isArray(s.ahaSeen) ? s.ahaSeen : [];
+    if (seen.length) return E.AHAS.find((a) => a.id === seen[seen.length - 1]) || E.AHAS[0];
+    return E.AHAS.find((a) => E.ahaUnlocked(s, a.id)) || E.AHAS[0];
+  }
   function actCopy(s) { return (locale === 'en' ? ACT_EN : ACT_ZH)[s.act] || (locale === 'en' ? ACT_EN[1] : ACT_ZH[1]); }
 
   // Paperclips rule: hidden -> revealed -> persistent. Temporary scarcity never hides a discovered surface.
@@ -57,7 +67,19 @@
   function actionButton(text, sub, type, enabled = true, props = {}, className = '') { const b = document.createElement('button'); b.type='button'; b.dataset.command=type; b.disabled=!enabled; b.className=className; const main = document.createElement('span'); main.textContent=text; b.append(main); if (sub) { const small=document.createElement('span'); small.className='action-sub'; small.textContent=sub; b.append(small); } b.addEventListener('click',()=>perform(type,props)); return b; }
   function renderActions(s) {
     const buttons=[]; const en=locale==='en'; const seen=new Set(s.ahaSeen||[]);
-    const add = (key, revealWhen, enabled, text, sub, type, props = {}, className = '') => { if (rememberReveal(`action:${key}`, revealWhen)) buttons.push(actionButton(text, sub, type, enabled, props, className)); };
+    // The engine owns what a command costs (E.commandReady). Re-deriving "can I afford this"
+    // here is exactly how a button ends up lit while the engine silently refuses it — the
+    // disclosure contract wants a greyed button naming the shortfall, never one that does nothing.
+    const add = (key, revealWhen, enabled, text, sub, type, props = {}, className = '') => {
+      if (!rememberReveal(`action:${key}`, revealWhen)) return;
+      const gate = E.commandReady(s, type);
+      const ready = gate.ready && enabled;
+      // A spent one-shot keeps its own「已完成」copy; only an unaffordable one gets the shortfall.
+      const short = gate.binding && !gate.spent
+        ? lack(E.fieldLabel(gate.binding.key, en), `${fmt(gate.binding.have,1)} / ${fmt(gate.binding.need)}`)
+        : sub;
+      buttons.push(actionButton(text, ready ? sub : short, type, ready, props, className));
+    };
     // Affordability only disables a discovered action; it never hides it. Reveal conditions must use latched or monotonic facts, because a player who leaves auto-sell on keeps stock below 1 forever.
     const draining = s.autoSell && !s.digital;
     const drainNote = draining ? (en?' · auto-sell is emptying stock':' · 自动出售正在清空库存') : '';
@@ -102,9 +124,14 @@
       add('city', s.worldScale>=1||seen.has('A14')||cityReady, cityReady, label(ACTIONS.city), en?'The workshop is no longer the whole world.':'工坊不再是全部世界。', 'map-city', {}, 'major');
     }
     else if (s.act === 3) {
-      buttons.push(actionButton(label(ACTIONS.dialect), en?'Another district diverges.':'再观察一个街区。', 'discover-dialect', true));
+      // Through `add`, not pushed directly: this one now costs readers, meaning and credits, and
+      // a button pushed straight into the list would stay lit while the engine refused it.
+      // Reveal latches on the act (monotonic), never on affordability — an action you have
+      // discovered stays on screen, greyed, with the shortfall written on it.
+      add('dialect', s.act >= 3, true, label(ACTIONS.dialect), en?'Another district diverges.':'再观察一个街区。', 'discover-dialect');
       add('concept', s.concepts>0||seen.has('A13')||s.meaning>=25, s.meaning>=25, label(ACTIONS.concept), en?'Spend 25 meaning to change society.':'花25意义，让一个概念进入社会。', 'make-concept');
-      const worldReady=s.concepts>=2&&s.districts>=3;
+      // 门槛数字的唯一真源在引擎（E.WORLD_GATE）；渲染层不再抄一份。
+      const worldReady=s.concepts>=E.WORLD_GATE.concepts&&s.districts>=E.WORLD_GATE.districts;
       add('world', s.worldScale>=2||seen.has('A15')||worldReady, worldReady, label(ACTIONS.world), en?'The city is only one node.':'城市只是网络中的一个节点。', 'map-world');
       add('agents', s.agents>=1||seen.has('A16')||s.worldScale>=2, s.worldScale>=2, label(ACTIONS.agents), en?'Hand authorship to a system.':'把“写什么”交给系统。', 'launch-agents', {}, 'major');
     }
@@ -122,9 +149,24 @@
     }
     else if (s.act === 6) {
       add('delete6', s.deletedNoise>0||seen.has('A27')||s.noise>=1, s.noise>=1, label(ACTIONS.delete), en?'Remove 500 noise.':'一次删除500噪音。', 'delete-noise', {amount:500}, 'major');
-      add('ambiguity', seen.has('A26')||s.ambiguity>0, s.ambiguity>0, label(ACTIONS.ambiguity), en?'Clarity becomes a resource.':'清晰度变成一种资源。', 'resolve-ambiguity');
+      // Same threshold as the engine's gate (E.AHA_GOALS.A26.need): the button appears as soon as
+      // ambiguity exists, but only becomes usable once there is enough of it to be worth clearing.
+      const ambiguityReady=s.ambiguity>=E.AHA_GOALS.A26.need;
+      add('ambiguity', seen.has('A26')||s.ambiguity>0, ambiguityReady, label(ACTIONS.ambiguity), ambiguityReady?(en?'Clarity becomes a resource.':'清晰度变成一种资源。'):lack(en?'100 ambiguity':'100 歧义', fmt(s.ambiguity,1)), 'resolve-ambiguity');
       const stopReady=E.gateProgress(s).done;
       add('stop', s.stopped||stopReady, !s.stopped&&stopReady, label(ACTIONS.stop), s.stopped?tr('done'):(en?'The final action is now possible.':'最后一个动作现在才出现。'), 'stop-printing', {}, 'danger');
+    }
+    // The ACT I economy does not retire at publication. Credits fund every downstream action —
+    // condense, dialects, concepts, agent factories, archive training — and the engine never
+    // stopped accepting `sell`, `contract` or `buy`. Hiding the only way to earn was a render
+    // decision, not a rule, and it left the later acts with no income at all.
+    if (s.act > 1) {
+      if (!s.digital) add('sell', s.lifetimeGlyphs>=1, s.glyphs>=1, label(ACTIONS.sell), `${fmt(Math.floor(s.glyphs)*E.PRICE,1)} ${en?'credits':'资金'}`, 'sell');
+      const c=E.CONTRACTS[s.contracts];
+      if (c) {
+        const sub = s.glyphs>=c.glyphs ? `${c.glyphs} → ${c.reward}` : lack(en?`${c.glyphs} stock`:`${c.glyphs} 库存字`, fmt(s.glyphs,1));
+        buttons.push(actionButton(label(ACTIONS.contract), sub, 'contract', s.glyphs>=c.glyphs));
+      }
     }
     // Auto-sell is a permanent setting, not an Act I verb: keep its toggle beside the primary action in every act, or publishing with it on strands the player with no way to stop it draining stock.
     if (s.autoSellUnlocked && !s.stopped) buttons.splice(1, 0, actionButton(label(ACTIONS.autoToggle), s.autoSell?'ON':'OFF', 'toggle-auto', true));
@@ -134,7 +176,9 @@
 
   function renderMachines(s) {
     const cards=[];
-    if (s.act===1) for (const u of E.UNITS) {
+    // Machines stay on the table for the whole game: `buy` has no act gate in the engine, and
+    // production rate still drives every later act's resources.
+    for (const u of E.UNITS) {
       const owned=s[u.id]; const c=E.cost(s,u.id); const unlocked=s.lifetimeGlyphs>=u.unlock; const affordable=s.credits>=c;
       if (!rememberReveal(`machine:${u.id}`, owned>0 || (unlocked&&affordable))) continue;
       const card=document.createElement('div'); card.className='machine';

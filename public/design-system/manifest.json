@@ -30,6 +30,7 @@
     "DESIGN.md": { "role": "说明：意图、清单、审计、待办" },
     "tokens.css": { "role": "设计数值唯一真源" },
     "components.html": { "role": "组件设计唯一真源与可视化陈列（1–12 已上线，13–15 提案）" },
+    "flows.html": { "role": "屏幕与流程：17 屏矢量重绘 + 6 条流程 + 29 个热点步骤，全部按真实 DOM 读数绘制并消费 tokens.css" },
     "preview/index.html": { "role": "令牌预览：色板/字阶/间距/描边/动效/对比度自检/提案层自检" },
     "references/mobbin-2026-09.md": { "role": "参考依据：看过的屏、每屏支撑的判断" },
     "assets/README.md": { "role": "资产来源说明（本包无二进制资产）" }
@@ -115,6 +116,7 @@
   "serve": {
     "entryUrl": "/design-system/index.html",
     "componentsUrl": "/design-system/components.html",
+    "flowsUrl": "/design-system/flows.html",
     "previewUrl": "/design-system/preview/index.html",
     "directoryFormWorks": false,
     "directoryFormNote": "/design-system/ 308 到 /design-system 后 404：Next 不为 public/ 子目录提供目录索引，必须写完整文件名。",

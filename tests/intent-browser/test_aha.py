@@ -122,18 +122,22 @@ class AhaReview(unittest.TestCase):
         self.assert_player()
 
     def test_F02_city_and_world_require_real_actions(self):
-        self.seed({'version':3,'act':2,'published':True,'paperCrisis':True,'meaning':75,'deletedNoise':1})
+        self.seed({'version':3,'act':2,'published':True,'paperCrisis':True,'meaning':400,'deletedNoise':1,
+                   'readers':5000,'credits':5000})
         self.open()
         expect(self.real_frame().locator('#world-card')).to_be_hidden()
         self.button('展开城市地图').click()
         expect(self.real_frame().locator('#world-card')).to_be_visible()
         self.assertEqual(self.saved()['act'],3)
         self.assertEqual(self.saved()['worldScale'],1)
-        # The city opens with one district. A dialect has to be observed, twice, before the
-        # city is wide enough to be zoomed out to the world.
-        self.button('观察一个新方言').click()
-        self.button('观察一个新方言').click()
-        self.button('创造一个概念').click(); self.button('创造一个概念').click()
+        # The city opens with one district, and a dialect is grown by a population rather than
+        # minted by a button: each observation needs more readers than the last
+        # (`readers >= 600 x (districts + 1)`). Zooming out takes the city to five districts and
+        # four concepts — one click per insight is exactly the collapse this replaced.
+        for _ in range(4):
+            self.button('观察一个新方言').click()
+        for _ in range(4):
+            self.button('创造一个概念').click()
         self.button('把地图缩到世界').click()
         self.assertEqual(self.saved()['worldScale'],2)
         expect(self.real_frame().locator('#world-scale')).to_have_text('传播网络')
@@ -146,7 +150,12 @@ class AhaReview(unittest.TestCase):
         self.open()
         expect(self.button('停止印刷')).to_have_count(0)
         self.button('删除噪音').click(); expect(self.button('停止印刷')).to_have_count(0)
-        self.button('删除噪音').click(); self.button('停止印刷').click()
+        self.button('删除噪音').click()
+        # Deletion alone no longer unlocks the ending: the world cannot be declared finished
+        # while it is still ambiguous, so the last act also asks for the ambiguity to be cleared.
+        expect(self.button('停止印刷')).to_have_count(0)
+        self.button('消解').click()   # the label reads 消解 25 歧义, so match on the verb
+        self.button('停止印刷').click()
         expect(self.real_frame().locator('#ending')).to_be_visible()
         expect(self.real_frame().locator('#rate')).to_have_text('0')
         self.assertEqual(self.real_frame().locator('#primary-actions button:enabled').count(),0)

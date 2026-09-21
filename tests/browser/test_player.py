@@ -38,26 +38,26 @@ AHA_CASES = (
     ("A06", {"readers": 99}, "clock", 10),
     ("A07", {"readers": 250}, "click:打开一封读者来信", 1),
     ("A08", {"letters": 1}, "click:允许读者造一个新词", 1),
-    ("A09", {"organicWords": 1}, "click:让这个词传播", 1),
+    ("A09", {"organicWords": 1, "readers": 1200}, "click:让这个词传播", 1),
     ("A10", {"readers": 999, "demand": 2}, "clock", 10),
     ("A11", {"noise": 2}, "click:删除噪音", 1),
-    ("A12", {"act": 3, "districts": 1, "worldScale": 1, "paperCrisis": True}, "click:观察一个新方言", 1),
+    ("A12", {"act": 3, "districts": 1, "worldScale": 1, "paperCrisis": True, "readers": 1500, "meaning": 50}, "click:观察一个新方言", 1),
     ("A13", {"act": 3, "districts": 2, "worldScale": 1, "meaning": 30}, "click:创造一个概念", 1),
     ("A14", {"act": 2, "paperCrisis": True, "meaning": 60, "deletedNoise": 2}, "click:展开城市地图", 1),
-    ("A15", {"act": 3, "districts": 3, "concepts": 2, "worldScale": 1}, "click:把地图缩到世界", 1),
+    ("A15", {"act": 3, "districts": 5, "concepts": 4, "worldScale": 1}, "click:把地图缩到世界", 1),
     ("A16", {"act": 3, "worldScale": 2, "districts": 3, "concepts": 2}, "click:上线记者", 1),
     ("A17", {"act": 4, "agents": 1}, "click:给编辑", 1),
-    ("A18", {"act": 4, "agents": 1, "editorAutonomy": True}, "click:允许", 1),
+    ("A18", {"act": 4, "agents": 1, "editorAutonomy": True, "meaning": 200}, "click:允许", 1),
     ("A19", {"act": 4, "agents": 2, "editorAutonomy": True, "agentFactories": 1, "overnightArticles": 95}, "clock", 30),
     ("A20", {"act": 4, "agents": 2, "editorAutonomy": True, "agentFactories": 1, "overnightArticles": 200}, "click:切换数字出版", 1),
     ("A21", {"act": 4, "agents": 2, "agentFactories": 1, "digital": True}, "click:用档案训练机器", 1),
-    ("A22", {"act": 4, "agents": 2, "agentFactories": 1, "digital": True, "archives": 1}, "click:检查未知字形", 1),
+    ("A22", {"act": 4, "agents": 2, "agentFactories": 3, "digital": True, "archives": 5}, "click:检查未知字形", 1),
     ("A23", {"act": 5, "machineGlyphs": 1, "machineGlyphUse": 0, "meaning": 100}, "clock", 70),
     ("A24", {"act": 5, "machineGlyphs": 1, "machineGlyphUse": 1000, "meaning": 200}, "click:语义压缩", 1),
     ("A25", {"act": 5, "compressedMeaning": 20000}, "click:让语言接管基础设施", 1),
     ("A26", {"act": 6, "infrastructure": True, "ambiguity": 99}, "clock", 10),
     ("A27", {"act": 6, "infrastructure": True, "compressedMeaning": 20000, "deletedNoise": 500, "noise": 600}, "click:删除噪音", 1),
-    ("A28", {"act": 6, "infrastructure": True, "compressedMeaning": 20000, "deletedNoise": 1200, "noise": 100}, "click:停止印刷", 1),
+    ("A28", {"act": 6, "infrastructure": True, "ambiguityResolved": True, "compressedMeaning": 20000, "deletedNoise": 1200, "noise": 100}, "click:停止印刷", 1),
 )
 
 
@@ -258,7 +258,7 @@ class PlayerContract(unittest.TestCase):
         self.assert_no_spoilers()
 
     def test_meaning_resource_and_action_remain_at_zero(self):
-        self.seed({"version": 3, "act": 3, "published": True, "meaning": 25, "districts": 2, "worldScale": 1})
+        self.seed({"version": 3, "act": 3, "published": True, "meaning": 25, "districts": 2, "worldScale": 1, "credits": 200})
         self.open()
         self.button("创造一个概念").click()
         expect(self.page.locator("#meaning")).to_have_text("0")
@@ -415,7 +415,7 @@ class PlayerContract(unittest.TestCase):
         self.assert_no_spoilers()
 
     def test_intent_stop_is_terminal_in_the_actual_ui(self):
-        self.seed({"version":3,"act":6,"published":True,"infrastructure":True,"compressedMeaning":10000,"deletedNoise":500,"noise":1000,"ambiguity":100,"keyboards":1})
+        self.seed({"version":3,"act":6,"published":True,"infrastructure":True,"ambiguityResolved":True,"compressedMeaning":10000,"deletedNoise":500,"noise":1000,"ambiguity":100,"keyboards":1})
         self.open()
         expect(self.button("停止印刷")).to_have_count(0)
         self.button("删除噪音").click()

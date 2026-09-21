@@ -1,0 +1,760 @@
+<title>字工厂流程图谱</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700;900&family=Noto+Serif+SC:wght@600;900&display=swap">
+<link rel="stylesheet" href="./tokens.css">
+<style>
+/* 这一页不定义任何新的设计数值：每个值要么来自 tokens.css，要么是几何常量。
+   字体族走 --font-*，阴影走 --shadow-1/3，语义色全部是指向系统令牌的别名。
+   本页是设计系统的一部分，因此没有自己的深色主题——系统的唯一视觉世界是纸与墨。 */
+:root{
+  --mono:var(--font-num); --sans:var(--font-ui); --serif:var(--font-mark);
+}
+<style>
+*{box-sizing:border-box}
+html{background:var(--paper)}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font:15px/1.7 var(--sans);
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1160px;margin:0 auto;padding:0 20px 96px}
+code,.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+a{color:inherit}
+
+/* masthead */
+.mast{padding:44px 0 22px;border-bottom:2px solid var(--ink)}
+.mast-top{display:flex;gap:16px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.brand{display:flex;gap:14px;align-items:center}
+.stamp{display:grid;place-items:center;width:52px;height:56px;background:var(--ink);color:var(--green);
+  font:900 32px/1 var(--serif);box-shadow:var(--shadow-3)}
+h1{margin:0;font:900 clamp(26px,4.4vw,40px)/1.1 var(--serif);letter-spacing:-.01em;text-wrap:balance}
+h1 em{font-style:normal;color:var(--rust)}
+.eyebrow{margin:0 0 3px;font:700 10px/1.6 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--rust)}
+.lede{margin:18px 0 0;max-width:64ch;color:var(--muted);font-size:15px}
+.lede b{color:var(--ink);font-weight:700}
+.meta{margin:0;font:400 11px/1.9 var(--mono);color:var(--muted);text-align:right}
+.meta b{display:block;color:var(--ink);font-weight:700}
+
+/* sections */
+section{margin-top:56px}
+.sec-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:22px}
+@media(max-width:640px){.sec-head .note{margin-left:0;flex-basis:100%}}
+.sec-head h2{margin:0;font:900 21px/1.3 var(--serif);letter-spacing:-.01em}
+.sec-head .num{font:700 11px/1 var(--mono);color:var(--rust);letter-spacing:.1em}
+.sec-head .note{margin-left:auto;font:400 11px/1.6 var(--mono);color:var(--muted)}
+h3{margin:34px 0 10px;font:900 16px/1.4 var(--serif)}
+p{margin:0 0 12px;max-width:70ch}
+.muted{color:var(--muted)}
+
+/* definition cards */
+.defs{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))}
+.def{border:1.5px solid var(--ink);background:var(--panel);padding:16px 16px 14px;box-shadow:var(--shadow-3-1)}
+.def h3{margin:0 0 6px;font-size:15px}
+.def dl{margin:10px 0 0;display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:13px}
+.def dt{font-family:var(--mono);font-size:10.5px;color:var(--rust);letter-spacing:.06em;padding-top:3px}
+.def dd{margin:0;color:var(--muted)}
+
+/* screen rails: swipe, drag, or arrow through a flow instead of scanning a grid */
+.screens,.strip{
+  display:flex;gap:16px;align-items:flex-start;overflow-x:auto;overscroll-behavior-x:contain;
+  scroll-snap-type:x proximity;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;
+  padding:4px 2px 12px;cursor:grab;scrollbar-width:thin}
+.screens:active,.strip:active{cursor:grabbing}
+.screens>*,.strip>*{flex:0 0 auto;scroll-snap-align:start}
+.screens .screen,.strip figure{width:clamp(292px,78vw,376px)}
+.screen{border:1.5px solid var(--ink);background:var(--panel);box-shadow:var(--shadow-3-1);display:flex;flex-direction:column}
+.screen svg.sch,.strip svg.sch{display:block;width:100%;height:auto}
+.screen svg.sch{border-bottom:1.5px solid var(--ink)}
+.wideframe{display:block;width:clamp(320px,92vw,640px)}
+.railbar{display:flex;align-items:center;gap:8px;margin:0 0 20px}
+.railbar button{
+  min-height:30px;padding:0 11px;border:1.5px solid var(--ink);background:var(--panel);
+  font:700 13px/1 var(--mono);box-shadow:2px 2px 0 var(--ink);cursor:pointer}
+.railbar button:active:not(:disabled){transform:translate(2px,2px);box-shadow:none}
+.railbar button:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}
+.railbar .hint{font:400 10.5px/1 var(--mono);color:var(--muted)}
+.railbar .count{margin-left:auto;font:700 10.5px/1 var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.screen .cap{padding:11px 12px 13px;display:flex;flex-direction:column;gap:7px;flex:1}
+.screen .hd{display:flex;align-items:center;gap:7px}
+.sid{font:700 10px/1 var(--mono);background:var(--ink);color:var(--green);padding:4px 6px;letter-spacing:.06em}
+.screen h4{margin:0;font:700 13.5px/1.35 var(--sans)}
+.facts{display:flex;flex-wrap:wrap;gap:4px;margin:0;padding:0;list-style:none}
+.facts li{font:500 10px/1 var(--mono);border:1px solid var(--line);padding:3px 5px;color:var(--muted);background:var(--surface-4)}
+.facts li.on{border-color:var(--ink);color:var(--ink);background:var(--green)}
+.facts li.off{border-style:dashed}
+.screen .why{margin:2px 0 0;font-size:12px;line-height:1.55;color:var(--muted)}
+.screen.rev{border-style:double;border-width:3px}
+
+/* flow */
+.flow{border:1.5px solid var(--ink);background:var(--panel);box-shadow:var(--shadow-3);margin-top:20px}
+.flow-head{display:flex;gap:14px;align-items:baseline;flex-wrap:wrap;padding:13px 16px;border-bottom:1.5px solid var(--ink);background:var(--surface-4)}
+.flow-head .fid{font:700 11px/1 var(--mono);letter-spacing:.08em;color:var(--rust)}
+.flow-head h3{margin:0;font-size:16.5px}
+.flow-head .stat{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.chip{font:700 11px/1 var(--mono);padding:5px 8px;border:1px solid var(--line);background:var(--panel);font-variant-numeric:tabular-nums}
+.chip b{color:var(--rust)}
+.strip{background:var(--panel);padding:16px}
+.strip figure{margin:0;position:relative}
+.strip figure+figure::before{
+  content:"→";position:absolute;left:-14px;top:34%;font:700 12px/1 var(--mono);color:var(--rust)}
+.strip figcaption{margin-top:7px;font:500 10px/1.5 var(--mono);color:var(--muted)}
+.strip figcaption{margin-top:7px;font:500 10px/1.5 var(--mono);color:var(--muted)}
+.strip figcaption b{display:block;color:var(--ink);font-weight:700}
+.tw{overflow-x:auto;border-top:1.5px solid var(--ink)}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:13px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{background:var(--surface-4);font:700 10px/1.5 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td.cmd{font-family:var(--mono);font-size:11.5px;color:var(--review-note);white-space:nowrap}
+td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+td.gate{font-size:12px;color:var(--muted)}
+td.gate code{font-size:11px;color:var(--ink)}
+
+/* ledger */
+.ledger{display:grid;gap:12px}
+.row{border:1.5px solid var(--line);border-left-width:6px;background:var(--panel);padding:13px 15px;display:grid;gap:8px}
+.row.bad{border-left-color:var(--rust)}
+.row.warn{border-left-color:var(--rust)}
+.row.ok{border-left-color:var(--ink)}
+.row .top{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.row .mid{font:700 10.5px/1 var(--mono);letter-spacing:.07em;padding:4px 7px}
+.mid.hi{background:var(--danger-bg);color:var(--danger-ink)}
+.mid.mid2{background:var(--surface-focus);color:var(--focus-body)}
+.mid.lo{background:var(--surface-4);color:var(--muted)}
+.row h4{margin:0;font:700 14.5px/1.4 var(--sans)}
+.row .ev{margin:0;font-size:13px;color:var(--muted)}
+.row .ev code{font-size:11.5px;background:var(--surface-4);padding:1px 4px;color:var(--ink)}
+.lbl{font:700 10px/1 var(--mono);letter-spacing:.08em;color:var(--rust);display:block;margin-bottom:2px}
+.two{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+.pass{border:1.5px solid var(--ink);background:var(--panel);padding:14px 16px}
+.pass ul{margin:8px 0 0;padding-left:18px;font-size:13.5px;color:var(--muted)}
+.pass li{margin-bottom:5px}
+.pass li b{color:var(--ink)}
+.pass li code{font-size:11.5px}
+
+pre{margin:0;background:var(--ink);color:var(--green);padding:14px 16px;overflow-x:auto;
+  font:400 12px/1.75 var(--mono);border:1.5px solid var(--ink)}
+footer{margin-top:56px;border-top:2px solid var(--ink);padding-top:16px;font:400 11px/1.9 var(--mono);color:var(--muted)}
+footer b{color:var(--ink)}
+:focus-visible{outline:3px solid var(--rust);outline-offset:3px}
+@media (prefers-reduced-motion:no-preference){.screen,.flow{transition:transform .12s ease}}
+.screen:hover{transform:translate(-1px,-1px)}
+</style>
+
+<div class="wrap">
+<header class="mast">
+  <div class="mast-top">
+    <div class="brand">
+      <div class="stamp">字</div>
+      <div>
+        <p class="eyebrow">Flow &amp; Screen Atlas · 2026-09-20</p>
+        <h1>字工厂<em>//</em>流程图谱</h1>
+      </div>
+    </div>
+    <p class="meta">
+      <b>7ebd57b</b>
+      public/glyph-engine-v3.js<br>
+      public/glyph-game-v3.js<br>
+      public/player-privacy-v3.js
+    </p>
+  </div>
+  <p class="lede">
+    按 Mobbin 的 <b>Flows / Screens</b> 结构，把字工厂从第一屏到「停止印刷」的全部界面状态摊开成
+    <b>17 个屏幕</b>与 <b>6 条流程</b>。每个屏幕都是<b>矢量重绘</b>——由运行时真实 DOM 读数生成，
+    不是截图，也不是示意图；然后用引擎源码、无头状态机推演与真实浏览器三份证据，
+    逐条核对<b>设计契约</b>（<code>docs/superpowers/specs/2026-09-16-acts-engine-v3-design.md</code>、
+    <code>aha.md</code>）与<b>运行中的逻辑机</b>是否说的是同一件事。
+    结论：契约层面 28/28 对齐，节奏与可见性层面有 10 处不一致。
+  </p>
+</header>
+
+<main>
+
+<!-- 1 -->
+<section id="defs">
+  <div class="sec-head"><span class="num">01</span><h2>Flows 与 Screens 是什么</h2>
+    <span class="note">Mobbin 的定义，及本图谱的使用方式</span></div>
+  <div class="defs">
+    <div class="def">
+      <h3>Screen · 屏幕</h3>
+      <p class="muted">一个界面的一个状态。不是「页面」，是页面在某一刻的样子。</p>
+      <dl>
+        <dt>单位</dt><dd>单帧：某时刻可见的元素、可用/禁用的控件</dd>
+        <dt>Mobbin 规模</dt><dd>621,500+ 张</dd>
+        <dt>本图谱</dt><dd>17 个：9 个玩家面 + 6 个导演态 + 2 个桌面构图</dd>
+      </dl>
+    </div>
+    <div class="def">
+      <h3>Flow · 流程</h3>
+      <p class="muted">一串<b>有序</b>屏幕，加上让屏幕之间前进的那个动作。</p>
+      <dl>
+        <dt>单位</dt><dd>屏幕序列 + 每步的 hotspot（被点的那一下）+ 顺序</dd>
+        <dt>Mobbin 规模</dt><dd>323,900 条；结构是树</dd>
+        <dt>本图谱</dt><dd>6 条，对应六个篇章，共 29 个热点步骤</dd>
+      </dl>
+    </div>
+    <div class="def">
+      <h3>为什么用它审游戏</h3>
+      <p class="muted">增量游戏的 bug 往往不在某一屏，而在两屏之间：按钮不出现、动作没有效果、上一幕的动词在下一幕消失。</p>
+      <dl>
+        <dt>看什么</dt><dd>每步是否有真实状态变化、门上条件与文案是否一致、下一幕是否继承上一幕</dd>
+        <dt>不看什么</dt><dd>像素级视觉比对（重绘只还原结构、文案与状态，不还原像素）</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<!-- 2 -->
+<section id="screens">
+  <div class="sec-head"><span class="num">02</span><h2>屏幕</h2>
+    <span class="note">矢量重绘 · 由运行时 DOM 读数生成 · 390×844 · chromium · zh-CN</span></div>
+  <p>每张图都是<b>重绘</b>，不是截图：脚本在真实浏览器里逐屏读取 DOM——哪些块存在、哪些指标可见、
+    每个按钮的原文与启用状态、世界卡的每一行、日志的头几行——再画成 SVG。
+    所以图上不可能出现那一屏没有的东西，反过来也藏不住它有的东西。好处是可以放大看、深浅色自动跟随、
+    整页不再背 3MB 位图。</p>
+  <p>玩家面在 <code>public/player-privacy-v3.js</code> 之下运行，所以 ACT、Aha、导演模式全部不可见——
+    这正是玩家看到的样子：这些块不是被涂灰，而是<b>根本不画</b>。括号内是该屏上真实可用的动作（<code>data-command</code>）。</p>
+
+  <h3>玩家面 · 一段存档走过六幕</h3>
+  <div class="screens">
+    <figure class="screen">
+      <img src="shots/p01.png" alt="玩家首屏，只有一个「印字」按钮与一项库存文字指标" loading="lazy" width="780" height="1688">
+      <div class="cap"><div class="hd"><span class="sid">P01</span><h4>全新存档</h4></div>
+        <ul class="facts"><li class="on">库存文字</li><li class="on">印字</li><li class="off">世界模型 隐藏</li></ul>
+        <p class="why">四项指标只出现一项，动作只有一个。披露契约 S01 的运行时证据。</p></div>
+    </figure>
+    <figure class="screen">
+      <img src="shots/p02.png" alt="玩家首次出售后，出现资金指标与出售、委托按钮" loading="lazy" width="780" height="1688">
+      <div class="cap"><div class="hd"><span class="sid">P02</span><h4>首次出售</h4></div>
+        <ul class="facts"><li class="on">+工坊资金</li><li class="on">出售全部库存</li><li class="on">交付街角委托</li><li class="on">机械键盘</li></ul>
+        <p class="why">S02：出售第一次真正可用。库存归零后按钮仍在。</p></div>
+    </figure>
+    <figure class="screen">
+      <img src="shots/p03.png" alt="玩家自动化阶段，三台机器卡片与自动出售开关" loading="lazy" width="780" height="1688">
+      <div class="cap"><div class="hd"><span class="sid">P03</span><h4>自动化</h4></div>
+        <ul class="facts"><li class="on">三台机器</li><li class="on">切换自动出售</li><li class="off">研发复写纸</li></ul>
+        <p class="why">机器卡片按「拥有或买得起」逐个出现，不是一次性铺开。</p></div>
+    </figure>
+    <figure class="screen">
+      <img src="shots/p04.png" alt="ACT II 玩家面，四个新动词，世界模型仍未出现，机器面板消失" loading="lazy" width="780" height="1688">
+      <div class="cap"><div class="hd"><span class="sid">P04</span><h4>ACT II · 字开始生长</h4></div>
+        <ul class="facts"><li class="on">+意义</li><li class="on">+噪音</li><li class="on">刻模</li><li class="off">机器面板消失</li></ul>
+        <p class="why">S10：城市未发现，世界面不存在。同时 ACT I 的机器面板与购买入口一起消失（见 M5）。</p></div>
+    </figure>
+    <figure class="screen">
+      <img src="shots/p05.png" alt="ACT III 玩家面，世界模型卡片首次出现，由单栏展开为双栏" loading="lazy" width="780" height="1688">
+      <div class="cap"><div class="hd"><span class="sid">P05</span><h4>ACT III · 城市</h4></div>
+        <ul class="facts"><li class="on">世界模型 可见</li><li class="off">地图=城市</li><li class="on">观察一个新方言</li></ul>
+        <p class="why">S11：城市被发现，hero 由单栏扩成双栏，ACT II 的动词整组退场。</p></div>
+    </figure>
+    <figure class="screen">
+      <img src="shots/p06.png" alt="ACT IV 玩家面，库存文字指标消失，五个智能体相关动词" loading="lazy" width="780" height="1688">
+      <div class="cap"><div class="hd"><span class="sid">P06</span><h4>ACT IV · 机器开始写</h4></div>
+        <ul class="facts"><li class="off">库存文字 消失</li><li class="on">5 个智能体动词</li><li class="off">地图=传播网络</li></ul>
+        <p class="why">S20 对应的唯一一处「有意替换」：数字出版让实体库存指标退场。</p></div>
+    </figure>
+    <figure class="screen">
+      <img src="shots/p07.png" alt="ACT V 玩家面，整个界面只剩一个「语义压缩」按钮" loading="lazy" width="780" height="1688">
+      <div class="cap"><div class="hd"><span class="sid">P07</span><h4>ACT V · 机器语言</h4></div>
+        <ul class="facts"><li class="on">语义压缩</li><li class="off">仅 1 个动作</li><li class="off">地图=机器语言</li></ul>
+        <p class="why">全游戏最薄的一屏：一个动作承担整个 ACT V 的推进。</p></div>
+    </figure>
+    <figure class="screen">
+      <img src="shots/p08.png" alt="ACT VI 玩家面，删除、消解歧义、停止印刷三个动作" loading="lazy" width="780" height="1688">
+      <div class="cap"><div class="hd"><span class="sid">P08</span><h4>ACT VI · 终局条件成立</h4></div>
+        <ul class="facts"><li class="on">停止印刷</li><li class="on">消解 25 歧义</li><li class="off">地图=世界</li></ul>
+        <p class="why">S21 到 S22 之间：删除成为生产动作，最后一个按钮出现。</p></div>
+    </figure>
+    <figure class="screen">
+      <img src="shots/p09.png" alt="停止印刷之后，终局文案出现，所有动作禁用" loading="lazy" width="780" height="1688">
+      <div class="cap"><div class="hd"><span class="sid">P09</span><h4>停止印刷之后</h4></div>
+        <ul class="facts"><li class="on">终局文案 可见</li><li class="off">全部动作禁用</li><li class="off">地图=静默</li></ul>
+        <p class="why">S22：<code>stopped=true</code>、产率 0、所有动作 disabled，导出与重置仍然可用。</p></div>
+    </figure>
+  </div>
+
+  <h3>评审面 · 导演模式（<code>play.html?review=1</code>）</h3>
+  <p class="muted">玩家看不到这一层。它带着完整 ACT 条、Aha 目录与导演模式，用来给单卡状态定位。</p>
+  <div class="screens">
+    <figure class="screen rev"><img src="shots/r01.png" alt="导演模式 A01 状态" loading="lazy" width="780" height="1688">
+      <div class="cap"><div class="hd"><span class="sid">R01</span><h4>A01 · ACT I</h4></div>
+        <ul class="facts"><li>6 幕条</li><li>28 项 Aha 目录</li></ul></div></figure>
+    <figure class="screen rev"><img src="shots/r02.png" alt="导演模式 A03 状态，ACT II" loading="lazy" width="780" height="1688">
+      <div class="cap"><div class="hd"><span class="sid">R02</span><h4>A03 · ACT II</h4></div>
+        <ul class="facts"><li>刻模可用</li><li>压缩待命</li></ul></div></figure>
+    <figure class="screen rev"><img src="shots/r03.png" alt="导演模式 A12 状态，ACT III" loading="lazy" width="780" height="1688">
+      <div class="cap"><div class="hd"><span class="sid">R03</span><h4>A12 · ACT III</h4></div>
+        <ul class="facts"><li>地图=城市</li><li>4 个动作</li></ul></div></figure>
+    <figure class="screen rev"><img src="shots/r04.png" alt="导演模式 A16 状态，ACT IV" loading="lazy" width="780" height="1688">
+      <div class="cap"><div class="hd"><span class="sid">R04</span><h4>A16 · ACT IV</h4></div>
+        <ul class="facts"><li>地图=传播网络</li><li>库存仍在</li></ul></div></figure>
+    <figure class="screen rev"><img src="shots/r05.png" alt="导演模式 A22 状态，ACT V" loading="lazy" width="780" height="1688">
+      <div class="cap"><div class="hd"><span class="sid">R05</span><h4>A22 · ACT V</h4></div>
+        <ul class="facts"><li>地图=机器语言</li><li>压缩可用</li></ul></div></figure>
+    <figure class="screen rev"><img src="shots/r06.png" alt="导演模式 A28 状态，终局" loading="lazy" width="780" height="1688">
+      <div class="cap"><div class="hd"><span class="sid">R06</span><h4>A28 · 终局</h4></div>
+        <ul class="facts"><li>地图=静默</li><li>终局文案可见</li></ul></div></figure>
+  </div>
+
+  <h3>桌面构图</h3>
+  <div class="screens">
+    <figure class="screen rev"><img src="shots/d01.png" alt="1280 宽度下的 ACT IV 评审面" loading="lazy" width="1280" height="900">
+      <div class="cap"><div class="hd"><span class="sid">D01</span><h4>ACT IV · 1280</h4></div>
+        <ul class="facts"><li>双栏 hero</li><li>系统面板</li><li>Aha 目录</li></ul></div></figure>
+    <figure class="screen rev"><img src="shots/d02.png" alt="1280 宽度下的 ACT I 评审面" loading="lazy" width="1280" height="900">
+      <div class="cap"><div class="hd"><span class="sid">D02</span><h4>ACT I · 1280</h4></div>
+        <ul class="facts"><li>三台机器卡</li><li>六幕条全亮</li></ul></div></figure>
+  </div>
+</section>
+
+<!-- 3 -->
+<section id="flows">
+  <div class="sec-head"><span class="num">03</span><h2>六条流程</h2>
+    <span class="note">热点取自 <code>#primary-actions</code> 的 data-command</span></div>
+  <p>每条流程的「成本」是<b>无头推演</b>出来的（每 500ms 一拍，与实际 <code>setInterval</code> 一致）：
+    一个只使用当前屏幕真实可用动作的玩家，走完这一幕要按几下、经过多少游戏内秒数。</p>
+
+  <!-- F01 -->
+  <article class="flow">
+    <div class="flow-head"><span class="fid">F01</span><h3>ACT I · 手工与自动化</h3>
+      <span class="stat"><span class="chip">屏幕 <b>P01→P03</b></span><span class="chip">2 个 Aha</span><span class="chip">出口 <b>发行《明日》</b></span></span></div>
+    <div class="strip">
+      <figure><img src="shots/p01.png" alt="首屏" loading="lazy" width="780" height="1688"><figcaption><b>P01</b>全新存档</figcaption></figure>
+      <figure><img src="shots/p02.png" alt="首次出售" loading="lazy" width="780" height="1688"><figcaption><b>P02</b>首次出售</figcaption></figure>
+      <figure><img src="shots/p03.png" alt="自动化" loading="lazy" width="780" height="1688"><figcaption><b>P03</b>自动化</figcaption></figure>
+      <figure><img src="shots/p04.png" alt="ACT II" loading="lazy" width="780" height="1688"><figcaption><b>P04</b>ACT II 开启</figcaption></figure>
+    </div>
+    <div class="tw"><table>
+      <thead><tr><th>步</th><th>热点</th><th>状态变化</th><th>门条件</th></tr></thead>
+      <tbody>
+        <tr><td class="n">1</td><td class="cmd">印字 · print</td><td class="n">glyphs +1（复写纸后 +4）</td><td class="gate">无</td></tr>
+        <tr><td class="n">2</td><td class="cmd">出售全部库存 · sell</td><td class="n">credits += ⌊glyphs⌋ × 0.5</td><td class="gate">首次出现于 <code>lifetimeGlyphs≥1</code></td></tr>
+        <tr><td class="n">3</td><td class="cmd">购买 · buy</td><td class="n">rate +0.5 / +2 / +12 每秒</td><td class="gate">解锁 <code>lifetime≥10 / 100 / 800</code>；成本 <code>5·1.34ⁿ / 24·1.38ⁿ / 110·1.42ⁿ</code></td></tr>
+        <tr><td class="n">4</td><td class="cmd">研发复写纸 · boost</td><td class="n">manualBoost = true</td><td class="gate"><code>lifetime≥150</code> 且 45 资金</td></tr>
+        <tr><td class="n">5</td><td class="cmd">研发自动出售 · research-auto</td><td class="n">autoSellUnlocked = true</td><td class="gate"><code>lifetime≥300</code> 且 60 资金</td></tr>
+        <tr><td class="n">6</td><td class="cmd">交付街角委托 · contract</td><td class="n">扣字，得 20 / 85 / 350 资金</td><td class="gate">三张委托依次 20 / 100 / 500 字</td></tr>
+        <tr><td class="n">7</td><td class="cmd">发行《明日》 · publish</td><td class="n">act=2，readers=20，demand=1</td><td class="gate"><code>lifetime≥5000</code> 且 <code>presses≥1</code> 且 <code>glyphs≥200</code> 且 <code>credits≥300</code></td></tr>
+      </tbody>
+    </table></div>
+  </article>
+
+  <!-- F02 -->
+  <article class="flow">
+    <div class="flow-head"><span class="fid">F02</span><h3>ACT II · 字开始生长</h3>
+      <span class="stat"><span class="chip">屏幕 <b>P03→P04</b></span><span class="chip">A03–A11</span><span class="chip">9 个 Aha</span><span class="chip">实测 <b>154 次点击 / 327 秒</b></span></span></div>
+    <div class="strip">
+      <figure><img src="shots/p04.png" alt="ACT II 起点" loading="lazy" width="780" height="1688"><figcaption><b>P04</b>ACT II 起点</figcaption></figure>
+      <figure><img src="shots/p05.png" alt="ACT III 城市" loading="lazy" width="780" height="1688"><figcaption><b>P05</b>城市地图展开</figcaption></figure>
+    </div>
+    <div class="tw"><table>
+      <thead><tr><th>步</th><th>热点</th><th>状态变化</th><th>门条件</th></tr></thead>
+      <tbody>
+        <tr><td class="n">1</td><td class="cmd">刻模：木+木→林 · compose-rule</td><td class="n">glyphs −2，composed +1</td><td class="gate"><code>act≥2</code> 且 <code>glyphs≥2</code>。置 <code>ruleActive</code> 后本应自动运行（见 M1）</td></tr>
+        <tr><td class="n">2</td><td class="cmd">压缩 20 字 → 12 意义 · condense</td><td class="n">glyphs −20，meaning +12，noise +1</td><td class="gate"><code>glyphs≥20</code>；每按必增噪音</td></tr>
+        <tr><td class="n">3</td><td class="cmd">打开一封读者来信 · read-letter</td><td class="n">letters +1，meaning +10</td><td class="gate"><code>readers≥250</code>，<b>无上限无冷却</b>（见 M7）</td></tr>
+        <tr><td class="n">4</td><td class="cmd">允许读者造一个新词 · organic-word</td><td class="n">organicWords +1，demand +1.5</td><td class="gate"><code>letters≥1</code>，无上限</td></tr>
+        <tr><td class="n">5</td><td class="cmd">让这个词传播 · viral-word</td><td class="n">readers +750，demand +3</td><td class="gate"><code>organicWords≥1</code>，<b>无上限无冷却</b>（见 M7）</td></tr>
+        <tr><td class="n">6</td><td class="cmd">删除噪音 · delete-noise</td><td class="n">noise −5，deletedNoise +5，meaning +0.25</td><td class="gate"><code>noise≥1</code></td></tr>
+        <tr><td class="n">7</td><td class="cmd">展开城市地图 · map-city</td><td class="n">act=3，districts=2，worldScale=1</td><td class="gate"><code>act===2</code> 且 <code>paperCrisis</code> 且 <code>meaning≥50</code> 且 <code>deletedNoise≥1</code></td></tr>
+      </tbody>
+    </table></div>
+  </article>
+
+  <!-- F03 -->
+  <article class="flow">
+    <div class="flow-head"><span class="fid">F03</span><h3>ACT III · 文字改变城市</h3>
+      <span class="stat"><span class="chip">屏幕 <b>P05</b></span><span class="chip">A12–A15</span><span class="chip">实测 <b>6 次点击 / 7 秒</b></span></span></div>
+    <div class="strip">
+      <figure><img src="shots/p05.png" alt="城市" loading="lazy" width="780" height="1688"><figcaption><b>P05</b>城市</figcaption></figure>
+      <figure><img src="shots/p06.png" alt="传播网络" loading="lazy" width="780" height="1688"><figcaption><b>P06</b>传播网络</figcaption></figure>
+    </div>
+    <div class="tw"><table>
+      <thead><tr><th>步</th><th>热点</th><th>状态变化</th><th>门条件</th></tr></thead>
+      <tbody>
+        <tr><td class="n">1</td><td class="cmd">观察一个新方言 · discover-dialect</td><td class="n">districts +1，meaning +25</td><td class="gate"><code>act≥3</code>，<b>无上限无成本</b>（见 M7）</td></tr>
+        <tr><td class="n">2</td><td class="cmd">创造一个概念 · make-concept</td><td class="n">meaning −25，concepts +1，societyEffects +1</td><td class="gate"><code>meaning≥25</code></td></tr>
+        <tr><td class="n">3</td><td class="cmd">把地图缩到世界 · map-world</td><td class="n">worldScale = 2</td><td class="gate"><code>act===3</code> 且 <code>concepts≥2</code> 且 <code>districts≥3</code></td></tr>
+        <tr><td class="n">4</td><td class="cmd">上线记者 Agent · launch-agents</td><td class="n">act=4，agents=1，生产接管</td><td class="gate"><code>act===3</code> 且 <code>worldScale≥2</code></td></tr>
+      </tbody>
+    </table></div>
+  </article>
+
+  <!-- F04 -->
+  <article class="flow">
+    <div class="flow-head"><span class="fid">F04</span><h3>ACT IV · 机器开始写</h3>
+      <span class="stat"><span class="chip">屏幕 <b>P06</b></span><span class="chip">A16–A21</span><span class="chip">实测 <b>5 次点击 / 4.5 秒</b></span></span></div>
+    <div class="strip">
+      <figure><img src="shots/p06.png" alt="ACT IV" loading="lazy" width="780" height="1688"><figcaption><b>P06</b>ACT IV</figcaption></figure>
+      <figure><img src="shots/p07.png" alt="ACT V" loading="lazy" width="780" height="1688"><figcaption><b>P07</b>ACT V</figcaption></figure>
+    </div>
+    <div class="tw"><table>
+      <thead><tr><th>步</th><th>热点</th><th>状态变化</th><th>门条件</th></tr></thead>
+      <tbody>
+        <tr><td class="n">1</td><td class="cmd">给编辑 Agent 否决权 · editor-autonomy</td><td class="n">editorAutonomy = true，meaning +100</td><td class="gate"><code>act≥4</code> 且 <code>agents≥1</code>，可重复（见 M7）</td></tr>
+        <tr><td class="n">2</td><td class="cmd">允许 Agent 创建 Agent · spawn-agents</td><td class="n">agentFactories +1，agents +4</td><td class="gate"><code>editorAutonomy</code>，可重复</td></tr>
+        <tr><td class="n">3</td><td class="cmd">切换数字出版 · digitize</td><td class="n">digital = true，overnightArticles +100</td><td class="gate"><code>agentFactories≥1</code>；同时关掉库存指标与自动出售</td></tr>
+        <tr><td class="n">4</td><td class="cmd">用档案训练机器 · train-memory</td><td class="n">archives +1，meaning +500</td><td class="gate"><code>digital</code>，可重复</td></tr>
+        <tr><td class="n">5</td><td class="cmd">检查未知字形 ◫ · discover-machine-glyph</td><td class="n">act=5，machineGlyphs=1，machineGlyphUse=1000</td><td class="gate"><code>act===4</code> 且 <code>archives≥1</code> 且 <code>agentFactories≥1</code></td></tr>
+      </tbody>
+    </table></div>
+  </article>
+
+  <!-- F05 -->
+  <article class="flow">
+    <div class="flow-head"><span class="fid">F05</span><h3>ACT V · 机器语言</h3>
+      <span class="stat"><span class="chip">屏幕 <b>P07</b></span><span class="chip">A22–A24</span><span class="chip">实测 <b>2 次点击 / 3 秒</b></span></span></div>
+    <div class="strip">
+      <figure><img src="shots/p07.png" alt="机器语言" loading="lazy" width="780" height="1688"><figcaption><b>P07</b>机器语言</figcaption></figure>
+      <figure><img src="shots/p08.png" alt="基础设施" loading="lazy" width="780" height="1688"><figcaption><b>P08</b>基础设施</figcaption></figure>
+    </div>
+    <div class="tw"><table>
+      <thead><tr><th>步</th><th>热点</th><th>状态变化</th><th>门条件</th></tr></thead>
+      <tbody>
+        <tr><td class="n">1</td><td class="cmd">语义压缩 · compress-language</td><td class="n">meaning −100，compressedMeaning +10000</td><td class="gate"><code>act≥5</code> 且 <code>meaning≥100</code></td></tr>
+        <tr><td class="n">2</td><td class="cmd">让语言接管基础设施 · infrastructure</td><td class="n">act=6，ambiguity=100，noise +1500</td><td class="gate"><code>act===5</code> 且 <code>compressedMeaning≥10000</code></td></tr>
+      </tbody>
+    </table></div>
+  </article>
+
+  <!-- F06 -->
+  <article class="flow">
+    <div class="flow-head"><span class="fid">F06</span><h3>ACT VI · 从增长到沉默</h3>
+      <span class="stat"><span class="chip">屏幕 <b>P08→P09</b></span><span class="chip">A25–A28</span><span class="chip">实测 <b>5 次点击 / 6.5 秒</b></span><span class="chip">终局 <b>stopped</b></span></span></div>
+    <div class="strip">
+      <figure><img src="shots/p08.png" alt="终局条件成立" loading="lazy" width="780" height="1688"><figcaption><b>P08</b>条件成立</figcaption></figure>
+      <figure><img src="shots/p09.png" alt="停止印刷之后" loading="lazy" width="780" height="1688"><figcaption><b>P09</b>静默</figcaption></figure>
+    </div>
+    <div class="tw"><table>
+      <thead><tr><th>步</th><th>热点</th><th>状态变化</th><th>门条件</th></tr></thead>
+      <tbody>
+        <tr><td class="n">1</td><td class="cmd">删除噪音 · delete-noise<span class="muted"> {amount:500}</span></td><td class="n">noise −500，deletedNoise +500</td><td class="gate"><code>act≥6</code> 时一次删 500，否则 5</td></tr>
+        <tr><td class="n">2</td><td class="cmd">消解 25 歧义 · resolve-ambiguity</td><td class="n">ambiguity −25，deletedNoise +250</td><td class="gate"><code>ambiguity&gt;0</code>，可重复（见 M7）</td></tr>
+        <tr><td class="n">3</td><td class="cmd">停止印刷 · stop-printing</td><td class="n">stopped = true，autoSell = false</td><td class="gate"><code>act===6</code> 且 <code>deletedNoise≥1000</code> 且 <code>compressedMeaning≥10000</code></td></tr>
+        <tr><td class="n">4</td><td class="cmd">（终局后）</td><td class="n">引擎层：<code>stopped</code> 时除 reset 外一切命令原样返回</td><td class="gate">导出存档与重新开始仍在页脚可用</td></tr>
+      </tbody>
+    </table></div>
+  </article>
+</section>
+
+<!-- 4 -->
+<section id="disclosure">
+  <div class="sec-head"><span class="num">04</span><h2>与既有披露流对照</h2>
+    <span class="note">aha.md 的 F01–F03 / S01–S22 是文字契约，本图谱是它的完整展开</span></div>
+  <p>仓库里原有一套 Flows 与 Screens 词汇：三类披露流、九个编号屏（S01–S03、S10–S12、S20–S22，编号之间刻意留空）。
+    节点测试 <code>both documents specify the same disclosure rule, every flow and every screen</code> 保证 Markdown 与 HTML 一致。
+    本图谱不修改它，只把留空的部分补齐到可对照的粒度。</p>
+  <div class="tw"><table>
+    <thead><tr><th>契约</th><th>契约描述</th><th>本图谱屏幕</th><th>运行时证据</th></tr></thead>
+    <tbody>
+      <tr><td class="cmd">S01</td><td class="gate">Fresh：只有「库存文字 + 印字」</td><td class="n">P01</td><td class="gate">1 项指标、1 个动作，实测通过</td></tr>
+      <tr><td class="cmd">S02</td><td class="gate">First sale：首次真实可用，归零后保留</td><td class="n">P02</td><td class="gate">出售按钮在库存 0 时仍在（disabled）</td></tr>
+      <tr><td class="cmd">S03</td><td class="gate">Automation：机器成为永久工作台的一部分</td><td class="n">P03</td><td class="gate">三台机器卡按发现依次出现；<b>但 ACT II 起整块消失</b>（M5）</td></tr>
+      <tr><td class="cmd">S10</td><td class="gate">Before city：world 面不存在，hero 单栏</td><td class="n">P04</td><td class="gate"><code>#world-card.hidden</code> 为 true，hero 单栏</td></tr>
+      <tr><td class="cmd">S11</td><td class="gate">City discovered：world 出现，展开双栏</td><td class="n">P05</td><td class="gate">进入 ACT III 当帧出现</td></tr>
+      <tr><td class="cmd">S12</td><td class="gate">Network：地图进一步扩大</td><td class="n">P06</td><td class="gate">标尺文字 城市 → 传播网络 → 机器语言 → 世界</td></tr>
+      <tr><td class="cmd">S20</td><td class="gate">Infrastructure：噪音/歧义成为运营资源</td><td class="n">P08</td><td class="gate">噪音与歧义出现在世界指标</td></tr>
+      <tr><td class="cmd">S21</td><td class="gate">Delete：删除成为推进动作</td><td class="n">P08</td><td class="gate">ACT VI 的删除按钮被标为 major</td></tr>
+      <tr><td class="cmd">S22</td><td class="gate">Stop：条件成立才出现，执行后产率 0</td><td class="n">P09</td><td class="gate">终局文案可见、全部动作 disabled、<code>#rate</code> 为 0</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 5 -->
+<section id="verify">
+  <div class="sec-head"><span class="num">05</span><h2>逻辑机与设计是否一致</h2>
+    <span class="note">引擎源码 + 无头推演 + 真实浏览器</span></div>
+
+  <div class="two">
+    <div class="pass">
+      <span class="lbl">已核实一致</span>
+      <ul>
+        <li><b>六幕表</b>：<code>ACTS</code> 的 id、名称、Aha 区间与设计文档逐项相同。</li>
+        <li><b>28 个 Aha 的幕归属</b>：引擎 <code>AHAS[].act</code>、评审契约的 <code>acts</code> 表、设计文档三者一致，28/28。</li>
+        <li><b>11 个核心机制 Aha</b>：<code>kind='mechanic'</code> 恰好落在设计文档点名的 A01/A03/A06/A10/A13/A16/A18/A22/A24/A27/A28 上。</li>
+        <li><b>触发阈值</b>：把评审契约（手写的第二份副本）与引擎触发器在临界点比对——阈值下方不触发、阈值处触发，<b>28/28 无一例外</b>。</li>
+        <li><b>终局语义</b>：<code>stopped</code> 后 <code>rate()</code> 返回 0，引擎拒绝除 <code>reset</code> 外的一切命令，UI 禁用全部按钮并显示终局文案，导出与重置仍可用。</li>
+        <li><b>旧存档迁移</b>：v2 的「已完成」存档迁移进 ACT II（<code>published=true</code>、<code>act=2</code>、<code>readers=20</code>），资源不丢失。</li>
+        <li><b>披露契约</b>：S01–S03、S10–S12、S20–S22 在真实浏览器逐屏成立；玩家面在计时器重渲染之后仍然不含 ACT、Aha、导演模式字样。</li>
+      </ul>
+    </div>
+    <div class="pass">
+      <span class="lbl">本轮怎么取的证</span>
+      <ul>
+        <li><code>node --test tests/*.test.mjs</code> → <b>82 通过 / 0 失败</b>（含源码与产物引擎逐动作等价、字节级可复现构建）。</li>
+        <li>无头状态机推演：<code>glyph-engine-v3.js</code> 原样加载，每 500ms 一拍，只按当前屏幕真实存在的动作推进，一直走到 <code>stopped=true</code>。</li>
+        <li>真实浏览器：playwright chromium，390×844 与 1280×900，<code>public/</code> 直接以静态站点提供（<code>127.0.0.1:4399</code>），玩家面走真实的隐私剥离脚本；每一屏的 DOM 读数落成 <code>screens.json</code>，本文的 SVG 全部由它绘制。</li>
+        <li>玩家面隐私套件 <code>run-browser-contracts.py player</code>：<b>22/22 PASS</b>，零失败零跳过零预期失败。</li>
+        <li>评审面驱动 <code>driver.py review</code>：28 个导演态、终局静默态、跨刷新持久化全部 PASS。</li>
+        <li>结论口径：<b>契约层一致</b>，问题全部出在节奏、可见性与动词生命周期上——它们不在任何现有断言里。</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>不一致清单</h3>
+  <div class="ledger">
+
+    <div class="row bad">
+      <div class="top"><span class="mid hi">高</span><h4>M1 · 「规则开始自动运行」在实时游玩中从不运行</h4></div>
+      <p class="ev"><span class="lbl">现象</span>刻模之后 <code>composed</code> 只会因为玩家继续手点而增加。引擎里自动组合的公式是
+        <code>pairs = min(⌊glyphs/2⌋, ⌊elapsed/4⌋)</code>，而 UI 每 <b>500ms</b> 调一次 <code>advance()</code>，
+        <code>⌊0.5/4⌋ = 0</code>——每一拍都乘 0。</p>
+      <p class="ev"><span class="lbl">证据</span>60 秒的实时节奏（120 拍）→ <code>composed</code> 增加 <b>0</b>；同样 60 秒一次性结算 → 增加 <b>15</b>。
+        也就是说 A04 承诺的自动化只在玩家<b>关掉页面</b>时发生。</p>
+      <p class="ev"><span class="lbl">影响</span>A04 是 ACT II 的核心机制之一，按钮副标题写的是「一条可重复规则」。</p>
+    </div>
+
+    <div class="row bad">
+      <div class="top"><span class="mid hi">高</span><h4>M2 · 后半程塌缩成一次连点：ACT III–VI 共 18 次点击 / 21 秒</h4></div>
+      <p class="ev"><span class="lbl">现象</span>每一幕的门都由它自己的前一步动作精准喂饱：<code>digitize</code> 恰好给 100 篇（A19 要 100）、
+        <code>discover-machine-glyph</code> 恰好给 1000（A23 要 1000）、<code>infrastructure</code> 恰好给 100 歧义（A26 要 100）、
+        <code>compress-language</code> 恰好给 10000 压缩意义（A24 要 10000）。于是每一幕一次循环就走完。</p>
+      <p class="ev"><span class="lbl">证据</span>无头推演（只按可用动作）：ACT II <b>154 次 / 327 秒</b>；ACT III <b>6 次 / 7 秒</b>；
+        ACT IV <b>5 次 / 4.5 秒</b>；ACT V <b>2 次 / 3 秒</b>；ACT VI <b>5 次 / 6.5 秒</b>。
+        后面四幕合计 <b>18 次点击</b>送掉 A12–A28，也就是 28 个 Aha 里的 <b>17 个</b>。</p>
+      <p class="ev"><span class="lbl">影响</span>设计写的是「每一幕改变增长的含意」，实测是前三幕是游戏、后三幕是菜单。</p>
+    </div>
+
+    <div class="row bad">
+      <div class="top"><span class="mid hi">高</span><h4>M3 · 28 个 Aha 里有 11 个永远进不了揭示面板</h4></div>
+      <p class="ev"><span class="lbl">现象</span><code>currentAha()</code> 取的是「已见 Aha 里目录序最靠后的那个」，而不是「刚刚发生的那个」。
+        只要一次动作同时解锁两个，靠前那个就被永久盖住；如果低序号的 Aha 触发得比高序号晚，也一样被盖住。</p>
+      <p class="ev"><span class="lbl">证据</span>拍级推演（记录每个 Aha 首次进入 <code>ahaSeen</code> 的那一拍）：
+        结构性同帧解锁的有 <code>map-city → A12+A14</code>、<code>digitize → A19+A20</code>、
+        <code>discover-machine-glyph → A22+A23</code>、<code>infrastructure → A25+A26</code>；
+        另外噪音以 0.08/秒、读者以 0.35/秒累积，使 A11 系统性地早于 A06–A10。
+        最终 <b>A04、A06、A07、A08、A09、A10、A12、A13、A19、A22、A25</b> 共 11 个从未成为当前揭示——其中 A22 与 A25 是设计点名的核心机制。</p>
+    </div>
+
+    <div class="row bad">
+      <div class="top"><span class="mid hi">高</span><h4>M11 · 保持「有货就卖」的玩家永远看不到发行按钮，而且没有任何提示</h4></div>
+      <p class="ev"><span class="lbl">现象</span>发行按钮的<b>出现条件就是</b> <code>canPublish()</code>，其中一项是 <code>glyphs≥200</code>；
+        而「出售全部库存」一次清空 <code>⌊glyphs⌋</code>。玩家越勤快卖货，按钮越不会出现——按钮是<b>不渲染</b>而非禁用，所以连灰掉的线索都没有。</p>
+      <p class="ev"><span class="lbl">证据</span>推演 40 万拍（约 55 游戏小时，每拍都卖）：累计 <b>24.4M</b> 字、<b>12.2M</b> 资金、<b>3</b> 台印刷机、产率 <b>57/秒</b>，
+        <code>canPublish</code> 仍然为 false，唯一不满足的就是库存（在 0–10 之间振荡）。
+        仓库 <code>run-glyph-factory</code> 技能记录的实测是同一回事的另一半：开着自动出售玩满 332 秒后库存 0.3，
+        关掉自动出售后 10 秒内库存到 203 才看见按钮（本轮未复跑该条）。</p>
+      <p class="ev"><span class="lbl">影响</span>ACT I 的唯一出口不可发现。这是目前最接近「玩家会卡死」的一条。</p>
+    </div>
+
+    <div class="row warn">
+      <div class="top"><span class="mid mid2">中</span><h4>M6 · 自动出售会把 ACT II 的动词锁死，而关它的按钮只存在于 ACT I</h4></div>
+      <p class="ev"><span class="lbl">现象</span><code>advance()</code> 在每拍清算自动出售；<code>act()</code> 先跑 <code>advance()</code> 再执行命令，
+        所以 <code>compose-rule</code> 的 <code>glyphs≥2</code> 永远不成立。切换开关只在 <code>s.act===1</code> 的面板里渲染，
+        ACT II 之后玩家无法关掉它。</p>
+      <p class="ev"><span class="lbl">证据</span>带自动出售进入 ACT II，跑 120 秒：库存 <b>0</b>，<code>composed</code> 仍为 <b>0</b>，
+        <code>compose-rule</code> 点击无效（对照：手动刻模一次 <code>composed</code> 立刻 +1）。</p>
+      <p class="ev"><span class="lbl">影响</span>要到 ACT IV 的 <code>digitize</code> 才会解除。A04 与「压缩 20 字」在这期间不可用；靠可重复的读者来信仍能推进，所以是残废而非死锁。</p>
+    </div>
+
+    <div class="row warn">
+      <div class="top"><span class="mid mid2">中</span><h4>M5 · ACT I 的整套动词在 ACT II 集体消失，机器再也买不到</h4></div>
+      <p class="ev"><span class="lbl">现象</span><code>renderActions</code> 与 <code>renderMachines</code> 都以 <code>s.act</code> 分支：
+        出版之后，出售、复写纸、自动出售开关、委托、购买机器连同整个系统面板一起退场。玩家面上 <code>#systems-panel</code> 直接隐藏。
+        但 <b>引擎并不禁止</b> <code>buy</code>——它没有幕的判断，是 UI 不再提供入口。</p>
+      <p class="ev"><span class="lbl">证据</span>玩家面 ACT I（3 张机器卡）与 ACT II（0 张、系统面板消失）两张真实截图；<code>renderActions</code> 的 <code>act===1</code> 分支。</p>
+      <p class="ev"><span class="lbl">影响</span>ACT II 起产率只能靠幕末残留的机器继续涨，玩家<b>无法再扩张产能</b>，而 ACT II 的动词恰恰都在消耗字。</p>
+    </div>
+
+    <div class="row warn">
+      <div class="top"><span class="mid mid2">中</span><h4>M4 · 资金在 ACT I 之后变成死资源，却一直留在屏幕上</h4></div>
+      <p class="ev"><span class="lbl">现象</span>28 个命令里只有 6 个与资金相关（<code>sell</code> 赚钱；<code>buy</code>/<code>boost</code>/<code>research-auto</code>/<code>contract</code>/<code>publish</code> 花钱），
+        全部属于 ACT I。ACT II 起没有任何消耗，而「工坊资金」指标因为「已发现即持久」的规则一直显示——P06/P07/P08 都还在。</p>
+      <p class="ev"><span class="lbl">影响</span>ACT II 的卖点是经济重心从「字→钱」转向「意义」，但界面没有把这个转向说清楚，留下的是一块不再变化的大数字。</p>
+    </div>
+
+    <div class="row warn">
+      <div class="top"><span class="mid mid2">中</span><h4>M7 · 六个无上限、无成本、无冷却的动作可以绕过全部资源门槛</h4></div>
+      <p class="ev"><span class="lbl">现象</span>读者来信（+10 意义）、让这个词传播（+750 读者）、观察一个新方言（+25 意义）、
+        编辑否决权（+100 意义）、Agent 创建 Agent（+1 工厂 +4 Agent）、消解歧义（+250 已删噪音）都是可无限重复的。
+        于是 A10 的「纸张危机：少写」张力、A13 的 25 意义成本、A24 的 100 意义成本、A27 的 1000 已删噪音目标全都可以直接点出来。</p>
+      <p class="ev"><span class="lbl">证据</span>各点 10 次：意义 <b>208→1108</b>、读者 <b>8539</b>、街区 <b>13</b>、工厂 <b>10</b>、Agent <b>45</b>；
+        <code>消解歧义</code> 点 4 次就供应了 A28 所要求的 1000 已删噪音。</p>
+    </div>
+
+    <div class="row warn">
+      <div class="top"><span class="mid mid2">中</span><h4>M9 · 设计要求的「合法动作走到 A28」测试并不存在</h4></div>
+      <p class="ev"><span class="lbl">现象</span>设计与计划文档都写了「a legal-action simulation reaching A28」。
+        实际 <code>tests/*.test.mjs</code> 里唯一的合法动作推演只到 ACT II（<code>从零按合法动作可以进入 Act II</code>）；
+        A28 靠 <code>directorState('A28')</code> 夹具覆盖；<code>progressive-disclosure.test.mjs</code> 那张 27 条命令的清单只断言源码引擎与产物引擎结果相同，不判断动作是否合法、状态是否可达。</p>
+      <p class="ev"><span class="lbl">说明</span>本轮推演补上了这个空白：28/28 全部可经合法动作到达并进入 <code>stopped</code>。
+        所以设计是<b>可达的</b>，只是没有任何测试在守它——M2 那种节奏塌缩因此不会被 CI 发现。</p>
+    </div>
+
+    <div class="row">
+      <div class="top"><span class="mid lo">低</span><h4>M8 · 三条文案与阈值对不上</h4></div>
+      <p class="ev">A19 标题「醒来已有八万篇文章」在 <b>100</b> 篇时触发；A24 标题「万亿文字压成一个符号」在压缩 <b>100</b> 点意义（记作 10000）时触发；A23「机器之间有自己的语言」在 <code>machineGlyphUse</code> 刚到 1000 时触发——而这个 1000 是上一步动作直接送的，不是长出来的。</p>
+    </div>
+
+    <div class="row">
+      <div class="top"><span class="mid lo">低</span><h4>M10 · 幕切换用严格相等，只有一条路能走进去</h4></div>
+      <p class="ev"><code>map-city</code> 要求 <code>act === 2</code>、<code>launch-agents</code> 要求 <code>act === 3</code>、<code>discover-machine-glyph</code> 要求 <code>act === 4</code>、<code>infrastructure</code> 要求 <code>act === 5</code>。
+        正常游玩只有唯一路径，所以没问题；但用导演模式「应用到存档」把幕号推前一步，对应的门就永久不可达。评审工具的风险，不是玩家风险。</p>
+    </div>
+
+  </div>
+
+  <h3>建议的处理顺序</h3>
+  <div class="two">
+    <div class="row bad"><div class="top"><span class="mid hi">先修</span><h4>让门不再靠一次点击喂饱</h4></div>
+      <p class="ev">M11 与 M2 是同一件事的两端：出口不可发现，进门又太便宜。做法上可以给 ACT II 之后的门加「持续量」条件（例如压缩意义要在若干秒内维持），
+        并把发行按钮改成<b>常驻显示 + 灰态 + 缺什么写什么</b>，而不是不渲染。</p></div>
+    <div class="row warn"><div class="top"><span class="mid mid2">再修</span><h4>把揭示面板改成「刚发生的那一个」</h4></div>
+      <p class="ev">M3 只需把 <code>currentAha()</code> 从「目录序最大」改成「最近一次进入 <code>ahaSeen</code> 的」，并给同一拍解锁多个的情况一个队列。
+        这是单点改动，却能让 11 个 Aha 重新出现在玩家眼前。</p></div>
+    <div class="row warn"><div class="top"><span class="mid mid2">再修</span><h4>给动词一个明确的退役规则</h4></div>
+      <p class="ev">M4/M5/M6 都来自「幕决定渲染什么」：要么在 ACT II 保留机器面板与自动出售开关（引擎本来就允许），
+        要么按披露契约第 4 条，明确写下「数字出版替换实体库存」之外还有哪些替换，并把退役做成一次可见的事件。</p></div>
+    <div class="row"><div class="top"><span class="mid lo">补测</span><h4>把本轮推演固化成测试</h4></div>
+      <p class="ev">把「合法动作走到 A28」「每幕点击数上限」「每个 Aha 至少一次成为当前揭示」写成断言，M1/M2/M3/M11 就都有了守卫。</p></div>
+  </div>
+
+  <h3>与并行分支的对账</h3>
+  <p class="muted">本文全部结论针对 <code>7ebd57b</code>（<code>main</code>）。仓库里另有一条在飞的分支
+    <code>fix/aha-legibility</code>（<code>9dfafe3</code>，独立 worktree），其中一部分条目已经处理。
+    下面是直接读该分支源码得到的对照，不是转述：</p>
+  <div class="ledger">
+    <div class="row ok"><div class="top"><span class="mid lo">已处理</span><h4>M1 · 实时自动组合</h4></div>
+      <p class="ev">该分支的 <code>advance()</code> 改用跨拍累加器 <code>ruleCredit</code>：
+        <code>pairs = min(⌊glyphs/2⌋, ⌊(ruleCredit+elapsed)/4⌋)</code>，并把 <code>RULE_PERIOD</code>／<code>RULE_READERS</code> 导出给渲染层。
+        多次 500ms tick 与一次等长跳跃等价，实时游玩终于会真的产出组合字。</p></div>
+    <div class="row ok"><div class="top"><span class="mid lo">已处理</span><h4>M6 的一半 · 自动出售开关在所有幕可达</h4></div>
+      <p class="ev">该分支把 <code>toggle-auto</code> 从 <code>act===1</code> 分支提到通用位置（<code>buttons.splice(1,0,…)</code>），
+        带着自动出售进入 ACT II 后不再被锁死；底层机制未变，仍需玩家自己关掉。</p></div>
+    <div class="row warn"><div class="top"><span class="mid mid2">仍存在</span><h4>在该分支上同样成立</h4></div>
+      <p class="ev"><code>currentAha()</code> 仍是「目录序最大」（M3）；<code>renderMachines()</code> 仍是 <code>if (s.act===1)</code>（M5）；
+        <code>map-city</code> 仍一次给 2 个街区、<code>digitize</code> 仍送 100 篇、<code>discover-machine-glyph</code> 仍预置
+        <code>machineGlyphUse:1000</code>、<code>infrastructure</code> 仍预置 <code>ambiguity:100</code>（M2 的同帧解锁）；
+        六个可无限重复的动作原样保留（M7）；<code>add()</code> 仍是「揭示即启用」（M11）。</p></div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section id="repro">
+  <div class="sec-head"><span class="num">06</span><h2>复现</h2>
+    <span class="note">候选 <code>7ebd57b</code> · 工作树干净</span></div>
+  <pre>node --test tests/*.test.mjs                                     # 82 pass / 0 fail
+node engine-probe.mjs                                            # M1、M4、M6 的状态机证据
+node flow-probe.mjs                                              # M2 每幕点击与秒数
+node focus-card-probe.mjs                                        # M3 拍级揭示面板可见性
+node contract-crosscheck.mjs                                     # 28/28 契约与引擎阈值临界比对
+node act1-timing.mjs                                             # M11 四十万拍推演
+python3 -m http.server 4399 --bind 127.0.0.1 --directory public   # 静态提供 public/
+GLYPH_BROWSER=chromium python3 scripts/run-browser-contracts.py player   # 22/22 PASS
+python3 .claude/skills/run-glyph-factory/driver.py review --base http://127.0.0.1:4399
+python3 test-results/audit-shots/screens.py                      # 逐屏读 DOM -> screens.json
+python3 test-results/audit-shots/rebuild_svg.py                  # screens.json -> 本文的 17 张矢量屏</pre>
+  <p class="muted" style="margin-top:14px">屏幕状态由 <code>E.fresh()</code> 叠加真实字段后经 <code>localStorage</code> 注入，
+    再用初始化脚本规避控制器的 <code>pagehide</code> 存档覆盖——与仓库自身「种子存档用于状态边界覆盖」的做法一致。
+    导演态（R/D 编号）不属于自然游玩证据，本文只在需要看六幕全貌时使用。
+    重绘脚本遇到没读到的状态会直接报错退出，所以「图上有」等于「那一屏真的有」。</p>
+  <footer>
+    <b>字工厂流程图谱</b> · 依据 Mobbin 的 Flows / Screens 结构整理 ·
+    屏幕 17 · 流程 6 · 热点步骤 29 · 核实结论：契约层 28/28 一致，节奏与可见性 10 处不一致（高 4 / 中 4 / 低 2）
+  </footer>
+</section>
+
+</main>
+</div>
+
+<script>
+// Every screen rail gets arrows, drag-to-swipe, arrow-key support and a position readout.
+// Swipe itself is native overflow scrolling; this only adds the desktop affordances.
+(() => {
+  'use strict';
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const behavior = reduced ? 'auto' : 'smooth';
+
+  document.querySelectorAll('.screens, .strip').forEach((rail) => {
+    rail.tabIndex = 0;
+    rail.setAttribute('role', 'group');
+
+    const bar = document.createElement('div');
+    bar.className = 'railbar';
+    const mk = (label, text, title) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = text;
+      b.title = title;
+      b.setAttribute('aria-label', label);
+      bar.append(b);
+      return b;
+    };
+    // Word labels, not arrow glyphs: a mono webfont that lacks ← → renders empty boxes.
+    const prev = mk('上一屏', '上一屏', '上一屏');
+    const next = mk('下一屏', '下一屏', '下一屏');
+    const hint = document.createElement('span');
+    hint.className = 'hint';
+    hint.textContent = '左右滑动 / 拖动 / ← → 切换';
+    const count = document.createElement('span');
+    count.className = 'count';
+    bar.append(hint, count);
+    rail.after(bar);
+
+    const cards = () => [...rail.children];
+    const step = () => {
+      const first = cards()[0];
+      return first ? first.getBoundingClientRect().width + 16 : rail.clientWidth;
+    };
+    const index = () => {
+      const left = rail.scrollLeft;
+      let best = 0, bestD = Infinity;
+      cards().forEach((c, i) => {
+        const d = Math.abs(c.offsetLeft - left);
+        if (d < bestD) { bestD = d; best = i; }
+      });
+      return best;
+    };
+    const sync = () => {
+      const n = cards().length;
+      const i = index();
+      count.textContent = `${i + 1} / ${n}`;
+      prev.disabled = i <= 0;
+      next.disabled = i >= n - 1;
+    };
+    const go = (dir) => rail.scrollBy({ left: dir * step(), behavior });
+
+    prev.addEventListener('click', () => go(-1));
+    next.addEventListener('click', () => go(1));
+    rail.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
+    });
+    rail.addEventListener('scroll', sync, { passive: true });
+    addEventListener('resize', sync);
+
+    // Mouse drag, so "swipe" is real on a desktop too. A drag must not fire the card's
+    // own click target, so the click is swallowed once the pointer has moved.
+    let down = null, moved = 0;
+    rail.addEventListener('pointerdown', (e) => {
+      if (e.pointerType !== 'mouse') return;
+      down = { x: e.clientX, left: rail.scrollLeft };
+      moved = 0;
+    });
+    rail.addEventListener('pointermove', (e) => {
+      if (!down) return;
+      const dx = e.clientX - down.x;
+      moved = Math.max(moved, Math.abs(dx));
+      if (moved > 6) {
+        rail.style.scrollBehavior = 'auto';
+        rail.scrollLeft = down.left - dx;
+      }
+    });
+    const release = () => {
+      if (!down) return;
+      rail.style.scrollBehavior = '';
+      down = null;
+      sync();
+    };
+    rail.addEventListener('pointerup', release);
+    rail.addEventListener('pointerleave', release);
+    rail.addEventListener('click', (e) => {
+      if (moved > 6) { e.stopPropagation(); e.preventDefault(); moved = 0; }
+    }, true);
+
+    sync();
+  });
+
+  document.documentElement.dataset.rails = String(document.querySelectorAll('.railbar').length);
+})();
+</script>
