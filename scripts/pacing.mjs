@@ -93,6 +93,36 @@ const total = rep.totalSeconds;
 console.log(`── 时长 ──  均值 ${rep.secondsMean.toFixed(1)}s  标准差 ${rep.secondsStd.toFixed(1)}s  `
   + `CV ${rep.secondsCv.toFixed(3)}  范围 ${Math.min(...secs).toFixed(0)}–${Math.max(...secs).toFixed(0)}s  `
   + `全程 ${(total / 60).toFixed(1)} 分钟${total >= 7200 ? '（≥2 小时 ✓）' : '（不足 2 小时 ✗）'}`);
+
+// 六个口径一起看，才是这份读数真正的样子：同一个「段」，三种单位 × 两种范围。
+// 全部 27 段和去掉第一章的 25 段必须分开——第一章是手速教学，它那两段量的是教程长度，
+// 不是节奏。判定和文案都按这个分区走，见 .claude/skills/verify/SKILL.md 的 rhythm contract。
+const inTutorial = (g) => g.from === 'A01' || g.from === 'A02';
+const stat = (xs) => {
+  const m = xs.reduce((a, b) => a + b, 0) / xs.length;
+  return { n: xs.length, m, s: Math.sqrt(xs.reduce((a, b) => a + (b - m) ** 2, 0) / xs.length), lo: Math.min(...xs), hi: Math.max(...xs) };
+};
+const rows = [
+  ['秒 · 全部 27 段', reports.decisions.list.map((g) => g.seconds)],
+  ['秒 · 去掉第一章 25 段', reports.decisions.list.filter((g) => !inTutorial(g)).map((g) => g.seconds)],
+  ['决策 · 全部 27 段', reports.decisions.list.map((g) => g.gap)],
+  ['决策 · 去掉第一章 25 段', reports.decisions.list.filter((g) => !inTutorial(g)).map((g) => g.gap)],
+  ['点击 · 全部 27 段', reports.clicks.list.map((g) => g.gap)],
+  ['点击 · 去掉第一章 25 段', reports.clicks.list.filter((g) => !inTutorial(g)).map((g) => g.gap)],
+];
+// 中文是双宽字符，padEnd 数的是码点数——表格会歪。按显示宽度补空格。
+const dw = (str) => [...str].reduce((n, c) => n + (/[\u1100-\u115f\u2e80-\ua4cf\uac00-\ud7a3\uf900-\ufaff\ufe30-\ufe6f\uff00-\uff60\uffe0-\uffe6]/.test(c) ? 2 : 1), 0);
+const padW = (str, n) => str + ' '.repeat(Math.max(0, n - dw(str)));
+console.log(`\n${padW('口径', 24)} ${'n'.padStart(4)} ${'均值'.padStart(9)} ${'标准差'.padStart(9)} ${'CV'.padStart(7)} ${'最小'.padStart(7)} ${'最大'.padStart(7)}`);
+console.log('─'.repeat(24 + 4 + 9 * 2 + 7 * 3 + 5));
+for (const [label, xs] of rows) {
+  const t = stat(xs);
+  console.log(`${padW(label, 24)} ${String(t.n).padStart(4)} ${t.m.toFixed(2).padStart(9)} ${t.s.toFixed(2).padStart(9)} `
+    + `${(t.s / t.m).toFixed(3).padStart(7)} ${t.lo.toFixed(0).padStart(7)} ${t.hi.toFixed(0).padStart(7)}`);
+}
+const tut = reports.clicks.list.filter(inTutorial);
+console.log(`\n第一章两段占全剧点击的 ${Math.round((tut.reduce((a, g) => a + g.gap, 0) / run.clicks) * 100)}%`
+  + `（${tut.map((g) => g.gap).join(' + ')} / ${run.clicks}）——要压它只能改第一章，见 verify skill 的「Act I 是唯一的旋钮」一节。`);
 console.log();
 
 console.log(`${pad('间隔', 16)} ${pad('ACT', 5)} ${'decisions'.padStart(10)} ${'clicks'.padStart(8)} ${'秒'.padStart(8)}`);

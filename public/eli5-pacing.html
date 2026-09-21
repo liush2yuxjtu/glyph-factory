@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<title>两条 Aha 之间：等了多久、按了多少下</title>
+<style>
+:root{--ink:#17201a;--paper:#efe9d8;--panel:#fffaf0;--muted:#657064;--line:#bcc4ae;
+--green:#c8ef70;--rust:#a34e34;--surface:#f4f1e4;--stage:#cfd4c2}
+*{box-sizing:border-box}
+body{margin:0;background:var(--stage);color:var(--ink);
+font:15px/1.65 -apple-system,"PingFang SC","Hiragino Sans GB",sans-serif;
+padding:28px 18px 60px}
+.wrap{max-width:720px;margin:0 auto}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px 22px 16px;margin:0 0 18px}
+h1{font-size:clamp(24px,4vw,34px);line-height:1.2;margin:0 0 6px;letter-spacing:.01em}
+h2{font-size:17px;margin:0 0 4px}
+.sub{color:var(--muted);font-size:13px;margin:0 0 16px}
+.cap{color:var(--muted);font-size:12px;margin:2px 0 0}
+svg{width:100%;height:auto;display:block}
+.band{fill:var(--surface)}.band.alt{fill:#faf7ec}
+.actlab{font-size:10px;fill:var(--muted)}
+.spike{font-size:11px;fill:var(--rust);font-weight:700}
+.axis{font-size:11px;fill:var(--muted)}
+.grid{stroke:var(--line);stroke-width:.6;stroke-dasharray:3 3;fill:none}
+.rule{stroke:var(--ink);stroke-width:.8;fill:none}
+.series{fill:none;stroke-width:2.2}
+.big{display:flex;gap:14px;flex-wrap:wrap;margin:4px 0 0}
+.box{flex:1 1 190px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.box.hot{background:#f7e7df;border-color:#d8b3a3}
+.box b{display:block;font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.04em;margin:0 0 8px}
+.box .n{font-size:26px;font-weight:700;letter-spacing:-.01em}
+.box .n small{font-size:13px;font-weight:500;color:var(--muted);margin-left:6px}
+table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{text-align:right;padding:7px 6px;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left}
+thead th{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.03em}
+tr.pick td{background:var(--green)}
+ol{margin:6px 0 0;padding-left:22px}li{margin:9px 0}
+li b{font-weight:700}.cost{color:var(--rust)}
+.foot{color:var(--muted);font-size:12px;text-align:center;margin:22px 0 0}
+</style></head><body><div class="wrap">
+
+<div class="card">
+  <h1>两条 Aha 之间：等了多久、按了多少下</h1>
+  <p class="sub">同 27 段，同一局。上面一张是「等了几秒」，下面一张是「按了几下」——两张图共用横轴。</p>
+  <svg viewBox="0 0 640 190" role="img" aria-label="27 段间隔的秒数与点击数">
+    <rect x="34.0" y="12" width="21.2" height="144" class="band"/><text x="44.6" y="170" text-anchor="middle" class="actlab">ACT 1</text><rect x="55.2" y="12" width="190.7" height="144" class="band alt"/><text x="150.5" y="170" text-anchor="middle" class="actlab">ACT 2</text><rect x="245.9" y="12" width="84.7" height="144" class="band"/><text x="288.2" y="170" text-anchor="middle" class="actlab">ACT 3</text><rect x="330.6" y="12" width="127.1" height="144" class="band alt"/><text x="394.1" y="170" text-anchor="middle" class="actlab">ACT 4</text><rect x="457.7" y="12" width="63.6" height="144" class="band"/><text x="489.5" y="170" text-anchor="middle" class="actlab">ACT 5</text><rect x="521.3" y="12" width="84.7" height="144" class="band alt"/><text x="563.6" y="170" text-anchor="middle" class="actlab">ACT 6</text>
+    <line class="grid" x1="34" y1="56" x2="606" y2="56"/>
+    <text class="axis" x="4" y="60">300s</text>
+    <rect x="37.4" y="73.8" width="14.4" height="82.2" fill="var(--rust)" rx="1.5"><title>A01→A02　247s</title></rect><rect x="58.6" y="69.3" width="14.4" height="86.7" fill="var(--rust)" rx="1.5"><title>A02→A03　260s</title></rect><rect x="79.8" y="60.3" width="14.4" height="95.7" fill="var(--rust)" rx="1.5"><title>A03→A04　287s</title></rect><rect x="100.9" y="61.5" width="14.4" height="94.5" fill="var(--rust)" rx="1.5"><title>A04→A05　284s</title></rect><rect x="122.1" y="49.2" width="14.4" height="106.8" fill="var(--rust)" rx="1.5"><title>A05→A06　321s</title></rect><rect x="143.3" y="61.2" width="14.4" height="94.8" fill="var(--rust)" rx="1.5"><title>A06→A07　285s</title></rect><rect x="164.5" y="62.0" width="14.4" height="94.0" fill="var(--rust)" rx="1.5"><title>A07→A08　282s</title></rect><rect x="185.7" y="61.7" width="14.4" height="94.3" fill="var(--rust)" rx="1.5"><title>A08→A09　283s</title></rect><rect x="206.9" y="61.7" width="14.4" height="94.3" fill="var(--rust)" rx="1.5"><title>A09→A10　283s</title></rect><rect x="228.1" y="61.5" width="14.4" height="94.5" fill="var(--rust)" rx="1.5"><title>A10→A11　284s</title></rect><rect x="249.2" y="61.3" width="14.4" height="94.7" fill="var(--rust)" rx="1.5"><title>A11→A12　284s</title></rect><rect x="270.4" y="62.0" width="14.4" height="94.0" fill="var(--rust)" rx="1.5"><title>A12→A13　282s</title></rect><rect x="291.6" y="61.8" width="14.4" height="94.2" fill="var(--rust)" rx="1.5"><title>A13→A14　283s</title></rect><rect x="312.8" y="71.2" width="14.4" height="84.8" fill="var(--rust)" rx="1.5"><title>A14→A15　255s</title></rect><rect x="334.0" y="69.5" width="14.4" height="86.5" fill="var(--rust)" rx="1.5"><title>A15→A16　260s</title></rect><rect x="355.2" y="62.5" width="14.4" height="93.5" fill="var(--rust)" rx="1.5"><title>A16→A17　281s</title></rect><rect x="376.4" y="62.7" width="14.4" height="93.3" fill="var(--rust)" rx="1.5"><title>A17→A18　280s</title></rect><rect x="397.5" y="65.8" width="14.4" height="90.2" fill="var(--rust)" rx="1.5"><title>A18→A19　271s</title></rect><rect x="418.7" y="74.2" width="14.4" height="81.8" fill="var(--rust)" rx="1.5"><title>A19→A20　246s</title></rect><rect x="439.9" y="63.3" width="14.4" height="92.7" fill="var(--rust)" rx="1.5"><title>A20→A21　278s</title></rect><rect x="461.1" y="68.7" width="14.4" height="87.3" fill="var(--rust)" rx="1.5"><title>A21→A22　262s</title></rect><rect x="482.3" y="62.7" width="14.4" height="93.3" fill="var(--rust)" rx="1.5"><title>A22→A23　280s</title></rect><rect x="503.5" y="61.5" width="14.4" height="94.5" fill="var(--rust)" rx="1.5"><title>A23→A24　284s</title></rect><rect x="524.6" y="62.0" width="14.4" height="94.0" fill="var(--rust)" rx="1.5"><title>A24→A25　282s</title></rect><rect x="545.8" y="76.7" width="14.4" height="79.3" fill="var(--rust)" rx="1.5"><title>A25→A26　238s</title></rect><rect x="567.0" y="68.5" width="14.4" height="87.5" fill="var(--rust)" rx="1.5"><title>A26→A27　263s</title></rect><rect x="588.2" y="80.3" width="14.4" height="75.7" fill="var(--rust)" rx="1.5"><title>A27→A28　227s</title></rect>
+    <line class="rule" x1="34" y1="156" x2="606" y2="156"/>
+    <text class="axis" x="606" y="26" text-anchor="end">秒 · 均值 273s · 标准差 18.7s</text>
+  </svg>
+  <p class="cap">平的：227–321 秒，标准差 18.7 秒。27 根柱子挤在一起分不出高低。</p>
+</div>
+
+<div class="card">
+  <h2>同样是这 27 段，换个 Y 轴</h2>
+  <p class="sub">点击数（含印字、卖字这些没有选择成分的动作）。</p>
+  <svg viewBox="0 0 640 190" role="img" aria-label="27 段间隔的点击数">
+    <rect x="34.0" y="12" width="21.2" height="144" class="band"/><text x="44.6" y="170" text-anchor="middle" class="actlab">ACT 1</text><rect x="55.2" y="12" width="190.7" height="144" class="band alt"/><text x="150.5" y="170" text-anchor="middle" class="actlab">ACT 2</text><rect x="245.9" y="12" width="84.7" height="144" class="band"/><text x="288.2" y="170" text-anchor="middle" class="actlab">ACT 3</text><rect x="330.6" y="12" width="127.1" height="144" class="band alt"/><text x="394.1" y="170" text-anchor="middle" class="actlab">ACT 4</text><rect x="457.7" y="12" width="63.6" height="144" class="band"/><text x="489.5" y="170" text-anchor="middle" class="actlab">ACT 5</text><rect x="521.3" y="12" width="84.7" height="144" class="band alt"/><text x="563.6" y="170" text-anchor="middle" class="actlab">ACT 6</text>
+    <line class="grid" x1="34" y1="48.85714285714286" x2="606" y2="48.85714285714286"/>
+    <text class="axis" x="4" y="52.85714285714286">500</text>
+    <line x1="34" y1="153.85714285714286" x2="606" y2="153.85714285714286"
+          stroke="var(--rust)" stroke-width="1" stroke-dasharray="4 3" opacity=".8"/>
+    <text class="axis" x="4" y="157.85714285714286" style="fill:var(--rust)">10</text>
+    <text class="axis" x="604" y="147.85714285714286" text-anchor="end" style="fill:var(--rust)">后面 25 段全在这条红线下，每段 0–10 下</text>
+    <rect x="37.4" y="50.4" width="14.4" height="105.6" fill="var(--rust)" rx="1.5"><title>A01→A02　493</title></rect><text x="44.6" y="46.4" text-anchor="middle" class="spike">493</text><rect x="58.6" y="45.0" width="14.4" height="111.0" fill="var(--rust)" rx="1.5"><title>A02→A03　518</title></rect><text x="65.8" y="41.0" text-anchor="middle" class="spike">518</text><rect x="79.8" y="154.0" width="14.4" height="2.0" fill="#8a9a76" rx="1.5"><title>A03→A04　4</title></rect><rect x="100.9" y="154.0" width="14.4" height="2.0" fill="#8a9a76" rx="1.5"><title>A04→A05　7</title></rect><rect x="122.1" y="154.0" width="14.4" height="2.0" fill="#8a9a76" rx="1.5"><title>A05→A06　0</title></rect><rect x="143.3" y="154.0" width="14.4" height="2.0" fill="#8a9a76" rx="1.5"><title>A06→A07　3</title></rect><rect x="164.5" y="154.0" width="14.4" height="2.0" fill="#8a9a76" rx="1.5"><title>A07→A08　7</title></rect><rect x="185.7" y="154.0" width="14.4" height="2.0" fill="#8a9a76" rx="1.5"><title>A08→A09　7</title></rect><rect x="206.9" y="154.0" width="14.4" height="2.0" fill="#8a9a76" rx="1.5"><title>A09→A10　1</title></rect><rect x="228.1" y="154.0" width="14.4" height="2.0" fill="#8a9a76" rx="1.5"><title>A10→A11　1</title></rect><rect x="249.2" y="154.0" width="14.4" height="2.0" fill="#8a9a76" rx="1.5"><title>A11→A12　3</title></rect><rect x="270.4" y="154.0" width="14.4" height="2.0" fill="#8a9a76" rx="1.5"><title>A12→A13　5</title></rect><rect x="291.6" y="154.0" width="14.4" height="2.0" fill="#8a9a76" rx="1.5"><title>A13→A14　5</title></rect><rect x="312.8" y="153.9" width="14.4" height="2.1" fill="#8a9a76" rx="1.5"><title>A14→A15　10</title></rect><rect x="334.0" y="154.0" width="14.4" height="2.0" fill="#8a9a76" rx="1.5"><title>A15→A16　6</title></rect><rect x="355.2" y="154.0" width="14.4" height="2.0" fill="#8a9a76" rx="1.5"><title>A16→A17　4</title></rect><rect x="376.4" y="154.0" width="14.4" height="2.0" fill="#8a9a76" rx="1.5"><title>A17→A18　1</title></rect><rect x="397.5" y="154.0" width="14.4" height="2.0" fill="#8a9a76" rx="1.5"><title>A18→A19　1</title></rect><rect x="418.7" y="154.0" width="14.4" height="2.0" fill="#8a9a76" rx="1.5"><title>A19→A20　1</title></rect><rect x="439.9" y="154.0" width="14.4" height="2.0" fill="#8a9a76" rx="1.5"><title>A20→A21　1</title></rect><rect x="461.1" y="154.0" width="14.4" height="2.0" fill="#8a9a76" rx="1.5"><title>A21→A22　4</title></rect><rect x="482.3" y="154.0" width="14.4" height="2.0" fill="#8a9a76" rx="1.5"><title>A22→A23　0</title></rect><rect x="503.5" y="154.0" width="14.4" height="2.0" fill="#8a9a76" rx="1.5"><title>A23→A24　5</title></rect><rect x="524.6" y="154.0" width="14.4" height="2.0" fill="#8a9a76" rx="1.5"><title>A24→A25　1</title></rect><rect x="545.8" y="154.0" width="14.4" height="2.0" fill="#8a9a76" rx="1.5"><title>A25→A26　0</title></rect><rect x="567.0" y="154.0" width="14.4" height="2.0" fill="#8a9a76" rx="1.5"><title>A26→A27　4</title></rect><rect x="588.2" y="154.0" width="14.4" height="2.0" fill="#8a9a76" rx="1.5"><title>A27→A28　1</title></rect>
+    <line class="rule" x1="34" y1="156" x2="606" y2="156"/>
+    <text class="axis" x="606" y="26" text-anchor="end">点击 · 均值 40.5 · 标准差 131.6</text>
+  </svg>
+  <p class="cap">两根红柱是第一章的两段，吃掉全剧 91% 的点击。</p>
+</div>
+
+<div class="card">
+  <h2>所以「点击的均值/标准差」要分段报</h2>
+  <div class="big">
+    <div class="box hot"><b>全部 27 段 · 点击</b><div class="n">40.48<small>均值</small></div><div class="n">131.60<small>标准差</small></div></div>
+    <div class="box"><b>后面 25 段 · 点击</b><div class="n">3.28<small>均值</small></div><div class="n">2.68<small>标准差</small></div></div>
+  </div>
+  <p class="cap" style="margin-top:14px">左边那个数说的是「教程有多长」，右边才是节奏。两条都真。</p>
+</div>
+
+<div class="card">
+  <h2>要动，只能动第一章</h2>
+  <p class="sub">唯一的旋钮是第一章的发行门槛（现在 32k）。下面是五个值各跑一遍的实测。</p>
+  <svg viewBox="0 0 640 216" role="img" aria-label="门槛与时长标准差、点击均值的关系">
+    <path class="series" stroke="var(--ink)" d="M46.0,56.2 L183.0,73.1 L320.0,89.8 L457.0,101.0 L594.0,110.4"/>
+    <path class="series" stroke="var(--rust)" d="M46.0,79.8 L183.0,72.4 L320.0,64.2 L457.0,57.7 L594.0,47.2"/>
+    <circle cx="46.0" cy="56.2" r="3.5" fill="var(--ink)"/><circle cx="183.0" cy="73.1" r="3.5" fill="var(--ink)"/><circle cx="320.0" cy="89.8" r="3.5" fill="var(--ink)"/><circle cx="457.0" cy="101.0" r="3.5" fill="var(--ink)"/><circle cx="594.0" cy="110.4" r="3.5" fill="var(--ink)"/><circle cx="46.0" cy="79.8" r="3.5" fill="var(--rust)"/><circle cx="183.0" cy="72.4" r="3.5" fill="var(--rust)"/><circle cx="320.0" cy="64.2" r="3.5" fill="var(--rust)"/><circle cx="457.0" cy="57.7" r="3.5" fill="var(--rust)"/><circle cx="594.0" cy="47.2" r="3.5" fill="var(--rust)"/>
+    <text x="46.0" y="190" text-anchor="middle" class="actlab">14k</text><text x="183.0" y="190" text-anchor="middle" class="actlab">18k</text><text x="320.0" y="190" text-anchor="middle" class="actlab">22k</text><text x="457.0" y="190" text-anchor="middle" class="actlab">26k</text><text x="594.0" y="190" text-anchor="middle" class="actlab">32k</text><text class="axis" x="46" y="208" text-anchor="start">← 教程越短</text><text class="axis" x="594" y="208" text-anchor="end">教程越长 →</text>
+    <text class="axis" x="606" y="24" text-anchor="end">黑＝时长标准差（越低越好）</text>
+    <text class="axis" x="606" y="40" text-anchor="end" style="fill:var(--rust)">红＝点击均值（越低越好）</text>
+  </svg>
+  <table><thead><tr><th>发行门槛</th><th>A02→A03</th><th>时长标准差</th><th>点击均值/标准差</th></tr></thead><tbody>
+  <tr><td>14k</td><td>121s</td><td>34.2s</td><td>30.22 / 101.10</td></tr><tr><td>18k</td><td>153s</td><td>29.4s</td><td>32.56 / 106.48</td></tr><tr><td>22k</td><td>188s</td><td>24.6s</td><td>35.15 / 113.62</td></tr><tr><td>26k</td><td>217s</td><td>21.4s</td><td>37.19 / 120.35</td></tr><tr class="pick"><td>32k</td><td>260s</td><td>18.7s</td><td>40.48 / 131.60</td></tr>
+  </tbody></table>
+  <p class="cap" style="margin-top:10px">两条线反向：教程越长，时长越匀、点击越难看。全程五档都 ≥ 2 小时（121/121/122/122/123 分钟）。</p>
+</div>
+
+<div class="card">
+  <h2>四个选项，挑一个</h2>
+  <ol>
+    <li><b>A · 不动（现在这样）</b>　时长最匀（18.7s / CV 0.069）；代价是全部段点击 40.48 / 131.60 一直难看。契约已经写明这个数要分段报。</li>
+    <li><b>B · 门槛降到 26k</b>　点击降到 37.19 / 120.35，时长标准差涨到 21.4s。<span class="cost">A02→A03 变成 217s，落到 2σ 带外。</span></li>
+    <li><b>C · 门槛降到 22k</b>　点击 35.15 / 113.62，时长标准差 24.6s。<span class="cost">那一段落得更远（188s）。</span></li>
+    <li><b>D · 改第一章机制</b>　让教程的时间自己走、不用按——但这只是让「点击数」不再计入，玩家手上还在按。我不建议把它当成解法。</li>
+  </ol>
+  <p class="cap" style="margin-top:12px">我的建议：<b>A</b>。那两根柱子量的是「教程的长度」，不是节奏；后面 25 段在五档里几乎不动（点击 3.24–3.36 / 2.67–2.73），说明第一章动不了后面的节奏。除非你要的就是那个总数好看——那就选 B。</p>
+</div>
+
+<p class="foot">数据：<code>node scripts/pacing.mjs</code> · commit 0450ab4 · 参考对局最多 1114 次点击、全程 122.9 分钟</p>
+</div></body></html>

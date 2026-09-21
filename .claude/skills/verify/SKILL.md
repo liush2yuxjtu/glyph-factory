@@ -187,6 +187,81 @@ they cannot do is *decide*, which is why the metric reads zero. And a large all-
 std is not by itself a defect — see the three-bullet list above for what it is and what the
 legitimate levers are.
 
+### 原始读数：一张表，六个口径
+
+`node scripts/pacing.mjs` 默认就打全表，不需要另写脚本；`--trace` 补上「这一段花在哪些
+动词上」。合起来是这样（当前 `feat/aha-rhythm` 的实测值）：
+
+```
+段        ACT   秒    决策  点击  | 这一段花在哪些动词上
+A01→A02    1    247    26   493  | sell×245 print×222 buy×24 boost×1 research-auto×1
+A02→A03    2    260    18   518  | sell×259 print×241 buy×17 publish×1
+A03→A04    2    287     3     4  | compose-rule×3 print×1
+…（27 行，A01→A02 到 A27→A28）…
+A22→A23    5    280     0     0  | （等机器把字形用起来）
+A25→A26    6    238     0     0  | （等歧义涨上来）
+A27→A28    6    227     1     1  | stop-printing×1
+
+口径                     n     均值     标准差     CV     最小   最大
+秒   · 全部 27 段        27   272.80    18.74  0.069    227    321
+秒   · 去掉第一章 25 段   25   274.36    18.51  0.067    227    321
+决策 · 全部 27 段        27     4.59     5.64  1.228      0     26
+决策 · 去掉第一章 25 段   25     3.20     2.62  0.820      0     10
+点击 · 全部 27 段        27    40.48   131.60  3.251      0    518
+点击 · 去掉第一章 25 段   25     3.28     2.68  0.816      0     10
+```
+
+六个口径不是六份读数，是同一份读数的六个面：三种单位 × 两种范围。**报数时必须说清是哪
+一格**——「点击 std 131.60」和「点击 std 2.68」说的是同一局，前者是教程长度，后者是节奏。
+
+### Act I 是唯一的旋钮
+
+要压「点击」这一列，只有第一章能动，而唯一的旋钮是 `ACT_GATES[1]` 里那条
+`lifetimeGlyphs`（发行门槛，当前 32000）。下面是五个值各实跑一遍的结果：
+
+| 发行门槛 | A02→A03 | 全程 | 时长标准差 | 时长 CV | 点击（全部） | 点击（去第一章） |
+|---|---|---|---|---|---|---|
+| 14000 | 121s | 120.6 分 | 34.2s | 0.128 | 30.22 / 101.10 | 3.36 / 2.73 |
+| 18000 | 153s | 121.2 分 | 29.4s | 0.109 | 32.56 / 106.48 | 3.36 / 2.73 |
+| 22000 | 188s | 121.7 分 | 24.6s | 0.091 | 35.15 / 113.62 | 3.36 / 2.73 |
+| 26000 | 217s | 122.2 分 | 21.4s | 0.079 | 37.19 / 120.35 | 3.24 / 2.67 |
+| **32000（当前）** | 260s | 122.9 分 | **18.7s** | **0.069** | 40.48 / 131.60 | 3.28 / 2.68 |
+
+三件事从这张表里直接读得出来，改这个旋钮之前先读一遍：
+
+1. **五档全程都 ≥ 2 小时**（120.6–122.9 分）。两小时这条线不靠这个旋钮守，靠的是后面
+   25 段的钟。
+2. **「去第一章」那一列几乎不动**（点击 3.24–3.36 / 2.67–2.73）。第一章动不了后面的
+   节奏——所以这是个「你要不要那个总数好看」的取舍，不是节奏问题。
+3. **门槛越低，全部段点击越好看、时长越不匀**：14000 时 `A02→A03` 只有 121s，远在
+   2σ 带（当前带 235–310s）之外。也就是说，压点击的代价是拿一条时长离群点去换。
+
+当前选择是 32000（时长最匀），代价是全部段点击 40.48 / 131.60 一直难看；这是有意选的，
+理由写在上面的断言表里。要换成别的档，改完必须重跑 `npm run verify:fast`（点击断言的
+`heavy` 列表会跟着变）和 `--diff`。
+
+**怎么自己量一档而不动工作区**：门槛是写死的常量，别为了测一档去改文件再改回来——
+在内存里替换源码再 eval 就行：
+
+```js
+import { readFileSync } from 'node:fs';
+import { playthrough, pacingReport } from './tests/pacing.mjs';
+const src = readFileSync('public/glyph-engine-v3.js', 'utf8')
+  .replace('need:32000,', 'need:22000,');          // 锚点：ACT_GATES[1] 的 lifetimeGlyphs
+const E = new Function(`${src}\nreturn GlyphEngineV3;`)();
+const run = playthrough(E);
+const d = pacingReport(E, run, 'decisions'), c = pacingReport(E, run, 'clicks');
+console.log(d.secondsStd.toFixed(1), d.totalSeconds, c.mean.toFixed(2), c.std.toFixed(2));
+```
+
+换成别的旋钮（任何 `need:` / 成本 / 速率）同理：改锚点字符串，别的都不变。同一个手法
+也是量「如果改成 X 会怎样」的标准做法——**先量，再决定，别先改**。
+
+**给非工程读者看的图**：`node scripts/eli5-pacing.mjs` 生成 `public/eli5-pacing.html`
+（自包含单文件，直接开）。数字全部从参考对局现算——包括上面那张五档对照表，它每次都
+重跑一遍，锚点从 `ACT_GATES[1]` 自己取，所以改了门槛这张图不会静默画成「所有档都一样」。
+它画的正是这条契约的核心对照：同样的 27 段，秒数图是一排平齐的柱子，点击图是两根尖峰。
+
 **How to use it on a change.** Any edit to a threshold, cost, rate or gate moves these vectors.
 Run `node scripts/pacing.mjs` and `node scripts/pacing.mjs --unit clicks` before and after, plus
 `node scripts/pacing.mjs --diff tests/pacing-baseline.json` (add `--unit clicks` for the click
