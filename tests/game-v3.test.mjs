@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { playthrough, pacingReport } from './pacing.mjs';
 
 const source = readFileSync(new URL('../public/glyph-engine-v3.js', import.meta.url), 'utf8');
 const E = new Function(`${source}\nreturn GlyphEngineV3;`)();
@@ -65,16 +66,25 @@ test('an active rule composes on the live 500ms tick, not only on a catch-up', (
 });
 
 test('A06 readership creates demand after publication', () => {
-  const g = E.advance({ ...E.fresh(t), act: 2, published: true, readers: 99, composed: 20 }, t + 10000);
+  // `meaning >= 10` is part of A06 now: a newspaper manufactures demand only for something
+  // the player has already learned is worth printing. Without it the readers crossed 100 on
+  // their own and A06 announced itself before A05 had ever happened.
+  const g = E.advance({ ...E.fresh(t), act: 2, published: true, readers: 99, composed: 20, meaning: 10 }, t + 10000);
   assert.ok(g.readers > 100);
   assert.ok(g.demand > 1);
   assert.ok(E.ahaUnlocked(g, 'A06'));
 });
 
-test('A10 scarcity flips on when readership crosses paper crisis threshold', () => {
-  const g = E.advance({ ...E.fresh(t), act: 2, published: true, readers: 1000 }, t + 1000);
-  assert.equal(g.paperCrisis, true);
-  assert.ok(E.ahaUnlocked(g, 'A10'));
+test('A10 scarcity arrives with the viral word, not before it', () => {
+  // Paper runs out because something went viral. Readership alone cannot produce the crisis:
+  // readers grow by themselves, and they reached the old threshold while the player was still
+  // working out A08/A09 — the crisis then fired four clicks *before* the word ever spread.
+  const quiet = E.advance({ ...E.fresh(t), act: 2, published: true, readers: 1999 }, t + 10000);
+  assert.equal(quiet.paperCrisis, false, 'a readership alone does not exhaust the paper');
+  const loud = E.advance({ ...E.fresh(t), act: 2, published: true, readers: 1999, viralWords: 1 }, t + 10000);
+  assert.equal(loud.paperCrisis, true, 'and it does as soon as the word is out');
+  assert.ok(E.ahaUnlocked(loud, 'A10'));
+  assert.ok(!E.ahaUnlocked(quiet, 'A10'));
 });
 
 test('A13 concepts spend meaning and change society', () => {
@@ -133,86 +143,70 @@ test('A22 machine glyph emerges from autonomous digital archive', () => {
   assert.ok(E.ahaUnlocked(E.advance(g, t + 40000), 'A23'), 'machines adopt the glyph as they use it');
 });
 
-test('A24 compression can turn meaning into a massive compact representation', () => {
-  let g = { ...E.fresh(t), act: 5, meaning: 200, machineGlyphs: 1, credits: 300 };
+test('A24 compression folds meaning into a compact representation, and takes more than one press', () => {
+  // 100 meaning → 10,000 compressed meaning per press. The A24 threshold is five presses, so
+  // the act does not collapse into a single click the moment the glyph is discovered.
+  let g = { ...E.fresh(t), act: 5, meaning: 1000, machineGlyphs: 1, machineGlyphUse: 1000, credits: 3000 };
   g = doIt(g, 'compress-language', { amount: 100 });
   assert.equal(g.compressedMeaning, 10000);
+  assert.ok(!E.ahaUnlocked(g, 'A24'), 'one press is not the whole insight');
+  for (let i = 0; i < 4; i++) g = doIt(g, 'compress-language', { amount: 100 });
+  assert.equal(g.compressedMeaning, 50000);
   assert.ok(E.ahaUnlocked(g, 'A24'));
+  // Compressing a language no machine is using is compressing nothing.
+  const idle = { ...E.fresh(t), act: 5, meaning: 1000, machineGlyphs: 1, machineGlyphUse: 0, credits: 3000 };
+  assert.equal(doIt(idle, 'compress-language', { amount: 100 }).compressedMeaning, 0);
 });
 
 // The headline defect from the flow audit: ACT I took 651 clicks and the four acts after it
-// took 35, because every gate was fed by exactly its own previous click. Nothing asserted that
-// a real player could finish at all, so the collapse was invisible to a green suite.
-test('a plain playthrough with legal actions reaches the ending, and no act collapses to a handful of clicks', () => {
-  let t2 = t;
-  let g = E.fresh(t2);
-  const decisions = {};
-  const bump = (type, act) => { if (type !== 'print' && type !== 'sell' && type !== 'toggle-auto') decisions[act] = (decisions[act] || 0) + 1; };
-  const cmd = (type, props = {}) => {
-    const base = E.advance(g, t2);
-    const next = E.act(g, { type, ...props }, t2);
-    if (JSON.stringify({ ...next, log: 0, updatedAt: 0, ruleCredit: 0 }) !== JSON.stringify({ ...base, log: 0, updatedAt: 0, ruleCredit: 0 })) {
-      g = next; bump(type, base.act);
-    }
-  };
-  // The later acts spend credits and meaning they do not produce. A player who never sells or
-  // condenses stalls with a mountain of stock and an empty purse — which is the state this
-  // guards against being reachable at all.
-  const earn = (needCredits, needMeaning) => {
-    if (needMeaning > 0 && g.meaning < needMeaning && g.glyphs >= 20 && g.credits >= 60) return cmd('condense');
-    if (needCredits > 0 && g.credits < needCredits && g.glyphs >= 1) return cmd('sell');
-    return false;
-  };
-  for (let i = 0; i < 200000 && !g.stopped; i++) {
-    t2 += 500;
-    const aff = E.UNITS.map((u) => ({ u, c: E.cost(g, u.id) })).filter(({ u, c }) => g.lifetimeGlyphs >= u.unlock && g.credits >= c && g[u.id] < 10000).sort((a, b) => a.c - b.c)[0];
-    if (g.act === 1) {
-      const ready = g.lifetimeGlyphs >= 5000 && g.presses >= 1;
-      cmd('publish');
-      if (!g.published) {
-        if (ready) { if (g.credits < 300) cmd('sell'); }
-        else if (aff) cmd('buy', { id: aff.u.id });
-        else if (!g.autoSellUnlocked && g.lifetimeGlyphs >= 300 && g.credits >= 60) cmd('research-auto');
-        else if (!g.manualBoost && g.lifetimeGlyphs >= 150 && g.credits >= 45) cmd('boost');
-        else if (g.glyphs >= 1) cmd('sell');
-        else cmd('print');
-      }
-    } else if (g.act === 2) {
-      if (g.composed < 3) cmd('compose-rule');
-      cmd('read-letter'); cmd('organic-word'); cmd('viral-word'); cmd('delete-noise'); cmd('map-city');
-      earn(600, 60);
-    } else if (g.act === 3) {
-      cmd('discover-dialect'); cmd('make-concept'); cmd('map-world'); cmd('launch-agents');
-      earn(3000, 120);
-    } else if (g.act === 4) {
-      cmd('editor-autonomy'); cmd('spawn-agents'); cmd('digitize'); cmd('train-memory'); cmd('discover-machine-glyph');
-      earn(4000, 300);
-    } else if (g.act === 5) {
-      cmd('compress-language', { amount: 100 }); cmd('infrastructure');
-      earn(3000, 200);
-    } else {
-      cmd('stop-printing'); cmd('resolve-ambiguity'); cmd('delete-noise', { amount: 500 });
-    }
-    g = E.advance(g, t2);
-  }
-  assert.equal(g.stopped, true, 'a player following the legal actions must be able to finish');
-  const missing = E.AHAS.map((a) => a.id).filter((id) => !g.ahaSeen.includes(id));
+// took 35, because every gate was fed by exactly its own previous click. Counting decisions per
+// act caught that collapse — but not the next one, because a per-act total says nothing about
+// where inside the act the discoveries land. The gaps between *consecutive* Aha moments are what
+// the player actually feels, so they are the metric here.
+//
+// Reference numbers for this revision: 27 gaps, mean 4.3 decisions, std 3.9, no gaps fired out
+// of order, no two on the same click, and the only 0-click gaps are passive breaths of 25s+.
+// The bands below are deliberately wide — they exist to catch a collapse, not to freeze tuning.
+test('a plain playthrough reaches the ending, and the rhythm between Aha moments holds', () => {
+  const run = playthrough(E);
+  assert.equal(run.stopped, true, 'a player following the legal actions must be able to finish');
+  const missing = E.AHAS.map((a) => a.id).filter((id) => !run.state.ahaSeen.includes(id));
   assert.deepEqual(missing, [], `a playthrough must not skip milestones: ${missing.join(', ')}`);
-  for (const [act, n] of Object.entries(decisions)) {
+  for (const [act, n] of Object.entries(run.decisionsByAct)) {
     assert.ok(n >= 5, `ACT ${act} collapsed to ${n} decisions`);
   }
-  assert.ok(decisions[6] >= 3, 'the ending is still a decision, not a formality');
+  assert.ok(run.decisionsByAct[6] >= 3, 'the ending is still a decision, not a formality');
+
+  const rep = pacingReport(E, run, 'decisions');
+  // 顺序：后一条不许抢在前一条之前发生。读者、噪音、机器用量都是自己涨的，
+  // 只要门槛写成「绝对值到了就算」，它们就会抢跑——原来有 6 对是倒着的。
+  assert.deepEqual(rep.inverted, [], `an Aha fired before the one it follows: ${rep.inverted.join(', ')}`);
+  // 同拍：一次点击点亮两条，焦点卡只会显示后一条，前一条玩家根本没收到公告。
+  assert.deepEqual(rep.sameTick, [], `two Aha moments on one click: ${rep.sameTick.join(', ')}`);
+  // 静默拍可以存在（读者、文章、机器用量都是自己涨上去的那几拍），但必须是「等了一会儿」
+  // 而不是「同一下」，而且不能多——一局里大部分发现都是零点击的等待，就是节奏又塌了。
+  for (const beat of rep.silent) {
+    assert.ok(beat.seconds >= 20, `${beat.pair}: ${beat.seconds}s apart is a collision, not a breath`);
+  }
+  assert.ok(rep.silent.length <= 3, `${rep.silent.length} discoveries arrived without a click between them`);
+  // 节拍本身：均值不许塌到「一路点下去」也不许拉成「半天看不到一个」。
+  assert.ok(rep.mean >= 3 && rep.mean <= 7, `mean gap ${rep.mean.toFixed(2)} is outside the 3–7 band`);
+  // 标准差是这次真正在管的那条：修之前是 10.6（后面几章的戏全挤在几段里演完）。
+  assert.ok(rep.std <= 5, `gap std ${rep.std.toFixed(2)} is too wide`);
+  assert.ok(rep.max <= 20, `a gap of ${rep.max} means one stretch carries a whole act`);
 });
 
 test('A27 deletion becomes the late-game growth verb', () => {
-  let g = { ...E.fresh(t), act: 6, infrastructure: true, noise: 1500, ambiguity: 100, compressedMeaning: 10000 };
+  // The mass delete is unlocked by resolving ambiguity: while the world is still ambiguous
+  // the player cannot tell noise from signal, and A27 raced ahead of A26.
+  let g = { ...E.fresh(t), act: 6, infrastructure: true, noise: 1500, ambiguity: 100, ambiguityResolved: true, compressedMeaning: 50000 };
   g = doIt(g, 'delete-noise', { amount: 1000 });
   assert.equal(g.deletedNoise, 1000);
   assert.ok(E.ahaUnlocked(g, 'A27'));
 });
 
 test('A28 stop printing is a real terminal mechanic and production halts', () => {
-  let g = { ...E.fresh(t), act: 6, infrastructure: true, ambiguityResolved: true, deletedNoise: 1000, compressedMeaning: 10000, keyboards: 100, glyphs: 50 };
+  let g = { ...E.fresh(t), act: 6, infrastructure: true, ambiguityResolved: true, deletedNoise: 1000, compressedMeaning: 50000, keyboards: 100, glyphs: 50 };
   g = doIt(g, 'stop-printing');
   assert.equal(g.stopped, true);
   assert.equal(E.rate(g), 0);

@@ -1,6 +1,6 @@
 ---
 name: verify
-description: Verify Glyph Factory changes against the exact candidate SHA — launch the dev server, drive the real browser surfaces with the committed driver, run the 28-case Aha invariant/transition suite on chromium and webkit, check the action disclosure contract (affordability disables, never hides), the progression contract (an active rule must run, and its gating resource must be on screen) and the Aha legibility contract (every one of A01–A28 must announce itself in the player's log), and capture visual and interaction evidence. Use for general verification, proving an Aha change is safe, checking the 28/28 claim, verifying an action reveal/enable change, verifying an advance() cadence / Act II progression change, or verifying that an Aha is perceivable on the player surface.
+description: Verify Glyph Factory changes against the exact candidate SHA — launch the dev server, drive the real browser surfaces with the committed driver, run the 28-case Aha invariant/transition suite on chromium and webkit, check the action disclosure contract (affordability disables, never hides), the progression contract (an active rule must run, and its gating resource must be on screen), the Aha legibility contract (every one of A01–A28 must announce itself in the player's log) and the rhythm contract (the gaps between consecutive Aha moments: order, no same-click pairs, mean and standard deviation of the click gaps), and capture visual and interaction evidence. Use for general verification, proving an Aha change is safe, checking the 28/28 claim, verifying an action reveal/enable change, verifying an advance() cadence / Act II progression change, verifying that an Aha is perceivable on the player surface, or verifying game pacing / rhythm after a threshold, cost or gate change.
 ---
 
 # Verify Glyph Factory
@@ -59,22 +59,18 @@ package.json package-lock.json vercel.json` into
 `fast` → `review-build` → `player-chromium` → `player-webkit` → `aha-chromium` →
 `aha-webkit` → `diff-check`.
 
-**As of 2026-09-20 it aborts on the first stage on this machine** (`scripts/intent-audit.mjs:40-42`):
+It runs end to end as of 2026-09-21. Between 2026-09-20 and then it aborted on its own first
+stage: `verify-player.mjs` shells out to `node --test`, Node ≥ 20 prints `ℹ tests 91` where the
+audit's parser required `# tests (\d+)`, and the fast stage was rejected *after* passing. That
+was a reporter-format drift, never a product regression, but it made the canonical gate
+unusable and the hand-run below was the workaround. `scripts/intent-audit.mjs` now accepts
+either prefix (`ℹ` or `#`) and still treats a missing field as unproven, so the
+nonempty/unskipped floor is unchanged. Verified on this machine: all seven stages PASS, 217
+tests, `test-results/intent-audit/report.json` with `status: "PASS"`.
 
-```
-error: "Fast gate did not prove nonempty, unskipped success"
-stages: [{ name: "fast", status: "PASS", exitCode: 0 }]
-```
-
-The fast stage *passes*; the audit's parser then rejects it. `verify-player.mjs` shells out
-to `node --test`, and Node ≥ 20 prints `ℹ tests 83` (an illustrative count, not this repo's
-total) where the audit's regex requires
-`# tests (\d+)`. This is a Node-reporter-format drift, not a product regression. It is not
-count- or content-dependent — the regex matches the reporter's *prefix*, so a clean
-checkout fails the same way; verified directly with
-`/^# tests (\d+)$/m.test('ℹ tests 83') === false`. Fixing it is a one-line regex change in
-`scripts/intent-audit.mjs`; until then, reproduce the audit by running its five substantive
-stages by hand and reporting them individually:
+If it aborts on the fast stage again, read that stage's own log
+(`test-results/intent-audit/fast.log`) before assuming a product failure: a reporter format
+change looks exactly like a red gate. The hand-run equivalent, if the gate itself is broken:
 
 ```bash
 npm run verify:fast
@@ -87,6 +83,73 @@ git diff --check
 ```
 
 Say plainly that this is the hand-run equivalent, not `intent-audit` itself.
+
+### The rhythm contract: the gaps between Aha moments
+
+A per-act count says an act did not collapse. It says nothing about **where inside the act**
+the discoveries land: an act can hold 40 decisions and still hand the player five insights in
+five clicks and then 35 clicks of nothing. The rhythm metric is therefore per **gap between
+consecutive Aha moments** — how many clicks the player makes between Aha N and Aha N+1.
+
+Two things make that measurable instead of a matter of taste:
+
+- The engine is deterministic, so with a fixed start and a fixed policy the whole playthrough
+  — and therefore the gap vector — is reproducible to the click.
+- The policy is the game's own guidance, not a walkthrough. `tests/pacing.mjs` presses what the
+  chapter calls for and, when it cannot, satisfies exactly the shortfall the engine reports in
+  `commandReady().binding` — the same string a player reads on a greyed button (`还差 …`) — or
+  the act-progress line (`gateProgress().binding`). A reference player that invents its own
+  budget measures the bot, not the game; the first version of this harness did exactly that and
+  reported 770 clicks in one act that a player following the on-screen text spends 5 on.
+
+```bash
+node scripts/pacing.mjs           # mean/std/CV, per-gap table, per-act clicks and seconds
+node scripts/pacing.mjs --trace   # which verbs each gap was spent on
+node scripts/pacing.mjs --json    # machine-readable, for comparing two revisions
+```
+
+`npm run verify:fast` runs the same playthrough inside the suite
+(`tests/game-v3.test.mjs`, "a plain playthrough reaches the ending, and the rhythm between Aha
+moments holds"), so a threshold change that wrecks the rhythm fails the fast gate as well.
+
+| Assertion | Why it is a contract and not taste |
+|---|---|
+| Firing order equals A01…A28 | The list, and the narrative behind it, are ordered. Readers, articles, machine use and noise all grow on their own, so any trigger written as "an absolute value was reached" eventually overtakes the click that was supposed to cause it. |
+| No two moments on one click | The focus card shows one moment. Two on one click means one of them is announced to nobody. |
+| A 0-click gap must be ≥ 20s wide, and there are at most 3 | A designed breath (the night shift writing articles) is legitimate; a collision is not. |
+| mean gap ∈ [3, 7] decisions | Under 3 the chapter is one press per insight; over 7 the player is grinding, not discovering. |
+| std ≤ 5 | The number this metric exists for. |
+| max gap ≤ 20 | One stretch may not carry a whole act. |
+| Every act ≥ 5 decisions, and all 28 fire | The 2026-09 collapse got back in through this door once already. |
+
+Reference numbers for the 2026-09-21 rebalance: **27 gaps, mean 4.59 decisions, std 3.75,
+CV 0.82, 0 inversions, 0 same-click pairs, 2 silent beats (25s and 39s)**. Before it: mean
+4.85, std 10.61, CV 2.19, 6 inversions (A05/A06, A09/A10, A13/A14, A19/A20, A23/A24,
+A26/A27) and 2 same-click pairs. The full vector, in A01…A28 order:
+`16 11 3 1 5 3 6 7 1 1 3 5 5 10 6 4 1 11 5 5 4 0 5 1 0 4 1`. ACT I keeps the two largest
+gaps (16 and 11) because it is the manual tutorial act; excluding it the remaining 25 gaps
+sit at mean 3.88, std 2.80, and the tail is the two act climaxes (A14→A15 = 10 at the world
+gate, A18→A19 = 11 across the agent factories).
+
+Read the units honestly: `decisions` excludes `print`/`sell`/`toggle-auto` (no choice in
+them), `clicks` counts everything. A01→A02 is 321 clicks but 16 decisions — the difference is
+a tutorial that is supposed to be clicked through, not a defect to flatten.
+
+**How to use it on a change.** Any edit to a threshold, cost, rate or gate moves this vector.
+Run `node scripts/pacing.mjs --json` before and after and compare `mean`, `std`, `inverted`,
+`sameTick` and the per-gap list. Two failure shapes to look for: a *reordering*, where a
+discovery that used to follow another now precedes it (that is a copy change the diff will not
+show you), and a *clumping*, where several gaps go to 1-2 and one goes to 15+ (that is the
+2026-09 collapse in miniature).
+
+The lever that moved this metric most was not a number but a shape: **an act gate that asks
+for the same resource the act's discoveries spend.** While Act II's gate demanded `meaning`
+on top of the meaning each discovery costs, the reference player accumulated the whole
+chapter's meaning during one passive wait and then paid for the next three discoveries out of
+stock — three gaps of 1 in a row. Dropping `meaning` from that gate and pricing it into the
+discoveries themselves (reading a letter 35, coining a word 55, spreading one 70) took the
+act from `1 8 1 1 6 5 1` to `1 5 3 6 7 1 1`. Any gate that double-counts a currency the
+chapter already spends will flatten the rhythm the same way.
 
 ### Build before any browser suite
 
@@ -273,13 +336,15 @@ state, then `clock.run_for`, click by `data-command`, and read back `localStorag
 ```
 
 Must reach, in order: `readers` visible on the metric row; `read-letter` appears once
-`readers >= 250`; A07 → A08 → A09 → A11 fire on real clicks; A10 fires from readership
-alone; `map-city` appears; clicking it gives `act === 3, worldScale === 1, districts === 1`
-and fires **A14 only** — A12 needs the first 观察一个新方言, because `map-city` no longer
-grants the second district (see the legibility contract below); **and only then** does
-`#world-card` become visible. Fifteen assertions, all passing at `7ebd57b+` — the run is
-reproducible but the script lives in `/tmp`, so treat it as a recipe to re-drive, not a
-committed suite. Say that when you report it.
+`readers >= 250` **and** `meaning >= 20`; A05 (压缩) → A07 → A08 → A09 fire on real clicks;
+A11 needs the paper crisis first; the city opens on its own once the Act II gates are met
+(`meaning >= 80, composed >= 10, paperCrisis, deletedNoise >= 1`) — **entering Act III and
+finding the map are two different beats since 2026-09-21**, and `#world-card` becomes visible
+on the transition; 观察一个新方言 raises districts to 2 (A12), 创造一个概念 fires A13, and
+**then** 展开城市地图 fires A14 (`districts >= 2`, `meaning >= 40`, `credits >= 150`). Walking
+a dead state to the ending is a committed suite now — the reference playthrough in
+`tests/game-v3.test.mjs` — so this recipe is for watching it on the real surface, not for
+proving the gate is completable.
 
 Two boundaries this must not cross, both pinned by existing tests:
 
@@ -492,8 +557,11 @@ overclaimed verdict.
 - **Only 3 of 28 have a real-play path.** `test_F01/F02/F03` operate the production UI;
   the other 25 arrive by director fixture. The suite proves "this state satisfies its gate
   and this action moves it", not "a player playing normally reaches it".
-- **Ordering and mutual exclusion are untested.** Nothing asserts A03 cannot fire before
-  A02, or that reaching A17 leaves A22's gate alone.
+- **Ordering is asserted for one path, and only one.** The reference playthrough asserts the
+  firing order equals A01…A28 and that no two fire on one click, from a dead state to the
+  ending. It does not enumerate the state machine: a player who takes a different route can
+  still reach a later gate before an earlier one, and `directorState` fixtures bypass the
+  question entirely by pre-recording `ahaSeen`.
 - **No pixel assertions.** Visibility is asserted as `hidden` / `getClientRects()`;
   the stored PNGs are evidence for a human, not compared by any assertion.
 - **`28 / 28 PASS` is scoped to `review-dist`** — engine plus review runtime. The *player*
@@ -507,15 +575,16 @@ overclaimed verdict.
   `rememberReveal` latches it, that `enabled` is correct, or that the shortfall copy says
   the right thing. Only the seeded browser recipe above covers that, and only for the
   actions you actually seed.
-- **The Act II progression recipe is not a committed suite.** The fifteen-assertion
-  end-to-end run (dead state → `map-city` → Act III) lives in `/tmp`, not in `tests/`. The
-  committed coverage is narrower: the Node cadence identity, and one browser test asserting
-  readership is visible and `composed` grows. Nothing committed proves the *whole* gate is
-  completable, so a green suite does not by itself license "Act II is unstuck".
-- **The cadence test proves tick-equivalence, not pacing.** `live ticks == one jump` says
-  the rule's output is no longer lost to tick granularity. It says nothing about whether
-  the resulting curves are balanced — readership is quadratic in time once `composed`
-  grows, and no test bounds that.
+- **The rhythm metric is one reference player.** It is a deterministic playthrough with a
+  stated policy, not a distribution over players. It cannot show that a *different* legal
+  route is equally well paced, and it says nothing about wall-clock feel: a 0-click beat is
+  scored as a gap of 0 even when it lasts 200 seconds, and two revisions with identical gap
+  vectors can differ in total play time. Read it next to the per-act seconds column.
+- **The cadence test proves tick-equivalence, not balance.** `live ticks == one jump` says the
+  rule's output is no longer lost to tick granularity. It says nothing about whether the
+  resulting curves are balanced — readership is quadratic in time once `composed` grows, and
+  no test bounds that. It is also why gap 1 of the playthrough opens at 321 clicks: the
+  tutorial act is hand-printing, and that is a design choice, not a regression.
 - **The Aha legibility sweep proves transport, not quality.** It asserts the authored
   sentence reaches the newest line of the player's log with no meta leak. It does not judge
   whether the sentence is *good*, and nothing asserts the announcement is still on screen
@@ -538,9 +607,12 @@ overclaimed verdict.
   Act III and by then the panel shows the Act III set. A06's world line describes reader
   growth instead, which is real and visible, but the resource the Aha is named after has no
   carrier anywhere. Reported, not fixed — rebalancing it is a pacing decision.
-- **`npm run intent-audit` did not run.** While its regex defect stands, there is no
-  single command whose green means "all layers passed". Report the five hand-run stages
-  individually and say that is what you did — do not present them as `intent-audit` PASS.
+- **`public/design-system/flows.html` is now older than the engine.** It is redrawn from
+  `scripts/flows/screens.json`, which was captured from a build before the 2026-09-21
+  rebalance, so its gate tables and readings describe the previous flow (notably `map-city`
+  as an Act II exit). Rebuilding it needs a fresh browser capture from a running build, which
+  is not part of any committed script. Until that capture is redone, cite the engine and
+  `node scripts/pacing.mjs` — not the flows page — as the current flow truth.
 - **No run in this session executed the Aha suite against a deployment.** Every result here
   is a local artifact built from the working tree; `report.json` says so in its own `scope`
   field. A local green is not a Preview or production claim.

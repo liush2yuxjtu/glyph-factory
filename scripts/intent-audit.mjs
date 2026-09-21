@@ -37,8 +37,12 @@ function run(name,command,args,extra={}) {
 }
 try {
   const fast=run('fast',process.execPath,['scripts/verify-player.mjs','--fast']);
-  const count=Number(fast.text.match(/^# tests (\d+)$/m)?.[1]);
-  if(!(count>0)||!/^# fail 0$/m.test(fast.text)||!/^# skipped 0$/m.test(fast.text)||!/^# todo 0$/m.test(fast.text))
+  // Node ≥20 的 spec reporter 打的是 `ℹ tests 91`，旧版/TAP 才是 `# tests 91`。两种写的是
+  // 同一件事，而这个门禁原来只认 `#`，于是干净检出上它会在自己刚通过的那一步里中止。
+  // 缺字段一律当作未证明（undefined !== 0），所以放宽前缀不放宽结论。
+  const stat=(text,key)=>Number(text.match(new RegExp(`^(?:#|ℹ) ${key} (\\d+)$`,'m'))?.[1]);
+  const count=stat(fast.text,'tests');
+  if(!(count>0)||stat(fast.text,'fail')!==0||stat(fast.text,'skipped')!==0||stat(fast.text,'todo')!==0)
     throw new Error('Fast gate did not prove nonempty, unskipped success');
   fast.stage.tests=count;
   run('review-build',process.execPath,['scripts/build-aha-review.mjs']);

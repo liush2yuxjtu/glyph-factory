@@ -122,21 +122,27 @@ class AhaReview(unittest.TestCase):
         self.assert_player()
 
     def test_F02_city_and_world_require_real_actions(self):
-        self.seed({'version':3,'act':2,'published':True,'paperCrisis':True,'meaning':400,'deletedNoise':1,
+        self.seed({'version':3,'act':2,'published':True,'paperCrisis':True,'composed':10,'meaning':400,'deletedNoise':1,
                    'readers':5000,'credits':5000})
         self.open()
         expect(self.real_frame().locator('#world-card')).to_be_hidden()
-        self.button('展开城市地图').click()
+        # 进城和地图是两件事：读完第二章就进城（读者、意义、删除三样都到位），
+        # 地图要城里真的有了两种以上街区才画得出来。
+        self.page.clock.run_for(2500)   # 存档有 1.8 秒节流，城市是在刻度里自己开出来的
         expect(self.real_frame().locator('#world-card')).to_be_visible()
         self.assertEqual(self.saved()['act'],3)
+        self.assertEqual(self.saved()['worldScale'],0)
+        self.button('观察一个新方言').click()
+        self.button('创造一个概念').click()
+        self.button('展开城市地图').click()
         self.assertEqual(self.saved()['worldScale'],1)
-        # The city opens with one district, and a dialect is grown by a population rather than
-        # minted by a button: each observation needs more readers than the last
-        # (`readers >= 600 x (districts + 1)`). Zooming out takes the city to five districts and
-        # four concepts — one click per insight is exactly the collapse this replaced.
-        for _ in range(4):
+        # A dialect is grown by a population rather than minted by a button: each observation
+        # needs more readers than the last (`readers >= 600 x (districts + 1)`). Zooming out
+        # takes the city to three districts and two concepts — one click per insight is exactly
+        # the collapse this replaced.
+        for _ in range(2):
             self.button('观察一个新方言').click()
-        for _ in range(4):
+        for _ in range(1):
             self.button('创造一个概念').click()
         self.button('把地图缩到世界').click()
         self.assertEqual(self.saved()['worldScale'],2)
@@ -146,15 +152,18 @@ class AhaReview(unittest.TestCase):
         self.assert_player()
 
     def test_F03_real_deletion_unlocks_final_stop(self):
-        self.seed({'version':3,'act':6,'published':True,'infrastructure':True,'compressedMeaning':10000,'deletedNoise':0,'noise':1500,'ambiguity':100,'presses':1})
+        self.seed({'version':3,'act':6,'published':True,'infrastructure':True,'compressedMeaning':50000,'deletedNoise':0,'noise':1500,'ambiguity':100,'presses':1})
         self.open()
         expect(self.button('停止印刷')).to_have_count(0)
-        self.button('删除噪音').click(); expect(self.button('停止印刷')).to_have_count(0)
+        # 歧义没消解之前删不动：分不清哪句是噪音。这条门槛同时把 A27 排在 A26 后面，
+        # 否则「目标从生产变成删除」会抢在「新资源：歧义」前面发生。
+        expect(self.button('删除噪音')).to_be_disabled()
+        self.button('消解 25').click()   # 灰掉的删除按钮上写着「还差 已消解歧义」，只匹配「消解」会撞上它
+        # 一次删 250、消解本身送 250，所以到 1000 要按三下；停机还要等歧义被清掉。
+        for _ in range(2):
+            self.button('删除噪音').click()
+            expect(self.button('停止印刷')).to_have_count(0)
         self.button('删除噪音').click()
-        # Deletion alone no longer unlocks the ending: the world cannot be declared finished
-        # while it is still ambiguous, so the last act also asks for the ambiguity to be cleared.
-        expect(self.button('停止印刷')).to_have_count(0)
-        self.button('消解').click()   # the label reads 消解 25 歧义, so match on the verb
         self.button('停止印刷').click()
         expect(self.real_frame().locator('#ending')).to_be_visible()
         expect(self.real_frame().locator('#rate')).to_have_text('0')

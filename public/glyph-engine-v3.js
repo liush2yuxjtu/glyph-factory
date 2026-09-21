@@ -137,12 +137,17 @@ const GlyphEngineV3 = (() => {
       case 'A03': return g.published;
       case 'A04': return g.ruleActive && g.composed >= 3;
       case 'A05': return g.meaning >= 10;
-      case 'A06': return g.readers >= 100;
+      // 「报纸制造需求」只有在「一句重要的话」已经被理解之后才说得通。读者是自己涨上来的，
+      // 涨到 100 的时候玩家可能一次「压缩」都没按过——那样 A06 会抢在 A05 前面发生，
+      // 玩家看到的是「读者开始回信」配着一场他还没学会的语义课。链上前一条，顺序就锁死了。
+      case 'A06': return g.readers >= 100 && g.meaning >= AHA_GOALS.A05.need;
       case 'A07': return g.letters >= 1;
       case 'A08': return g.organicWords >= 1;
       case 'A09': return g.viralWords >= 1;
       case 'A10': return g.paperCrisis;
-      case 'A11': return g.deletedNoise >= 1;
+      // 删除是在纸张危机之后才学会的：A10 那句话说的就是「再提高产量只会更糟」。
+      // 不链上的话，噪音一冒出来玩家就能删，A11 会抢在 A10 前面（实测差 4 次点击）。
+      case 'A11': return g.deletedNoise >= 1 && g.paperCrisis;
       case 'A12': return g.districts >= 2;
       case 'A13': return g.concepts >= 1;
       case 'A14': return g.worldScale >= 1;
@@ -150,12 +155,12 @@ const GlyphEngineV3 = (() => {
       case 'A16': return g.agents >= 1;
       case 'A17': return g.editorAutonomy;
       case 'A18': return g.agentFactories >= 1;
-      case 'A19': return g.overnightArticles >= 100;
+      case 'A19': return g.overnightArticles >= AHA_GOALS.A19.need;
       case 'A20': return g.digital;
       case 'A21': return g.archives >= 1;
       case 'A22': return g.machineGlyphs >= 1;
-      case 'A23': return g.machineGlyphUse >= 1000;
-      case 'A24': return g.compressedMeaning >= 10000;
+      case 'A23': return g.machineGlyphUse >= AHA_GOALS.A23.need;
+      case 'A24': return g.compressedMeaning >= AHA_GOALS.A24.need;
       case 'A25': return g.infrastructure;
       case 'A26': return g.ambiguity >= 100;
       case 'A27': return g.deletedNoise >= 1000;
@@ -240,11 +245,17 @@ const GlyphEngineV3 = (() => {
         // Digital publishing ends the physical stock economy — `sell` and auto-sell both stop —
         // so readership has to become the income, or every later act's cost is unpayable.
         if (g.digital) g.credits = num(g.credits + elapsed * g.readers * 0.004);
-        if (g.readers >= 1000) g.paperCrisis = true;
+        // 纸张危机必须发生在「一个词突然传播」之后：危机的成因就是那一下带来的需求。
+        // 读者是自己涨上来的，所以只看读者数会让危机抢在传播之前发生（原来差 4 次点击）。
+        // 门槛写在 2000（传播一次送 750，落点在 1750 以下），再加上传播本身，
+        // 顺序就不依赖玩家什么时候按下那个按钮。
+        if (g.viralWords >= 1 && g.readers >= 2000) g.paperCrisis = true;
       }
       if (g.agents > 0) {
         g.meaning = num(g.meaning + elapsed * g.agents * 0.35);
-        g.overnightArticles = num(g.overnightArticles + elapsed * g.agents * 0.2);
+        // 「醒来时文章堆满了桌子」等的是这一行。0.2/秒时，一桌文章要 500 秒，玩家只能
+        // 一边空转一边按「压缩」凑下一条的钱——那段空转有 45 次点击，比整幕还长。
+        g.overnightArticles = num(g.overnightArticles + elapsed * g.agents * 0.5);
       }
       if (g.agentFactories > 0) g.agents = num(g.agents + elapsed * g.agentFactories / 120, 1e7);
       if (g.machineGlyphs > 0) g.machineGlyphUse = num(g.machineGlyphUse + elapsed * g.machineGlyphs * (20 + g.agentFactories * 10));
@@ -252,6 +263,13 @@ const GlyphEngineV3 = (() => {
       if (g.autoSellUnlocked && g.autoSell && !g.digital) {
         const sold = Math.floor(g.glyphs); g.glyphs -= sold; g.credits = num(g.credits + sold * PRICE);
       }
+    }
+    // 幕转换和「地图出现」原来是同一件事：按下「展开城市地图」的那一刻既是进入第三章，
+    // 又是 A14「城市地图出现」。于是 A14 总是抢在自己的前两条（A12 街区长出方言、
+    // A13 概念改变城市）之前发生——地图先出现，城市才开始长大，叙述是倒的。
+    // 拆开：读完第二章就进城，地图要在城里真的有了两种以上街区之后才画得出来。
+    if (g.act === 2 && gateMet(g, 2)) {
+      g = note({ ...g, act: 3, districts: 1 }, '地图摊开在桌上：你终于看见了工坊外面的部分。');
     }
     return syncAhas(g);
   }
@@ -263,39 +281,11 @@ const GlyphEngineV3 = (() => {
   // machineReady / stopReady），进度条再抄一遍就会变成第二份真源。收进引擎，渲染层只读。
   // ACT III's own precondition: how big the city has to be before the map can zoom out.
   // Exported so the renderer stops carrying a second copy of these two numbers.
-  const WORLD_GATE = { concepts: 4, districts: 5 };
-
-  const ACT_GATES = {
-    1: [
-      { key:'lifetimeGlyphs', need:5000, label:'累计印字', labelEn:'Lifetime glyphs' },
-      { key:'presses', need:1, label:'小型印刷机', labelEn:'Printing presses' },
-      { key:'glyphs', need:200, label:'库存字', labelEn:'Glyph stock' },
-      { key:'credits', need:300, label:'工坊资金', labelEn:'Workshop credits' },
-    ],
-    2: [
-      { key:'paperCrisis', need:1, label:'纸张危机', labelEn:'Paper crisis' },
-      { key:'meaning', need:50, label:'意义', labelEn:'Meaning' },
-      { key:'deletedNoise', need:1, label:'已删除噪音', labelEn:'Noise deleted' },
-    ],
-    3: [{ key:'worldScale', need:2, label:'地图范围', labelEn:'Map scale' }],
-    4: [
-      { key:'archives', need:5, label:'档案记忆', labelEn:'Archive memory' },
-      { key:'agentFactories', need:3, label:'智能体工厂', labelEn:'Agent factories' },
-    ],
-    5: [{ key:'compressedMeaning', need:10000, label:'已压缩意义', labelEn:'Compressed meaning' }],
-    6: [
-      { key:'deletedNoise', need:1000, label:'已删除噪音', labelEn:'Noise deleted' },
-      { key:'compressedMeaning', need:10000, label:'已压缩意义', labelEn:'Compressed meaning' },
-      // The world cannot be declared finished while it is still ambiguous. Without this the
-      // last act took about a second: `deletedNoise` carries over from ACT II, so the stop
-      // gate was already satisfied on arrival and the player could finish without ever
-      // discovering that ambiguity is a resource.
-      { key:'ambiguityResolved', need:1, label:'已消解歧义', labelEn:'Ambiguity resolved' },
-    ],
-  };
+  const WORLD_GATE = { concepts: 2, districts: 3 };
 
   // 每条 Aha 的门槛，和 trigger() 是同一个条件，只是写成可展示的「字段 × 目标值」。
   // 只给评审面用：玩家面看到 28 条待办清单等于把整个游戏的发现过程剧透掉。
+  // 放在 ACT_GATES 之前：幕门槛直接引用这里的数字，两处不许各写一份。
   const AHA_GOALS = {
     A01:{key:'rate',need:1}, A02:{key:'typists',need:5}, A03:{key:'published',need:1},
     A04:{key:'composed',need:3}, A05:{key:'meaning',need:10}, A06:{key:'readers',need:100},
@@ -304,9 +294,44 @@ const GlyphEngineV3 = (() => {
     A13:{key:'concepts',need:1}, A14:{key:'worldScale',need:1}, A15:{key:'worldScale',need:2},
     A16:{key:'agents',need:1}, A17:{key:'editorAutonomy',need:1}, A18:{key:'agentFactories',need:1},
     A19:{key:'overnightArticles',need:100}, A20:{key:'digital',need:1}, A21:{key:'archives',need:1},
-    A22:{key:'machineGlyphs',need:1}, A23:{key:'machineGlyphUse',need:1000}, A24:{key:'compressedMeaning',need:10000},
+    A22:{key:'machineGlyphs',need:1}, A23:{key:'machineGlyphUse',need:1000}, A24:{key:'compressedMeaning',need:50000},
     A25:{key:'infrastructure',need:1}, A26:{key:'ambiguity',need:100}, A27:{key:'deletedNoise',need:1000},
     A28:{key:'stopped',need:1},
+  };
+
+  const ACT_GATES = {
+    1: [
+      { key:'lifetimeGlyphs', need:5000, label:'累计印字', labelEn:'Lifetime glyphs' },
+      { key:'presses', need:1, label:'小型印刷机', labelEn:'Printing presses' },
+      { key:'glyphs', need:200, label:'库存字', labelEn:'Glyph stock' },
+      { key:'credits', need:300, label:'工坊资金', labelEn:'Workshop credits' },
+    ],
+    // 顺序就是这一章的发现顺序：先懂「意义比字数值钱」，再遇到纸张危机，最后学会删。
+    // 玩家看到的「下一个阶段 还差 …」是按这个顺序逐条点亮的，第一句提示不会再是这一章
+    // 最后才会发生的那件事。
+    // 门槛不再单独要「意义」。它一旦写在这里，玩家就会在等读者的那几拍里一口气把整章的
+    // 意义攒够，后面两三条发现的钱是提前付掉的，间隔随之塌成 1 下。意义现在只由发现本身
+    // 消费：每一次都要现挣。
+    2: [
+      { key:'composed', need:10, label:'组合字', labelEn:'Composed glyphs' },
+      { key:'paperCrisis', need:1, label:'纸张危机', labelEn:'Paper crisis' },
+      { key:'deletedNoise', need:1, label:'已删除噪音', labelEn:'Noise deleted' },
+    ],
+    3: [{ key:'worldScale', need:2, label:'地图范围', labelEn:'Map scale' }],
+    4: [
+      { key:'archives', need:4, label:'档案记忆', labelEn:'Archive memory' },
+      { key:'agentFactories', need:2, label:'智能体工厂', labelEn:'Agent factories' },
+    ],
+    5: [{ key:'compressedMeaning', need:AHA_GOALS.A24.need, label:'已压缩意义', labelEn:'Compressed meaning' }],
+    6: [
+      { key:'deletedNoise', need:1000, label:'已删除噪音', labelEn:'Noise deleted' },
+      { key:'compressedMeaning', need:AHA_GOALS.A24.need, label:'已压缩意义', labelEn:'Compressed meaning' },
+      // The world cannot be declared finished while it is still ambiguous. Without this the
+      // last act took about a second: `deletedNoise` carries over from ACT II, so the stop
+      // gate was already satisfied on arrival and the player could finish without ever
+      // discovering that ambiguity is a resource.
+      { key:'ambiguityResolved', need:1, label:'已消解歧义', labelEn:'Ambiguity resolved' },
+    ],
   };
 
   // 布尔门槛当作 0/1 计数，于是进度条不需要为「已发行 / 未发行」写特例。
@@ -344,28 +369,40 @@ const GlyphEngineV3 = (() => {
   // 它的时候依然是亮的，而本仓库的披露契约要求「买不起就置灰」，不是「点了没反应」。
   // 幕判断和一次性判断（act >= N、!g.digital 之类）不在这里，那些是条件不是代价。
   const COMMAND_COSTS = {
-    'read-letter': (g) => [['readers', 250 * (integer(g.letters, 1e6) + 1)]],
-    'viral-word': (g) => [['organicWords', 1], ['readers', 1000 * (integer(g.viralWords, 1e6) + 1)]],
+    'read-letter': (g) => [['readers', 250 * (integer(g.letters, 1e6) + 1)], ['meaning', 35]],
+    'viral-word': (g) => [['organicWords', 1], ['meaning', 70], ['readers', 1000 * (integer(g.viralWords, 1e6) + 1)]],
     'compose-rule': () => [['glyphs', 2], ['credits', 40]],
     'condense': () => [['glyphs', 20], ['credits', 60]],
-    'organic-word': () => [['letters', 1], ['credits', 120]],
+    'organic-word': () => [['letters', 1], ['meaning', 55], ['credits', 120]],
     'discover-dialect': (g) => {
       const d = integer(g.districts, 1000);
-      return [['meaning', 25], ['readers', 600 * (d + 1)], ['credits', 120 * (d + 1)]];
+      return [['meaning', 40], ['readers', 600 * (d + 1)], ['credits', 120 * (d + 1)]];
     },
     'make-concept': (g) => {
       const c = integer(g.concepts, 1000);
-      return [['meaning', 25], ['districts', c + 1], ['credits', 200 * (c + 1)]];
+      return [['meaning', 50], ['districts', c + 2], ['credits', 200 * (c + 1)]];
     },
+    'editor-autonomy': () => [['meaning', 40], ['credits', 300]],
     'spawn-agents': (g) => {
       const f = integer(g.agentFactories, 10000);
-      return [['meaning', 150 + f * 100], ['credits', Math.ceil(800 * 1.6 ** Math.min(f, 30))]];
+      return [['meaning', 80 + f * 60], ['credits', Math.ceil(500 * 1.5 ** Math.min(f, 30))]];
     },
-    'train-memory': (g) => [['credits', Math.ceil(500 * 2 ** Math.min(integer(g.archives, 1e6), 20))]],
-    'compress-language': () => [['meaning', 100], ['credits', 300]],
-    'infrastructure': () => [['credits', 2000]],
+    'train-memory': (g) => [['meaning', 80], ['credits', Math.ceil(500 * 2 ** Math.min(integer(g.archives, 1e6), 20))]],
+    // 压缩的是机器已经在用的语言：字形刚被发现、还没有任何机器在用它的时候，
+    // 「语义压缩」压的是空气。这个门槛同时把 A23 排在 A24 前面——否则一台机器还没开口，
+    // 玩家就已经把它的语言折叠成一个符号了。
+    'compress-language': () => [['machineGlyphUse', AHA_GOALS.A23.need], ['meaning', 100], ['credits', 300]],
+    'map-city': () => [['districts', 2], ['meaning', 40], ['credits', 150]],
+    // 数字出版不是「买了机器就能切」的开关：得先有东西值得从仓库里搬出来。
+    // 门槛同时把 A20 排在 A19 后面（文章堆满桌子之后，仓库才显得多余）。
+    'digitize': () => [['overnightArticles', AHA_GOALS.A19.need], ['meaning', 120], ['agentFactories', 1]],
+    // 第六章的批量删除要先能分辨噪音。歧义没消解的时候，玩家分不清哪句该删——
+    // 这也是把 A27 排在 A26 后面的那条边。
+    'delete-noise': (g) => (g.act >= 6 ? [['noise', 1], ['ambiguityResolved', 1]]
+      : (g.act === 2 ? [['noise', 1], ['paperCrisis', 1]] : [['noise', 1]])),
+    'infrastructure': () => [['meaning', 400], ['credits', 2000]],
     'resolve-ambiguity': () => [['ambiguity', AHA_GOALS.A26.need]],
-    'launch-agents': () => ACT_GATES[3].map((c) => [c.key, c.need]),
+    'launch-agents': () => [...ACT_GATES[3].map((c) => [c.key, c.need]), ['meaning', 60], ['credits', 600]],
     'stop-printing': () => ACT_GATES[6].map((c) => [c.key, c.need]),
   };
 
@@ -380,6 +417,7 @@ const GlyphEngineV3 = (() => {
     readers:['读者','Readers'], districts:['街区','Districts'], concepts:['概念','Concepts'],
     letters:['读者来信','Reader letters'], organicWords:['自造词','Coined words'],
     viralWords:['传播中的词','Words in circulation'], ambiguity:['歧义','Ambiguity'],
+    overnightArticles:['夜间文章','Overnight articles'], machineGlyphUse:['机器用量','Machine use'],
     rate:['自动产量','Automatic rate'],
   };
   const fieldLabel = (key, en) => { const pair = FIELD_LABELS[key]; return pair ? (en ? pair[1] : pair[0]) : key; };
@@ -396,6 +434,10 @@ const GlyphEngineV3 = (() => {
     'infrastructure': (g) => Boolean(g.infrastructure),
     'stop-printing': (g) => Boolean(g.stopped),
   };
+
+  // 删除这个动词在每一幕解锁的条件不同，写一处：第二章要等纸张危机（先知道写多了会坏事，
+  // 才学得会删），第六章要等歧义消解（分不清哪句是噪音就没法删），中间几幕随时可用。
+  const deleteUnlocked = (g) => (g.act >= 6 ? g.ambiguityResolved : (g.act === 2 ? g.paperCrisis : true));
 
   // 与 gateProgress 同形：返回是否就绪、以及第一条未达成的门槛，渲染层直接拿它写「还差 …」。
   function commandReady(g, type) {
@@ -441,19 +483,27 @@ const GlyphEngineV3 = (() => {
       g = note({ ...g, glyphs:g.glyphs-2, credits:num(g.credits-40), composed:g.composed+1, ruleActive:true }, '刻模成功：木 + 木 → 林。');
     } else if (type === 'condense' && g.act >= 2 && g.glyphs >= 20 && g.credits >= 60) {
       g = { ...g, glyphs:g.glyphs-20, credits:num(g.credits-60), meaning:num(g.meaning+12), noise:num(g.noise+1) };
-    } else if (type === 'read-letter' && g.act >= 2 && g.readers >= 250 * (integer(g.letters, 1e6) + 1)) {
-      g = { ...g, letters:g.letters+1, meaning:num(g.meaning+10) };
-    } else if (type === 'organic-word' && g.letters >= 1 && g.credits >= 120) {
-      g = { ...g, credits:num(g.credits-120), organicWords:g.organicWords+1, demand:num(g.demand+1.5) };
-    } else if (type === 'viral-word' && g.organicWords >= 1 && g.readers >= 1000 * (integer(g.viralWords, 1e6) + 1)) {
-      g = { ...g, viralWords:g.viralWords+1, readers:num(g.readers+750), demand:num(g.demand+3) };
-    } else if (type === 'delete-noise' && g.noise >= 1) {
-      const amount = Math.min(g.noise, command.amount || (g.act >= 6 ? 500 : 5)); g = { ...g, noise:g.noise-amount, deletedNoise:num(g.deletedNoise+amount), meaning:num(g.meaning+amount*0.05) };
-    } else if (type === 'map-city' && g.act >= 2 && !g.worldScale && gateMet(g, 2)) {
-      // One district, not two. Granting a second fired A12 (districts>=2) together with A14
-      // (worldScale>=1), so "the map appeared" and "districts grow dialects" arrived as one
-      // announcement. A dialect is supposed to be something the player goes and observes.
-      g = note({ ...g, act:3, districts:1, worldScale:1 }, '城市地图展开：你终于看见了工坊外面的部分。');
+    } else if (type === 'read-letter' && g.act >= 2 && g.readers >= 250 * (integer(g.letters, 1e6) + 1) && g.meaning >= 35) {
+      // 回信不是天上掉下来的：先得有一句值得回的话。这条门槛同时把 A07 和 A05 分开——
+      // 原来「打开一封读者来信」自己送 +10 意义，按下它的时候 A05（意义≥10）和 A07（来信≥1）
+      // 会同时点亮，玩家一口气收到两个发现。
+      g = { ...g, meaning:num(g.meaning-35), letters:g.letters+1, demand:num(g.demand+2), readers:num(g.readers+50) };
+    } else if (type === 'organic-word' && g.letters >= 1 && g.credits >= 120 && g.meaning >= 55) {
+      // 让读者造词要花意义：这是编辑部替语言做的一次选择，不是一次点击的副产品。
+      // 第二章的动词因此有了自己的节拍——每一个发现都要先用「压缩」把废话变成意义，
+      // 而不是读者数字涨到了就自动发生。
+      g = { ...g, meaning:num(g.meaning-55), credits:num(g.credits-120), organicWords:g.organicWords+1, demand:num(g.demand+1.5) };
+    } else if (type === 'viral-word' && g.organicWords >= 1 && g.readers >= 1000 * (integer(g.viralWords, 1e6) + 1) && g.meaning >= 70) {
+      // 传播同样是选择：把哪一个词推出去，是这一章里唯一需要判断的动作。
+      g = { ...g, meaning:num(g.meaning-70), viralWords:g.viralWords+1, readers:num(g.readers+750), demand:num(g.demand+3) };
+    } else if (type === 'delete-noise' && g.noise >= 1 && deleteUnlocked(g)) {
+      // 第六章一次删 250：这一章的动词是删，收尾的几下要按得住手。
+      // 500 的时候「消解歧义」送的 250 加两下就到门槛，整章只剩 4 次决策。
+      const amount = Math.min(g.noise, command.amount || (g.act >= 6 ? 250 : 5)); g = { ...g, noise:g.noise-amount, deletedNoise:num(g.deletedNoise+amount), meaning:num(g.meaning+amount*0.05) };
+    } else if (type === 'map-city' && g.act >= 3 && !g.worldScale && g.districts >= 2 && g.credits >= 150 && g.meaning >= 40) {
+      // 地图是第三章里画出来的东西，不是幕转换。要先有两种以上街区，地图上才有东西可看。
+      // 门槛写进 COMMAND_COSTS，按钮就会置灰写着「还差 街区 1/2」，而不是点了没反应。
+      g = note({ ...g, meaning:num(g.meaning-40), credits:num(g.credits-150), worldScale:1 }, '地图展开了：你的工坊在里面，只是一个小方块。');
     } else if (type === 'discover-dialect' && g.act >= 3) {
       // A dialect is grown by a population, not minted by a button. The readership floor is
       // what gives ACT III a clock: readers accrue on their own, and every district feeds
@@ -461,49 +511,54 @@ const GlyphEngineV3 = (() => {
       const d = integer(g.districts, 1000);
       const readersNeeded = 600 * (d + 1);
       const creditCost = 120 * (d + 1);
-      if (g.readers >= readersNeeded && g.meaning >= 25 && g.credits >= creditCost) {
-        g = { ...g, districts:num(d+1,1000), meaning:num(g.meaning-25), credits:num(g.credits-creditCost) };
+      if (g.readers >= readersNeeded && g.meaning >= 40 && g.credits >= creditCost) {
+        g = { ...g, districts:num(d+1,1000), meaning:num(g.meaning-40), credits:num(g.credits-creditCost) };
       }
-    } else if (type === 'make-concept' && g.act >= 3 && g.meaning >= 25 && g.concepts < g.districts
+    } else if (type === 'make-concept' && g.act >= 3 && g.meaning >= 50 && g.concepts + 1 < g.districts
                && g.credits >= 200 * (integer(g.concepts, 1000) + 1)) {
       // A concept needs a district to live in. Without that, `discover-dialect` handed over
       // exactly the 25 meaning this costs, and the two commands traded one click for one click.
-      g = note({ ...g, meaning:num(g.meaning-25), credits:num(g.credits-200*(integer(g.concepts,1000)+1)), concepts:g.concepts+1, societyEffects:g.societyEffects+1 }, '新概念进入城市，行为开始改变。');
+      g = note({ ...g, meaning:num(g.meaning-50), credits:num(g.credits-200*(integer(g.concepts,1000)+1)), concepts:g.concepts+1, societyEffects:g.societyEffects+1 }, '新概念进入城市，行为开始改变。');
     } else if (type === 'map-world' && g.act >= 3 && g.worldScale < 2 && g.concepts >= WORLD_GATE.concepts && g.districts >= WORLD_GATE.districts) {
       g = { ...g, worldScale:2 };
-    } else if (type === 'launch-agents' && g.act >= 3 && g.agents < 1 && gateMet(g, 3)) {
-      g = note({ ...g, act:4, agents:1 }, '第一名记者 Agent 上线：它自己选择下一篇报道。');
-    } else if (type === 'editor-autonomy' && g.act >= 4 && g.agents >= 1 && !g.editorAutonomy) {
-      g = { ...g, editorAutonomy:true, meaning:num(g.meaning+100) };
+    } else if (type === 'launch-agents' && g.act >= 3 && g.agents < 1 && gateMet(g, 3) && g.meaning >= 60 && g.credits >= 600) {
+      // 养一个 Agent 编辑部要先有本钱：这一条让 A16 不是「门槛一达成就顺手按掉」的那一下。
+      g = note({ ...g, meaning:num(g.meaning-60), credits:num(g.credits-600), act:4, agents:1 }, '第一名记者 Agent 上线：它自己选择下一篇报道。');
+    } else if (type === 'editor-autonomy' && g.act >= 4 && g.agents >= 1 && !g.editorAutonomy && g.meaning >= 40 && g.credits >= 300) {
+      // 把否决权交出去是这一章的第二个决定，不能和「上线 Agent」同一口气按完。
+      // 换来的是编辑自己攒下的判断力（+100 意义）。
+      g = { ...g, meaning:num(g.meaning-40+100), credits:num(g.credits-300), editorAutonomy:true };
     } else if (type === 'spawn-agents' && g.act >= 4 && g.editorAutonomy) {
       // Self-replication has to get more expensive each time it replicates: a flat price is a
       // free faucet, and agentFactories is the multiplier on everything downstream of it.
       const f = integer(g.agentFactories, 10000);
-      const meaningCost = 150 + f * 100;
-      const creditCost = Math.ceil(800 * 1.6 ** Math.min(f, 30));
+      const meaningCost = 80 + f * 60;
+      const creditCost = Math.ceil(500 * 1.5 ** Math.min(f, 30));
       if (g.meaning >= meaningCost && g.credits >= creditCost) {
         g = { ...g, meaning:num(g.meaning-meaningCost), credits:num(g.credits-creditCost), agentFactories:f+1, agents:num(g.agents+4,1e7) };
       }
-    } else if (type === 'digitize' && g.act >= 4 && !g.digital && g.agentFactories >= 1) {
+    } else if (type === 'digitize' && g.act >= 4 && !g.digital && g.agentFactories >= 1 && g.meaning >= 120
+               && g.overnightArticles >= AHA_GOALS.A19.need) {
       // No article grant here: handing over +100 made A19 and A20 fire on the same click, so
       // the player got two world announcements for one decision and could not tell them apart.
       // The agents write on their own clock, so A19 arrives when it actually becomes true.
-      g = { ...g, digital:true };
+      g = { ...g, meaning:num(g.meaning-120), digital:true };
     } else if (type === 'train-memory' && g.act >= 4 && g.digital) {
       // Training is the credit sink that keeps the ACT I economy alive after publication.
       const a = integer(g.archives, 1e6);
       const creditCost = Math.ceil(500 * 2 ** Math.min(a, 20));
-      if (g.credits >= creditCost) g = { ...g, credits:num(g.credits-creditCost), archives:a+1, meaning:num(g.meaning+500) };
+      // 用过去的文字训练机器，也得先有能过一遍的文字。
+      if (g.credits >= creditCost && g.meaning >= 80) g = { ...g, credits:num(g.credits-creditCost), meaning:num(g.meaning-80+500), archives:a+1 };
     } else if (type === 'discover-machine-glyph' && g.act >= 4 && g.machineGlyphs < 1 && gateMet(g, 4)) {
       // Seeding machineGlyphUse at 1000 fired A22 and A23 on the same click. The glyph's use
       // is supposed to accumulate after the discovery, so it starts at zero and grows by itself.
       g = note({ ...g, act:5, machineGlyphs:1, machineGlyphUse:0 }, '03:17:42 · 发现未知字形。来源：机器之间。');
-    } else if (type === 'compress-language' && g.act >= 5 && g.meaning >= 100 && g.credits >= 300) {
+    } else if (type === 'compress-language' && g.act >= 5 && g.meaning >= 100 && g.credits >= 300 && g.machineGlyphUse >= AHA_GOALS.A23.need) {
       const moved = Math.min(g.meaning, command.amount || 10000); g = { ...g, meaning:g.meaning-moved, credits:num(g.credits-300), compressedMeaning:num(g.compressedMeaning+moved*100) };
-    } else if (type === 'infrastructure' && g.act >= 5 && !g.infrastructure && gateMet(g, 5) && g.credits >= 2000) {
+    } else if (type === 'infrastructure' && g.act >= 5 && !g.infrastructure && gateMet(g, 5) && g.credits >= 2000 && g.meaning >= 400) {
       // Ambiguity starts below its own threshold: seeding it at 100 fired A25 and A26 together,
       // and "ambiguity is now a resource" only reads as a separate insight once it accumulates.
-      g = note({ ...g, act:6, infrastructure:true, ambiguity:60, noise:num(g.noise+1500), credits:num(g.credits-2000) }, '语言不再只是内容，它开始驱动城市的系统。');
+      g = note({ ...g, act:6, infrastructure:true, ambiguity:60, noise:num(g.noise+1500), credits:num(g.credits-2000), meaning:num(g.meaning-400) }, '语言不再只是内容，它开始驱动城市的系统。');
     } else if (type === 'resolve-ambiguity' && g.act >= 6 && g.ambiguity >= AHA_GOALS.A26.need) {
       // Gated on A26's own threshold, not on `> 0`. Resolving as soon as a trace appears let the
       // player drain ambiguity to zero on the way to the stop gate and finish the game without
@@ -533,7 +588,7 @@ const GlyphEngineV3 = (() => {
       { act:3, districts:2, worldScale:1, credits:1e6, meaning:5000, readers:200000 },
       { concepts:1, societyEffects:1 }, { worldScale:1 }, { worldScale:2, districts:4, concepts:2 },
       { act:4, agents:1, credits:1e6, meaning:50000 }, { editorAutonomy:true }, { agentFactories:1, agents:5 }, { overnightArticles:100 }, { digital:true }, { archives:1 },
-      { act:5, machineGlyphs:1, meaning:100, credits:1e6 }, { machineGlyphUse:1000 }, { compressedMeaning:10000 },
+      { act:5, machineGlyphs:1, meaning:100, credits:1e6 }, { machineGlyphUse:1000 }, { compressedMeaning:50000 },
       // A28's snapshot has to be one the stop action would actually accept: the world cannot be
       // declared finished while it is still ambiguous, so the review states past A26 carry that.
       { act:6, infrastructure:true }, { ambiguity:100 }, { deletedNoise:1000, noise:50, ambiguityResolved:true }, { stopped:true },

@@ -119,9 +119,6 @@
       add('organic', s.organicWords>0||seen.has('A08')||s.letters>=1, s.letters>=1, label(ACTIONS.organic), en?'The audience writes back.':'让读者也成为作者。', 'organic-word');
       add('viral', s.viralWords>0||seen.has('A09')||s.organicWords>=1, s.organicWords>=1, label(ACTIONS.viral), en?'Propagation > production':'传播速度 > 生产速度', 'viral-word');
       add('delete2', s.deletedNoise>0||seen.has('A11')||s.noise>=1, s.noise>=1, label(ACTIONS.delete), en?'Deletion is now productive.':'删除第一次成为生产行为。', 'delete-noise');
-      // 门槛数字的唯一真源在引擎（E.ACT_GATES）；渲染层不再抄一份。
-      const cityReady=E.gateProgress(s).done;
-      add('city', s.worldScale>=1||seen.has('A14')||cityReady, cityReady, label(ACTIONS.city), en?'The workshop is no longer the whole world.':'工坊不再是全部世界。', 'map-city', {}, 'major');
     }
     else if (s.act === 3) {
       // Through `add`, not pushed directly: this one now costs readers, meaning and credits, and
@@ -130,6 +127,9 @@
       // discovered stays on screen, greyed, with the shortfall written on it.
       add('dialect', s.act >= 3, true, label(ACTIONS.dialect), en?'Another district diverges.':'再观察一个街区。', 'discover-dialect');
       add('concept', s.concepts>0||seen.has('A13')||s.meaning>=25, s.meaning>=25, label(ACTIONS.concept), en?'Spend 25 meaning to change society.':'花25意义，让一个概念进入社会。', 'make-concept');
+      // 地图是这一章画出来的，不是上一章的出口。要有两种以上街区，地图上才有东西可看——
+      // 门槛数字来自引擎（E.COMMAND_COSTS），按钮自己会写「还差 街区 1/2」。
+      add('city', s.worldScale>=1||seen.has('A14')||s.districts>=2, true, label(ACTIONS.city), en?'The workshop is no longer the whole world.':'工坊不再是全部世界。', 'map-city', {}, 'major');
       // 门槛数字的唯一真源在引擎（E.WORLD_GATE）；渲染层不再抄一份。
       const worldReady=s.concepts>=E.WORLD_GATE.concepts&&s.districts>=E.WORLD_GATE.districts;
       add('world', s.worldScale>=2||seen.has('A15')||worldReady, worldReady, label(ACTIONS.world), en?'The city is only one node.':'城市只是网络中的一个节点。', 'map-world');
@@ -148,7 +148,7 @@
       add('infra', s.infrastructure||seen.has('A25')||s.compressedMeaning>=10000, s.compressedMeaning>=10000, label(ACTIONS.infra), en?'Language is ready to become infrastructure.':'语言已经可以接管基础设施。', 'infrastructure');
     }
     else if (s.act === 6) {
-      add('delete6', s.deletedNoise>0||seen.has('A27')||s.noise>=1, s.noise>=1, label(ACTIONS.delete), en?'Remove 500 noise.':'一次删除500噪音。', 'delete-noise', {amount:500}, 'major');
+      add('delete6', s.deletedNoise>0||seen.has('A27')||s.noise>=1, s.noise>=1, label(ACTIONS.delete), en?'Remove 250 noise.':'一次删除250噪音。', 'delete-noise', {amount:250}, 'major');
       // Same threshold as the engine's gate (E.AHA_GOALS.A26.need): the button appears as soon as
       // ambiguity exists, but only becomes usable once there is enough of it to be worth clearing.
       const ambiguityReady=s.ambiguity>=E.AHA_GOALS.A26.need;

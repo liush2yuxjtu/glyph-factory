@@ -35,29 +35,33 @@ AHA_CASES = (
     ("A03", {"published": False, "act": 1, "glyphs": 400, "credits": 400, "lifetimeGlyphs": 6000, "presses": 1}, "click:发行《明日》", 1),
     ("A04", {"ruleActive": True, "composed": 0, "glyphs": 500}, "clickx3:刻模", 2),
     ("A05", {"meaning": 0, "glyphs": 500, "composed": 1}, "click:压缩", 1),
-    ("A06", {"readers": 99}, "clock", 10),
-    ("A07", {"readers": 250}, "click:打开一封读者来信", 1),
-    ("A08", {"letters": 1}, "click:允许读者造一个新词", 1),
-    ("A09", {"organicWords": 1, "readers": 1200}, "click:让这个词传播", 1),
-    ("A10", {"readers": 999, "demand": 2}, "clock", 10),
-    ("A11", {"noise": 2}, "click:删除噪音", 1),
+    # A06 now carries A05's condition: demand is manufactured by something worth reading.
+    ("A06", {"readers": 99, "meaning": 10}, "clock", 10),
+    ("A07", {"readers": 250, "meaning": 40}, "click:打开一封读者来信", 1),
+    ("A08", {"letters": 1, "meaning": 60}, "click:允许读者造一个新词", 1),
+    ("A09", {"organicWords": 1, "readers": 1200, "meaning": 80}, "click:让这个词传播", 1),
+    # The paper runs out because something went viral, so the crisis waits for A09.
+    ("A10", {"readers": 1999, "demand": 2, "viralWords": 1}, "clock", 10),
+    ("A11", {"paperCrisis": True, "noise": 2}, "click:删除噪音", 1),
     ("A12", {"act": 3, "districts": 1, "worldScale": 1, "paperCrisis": True, "readers": 1500, "meaning": 50}, "click:观察一个新方言", 1),
-    ("A13", {"act": 3, "districts": 2, "worldScale": 1, "meaning": 30}, "click:创造一个概念", 1),
-    ("A14", {"act": 2, "paperCrisis": True, "meaning": 60, "deletedNoise": 2}, "click:展开城市地图", 1),
+    ("A13", {"act": 3, "districts": 2, "worldScale": 1, "meaning": 60}, "click:创造一个概念", 1),
+    # 地图是第三章画出来的：要有两种以上街区，地图上才有东西可看。
+    ("A14", {"act": 3, "districts": 2, "worldScale": 0, "paperCrisis": True, "meaning": 60}, "click:展开城市地图", 1),
     ("A15", {"act": 3, "districts": 5, "concepts": 4, "worldScale": 1}, "click:把地图缩到世界", 1),
-    ("A16", {"act": 3, "worldScale": 2, "districts": 3, "concepts": 2}, "click:上线记者", 1),
-    ("A17", {"act": 4, "agents": 1}, "click:给编辑", 1),
+    ("A16", {"act": 3, "worldScale": 2, "districts": 3, "concepts": 2, "meaning": 200}, "click:上线记者", 1),
+    ("A17", {"act": 4, "agents": 1, "meaning": 200}, "click:给编辑", 1),
     ("A18", {"act": 4, "agents": 1, "editorAutonomy": True, "meaning": 200}, "click:允许", 1),
     ("A19", {"act": 4, "agents": 2, "editorAutonomy": True, "agentFactories": 1, "overnightArticles": 95}, "clock", 30),
-    ("A20", {"act": 4, "agents": 2, "editorAutonomy": True, "agentFactories": 1, "overnightArticles": 200}, "click:切换数字出版", 1),
-    ("A21", {"act": 4, "agents": 2, "agentFactories": 1, "digital": True}, "click:用档案训练机器", 1),
+    ("A20", {"act": 4, "agents": 2, "editorAutonomy": True, "agentFactories": 1, "overnightArticles": 200, "meaning": 300}, "click:切换数字出版", 1),
+    ("A21", {"act": 4, "agents": 2, "agentFactories": 1, "digital": True, "meaning": 300}, "click:用档案训练机器", 1),
     ("A22", {"act": 4, "agents": 2, "agentFactories": 3, "digital": True, "archives": 5}, "click:检查未知字形", 1),
     ("A23", {"act": 5, "machineGlyphs": 1, "machineGlyphUse": 0, "meaning": 100}, "clock", 70),
-    ("A24", {"act": 5, "machineGlyphs": 1, "machineGlyphUse": 1000, "meaning": 200}, "click:语义压缩", 1),
-    ("A25", {"act": 5, "compressedMeaning": 20000}, "click:让语言接管基础设施", 1),
+    # 一次压缩 100 意义 → 10,000；A24 的门槛是五次，所以是 clickx5 而不是一次。
+    ("A24", {"act": 5, "machineGlyphs": 1, "machineGlyphUse": 1000, "meaning": 600}, "clickx5:语义压缩", 1),
+    ("A25", {"act": 5, "compressedMeaning": 50000, "meaning": 600}, "click:让语言接管基础设施", 1),
     ("A26", {"act": 6, "infrastructure": True, "ambiguity": 99}, "clock", 10),
-    ("A27", {"act": 6, "infrastructure": True, "compressedMeaning": 20000, "deletedNoise": 500, "noise": 600}, "click:删除噪音", 1),
-    ("A28", {"act": 6, "infrastructure": True, "ambiguityResolved": True, "compressedMeaning": 20000, "deletedNoise": 1200, "noise": 100}, "click:停止印刷", 1),
+    ("A27", {"act": 6, "infrastructure": True, "ambiguityResolved": True, "compressedMeaning": 50000, "deletedNoise": 800, "noise": 600}, "click:删除噪音", 1),
+    ("A28", {"act": 6, "infrastructure": True, "ambiguityResolved": True, "compressedMeaning": 50000, "deletedNoise": 1200, "noise": 100}, "click:停止印刷", 1),
 )
 
 
@@ -258,7 +262,7 @@ class PlayerContract(unittest.TestCase):
         self.assert_no_spoilers()
 
     def test_meaning_resource_and_action_remain_at_zero(self):
-        self.seed({"version": 3, "act": 3, "published": True, "meaning": 25, "districts": 2, "worldScale": 1, "credits": 200})
+        self.seed({"version": 3, "act": 3, "published": True, "meaning": 50, "districts": 2, "worldScale": 1, "credits": 200})
         self.open()
         self.button("创造一个概念").click()
         expect(self.page.locator("#meaning")).to_have_text("0")
@@ -270,7 +274,7 @@ class PlayerContract(unittest.TestCase):
         expect(self.page.locator("#meaning").locator("..")).to_be_visible()
 
     def test_noise_box_and_delete_action_remain_at_zero(self):
-        self.seed({"version": 3, "act": 2, "published": True, "noise": 1})
+        self.seed({"version": 3, "act": 2, "published": True, "paperCrisis": True, "noise": 1})
         self.open()
         self.button("删除噪音").click()
         expect(self.page.locator("#noise")).to_have_text("0")
@@ -405,7 +409,7 @@ class PlayerContract(unittest.TestCase):
                     self.assertLessEqual(abs(widths[0] - widths[1]), 2, f"{parent} leaves an undiscovered empty column")
 
     def test_intent_digital_publishing_replaces_inventory(self):
-        self.seed({"version":3,"act":4,"published":True,"agents":5,"agentFactories":1,"glyphs":30,"meaning":100})
+        self.seed({"version":3,"act":4,"published":True,"agents":5,"agentFactories":1,"glyphs":30,"meaning":300,"overnightArticles":200})
         self.open()
         expect(self.page.locator("#glyphs").locator("..")).to_be_visible()
         self.button("切换数字出版").click()
@@ -415,10 +419,12 @@ class PlayerContract(unittest.TestCase):
         self.assert_no_spoilers()
 
     def test_intent_stop_is_terminal_in_the_actual_ui(self):
-        self.seed({"version":3,"act":6,"published":True,"infrastructure":True,"ambiguityResolved":True,"compressedMeaning":10000,"deletedNoise":500,"noise":1000,"ambiguity":100,"keyboards":1})
+        self.seed({"version":3,"act":6,"published":True,"infrastructure":True,"ambiguityResolved":True,"compressedMeaning":50000,"deletedNoise":500,"noise":1000,"ambiguity":100,"keyboards":1})
         self.open()
         expect(self.button("停止印刷")).to_have_count(0)
-        self.button("删除噪音").click()
+        for _ in range(2):
+            self.button("删除噪音").click()
+            self.page.clock.run_for(600)
         self.button("停止印刷").click()
         expect(self.page.locator("#ending")).to_be_visible()
         expect(self.page.locator("#rate")).to_have_text("0")
@@ -478,7 +484,7 @@ class PlayerContract(unittest.TestCase):
                       if (!node) throw new Error('missing target: ' + label);
                       (kind === 'buy' ? node.querySelector('button') : node).click();
                     }"""
-                    for _ in range(3 if kind == "clickx3" else 1):
+                    for _ in range(int(re.match(r"clickx(\d+)", kind).group(1)) if kind.startswith("clickx") else 1):
                         self.page.evaluate(click, ["buy" if kind == "buy" else "click", label])
                         self.page.clock.run_for(600)
                 self.page.clock.run_for(max(seconds, 1) * 1000)
