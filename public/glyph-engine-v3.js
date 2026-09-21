@@ -252,6 +252,78 @@ const GlyphEngineV3 = (() => {
 
   function canPublish(g) { return !g.published && g.lifetimeGlyphs >= 5000 && g.presses >= 1 && g.glyphs >= 200 && g.credits >= 300; }
 
+  // ── 通往下一阶段的门槛 ────────────────────────────────────────────────────
+  // 这些条件原先散在 glyph-game-v3.js 里，每个动作各写一份（cityReady / worldReady /
+  // machineReady / stopReady），进度条再抄一遍就会变成第二份真源。收进引擎，渲染层只读。
+  const ACT_GATES = {
+    1: [
+      { key:'lifetimeGlyphs', need:5000, label:'累计印字', labelEn:'Lifetime glyphs' },
+      { key:'presses', need:1, label:'小型印刷机', labelEn:'Printing presses' },
+      { key:'glyphs', need:200, label:'库存字', labelEn:'Glyph stock' },
+      { key:'credits', need:300, label:'工坊资金', labelEn:'Workshop credits' },
+    ],
+    2: [
+      { key:'paperCrisis', need:1, label:'纸张危机', labelEn:'Paper crisis' },
+      { key:'meaning', need:50, label:'意义', labelEn:'Meaning' },
+      { key:'deletedNoise', need:1, label:'已删除噪音', labelEn:'Noise deleted' },
+    ],
+    3: [{ key:'worldScale', need:2, label:'地图范围', labelEn:'Map scale' }],
+    4: [
+      { key:'archives', need:1, label:'档案记忆', labelEn:'Archive memory' },
+      { key:'agentFactories', need:1, label:'智能体工厂', labelEn:'Agent factories' },
+    ],
+    5: [{ key:'compressedMeaning', need:10000, label:'已压缩意义', labelEn:'Compressed meaning' }],
+    6: [
+      { key:'deletedNoise', need:1000, label:'已删除噪音', labelEn:'Noise deleted' },
+      { key:'compressedMeaning', need:10000, label:'已压缩意义', labelEn:'Compressed meaning' },
+    ],
+  };
+
+  // 每条 Aha 的门槛，和 trigger() 是同一个条件，只是写成可展示的「字段 × 目标值」。
+  // 只给评审面用：玩家面看到 28 条待办清单等于把整个游戏的发现过程剧透掉。
+  const AHA_GOALS = {
+    A01:{key:'rate',need:1}, A02:{key:'typists',need:5}, A03:{key:'published',need:1},
+    A04:{key:'composed',need:3}, A05:{key:'meaning',need:10}, A06:{key:'readers',need:100},
+    A07:{key:'letters',need:1}, A08:{key:'organicWords',need:1}, A09:{key:'viralWords',need:1},
+    A10:{key:'paperCrisis',need:1}, A11:{key:'deletedNoise',need:1}, A12:{key:'districts',need:2},
+    A13:{key:'concepts',need:1}, A14:{key:'worldScale',need:1}, A15:{key:'worldScale',need:2},
+    A16:{key:'agents',need:1}, A17:{key:'editorAutonomy',need:1}, A18:{key:'agentFactories',need:1},
+    A19:{key:'overnightArticles',need:100}, A20:{key:'digital',need:1}, A21:{key:'archives',need:1},
+    A22:{key:'machineGlyphs',need:1}, A23:{key:'machineGlyphUse',need:1000}, A24:{key:'compressedMeaning',need:10000},
+    A25:{key:'infrastructure',need:1}, A26:{key:'ambiguity',need:100}, A27:{key:'deletedNoise',need:1000},
+    A28:{key:'stopped',need:1},
+  };
+
+  // 布尔门槛当作 0/1 计数，于是进度条不需要为「已发行 / 未发行」写特例。
+  const goalValue = (g, key) => {
+    if (key === 'rate') return rate(g);
+    const raw = g[key];
+    if (typeof raw === 'boolean') return raw ? 1 : 0;
+    return num(raw);
+  };
+
+  // 返回当前阶段的全部门槛（已标注是否达成）以及**第一条未达成项**。
+  // 取「第一条」而不是「进度最低的一条」：门槛是有顺序的清单，逐条从左往右点亮，
+  // 进度条上的 now 标记必须和文字说的是同一条。按比例挑会跳到某个 0 进度的后置条件上
+  // （刚印了六个字，提示却变成「还差 小型印刷机 0/1」），读起来像卡住了。
+  function gateProgress(g) {
+    const act = actIndex(g);
+    const gates = ACT_GATES[act];
+    if (!gates) return null;
+    const conds = gates.map((c) => {
+      const have = goalValue(g, c.key);
+      return { ...c, have, met: have >= c.need };
+    });
+    const binding = conds.find((c) => !c.met) || null;
+    return { act, done: !binding, binding, conds };
+  }
+
+  function ahaGoal(g, id) {
+    const goal = AHA_GOALS[id];
+    if (!goal) return null;
+    return { have: goalValue(g, goal.key), need: goal.need, key: goal.key, done: goalValue(g, goal.key) >= goal.need };
+  }
+
   function act(state, command, now = Date.now()) {
     let g = advance(state, now);
     const type = command && command.type;
@@ -347,6 +419,6 @@ const GlyphEngineV3 = (() => {
     return syncAhas(g);
   }
 
-  return { VERSION,SAVE_KEY,OFFLINE_CAP,PRICE,RULE_PERIOD,RULE_READERS,UNITS,CONTRACTS,ACTS,AHAS,AHA_WORLD,fresh,restore,advance,act,rate,cost,actIndex,ahaUnlocked,directorState,canPublish };
+  return { VERSION,SAVE_KEY,OFFLINE_CAP,PRICE,RULE_PERIOD,RULE_READERS,UNITS,CONTRACTS,ACTS,AHAS,AHA_WORLD,ACT_GATES,AHA_GOALS,gateProgress,ahaGoal,fresh,restore,advance,act,rate,cost,actIndex,ahaUnlocked,directorState,canPublish };
 })();
 if (typeof window !== 'undefined') window.GlyphEngineV3 = GlyphEngineV3;
