@@ -1,6 +1,6 @@
 ---
 name: verify
-description: Verify Glyph Factory changes against the exact candidate SHA — launch the dev server, drive the real browser surfaces with the committed driver, run the 28-case Aha invariant/transition suite on chromium and webkit, check the action disclosure contract (affordability disables, never hides), the progression contract (an active rule must run, and its gating resource must be on screen) and the Aha legibility contract (every one of A01–A28 must announce itself in the player's log), and capture visual and interaction evidence. Use for general verification, proving an Aha change is safe, checking the 28/28 claim, verifying an action reveal/enable change, verifying an advance() cadence / Act II progression change, or verifying that an Aha is perceivable on the player surface.
+description: Verify Glyph Factory changes against the exact candidate SHA — launch the dev server, drive the real browser surfaces with the committed driver, run the 28-case Aha invariant/transition suite on chromium and webkit, check the action disclosure contract (affordability disables, never hides), the cost-gate contract (one engine table decides what an action costs, and a button must never be lit while the engine refuses it), the pacing contract (no act may collapse to a handful of decisions), the progression contract (an active rule must run, and its gating resource must be on screen) and the Aha legibility contract (every one of A01–A28 must announce itself in the player's log), and capture visual and interaction evidence. Use for general verification, proving an Aha change is safe, checking the 28/28 claim, verifying an action reveal/enable change, verifying an action cost or act-gate change, verifying an advance() cadence / Act II progression change, verifying the game is still completable at a sane pace, or verifying that an Aha is perceivable on the player surface.
 ---
 
 # Verify Glyph Factory
@@ -192,6 +192,15 @@ before ever holding the first contract's 20 glyphs never saw the button, and the
 green throughout. It now asserts its own detector still rejects that exact shape, so a green
 run cannot just mean the pattern stopped matching anything.
 
+**There is a third form, and it is the one that bites: `buttons.push(actionButton(…))` with a
+hand-written `enabled`.** A button pushed straight into the list never consults
+`E.commandReady()`, so it stays lit while the engine silently refuses the click — the exact
+defect this contract exists to prevent, reproduced from the other direction. It happened again
+on 2026-09-21 to `discover-dialect` the moment that action acquired a cost, and no test caught
+it; CodeRabbit did. Route every costed action through `add(…)`. When you add a cost to an
+action, grep for its command name in `glyph-game-v3.js` and confirm exactly one registration,
+through the helper.
+
 **Browser (for any stock-cost action you changed).** Two committed cases cover this:
 `test_sell_stays_visible_disabled_and_persistent_after_zero_and_reload` (*sell*) and
 `test_contract_survives_auto_sell_stranding_the_one_stock_cost_it_has` (*contract*, seeded
@@ -296,6 +305,62 @@ Two boundaries this must not cross, both pinned by existing tests:
 The engine exports `RULE_PERIOD` (4) and `RULE_READERS` (0.015) so the renderer reports the
 real coefficient instead of a second copy; if you change the cadence, change it there.
 
+### The cost-gate contract: one table decides what an action costs
+
+Added 2026-09-21. `glyph-engine-v3.js` owns two tables and nothing else may restate them:
+
+| Table | Answers | Read by |
+|---|---|---|
+| `ACT_GATES` + `gateMet(g, act)` | what it takes to leave an act | the act-transition actions, and `gateProgress()` for the progress bar |
+| `COMMAND_COSTS` + `commandReady(g, type)` | what a single action costs | `act()`'s own guards, and `renderActions()` to grey the button |
+
+Before this, each act-transition condition was written into its own action *and* copied into the
+progress bar, so the bar could read "one step left" while the button already worked. Verify a
+cost change at both layers:
+
+- **Node.** `the engine never accepts a command its own cost gate calls unaffordable` walks all
+  28 director states × every costed command × three resource paddings and asserts the direction
+  that matters for the disclosure contract: a command the gate calls unaffordable must never be
+  accepted. It does **not** assert the converse — `commandReady` deliberately models costs only,
+  not act windows or one-shot guards, so an affordable command may still be a no-op.
+- **Two traps when seeding it.** `act()` runs `advance()` first, so readiness and acceptance must
+  be judged on the same advanced state, not on the raw snapshot — one tick of production can
+  afford a cheap command. And padding resources can cross a milestone on its own, so the
+  baseline has to be `advance(seeded, at)` rather than `seeded`, or a refused command looks
+  accepted because `syncAhas()` changed something.
+
+`COMMAND_SPENT` rides in the same table: a one-shot that has already fired (`digitize`,
+`editor-autonomy`, `map-city`, …) reports not-ready, so the button greys out with its own
+「已完成」 copy instead of sitting there doing nothing. A spent action that still renders enabled
+is a bug — it is what made the review suite's `exercise()` pick a no-op button and fail.
+
+### The pacing contract: no act may collapse
+
+Added 2026-09-21, after the flow audit. The original defect: ACT I took 651 clicks and the four
+acts after it took 35, because every gate was fed by exactly its own previous click. Deltas that
+granted the next Aha's threshold outright (`digitize` +100 articles, `machineGlyphUse` seeded at
+its own 1000) made each later act one click per insight.
+
+Two invariants now hold, both under test:
+
+1. **Accumulation, not adjacency.** A gate must depend on a resource that accrues on its own
+   clock. `discover-dialect` needs `readers >= 600 × (districts + 1)`; `make-concept` needs
+   `concepts < districts`. Every later action also costs something.
+2. **No act is trivial.** `a plain playthrough with legal actions reaches the ending…` drives a
+   full game and asserts it reaches `stopped`, sees all 28 milestones, and that **no act takes
+   fewer than 5 decisions**.
+
+Reference numbers from the probe at the time of writing (decisions per act I–VI): 28 / 272 / 10 /
+13 / 452 / 59; wall clock 347 / 629 / 158 / 521 / 389 / 30 seconds. Treat a large shift in either
+column as a regression signal, not as noise.
+
+**Two gates that are easy to break by accident.** `stop-printing` requires
+`ambiguityResolved`, and `resolve-ambiguity` requires `ambiguity >= AHA_GOALS.A26.need` — that
+pair is what makes A26 unskippable, and loosening either one reintroduces "a milestone the
+normal path walks past". Separately, `digitize` disables both `sell` and auto-sell, so if the
+later acts cost credits at all there must be an equivalent income: digital publishing earns
+`credits += elapsed × readers × 0.004`. Removing that line deadlocks the game with no error.
+
 ### The Aha legibility contract: every moment must be said out loud
 
 `aha.md` forbids the player from ever seeing `A01–A28`, `AHA`, `ACT`, Director Mode or any
@@ -342,6 +407,22 @@ npm test
 
 `tests/game-v3.test.mjs` carries invariants 1, 2 and 4, plus the existing cadence identity.
 Invariant 4 runs all 28 director states × all 30 real commands.
+
+It also carries the two contracts added on 2026-09-21:
+
+```bash
+# Node must be given the pattern BEFORE the file list; `npm test -- --test-name-pattern` puts it
+# after, and the flag is then ignored — all 91 run and the filter silently does nothing.
+node --test --test-name-pattern 'playthrough with legal actions' tests/*.test.mjs          # pacing
+node --test --test-name-pattern 'never accepts a command its own cost gate' tests/*.test.mjs
+```
+
+**The director states are part of the contract, not scaffolding.** `directorState(id)` must
+produce a state that can *afford* the action it is there to demonstrate — a snapshot whose own
+button is greyed out reviews nothing. When you add a cost, check `directorState` grants enough
+resources to cover it (credits and meaning trigger no Aha by ACT III, so raising them is safe;
+readers past A06 and meaning past A05 likewise). Fifteen review-suite cases failed on
+2026-09-21 for exactly this reason.
 
 **Browser (for any `AHA_WORLD`, `syncAhas`, log, or player-surface change).**
 
@@ -476,6 +557,21 @@ candidate directory.
 Record: SHA, both browser results, the driver's `aha` line, and the screenshot paths. A
 green `npm test` is **not** a UI PASS for the Aha question — it only covers the Node layer.
 
+**If the change touches the player surface, the design-system atlas is now stale.** Test counts
+and build success will not tell you. `public/design-system/flows.html` is a *reading* of the real
+DOM (`scripts/flows/screens.json`), so it silently keeps describing the previous UI:
+
+```bash
+python3 test-results/audit-shots/screens.py   # re-capture from a running static server on :4399
+cp test-results/audit-shots/screens.json scripts/flows/screens.json
+python3 scripts/flows/build.py                # writes public/design-system/flows.html
+```
+
+Then look at it. The failure mode has no error message: SVG `var(--token)` referencing a token
+that does not exist resolves to **black**, not to a warning, so a page can load cleanly with
+every screen painted wrong. Confirm `getComputedStyle(document.querySelector('svg.sch rect')).fill`
+equals the paper token, not `rgb(0, 0, 0)`.
+
 ## Probe
 
 Exercise one adjacent state: alternate asset, repeated interaction, resize/mobile viewport, missing/invalid input, or another browser engine when the diff suggests it.
@@ -507,6 +603,18 @@ overclaimed verdict.
   `rememberReveal` latches it, that `enabled` is correct, or that the shortfall copy says
   the right thing. Only the seeded browser recipe above covers that, and only for the
   actions you actually seed.
+- **The pacing test measures one policy, not the game.** `a plain playthrough…` finishes the
+  game and counts decisions, but the counts depend on the strategy hard-coded in the test. A
+  human who plays differently gets different numbers; the assertion (`no act below 5`) is a
+  floor, not a curve. Treat the per-act columns as a regression signal — when they move a lot,
+  re-run `node /tmp/glyph-audit/reconcile.mjs` (a second, independent policy) before believing
+  either number. And its guard against "one click satisfies the next gate" is structural only
+  for the one pair it names (`concepts < districts`); a new adjacency of that shape would not
+  be caught.
+- **A cost-gate PASS says nothing about copy.** `commandReady` decides whether a button is
+  enabled and which field is named as the shortfall, but nothing asserts the label a player
+  reads is the right noun for that field. `E.fieldLabel` maps the key; a wrong entry there
+  produces a grammatically fine, semantically wrong sentence that every suite accepts.
 - **The Act II progression recipe is not a committed suite.** The fifteen-assertion
   end-to-end run (dead state → `map-city` → Act III) lives in `/tmp`, not in `tests/`. The
   committed coverage is narrower: the Node cadence identity, and one browser test asserting
@@ -550,7 +658,9 @@ overclaimed verdict.
 - **`review-dist/` is required and is not built by `npm run dev`.** A fresh clone fails the
   suite with a build error, not a test failure. Same for `dist/` — see "Build before any
   browser suite" above; the failure reads as `setUpClass ERROR`, not as a test failure, so
-  a run showing `discovered 22, run 3, errors 1` is a missing build, not a product defect.
+  a run showing `discovered 26, run 0, errors 1` is a missing build, not a product defect.
+  (The `aha` suite discovers 37 and needs `node scripts/build-aha-review.mjs` first; it is not
+  built by `npm run dev` either.)
 - **Seeding `localStorage` needs `add_init_script`, not a post-`goto` evaluate.** The
   controller registers `pagehide → save(true)`, so writing a fixture save after `goto` and
   then calling `reload()` has it overwritten by the in-memory state on the way out. The
