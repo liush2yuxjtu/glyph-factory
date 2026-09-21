@@ -59,9 +59,16 @@ Aha 的标题与 reveal 是设计语言，玩家永远看不到：日志里的 `
 
 ## File identity and reproducibility
 
-`aha.md` 是唯一文字契约，`public/aha.html` 是唯一交互评审源。
-`intent.md` 与 `public/intent.html` 是兼容副本，必须逐字节一致；运行
-`node scripts/sync-aha-docs.mjs` 同步。不得分别维护两个方向。
+`aha.md` 是 Aha / 披露契约的唯一文字源，`public/aha.html` 是它唯一的交互评审源；
+两者各自维护（HTML 那边有 iframe 评审台，不是 Markdown 能表达的），由
+`node scripts/sync-aha-docs.mjs` 把 Markdown 发到 `public/` 供评审页读取。
+
+**用户意图不在本文件。** 它记在 `intent.md`，由 `node scripts/build-intent.mjs` 生成
+`public/intent.html`。这份文件回答「怎么实现」，那份回答「要实现成什么样」。
+
+2026-09-21 之前 `intent.md` / `public/intent.html` 是本文件的逐字节副本，那是历史遗留；
+用户明确要求两者各自独立，所以那几个「必须逐字节一致」的断言已随之删除（见
+`tests/intent-audit.test.mjs`）。改这个方向之前先读 `intent.md` 的非目标一节。
 
 ## Executable acceptance matrix
 

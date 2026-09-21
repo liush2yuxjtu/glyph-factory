@@ -5,10 +5,27 @@ import vm from 'node:vm';
 const read=(path)=>readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 const intent=read('aha.md'), html=read('public/aha.html');
 
-test('canonical Aha Markdown and HTML have exact legacy aliases',()=>{
+test('canonical Aha Markdown is published byte-for-byte next to the review page',()=>{
   assert.equal(read('public/aha.md'),intent,'Public Markdown entry must match the canonical contract');
-  assert.equal(read('intent.md'),intent,'Run node scripts/sync-aha-docs.mjs');
-  assert.equal(read('public/intent.html'),html,'Run node scripts/sync-aha-docs.mjs');
+});
+
+// 2026-09-21 之前 intent.md 与 public/intent.html 是 aha.md / public/aha.html 的逐字节副本，
+// 上面那条断言原本还守着它们相等。用户要求「each intent separate」，所以这条线反过来了：
+// 现在要守的是**它们不相等**——aha 回答「怎么实现」，intent 回答「要实现成什么样」。
+// 真正会腐烂的正是「原话」：手写两份的那天起，就一定有一份先过期。
+test('user intent is its own document, and it is verifiable intent by intent',()=>{
+  const intentMd=read('intent.md'), intentHtml=read('public/intent.html');
+  assert.notEqual(intentMd,intent,'intent.md must not be a copy of the Aha contract');
+  assert.notEqual(intentHtml,html,'public/intent.html must not be a copy of the Aha page');
+  for(const id of ['U1','U2','U3','U4','U5','U6'])
+    for(const [name,source] of [['intent.md',intentMd],['public/intent.html',intentHtml]])
+      assert.match(source,new RegExp(`\\b${id}\\b`),`${id} is missing from ${name}`);
+  // 每条意图都要能被验：原话（用户怎么说）+ 怎么验（证据在哪）+ 状态（做没做）
+  assert.ok((intentMd.match(/\*\*怎么验。\*\*/g)||[]).length>=6,'每条意图都要写清怎么验');
+  assert.ok((intentMd.match(/\*\*状态。\*\*/g)||[]).length>=6,'每条意图都要写清状态');
+  assert.match(intentMd,/> .+\n/,'原话要留引用块，不许改写成转述');
+  // HTML 是生成物，别手改
+  assert.match(intentHtml,/build-intent\.mjs/,'生成的 HTML 要写明它是从哪来的');
 });
 
 test('both documents specify the same disclosure rule, every flow and every screen',()=>{

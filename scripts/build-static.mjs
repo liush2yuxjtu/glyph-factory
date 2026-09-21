@@ -5,13 +5,14 @@ const root = new URL('../', import.meta.url);
 const publicDir = new URL('public/', root);
 const out = new URL('dist/', root);
 
-const [html, engine, controller, privacy, preview, intent] = await Promise.all([
+const [html, engine, controller, privacy, preview, intent, aha] = await Promise.all([
   readFile(new URL('play.html', publicDir), 'utf8'),
   readFile(new URL('glyph-engine-v3.js', publicDir), 'utf8'),
   readFile(new URL('glyph-game-v3.js', publicDir), 'utf8'),
   readFile(new URL('player-privacy-v3.js', publicDir), 'utf8'),
   readFile(new URL('preview.html', publicDir), 'utf8'),
   readFile(new URL('intent.html', publicDir), 'utf8'),
+  readFile(new URL('aha.html', publicDir), 'utf8'),
 ]);
 
 if (!html.includes('lang="zh-CN"') || !html.includes('/glyph-engine-v3.js') || !html.includes('/glyph-game-v3.js')) {
@@ -29,8 +30,14 @@ if (!privacy.includes('Aha IDs, reveal copy') || !privacy.includes('scrubLog')) 
 if (!preview.includes('glyph-factory-v3-preview.webm') || !preview.includes('A28')) {
   throw new Error('设计评审源文件缺失。');
 }
-if (!intent.includes('hidden → discovered → persistent') && !intent.includes('出现 → 永久保留')) {
-  throw new Error('intent.html 设计契约缺失。');
+// 披露契约的真源是 aha.html。2026-09-21 之前 intent.html 是它的逐字节副本，这条检查写在
+// intent 上；用户要求意图文档各自独立之后，两份文件回答的问题不一样了（aha 怎么实现、
+// intent 要实现成什么样），检查也跟着分开：契约查 aha，意图页查它自己那两样东西。
+if (!aha.includes('hidden → discovered → persistent') && !aha.includes('出现 → 永久保留')) {
+  throw new Error('aha.html 披露契约缺失。');
+}
+if (!intent.includes('用户意图') || !intent.includes('build-intent.mjs')) {
+  throw new Error('intent.html 用户意图页缺失：跑 node scripts/build-intent.mjs 生成。');
 }
 
 // Production/player HTML contains no navigation to review materials. Internal review artifacts

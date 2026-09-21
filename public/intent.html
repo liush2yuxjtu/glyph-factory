@@ -3,51 +3,89 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>字工厂 · Aha 意图与行为核验</title>
+<title>字工厂 · 用户意图登记表</title>
 <meta name="robots" content="noindex,nofollow">
 <style>
-:root{--ink:#17201a;--paper:#efe9d8;--panel:#fffaf0;--muted:#657064;--line:#bcc4ae;--green:#c8ef70;--rust:#a34e34}*{box-sizing:border-box}body{margin:0;background:#cfd4c2;color:var(--ink);font:14px/1.55 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}.page{max-width:980px;margin:auto;min-height:100vh;background:var(--paper);padding:28px clamp(16px,4vw,42px)}h1{font-size:clamp(30px,6vw,58px);line-height:1;margin:.2em 0}h2{font-size:18px;margin:0 0 10px}.eyebrow{font:800 11px/1.2 ui-monospace,monospace;letter-spacing:.14em;color:var(--rust)}.lead{font-size:18px;max-width:760px}.rule{border:2px solid var(--ink);background:var(--green);padding:18px;box-shadow:4px 4px 0 var(--ink);font-size:20px;font-weight:800}.internal{border:2px solid var(--rust);padding:12px 14px;background:#f2ded5;font-weight:800;margin:16px 0}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:18px}.card{border:1.5px solid var(--ink);background:var(--panel);padding:16px}.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}.step{border:1px solid var(--line);padding:12px;background:#f5f1e4}.step b{display:block}.demo{margin-top:18px;border:2px solid var(--ink);background:var(--panel);padding:18px}.screen{max-width:480px;border:1.5px solid var(--ink);padding:18px;background:#fff}.count{font:800 36px/1.2 ui-monospace,monospace;margin:18px 0}button{font:inherit;font-weight:750;min-height:44px;border:1.5px solid var(--ink);background:#fffaf0;padding:10px 12px;box-shadow:2px 2px 0 var(--ink);cursor:pointer}button:hover:not(:disabled){background:var(--green)}button:disabled{opacity:.46;cursor:not-allowed}.reveal{display:none;border-top:1px solid var(--line);margin-top:14px;padding-top:14px}.reveal.show{display:block}.small{font-size:12px;color:var(--muted)}code{background:#e8e3d4;padding:2px 5px}@media(max-width:720px){.grid{grid-template-columns:1fr}.steps{grid-template-columns:1fr 1fr}}
-.audit-layout{display:grid;grid-template-columns:minmax(220px,1fr) minmax(0,2fr);gap:14px;margin-top:16px}.audit-layout nav{max-height:680px;overflow:auto}.audit-layout nav button{display:block;width:100%;text-align:left;margin:0 0 6px}.audit-layout nav button[aria-current="true"]{background:var(--green)}.audit-layout iframe{width:100%;height:680px;border:1px solid var(--ink)}pre{white-space:pre-wrap;overflow-wrap:anywhere}iframe{max-width:100%}button:focus-visible,a:focus-visible{outline:3px solid var(--rust);outline-offset:3px}.steps{grid-template-columns:repeat(auto-fit,minmax(min(100%,160px),1fr))}@media(max-width:720px){.audit-layout{grid-template-columns:1fr}.audit-layout nav{max-height:260px}}
+:root{--ink:#17201a;--paper:#efe9d8;--panel:#fffaf0;--muted:#657064;--line:#bcc4ae;--green:#c8ef70;--rust:#a34e34}
+*{box-sizing:border-box}
+body{margin:0;background:#cfd4c2;color:var(--ink);font:14px/1.65 system-ui,-apple-system,"PingFang SC",sans-serif}
+.page{max-width:860px;margin:auto;min-height:100vh;background:var(--paper);padding:28px clamp(16px,4vw,42px) 72px}
+h1{font-size:clamp(26px,5vw,40px);line-height:1.15;margin:.2em 0 .4em}
+h2{font-size:19px;margin:34px 0 10px;padding-top:14px;border-top:2px solid var(--ink)}
+h3{font-size:15px;margin:20px 0 6px}
+p{margin:9px 0}
+blockquote{margin:10px 0;padding:10px 14px;background:var(--panel);border-left:4px solid var(--rust);font-style:normal}
+blockquote p{margin:2px 0;font-weight:600}
+code{background:#e8e3d4;padding:2px 5px;font-size:12.5px}
+a{color:var(--rust)}
+hr{border:0;border-top:1px solid var(--line);margin:26px 0}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0}
+th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+th{background:#e8e3d4;font-size:12px}
+ul,ol{margin:8px 0;padding-left:22px}
+li{margin:5px 0}
+.note{margin:0 0 22px;padding:12px 14px;border:1.5px solid var(--ink);background:var(--green);font-weight:600}
+.foot{margin-top:34px;color:var(--muted);font-size:12px;text-align:center}
 </style>
 </head>
 <body><main class="page">
-<p class="eyebrow">GLYPH FACTORY · INTERNAL DESIGN INTENT</p>
-<div class="internal">内部设计/开发材料。不要把本页的 Aha、阶段、触发条件或设计解释复制到玩家界面。</div>
-<h1>不用，就不存在。出现，就留下。</h1>
-<p class="lead">把 Universal Paperclips 式的惊喜放回界面：玩家尚未发现的系统不显示、不占位、不剧透；但一旦玩家真正解锁过它，它就成为世界的一部分，不会因为暂时缺钱、缺字或缺资源而消失。</p>
-<div class="rule">hidden → discovered → persistent → intentionally replaced</div>
-<section class="grid">
-  <article class="card"><h2>默认规则</h2><p>未来功能在玩家真正发现之前不渲染。一个控件第一次真正可用时出现；之后永久保留，资源不足时只变成 disabled / 显示需求。Aha 编号、未来章节和设计解释永远不是玩家文案。</p><div class="steps"><div class="step"><b>未解锁</b><span class="small">不渲染</span></div><div class="step"><b>首次发现</b><span class="small">出现 + 可操作</span></div><div class="step"><b>已发现</b><span class="small">永久保留</span></div><div class="step"><b>范式替代</b><span class="small">只有明确被新系统替代时退出</span></div></div></article>
-  <article class="card"><h2>玩家与设计师看到不同内容</h2><p>玩家只看到世界内的动作、资源和结果。A01–A28、Director、未来系统说明和 reveal 文案只存在于设计/开发材料。生产构建不会发布本页、Aha Preview 或预告视频。</p><p>每个 Aha 触发时，世界要用自己的语言说出一句话（世界线）：不含编号、不含章节、不解释机制。日志里的 <code>A## ·</code> 行会被隐私层剥掉，所以世界线是玩家能感知到这个瞬间的全部依据。一次真实动作最多触发一个 Aha。</p></article>
-</section>
-<section class="demo" id="player-flow"><h2>真实玩家流程 · F01</h2>
-<p>这里运行同一份玩家代码，不再使用独立计数器。印字 → 出售 → 购买机械键盘；观察首次发现、余额归零和刷新后的保留。</p>
-<iframe id="player-frame" title="真实玩家流程" src="/play.html" style="width:100%;height:580px;border:1px solid var(--ink)"></iframe></section>
-<section class="demo"><h2>Screens + Flows · Aha 必须发生在产品里</h2>
-<p class="small">不是把 A01–A28 解释给玩家，而是让界面在玩家行动后改变自己的规模、资源与目标。</p>
-<div class="steps">
-<div class="step"><b>S01 · Fresh</b><span class="small">只有库存文字 + 印字；没有世界卡，没有空系统栏。</span></div>
-<div class="step"><b>S02 · Discover</b><span class="small">出售/机器第一次真实可用时出现；暂时不可用时保留。</span></div>
-<div class="step"><b>S03 · Automation</b><span class="small">买下机械键盘后，定时生产改变真实库存；耗尽资金和刷新都不移除机器。</span></div>
-<div class="step"><b>S10 · Before city</b><span class="small">城市条件满足前，世界卡不出现也不占列。</span></div>
-<div class="step"><b>S11 · City</b><span class="small">世界被发现后，hero 才从单栏扩成双栏；空间变化本身就是反馈。</span></div>
-<div class="step"><b>S12 · Network</b><span class="small">真实地图动作把 worldScale 从 1 改为 2。</span></div>
-<div class="step"><b>S20 · Infrastructure</b><span class="small">语言进入基础设施阶段，歧义成为可操作资源。</span></div>
-<div class="step"><b>S21 · Delete</b><span class="small">删除动作实际减少噪音，累计删除达到阈值后才出现停止按钮。</span></div>
-<div class="step"><b>S22 · Silence</b><span class="small">目标从生产翻成删除，最后停止印刷让生产率归零。</span></div>
-</div>
-<p><strong>Flow F01：</strong>手工 → 出售 → 自动化。<br><strong>Flow F02：</strong>工坊 → 城市 → 世界。<br><strong>Flow F03：</strong>增长 → 删除噪音 → 停止印刷。</p>
-</section>
-<section class="grid"><article class="card"><h2>玩家验收标准</h2><p>生产玩家界面不能出现 Aha、A01–A28、Director、未来章节路线图、设计解释或内部 reveal 日志。未来功能在首次发现前不可见；发现后的按钮、资源框和机器卡片不会因为当前资源下降而消失。</p></article><article class="card"><h2>内部文档入口</h2><p><a href="/aha.md">aha.md · 唯一文字契约</a></p><p><code>docs/design/aha-moments-internal.zh-CN.md</code></p><p><code>docs/development/aha-spoiler-boundary.md</code></p><p class="small">本文件与 <code>public/preview.html</code> 保留在源码仓库供本地评审，但不进入 Vercel 玩家构建。</p></article></section>
-<section class="demo" id="aha-review"><h2>Aha Lab · 28 个状态的行为核验</h2>
-<p>内部设计/开发工具。选择状态会生成真实引擎预览，不会覆盖玩家存档。全检逐项验证目标状态与实际动作效果；最后的停止状态必须没有可用生产动作。</p>
-<button id="verify-all" type="button" disabled>验证全部 28 个 Aha</button>
-<p id="audit-status" role="status" aria-live="polite">等待真实游戏载入…</p>
-<div class="audit-layout"><nav id="aha-catalog" aria-label="Aha 状态"></nav>
-<iframe id="review-frame" title="真实 Aha 状态预览" src="/play.html?director=1"></iframe></div>
-<details><summary>逐项核验证据</summary><pre id="audit-evidence"></pre></details>
-<p class="small">这里的 28 项是内部状态与动作核验，不代表生产发布已验收。完整门禁运行 <code>npm run intent-audit</code>，含真实玩家流程、双浏览器、文档一致性和生产边界。</p></section>
-<script src="/glyph-engine-v3.js"></script>
-<script src="/aha-review-contract.js"></script>
-<script src="/aha-review-ui.js"></script>
+<p class="note">本页由 <code>node scripts/build-intent.mjs</code> 从 <code>intent.md</code> 生成——改需求改 Markdown，不要改这里。</p>
+<h1>Glyph Factory · 用户意图登记表</h1>
+<p>这份文件记<strong>用户要什么</strong>，原话照抄，不改写。</p>
+<p><code>aha.md</code> 记的是 Aha / 披露契约——<strong>怎么实现</strong>。这份记的是需求本身——<strong>要实现成什么样</strong>。 两份文件各管一头，<strong>不再互为副本</strong>：加产品需求改这里，改实现契约改 <code>aha.md</code>。 （在 2026-09-21 之前这两份是同一份文件的逐字节副本，那是历史遗留，已拆开。）</p>
+<p>每条意图四栏：<strong>原话</strong>（用户自己怎么说的）· <strong>操作化</strong>（落在哪张表、哪个数上）· <strong>怎么验</strong>（命令与证据路径）· <strong>状态</strong>。</p>
+<hr>
+<h2>U1 · 相邻两条 Aha 之间的点击要低标准差、要好均值</h2>
+<blockquote><p>fix the clicks between different aha moments until we reach to a low std. and GOOD mean version .</p><p>this is the baseline for yourrefrence .</p><p>—— 2026-09-21</p></blockquote>
+<p><strong>操作化。</strong> 节奏按「相邻两条 Aha 之间」读，不按幕读：幕是作者的划分，Aha 才是玩家收到的 节拍。三个单位各回答一个问题——秒（等了多久）· 决策点击（这一段有几个真判断）· 全部点击 （这一段按了多少下）。参考玩家只按屏幕上写着的东西走（<code>tests/pacing.mjs</code>），不自己拍预算， 否则量到的是机器人不是游戏。</p>
+<p><strong>怎么验。</strong> <code>node scripts/pacing.mjs</code> 六个口径全打；断言在 <code>tests/game-v3.test.mjs</code> 的 「a plain playthrough reaches the ending, and the rhythm between Aha moments holds」； 基线 <code>tests/pacing-baseline.json</code>，改门槛后用 <code>--diff</code> 对照。判据与三种坏形状见 <code>.claude/skills/verify/SKILL.md</code> 的 rhythm contract。</p>
+<p><strong>状态。</strong> 已达成。时长 CV 0.069（均值 272.8s / 标准差 18.7s）；去掉第一章教学后 决策 3.20 / 2.62、点击 3.28 / 2.68；0 逆序、0 同拍。 <strong>「全部 27 段点击」这一口径刻意不进判定</strong>——它量的是教程长度不是节奏，理由见 U3。</p>
+<hr>
+<h2>U2 · 「均值好」＝至少能玩两小时</h2>
+<blockquote><p>when i say mean is good. i mean it will offer at least 2 hours time playing it .</p><p>—— 2026-09-21</p></blockquote>
+<p><strong>操作化。</strong> 读<strong>全程秒数</strong>，不读任何一段的平均。27 条发现各有一条会自己长的钟 （<code>AHA_CLOCK</code>：第二章读者、第四章夜间文章、第五章机器用量、第六章歧义），相邻刻度之差 按 ~280 秒写，合起来两小时。</p>
+<p><strong>怎么验。</strong> <code>node scripts/pacing.mjs</code> 报「全程 X 分钟（≥2 小时 ✓）」；断言 <code>totalSeconds &gt;= 7200</code>。</p>
+<p><strong>状态。</strong> 已达成：122.9 分钟（7376 秒）。 已知边界：离线也累积（上限 8 小时），挂机回来的玩家会跳过一部分等待——这是放置游戏的 正常行为，不是契约漏洞；「两小时」说的是从头连续玩。</p>
+<hr>
+<h2>U3 · 每一章都要有第一章那种可重复的手部动作</h2>
+<blockquote><p>give each new aha momement the repatable movements just like the fist aha moment. we liek this really !</p><p>—— 2026-09-21</p></blockquote>
+<p><strong>操作化。</strong> 第一章的手感是「随时有一下可按，按了世界就动」——参考对局里它每秒 2 下。 第二到六章现在没有这个：四个钟只自己涨，点击对它们的贡献最多 11%（<code>composed</code> 封顶 12 之后 只值 0.18/秒），所以按不按都是四分半，点击在第二到六章是装饰性的。 要做的是<strong>每章一个可重复动作，直接往那一章的钟里灌</strong>，代价随按次递增，保证被动玩仍 ≥2 小时。 设计参照见 U6。</p>
+<p><strong>怎么验。</strong> 四层，缺一层就不算：</p>
+<ol><li><strong>被动路径不变</strong>：节奏断言（<code>npm run verify:fast</code>）仍全绿，全程仍 ≥7200 秒；</li><li><strong>主动路径真的更快</strong>：参考玩家在每章用它，读数里能看到那几段秒数下降；</li><li><strong>真实可点</strong>：浏览器契约里每章有一个可见可点的按钮，点了钟真的涨（不是只改文案）；</li><li><strong>负对照</strong>：把递增代价去掉，2 小时地板必须被打破——否则说明这个动作没有约束力，</li></ol>
+<p>「点击换时间」是假的。</p>
+<p><strong>状态。</strong> 未达成，进行中。</p>
+<hr>
+<h2>U4 · 节奏要能被 /verify</h2>
+<blockquote><p>after job is done. add how u /verify this 游戏节奏 in good way</p><p>—— 2026-09-21</p></blockquote>
+<p><strong>操作化。</strong> 不是写一段说明，是把读数变成可复现的东西：参考玩家、报表、基线文件、 进快门的断言、以及「改完怎么对照」的流程。</p>
+<p><strong>怎么验。</strong> <code>.claude/skills/verify/SKILL.md</code> 的 rhythm contract 一节； 基线 <code>tests/pacing-baseline.json</code>；<code>node scripts/pacing.mjs --diff</code>； 可视化 <code>node scripts/eli5-pacing.mjs</code> → <code>public/eli5-pacing.html</code>。</p>
+<p><strong>状态。</strong> 已达成。</p>
+<hr>
+<h2>U5 · 用户意图本身要单独存档、单独可验</h2>
+<blockquote><p>add how we verify user intent just like above in a new part in /verify the intent part please .</p><p>save user intent with intent.md and intent.html</p><p>—— 2026-09-21</p></blockquote>
+<p><strong>操作化。</strong> 这份文件（<code>intent.md</code>）是用户意图的唯一真源，<code>public/intent.html</code> 是它的 可读版本；两者内容一致，但<strong>都不是 <code>aha.md</code> 的副本</strong>。<code>/verify</code> 里要有对应的一节， 说明每条意图怎么验、证据在哪。</p>
+<p><strong>怎么验。</strong> <code>tests/intent-audit.test.mjs</code> 断言两条：意图文档不再与 <code>aha.md</code> 逐字节相同， 且每条 U 编号在 <code>.md</code> 与 <code>.html</code> 里都在、都带「原话」与「怎么验」两栏。</p>
+<p><strong>状态。</strong> 已达成（本次）。</p>
+<hr>
+<h2>U6 · 手感参照 Universal Paperclips</h2>
+<blockquote><p>so what does paperclip solve this ?</p><p>—— 2026-09-21</p></blockquote>
+<p><strong>结论（来源见下）。</strong> UP 不是靠「让人一直点」解决等待的——它中段同样有死时间，评测里 明说「第二小时里有一段在等 trust 升级，活跃玩法慢下来，有些玩家在这里流失」。 它解决的是<strong>别让屏幕上只剩一个计时器</strong>，靠三件事：</p>
+<ol><li><strong>每一阶段换一种基础资源和一种手部动词。</strong> 第一阶段按「做回形针」，之后是定价/营销、</li></ol>
+<p>分配无人机（Work/Think 滑杆）、配置探测器 Trust。手部动作没有消失，是<strong>换了皮</strong>。</p>
+<ol><li><strong>那个动词永远对着当前的瓶颈。</strong> 玩家做的都是「一次小修补」：收入慢就调价、产量慢就买</li></ol>
+<p>设备、设备贵就多做、多做要线材……瓶颈一个接一个被造出来。原文：系统「几乎不给你留反思 的余地，因为它一直在生成新的活」。</p>
+<ol><li><strong>原来的按钮不删只降级。</strong> 「Make Paperclip」按钮整局都在，到最后灰掉；结局还要你亲手</li></ol>
+<p>按 120 下拆掉自己——手部动作的消失本身就是叙事。</p>
+<p><strong>对字工厂的意思。</strong> 我们已经有 UP 那种「每阶段一种新资源」（读者 / 文章 / 机器用量 / 歧义）， 缺的正是第 1、2 条：<strong>没有一个动词对着当阶段的瓶颈</strong>。U3 就是补这个。</p>
+<p><strong>怎么验。</strong> 这条不是功能，是设计依据，验法是<strong>可追溯</strong>：U3 的每个动作都要能指回本节 三条之一，指不回去就说明是凭感觉加的。另外第 3 条（中段仍有死时间）是<strong>反面参照</strong>—— 它说明「UP 也这样」不能当作我们四分钟空转的辩护，只能当作「别让屏幕上只剩计时器」的理由。</p>
+<p><strong>状态。</strong> 研究已完成，结论落在这里；实现见 U3。</p>
+<hr>
+<h2>可执行验收</h2>
+<table><thead><tr><th>ID</th><th>必须发生的事实</th><th>验证方式</th></tr></thead><tbody><tr><td>U1</td><td>相邻两条 Aha 之间的秒数与点击数都稳定，顺序不乱、不挤在同一拍</td><td><code>node scripts/pacing.mjs</code> 六口径 + <code>tests/game-v3.test.mjs</code> 节奏断言 + <code>--diff tests/pacing-baseline.json</code></td></tr><tr><td>U2</td><td>从头连续玩，全程不少于两小时</td><td><code>pacingReport().totalSeconds &gt;= 7200</code>，报表里那行「≥2 小时 ✓」</td></tr><tr><td>U3</td><td>第二到六章各有一个可重复动作，按了直接推进当阶段的钟；被动路径仍满足 U1/U2</td><td>节奏断言（被动）+ 参考玩家主动路径读数 + 浏览器真实点击 + 去掉递增代价后 2 小时地板必须被打破</td></tr><tr><td>U4</td><td>节奏读数可复现、可对照、可回归</td><td><code>.claude/skills/verify/SKILL.md</code> rhythm contract；基线文件；<code>--diff</code></td></tr><tr><td>U5</td><td>用户意图单独存档，且与 Aha 契约不再互为副本</td><td><code>tests/intent-audit.test.mjs</code> 的非同一性与完整性断言</td></tr><tr><td>U6</td><td>设计上有据可依（不是凭感觉）</td><td>本节列出的来源；U3 的实现要能对上三条之一</td></tr></tbody></table>
+<h2>来源</h2>
+<ul><li>U6 结论来自对 Universal Paperclips 的公开分析：Oli Z. 的逐阶段拆解</li></ul>
+<p>（&lt;https://oliz.io/blog/2022/game-analysis-universal-paperclips/&gt;）、 Schmalzer 在 *Eludamos* 上的论文 （&lt;https://doi.org/10.7557/23.6174&gt;）、以及一篇明确指出中段死时间的评测 （&lt;https://dinogame.gg/blog/universal-paperclips-review/&gt;）。 「每阶段一种新资源 + 中段仍有死时间」这两点三处互相印证。</p>
+<h2>非目标</h2>
+<ul><li>不把 <code>intent.md</code> 当作实现文档；实现的真源是引擎表（<code>AHA_CLOCK</code> / <code>ACT_GATES</code> / <code>COMMAND_COSTS</code>）。</li><li>不为了满足某条意图去改判定口径。改口径要先改这份文件，并写清为什么。</li></ul>
+<p class="foot">用户意图真源：<code>intent.md</code> · 实现契约真源：<code>aha.md</code> · 两者不再互为副本</p>
 </main></body></html>
