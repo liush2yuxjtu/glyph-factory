@@ -27,7 +27,11 @@ save();
 function run(name,command,args,extra={}) {
   console.log(`RUN ${name}`);
   const r=spawnSync(command,args,{cwd:root,encoding:'utf8',env:{...process.env,...extra},maxBuffer:20*1024*1024,timeout:15*60*1000});
-  const text=(r.stdout||'')+(r.stderr||'')+(r.error?'\n'+r.error.message:'');
+  // 先剥掉 ANSI 颜色再读。Node 的 reporter 在多数终端里会给 `ℹ tests 97` 加一层转义，
+  // 行首于是不是 `#` 也不是 `ℹ`，下面那些 `^` 锚定的读数全部落空——门禁会在自己刚刚通过
+  // 的那一步里中止，报的还是「没有证明成功」。剥颜色只是把看不见的字符去掉，判定不放宽。
+  const stripAnsi=(s)=>s.replace(/\u001B\[[0-9;]*m/g,'');
+  const text=stripAnsi((r.stdout||'')+(r.stderr||'')+(r.error?'\n'+r.error.message:''));
   writeFileSync(new URL(name+'.log',output),text);
   const stage={name,status:r.status===0?'PASS':'FAIL',exitCode:r.status};
   report.stages.push(stage); save();

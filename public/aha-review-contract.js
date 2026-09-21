@@ -1,16 +1,22 @@
 /* Independent review assertions, never included in the production player artifact. */
 (() => {
   'use strict';
+  // 门槛数字从引擎的阶梯表里取，不在这里再抄一遍。
+  // 这份表原本是手抄的，而且已经漂了：`A02` 那行写着打字员 5，引擎要的是 8；这份漂掉的
+  // 恰好就是「独立」的那份。独立的是**检查逻辑**——它不调用 trigger / clockMet，只读状态
+  // 字段，所以引擎的判定写错了它照样查得出来——不是数字。数字抄第二遍就一定会漂第二次。
+  const G = globalThis.GlyphEngineV3;
+  const L = { readers: G.READERS_LADDER, articles: G.ARTICLE_LADDER, machine: G.MACHINE_LADDER, ambiguity: G.AMBIGUITY_LADDER };
   const rules = [
-    ['A01','keyboards',1], ['A02','typists',5], ['A03','published',true],
-    ['A04','composed',3], ['A05','meaning',10], ['A06','readers',440],
+    ['A01','keyboards',1], ['A02','typists',G.AHA_GOALS.A02.need], ['A03','published',true],
+    ['A04','composed',G.AHA_GOALS.A04.need], ['A05','meaning',G.AHA_GOALS.A05.need], ['A06','readers',L.readers.A06],
     ['A07','letters',1], ['A08','organicWords',1], ['A09','viralWords',1],
-    ['A10','paperCrisis',true], ['A11','deletedNoise',1], ['A12','districts',2],
-    ['A13','concepts',1], ['A14','worldScale',1], ['A15','worldScale',2],
+    ['A10','paperCrisis',true], ['A11','deletedNoise',1], ['A12','districts',G.AHA_GOALS.A12.need],
+    ['A13','concepts',1], ['A14','worldScale',1], ['A15','worldScale',G.AHA_GOALS.A15.need],
     ['A16','agents',1], ['A17','editorAutonomy',true], ['A18','agentFactories',1],
-    ['A19','overnightArticles',1800], ['A20','digital',true], ['A21','archives',1],
-    ['A22','machineGlyphs',1], ['A23','machineGlyphUse',11200], ['A24','compressedMeaning',50000],
-    ['A25','infrastructure',true], ['A26','ambiguity',1100], ['A27','deletedNoise',1000], ['A28','stopped',true],
+    ['A19','overnightArticles',L.articles.A19], ['A20','digital',true], ['A21','archives',1],
+    ['A22','machineGlyphs',1], ['A23','machineGlyphUse',L.machine.C0], ['A24','compressedMeaning',G.AHA_GOALS.A24.need],
+    ['A25','infrastructure',true], ['A26','ambiguity',L.ambiguity.A26], ['A27','deletedNoise',G.AHA_GOALS.A27.need], ['A28','stopped',true],
   ];
   const acts = [1,1,2,2,2,2,2,2,2,2,2,3,3,3,3,4,4,4,4,4,4,5,5,5,6,6,6,6];
   // 28 个状态里有两种「此刻没有按钮可点」是设计本身：结局，以及几拍必须自己等出来的
@@ -19,7 +25,7 @@
   const a26Need = rules.find((r) => r[0] === 'A26')[2];
   // Agent 写完一桌稿子需要的时间，就是第四章里两拍之间的那几百篇文章。数字和引擎的
   // AHA_CLOCK.A17 / A18 是同一对刻度。
-  const articles = { A17: 140, A18: 280 };
+  const articles = { A17: L.articles.A17, A18: L.articles.A18 };
   const clocks = {
     // Agent 上线之后，编辑要读到足够多的稿子才有资格说「不」。这一拍没有按钮可点，
     // 屏幕上那句「还差 夜间文章 …」就是这一拍的全部内容。

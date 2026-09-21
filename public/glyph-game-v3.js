@@ -73,6 +73,9 @@
     const add = (key, revealWhen, enabled, text, sub, type, props = {}, className = '') => {
       if (!rememberReveal(`action:${key}`, revealWhen)) return;
       const gate = E.commandReady(s, type);
+      // `available === false` 不是「买不起」而是「这一幕还没有」：第一章没有推钟动词，
+      // 微事件在两次之间本来就不该在屏幕上。这种要**不渲染**，灰着写「还差」是另一种谎。
+      if (gate.available === false) return;
       const ready = gate.ready && enabled;
       // A spent one-shot keeps its own「已完成」copy; only an unaffordable one gets the shortfall.
       const short = gate.binding && !gate.spent
@@ -155,6 +158,32 @@
       add('ambiguity', seen.has('A26')||s.ambiguity>0, ambiguityReady, label(ACTIONS.ambiguity), ambiguityReady?(en?'Clarity becomes a resource.':'清晰度变成一种资源。'):lack(en?'100 ambiguity':'100 歧义', fmt(s.ambiguity,1)), 'resolve-ambiguity');
       const stopReady=E.gateProgress(s).done;
       add('stop', s.stopped||stopReady, !s.stopped&&stopReady, label(ACTIONS.stop), s.stopped?tr('done'):(en?'The final action is now possible.':'最后一个动作现在才出现。'), 'stop-printing', {}, 'danger');
+    }
+    // 这一幕的复利推钟动词：第二章起每一幕一个，第一章没有（它的手速本身就是动词）。
+    // 它排在主行动位：这一段等待里玩家唯一能主动做的事就是它，藏在边角等于没有。
+    // 「买不起」写成还差什么，「这一幕没有」直接不渲染——两种都由引擎的 commandReady 说。
+    const verb = E.ACT_VERBS[s.act];
+    if (verb) {
+      const used = E.boostCount(s, s.act);
+      const step = Math.round(E.BOOST_STEP * 100), cap = Math.round(E.BOOST_CAP * 100);
+      const now = Math.round(used * E.BOOST_STEP * 100);
+      const sub = used >= E.BOOST_MAX
+        ? (en ? `Maxed: this act runs ${cap}% faster` : `已到顶：这一幕快 ${cap}%`)
+        : (en ? `+${step}% for the rest of this act (now +${now}%)` : `这一幕以后每一段都快 ${step}%（现在 +${now}%）`);
+      const before = buttons.length;
+      add('push', Boolean(E.ACT_VERBS[s.act]), true, en ? verb.nameEn : verb.name, sub, 'push-clock', {}, 'major');
+      if (buttons.length > before) buttons.unshift(buttons.pop());
+    }
+    // 微事件：等待里偶尔出现的一个世界内的东西。它平时不在屏幕上——到点了才在，
+    // 点掉就轮到下一个。这正是它和主循环的区别：主循环一直在，它不。
+    const ev = E.EVENTS[s.act];
+    if (ev) {
+      const cost = ev.cost.map(([key, amount]) => `${E.fieldLabel(key, en)} ${fmt(amount)}`).join(' + ');
+      // 「发现」这个事件的条件就是它到点了——没到点不是「藏起来了」，是还没发生。
+      // 到点之后就一直看得见，买不起也只是灰着写还差什么（契约要的是这个，不是藏）。
+      const before = buttons.length;
+      add('event', E.eventDue(s), true, en ? ev.nameEn : ev.name, en ? `Costs ${cost}` : `花掉 ${cost}`, 'take-event', {}, 'event');
+      if (buttons.length > before) buttons.splice(1, 0, buttons.pop());
     }
     // The ACT I economy does not retire at publication. Credits fund every downstream action —
     // condense, dialects, concepts, agent factories, archive training — and the engine never

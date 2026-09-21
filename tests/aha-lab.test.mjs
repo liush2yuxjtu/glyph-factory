@@ -4,7 +4,10 @@ import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 const read=(path)=>readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 const ctx=vm.createContext({});
-vm.runInContext(read('public/glyph-engine-v3.js')+';globalThis.engine=GlyphEngineV3;',ctx);
+// 引擎在浏览器里把自己挂到 window.GlyphEngineV3；vm 上下文里没有 window，所以这里显式挂上
+// 同一个名字——评审契约读的是它，两个名字不一致的话契约会拿到 undefined（而且是在评审页上
+// 才炸，测试里看不见）。
+vm.runInContext(read('public/glyph-engine-v3.js')+';globalThis.GlyphEngineV3=GlyphEngineV3;globalThis.engine=GlyphEngineV3;',ctx);
 vm.runInContext(read('public/aha-review-contract.js'),ctx);
 const E=ctx.engine, audit=ctx.GlyphAhaAudit;
 const expected=Array.from({length:28},(_,i)=>`A${String(i+1).padStart(2,'0')}`);

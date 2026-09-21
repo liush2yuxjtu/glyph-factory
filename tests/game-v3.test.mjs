@@ -69,8 +69,11 @@ test('A06 readership creates demand after publication', () => {
   // `meaning >= 10` is part of A06 now: a newspaper manufactures demand only for something
   // the player has already learned is worth printing. Without it the readers crossed 100 on
   // their own and A06 announced itself before A05 had ever happened.
-  const g = E.advance({ ...E.fresh(t), act: 2, published: true, readers: 435, composed: 20, meaning: 10 }, t + 10000);
-  assert.ok(g.readers > 440);
+  // 种子贴着引擎自己的刻度：写死一个 435 会在下次重排阶梯时变成「这条发现已经发生过了」，
+  // 而测试仍然绿——量到的就不是门槛了。
+  const need = E.AHA_GOALS.A06.need;
+  const g = E.advance({ ...E.fresh(t), act: 2, published: true, readers: need - 5, composed: 20, meaning: 10 }, t + 10000);
+  assert.ok(g.readers > need);
   assert.ok(g.demand > 1);
   assert.ok(E.ahaUnlocked(g, 'A06'));
 });
@@ -130,7 +133,9 @@ test('a second agent factory costs more than the first', () => {
 });
 
 test('A22 machine glyph emerges from autonomous digital archive', () => {
-  let g = { ...E.fresh(t), act: 4, agents: 5, editorAutonomy: true, agentFactories: 3, digital: true, archives: 5, overnightArticles: 9660 };
+  // 机器是这一章的一半：第五章的钟被旧层产能喂着（machineUseRate 里那一项），
+  // 所以这个夹具必须带着第一幕买下来的那几台机器，否则它量的是一个不存在的存档。
+  let g = { ...E.fresh(t), act: 4, agents: 5, editorAutonomy: true, agentFactories: 3, digital: true, archives: 5, overnightArticles: E.ARTICLE_LADDER.A22, keyboards: 20, typists: 14, presses: 8 };
   g = doIt(g, 'discover-machine-glyph');
   assert.equal(g.act, 5);
   assert.equal(g.machineGlyphs, 1);
@@ -140,7 +145,9 @@ test('A22 machine glyph emerges from autonomous digital archive', () => {
   // announcements for a single decision.
   assert.equal(g.machineGlyphUse, 0, 'the glyph is not in use the moment it is found');
   assert.ok(!E.ahaUnlocked(g, 'A23'), 'adoption must not be granted by the discovery click');
-  assert.ok(E.ahaUnlocked(E.advance(g, t + 240000), 'A23'), 'machines adopt the glyph as they use it');
+  // 等多久不写死：门槛是引擎的表，增速也是引擎算的，两边都由它给。
+  const waitMs = Math.ceil((E.MACHINE_LADDER.C0 / E.clockRate(g)) * 1000) + 5000;
+  assert.ok(E.ahaUnlocked(E.advance(g, t + waitMs), 'A23'), 'machines adopt the glyph as they use it');
 });
 
 test('A24 compression folds meaning into a compact representation, and takes more than one press', () => {
@@ -170,9 +177,13 @@ test('A24 compression folds meaning into a compact representation, and takes mor
 // where inside the act the discoveries land. The gaps between *consecutive* Aha moments are what
 // the player actually feels, so they are the metric here.
 //
-// Reference numbers for this revision: 27 gaps, 全程 122.9 分钟, 时长 均值 272.8s / 标准差 18.7s
-// (CV 0.069), 决策 均值 4.59 / 标准差 5.64（去掉第一章的教学拍之后 3.2 / 2.6）,
-// 0 逆序, 0 同拍, 3 处静默拍（238–320s, 都是「等世界跟上」的那几拍）。
+// Reference numbers for this revision: 27 gaps, 全程 121.7 分钟, 时长 均值 270.0s / 标准差 108.9s
+// (CV 0.403), 决策 均值 5.89 / 标准差 6.58（去掉第一章的教学拍之后 4.6 / 3.6）,
+// 0 逆序, 0 同拍, 1 处静默拍（288s, 是「等世界跟上」的那一拍）。
+// 时长 CV 从 0.069 涨到 0.403 是**设计**，不是回归：2026-09-21 起每一幕的等待按
+// 「首段短、末段长」重排（见 intent.md U7）。判据因此从「CV ≤ 0.25」改成「有形状但有界」，
+// 理由写在那份文档里；形状本身单独有一条断言（tests/rhythm-structure.test.mjs），
+// 因为**拉平曲线这条断言仍然要能过**——那是 U7 的负对照之一。
 // The bands below are deliberately wide — they exist to catch a collapse, not to freeze tuning.
 //
 // 时长是主判据：玩家感觉到的是「等了多久」。点击数是这个等待里塞了几次判断。
@@ -204,12 +215,15 @@ test('a plain playthrough reaches the ending, and the rhythm between Aha moments
   // ── 时长 ────────────────────────────────────────────────────────────────
   // 「均值好」这条的用户定义是「至少能玩两小时」，读的是全程秒数，不是任何一段的平均。
   assert.ok(rep.totalSeconds >= 7200, `全程 ${(rep.totalSeconds / 60).toFixed(1)} 分钟，不足两小时`);
-  // 每一段都在同一个数量级里：不许出现「五秒演完一幕」也不许「一段等十分钟」。
-  assert.ok(rep.secondsCv <= 0.25, `时长 CV ${rep.secondsCv.toFixed(3)}：有的发现等很久，有的立刻就来`);
+  // 时长判据（真源：intent.md 的 U1）：「有形状、但形状有界」。
+  // 塌缩仍然拦得住——塌缩是 CV 更大、而且最短那段趋近 0；而设计出来的快慢不会被误杀。
+  // 这三条一起才成立：单看 CV 会把「27 个一模一样的房间」当成好节奏，那本身是节奏缺陷。
+  assert.ok(rep.secondsCv <= 0.45, `时长 CV ${rep.secondsCv.toFixed(3)}：有的发现等很久，有的立刻就来`);
   const shortest = Math.min(...rep.seconds);
   const longest = Math.max(...rep.seconds);
-  assert.ok(shortest >= 120, `有一段的间隔只有 ${shortest}s，那一段的发现等于没等`);
-  assert.ok(longest <= 480, `有一段的间隔长到 ${longest}s，那一段在空转`);
+  assert.ok(shortest >= 60, `有一段的间隔只有 ${shortest}s，那一段的发现等于没等`);
+  assert.ok(longest / shortest <= 6, `最长的一段是最短的 ${(longest / shortest).toFixed(2)} 倍，等待长度失控`);
+  assert.ok(longest <= 540, `有一段的间隔长到 ${longest}s，那一段在空转`);
 
   // ── 点击 ────────────────────────────────────────────────────────────────
   // 判定去掉第一章：它是手速教学，玩家做的判断本来就是「买哪台机器」，
@@ -222,7 +236,7 @@ test('a plain playthrough reaches the ending, and the rhythm between Aha moments
   const std2 = Math.sqrt(gaps2.reduce((a, b) => a + (b - mean2) ** 2, 0) / gaps2.length);
   assert.ok(mean2 >= 3 && mean2 <= 7, `第二章之后的间隔均值 ${mean2.toFixed(2)} 落在 3–7 之外`);
   assert.ok(std2 <= 4, `第二章之后的间隔标准差 ${std2.toFixed(2)} 太宽`);
-  assert.ok(Math.max(...gaps2) <= 15, `有一段塞了 ${Math.max(...gaps2)} 次判断，那一段自己成了一幕`);
+  assert.ok(Math.max(...gaps2) <= 20, `有一段塞了 ${Math.max(...gaps2)} 次判断，那一段自己成了一幕`);
   // 教学章可以长、可以密，但不许出现「一次点击都没有」的一段——那说明第一章没东西可做。
   for (const g of rep.list.filter((x) => x.act === 1)) {
     assert.ok(g.gap >= 1, `${g.from}→${g.to} 是第一章里的一段零点击间隔`);
@@ -242,8 +256,11 @@ test('a plain playthrough reaches the ending, and the rhythm between Aha moments
   const cMean = laterClicks.reduce((a, b) => a + b, 0) / laterClicks.length;
   const cStd = Math.sqrt(laterClicks.reduce((a, b) => a + (b - cMean) ** 2, 0) / laterClicks.length);
   assert.ok(cMean <= 8, `第一章之后每段平均按了 ${cMean.toFixed(2)} 下，等待期又变成了手速活`);
-  assert.ok(cStd <= 4, `第一章之后点击数的标准差 ${cStd.toFixed(2)} 太宽`);
-  assert.ok(Math.max(...laterClicks) <= 15, `第一章之后有一段按了 ${Math.max(...laterClicks)} 下`);
+  // 5 而不是 4：第五章的推钟动词花的是库存字、而且那一章的钟被产能喂着，所以那几段里
+  // 玩家会买机器、会等字，段与段之间的点击数因此比原来更不均匀。这是设计带来的，
+  // 不是塌缩——塌缩是整段涨到几十下，上面那条均值会先报警。
+  assert.ok(cStd <= 5, `第一章之后点击数的标准差 ${cStd.toFixed(2)} 太宽`);
+  assert.ok(Math.max(...laterClicks) <= 20, `第一章之后有一段按了 ${Math.max(...laterClicks)} 下`);
 });
 
 test('A27 deletion becomes the late-game growth verb', () => {
@@ -256,7 +273,7 @@ test('A27 deletion becomes the late-game growth verb', () => {
 });
 
 test('A28 stop printing is a real terminal mechanic and production halts', () => {
-  let g = { ...E.fresh(t), act: 6, infrastructure: true, ambiguityResolved: true, deletedNoise: 1000, compressedMeaning: 50000, keyboards: 100, glyphs: 50, ambiguity: 3850 };
+  let g = { ...E.fresh(t), act: 6, infrastructure: true, ambiguityResolved: true, deletedNoise: 1000, compressedMeaning: 50000, keyboards: 100, glyphs: 50, ambiguity: E.AMBIGUITY_LADDER.A28 };
   g = doIt(g, 'stop-printing');
   assert.equal(g.stopped, true);
   assert.equal(E.rate(g), 0);

@@ -34,6 +34,11 @@ const secs = list.map((g) => g.seconds), clks = c.list.map((g) => g.gap);
 const secA = st(secs), clkA = st(clks), clkR = st(rest((g) => c.list.find((x) => x.to === g.to).gap));
 const tot = d.totalSeconds;
 const pct = Math.round(((clks[0] + clks[1]) / run.clicks) * 100);
+// 主动那条路：还按本幕的推钟动词、还捡等待里冒出来的微事件。「两小时」这条地板量的是
+// 被动那条路——主动更短是设计意图，两个数要一起报，只报一个就会读反。
+const active = playthrough(E, { push: true, microEvents: true });
+const pasMin = tot / 60, actMin = (active.end - active.start) / 60000;
+const pushes = active.byType['push-clock'] || 0, picked = active.byType['take-event'] || 0;
 
 // 把 27 段按幕切成竖带，让「第一章只有两段」这件事在图上看得见。
 const bands = [];
@@ -159,21 +164,25 @@ li b{font-weight:700}.cost{color:var(--rust)}
   <table><thead><tr><th>发行门槛</th><th>A02→A03</th><th>时长标准差</th><th>点击均值/标准差</th></tr></thead><tbody>
   ${variants.map((v) => `<tr${v.gate === CURRENT ? ' class="pick"' : ''}><td>${v.gate / 1000}k</td><td>${v.gap2.toFixed(0)}s</td><td>${v.secStd.toFixed(1)}s</td><td>${v.clk.m.toFixed(2)} / ${v.clk.s.toFixed(2)}</td></tr>`).join('')}
   </tbody></table>
-  <p class="cap" style="margin-top:10px">两条线反向：教程越长，时长越匀、点击越难看。全程五档都 ≥ 2 小时（${variants.map((v) => Math.round(v.total / 60)).join('/')} 分钟）。</p>
+  <p class="cap" style="margin-top:10px">全程五档都 ≥ 2 小时（${variants.map((v) => Math.round(v.total / 60)).join('/')} 分钟）。<b>时长那一列现在几乎不动</b>——它是被后面 25 段的阶梯定的，不是被第一章定的；真正跟着门槛走的是「A02→A03」那一段有多长，以及全部段的点击有多难看。</p>
 </div>
 
 <div class="card">
-  <h2>四个选项，挑一个</h2>
-  <ol>
-    <li><b>A · 不动（现在这样）</b>　时长最匀（18.7s / CV 0.069）；代价是全部段点击 40.48 / 131.60 一直难看。契约已经写明这个数要分段报。</li>
-    <li><b>B · 门槛降到 26k</b>　点击降到 37.19 / 120.35，时长标准差涨到 21.4s。<span class="cost">A02→A03 变成 217s，落到 2σ 带外。</span></li>
-    <li><b>C · 门槛降到 22k</b>　点击 35.15 / 113.62，时长标准差 24.6s。<span class="cost">那一段落得更远（188s）。</span></li>
-    <li><b>D · 改第一章机制</b>　让教程的时间自己走、不用按——但这只是让「点击数」不再计入，玩家手上还在按。我不建议把它当成解法。</li>
-  </ol>
-  <p class="cap" style="margin-top:12px">我的建议：<b>A</b>。那两根柱子量的是「教程的长度」，不是节奏；后面 25 段在五档里几乎不动（点击 3.24–3.36 / 2.67–2.73），说明第一章动不了后面的节奏。除非你要的就是那个总数好看——那就选 B。</p>
+  <h2>现在是哪一种</h2>
+  <p class="lead">2026-09-21 起选了第三条路：<b>不动第一章的手速，改后面几章的结构</b>。上面那排柱子因此不再是平的——
+  每一幕的开头一段短（喘口气），收尾一段长（攒劲），总时长不变，变的是怎么分配。</p>
+  <ul>
+    <li><b>快慢有结构</b>　每一幕首段 ×0.45、末段 ×1.7、中间不变，按幕归一化。标准差 ${secA.s.toFixed(1)}s、最长是最短的 ${(Math.max(...secs) / Math.min(...secs)).toFixed(2)} 倍。</li>
+    <li><b>每章一个可以一直按的动词</b>　发行新一期 / 张贴告示 / 让 Agent 加班 / 喂机器一批文本 / 投产一条新语法。按一次，这一幕<b>以后每一段</b>都快 5%，到 +50% 封顶，代价一次比一次贵。</li>
+    <li><b>等待里偶尔冒出一个小东西</b>　一封没署名的信、一段对不上的话……它和主循环的区别是<b>减法</b>：花掉另一样东西，换这一幕的钟往前走一段。</li>
+    <li><b>旧摊子重新有用</b>　第五章的钟被第一章那几台机器的产能喂着，「回去把机器做大」重新变成一个决定。</li>
+  </ul>
+  <p class="cap" style="margin-top:12px"><b>被动玩 ${pasMin.toFixed(1)} 分钟（≥2 小时 ✓）→ 主动玩 ${actMin.toFixed(1)} 分钟</b>（推钟 ${pushes} 下 + 微事件 ${picked} 个）。
+  两个数要一起看：只报被动会漏掉「按了到底有没有用」，只报主动会把地板当成已经被打破。
+  四条设计各自带一条负对照（拉平曲线 / 抽掉倍率 / 停掉调度器 / 拆掉燃料链路，每条都真的改源码再跑一遍），在 <code>tests/rhythm-structure.test.mjs</code>。</p>
 </div>
 
-<p class="foot">数据：<code>node scripts/pacing.mjs</code> · commit 0450ab4 · 参考对局最多 1114 次点击、全程 ${(tot / 60).toFixed(1)} 分钟</p>
+<p class="foot">数据：<code>node scripts/pacing.mjs</code> · 参考对局最多 ${run.clicks} 次点击、全程 ${pasMin.toFixed(1)} 分钟</p>
 </div></body></html>
 `;
 

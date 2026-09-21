@@ -39,13 +39,16 @@ li{margin:5px 0}
 <blockquote><p>fix the clicks between different aha moments until we reach to a low std. and GOOD mean version .</p><p>this is the baseline for yourrefrence .</p><p>—— 2026-09-21</p></blockquote>
 <p><strong>操作化。</strong> 节奏按「相邻两条 Aha 之间」读，不按幕读：幕是作者的划分，Aha 才是玩家收到的 节拍。三个单位各回答一个问题——秒（等了多久）· 决策点击（这一段有几个真判断）· 全部点击 （这一段按了多少下）。参考玩家只按屏幕上写着的东西走（<code>tests/pacing.mjs</code>），不自己拍预算， 否则量到的是机器人不是游戏。</p>
 <p><strong>怎么验。</strong> <code>node scripts/pacing.mjs</code> 六个口径全打；断言在 <code>tests/game-v3.test.mjs</code> 的 「a plain playthrough reaches the ending, and the rhythm between Aha moments holds」； 基线 <code>tests/pacing-baseline.json</code>，改门槛后用 <code>--diff</code> 对照。判据与三种坏形状见 <code>.claude/skills/verify/SKILL.md</code> 的 rhythm contract。</p>
-<p><strong>状态。</strong> 已达成。时长 CV 0.069（均值 272.8s / 标准差 18.7s）；去掉第一章教学后 决策 3.20 / 2.62、点击 3.28 / 2.68；0 逆序、0 同拍。 <strong>「全部 27 段点击」这一口径刻意不进判定</strong>——它量的是教程长度不是节奏，理由见 U3。</p>
+<p><strong>判据（2026-09-21 由 U7 改写，理由见那一节的「连带」）。</strong> 原来是 <code>时长 CV ≤ 0.25</code>， 那是「塌缩」的代理指标；把它压到极限会得到 27 个一模一样的房间，而「每个房间都是中等强度」 本身就是节奏缺陷。改成守「有形状、但形状有界」：</p>
+<blockquote><p>时长 CV ≤ 0.45，且 最长 ÷ 最短 ≤ 6，且 没有一段短于 60 秒，且全程 ≥ 7200 秒。</p></blockquote>
+<p>塌缩仍然拦得住（塌缩是 CV 更大、且最短段趋近 0），设计出来的快慢不会被误杀。</p>
+<p><strong>状态。</strong> 已达成。新判据下的读数：时长 CV 0.403（均值 270.0s / 标准差 108.9s / 90–490s）、 最长÷最短 5.43、全程 121.7 分钟；去掉第一章教学后决策 4.60 / 3.59、点击 4.68 / 3.60； 0 逆序、0 同拍、1 处静默拍（288s）。改判据前的那组是 CV 0.069 / 272.8±18.7s—— 把 CV 从 0.069 抬到 0.403 是这一轮的设计结果，不是回归。 <strong>「全部 27 段点击」这一口径刻意不进判定</strong>——它量的是教程长度不是节奏，理由见 U3。</p>
 <hr>
 <h2>U2 · 「均值好」＝至少能玩两小时</h2>
 <blockquote><p>when i say mean is good. i mean it will offer at least 2 hours time playing it .</p><p>—— 2026-09-21</p></blockquote>
 <p><strong>操作化。</strong> 读<strong>全程秒数</strong>，不读任何一段的平均。27 条发现各有一条会自己长的钟 （<code>AHA_CLOCK</code>：第二章读者、第四章夜间文章、第五章机器用量、第六章歧义），相邻刻度之差 按 ~280 秒写，合起来两小时。</p>
 <p><strong>怎么验。</strong> <code>node scripts/pacing.mjs</code> 报「全程 X 分钟（≥2 小时 ✓）」；断言 <code>totalSeconds &gt;= 7200</code>。</p>
-<p><strong>状态。</strong> 已达成：122.9 分钟（7376 秒）。 已知边界：离线也累积（上限 8 小时），挂机回来的玩家会跳过一部分等待——这是放置游戏的 正常行为，不是契约漏洞；「两小时」说的是从头连续玩。</p>
+<p><strong>状态。</strong> 已达成：121.7 分钟（7302 秒）——读的是<strong>被动</strong>那条路（屏幕写着什么就做什么）。 主动玩更短（97.6 分钟），那是设计意图，不是这条需求被打破。 已知边界：离线也累积（上限 8 小时），挂机回来的玩家会跳过一部分等待——这是放置游戏的 正常行为，不是契约漏洞；「两小时」说的是从头连续玩。</p>
 <hr>
 <h2>U3 · 每一章都要有第一章那种可重复的手部动作</h2>
 <blockquote><p>give each new aha momement the repatable movements just like the fist aha moment. we liek this really !</p><p>—— 2026-09-21</p></blockquote>
@@ -53,7 +56,7 @@ li{margin:5px 0}
 <p><strong>怎么验。</strong> 四层，缺一层就不算：</p>
 <ol><li><strong>被动路径不变</strong>：节奏断言（<code>npm run verify:fast</code>）仍全绿，全程仍 ≥7200 秒；</li><li><strong>主动路径真的更快</strong>：参考玩家在每章用它，读数里能看到那几段秒数下降；</li><li><strong>真实可点</strong>：浏览器契约里每章有一个可见可点的按钮，点了钟真的涨（不是只改文案）；</li><li><strong>负对照</strong>：把递增代价去掉，2 小时地板必须被打破——否则说明这个动作没有约束力，</li></ol>
 <p>「点击换时间」是假的。</p>
-<p><strong>状态。</strong> 未达成，进行中；<strong>方向已由 U7 定稿</strong>——这一条没有被否掉。中途一轮子任务把它记成 「用户改选：不加手部动作、改成计划型」，随后用户当面推翻，选定「复利推钟」。所以这一条要的 「每章都有第一章那种可重复的手部动作」是要做的，只是<strong>形式定为复利</strong>（每按一次本幕永久加速）， 不是一次性充值。记录打架的过程与被否掉的候选留在 <code>prototypes/pacing-options.answer.md</code>—— <code>/verify</code> 只写方法、不写决定，所以存档不放那里。</p>
+<p><strong>状态。</strong> 已达成（2026-09-21，形式由 U7 定稿）。第二到六章各有一个可重复动词，按下去本幕的钟 永久加速、代价递增；被动路径仍是 121.7 分钟（地板在），主动路径 97.6 分钟。 四层验证全在 <code>tests/rhythm-structure.test.mjs</code>：被动断言、主动更快、真实可点（引擎的 <code>commandReady</code> 是渲染层的同一份真源）、以及「拆掉倍率主动路径退回被动长度」这条负对照。 中途一轮子任务把这条记成「用户改选：不加手部动作、改成计划型」，随后用户当面推翻； 记录打架的过程与被否掉的候选留在 <code>prototypes/pacing-options.answer.md</code>—— <code>/verify</code> 只写方法、不写决定，所以存档不放那里。</p>
 <hr>
 <h2>U4 · 节奏要能被 /verify</h2>
 <blockquote><p>after job is done. add how u /verify this 游戏节奏 in good way</p><p>—— 2026-09-21</p></blockquote>
@@ -83,23 +86,28 @@ li{margin:5px 0}
 <h2>U7 · 这一轮的方向：快慢有结构 + 复利推钟 + 微事件</h2>
 <blockquote><p>「均质」→ <strong>改成有设计的快慢</strong></p><p>「点击不累积」→ <strong>复利：每按一次，这一章以后每一段永久快 5%，每章上限 +50%</strong></p><p>「等待期要不要加东西」→ <strong>加微事件</strong></p><p>—— 2026-09-21 问卷选项（用户点选的选项，不是手打原话）</p></blockquote>
 <p><strong>背景。</strong> 先做了一轮竞品批评自查（见下节），再把候选解法摆给用户拍板。 四个问题里「旧动词死掉」那条的答案是「换意义（Orchard Deck 式）：旧动作的产出变成新系统的燃料， 第一章印的字成为第五章机器的训练材料」。</p>
-<p><strong>操作化。</strong></p>
+<p><strong>操作化（已实现，读数见下）。</strong></p>
 <ol><li><strong>快慢有结构</strong>：每一幕的段长按「首段 ×0.45（喘口气）、末段 ×1.7（攒劲）、其余 ×1.0」重排，</li></ol>
-<p><strong>按幕归一化</strong>——每一幕的总秒数不变，全程也不变。实测标准差 18.7 → 109.1，最长÷最短 4.54×。</p>
+<p><strong>按幕归一化</strong>——每一幕的总秒数不变。实现方式是把四条阶梯的<strong>刻度</strong>重排（秒数 = 刻度差 ÷ 增速，所以只能解一个不动点，不能手调），脚本是 <code>scripts/fit-rhythm.mjs</code>。 实测标准差 18.7 → 108.9s，最长÷最短 4.54 → <strong>5.43×</strong>。</p>
 <ol><li><strong>复利推钟</strong>：每章一个可重复动词（第二章「发行新一期」· 第三章「张贴告示」·</li></ol>
-<p>第四章「让 Agent 加班」· 第五章「喂机器一批文本」· 第六章「投产一条新语法」）。 每按一次本幕时钟永久 +5%，每章上限 +50%（10 下到顶）。第一章没有——它的手速本身就是动词。</p>
-<ol><li><strong>微事件</strong>：等待中偶尔出现一个可点的世界内小事件（例如「一封没署名的信」），给一次性小倍率。</li></ol>
-<p><strong>必须过下面 AdCap 事件疲劳那条</strong>：不能是换皮重复，要能回答「它和主循环的机制差在哪」。</p>
-<ol><li><strong>旧动作供新层</strong>：第一章印的字成为第五章机器的训练材料。</li></ol>
-<p><strong>怎么验。</strong> 每一条自带负对照，缺一条就不算做到：</p>
-<ul><li>快慢结构：把曲线拉平回 CV≈0，断言仍须全绿，<strong>但</strong>要能指出哪段是恢复拍、哪段是铺垫拍——</li></ul>
-<p>说不出来就说明结构是装出来的。</p>
-<ul><li>复利推钟：关掉倍率，主动路径必须退回被动路径的长度；关掉之后全程没变，就说明这动词本来就是装饰。</li><li>微事件：关掉调度器，等待期必须重新变成「没有任何可点的东西」。</li><li>旧动作供新层：断开燃料链路，旧动词的点击次数必须掉下来。</li></ul>
-<p>另有一条不动的地板：<strong>被动玩仍 ≥ 7200 秒</strong>。主动玩更短是设计意图，不是漏洞。</p>
+<p>第四章「让 Agent 加班」· 第五章「喂机器一批文本」· 第六章「投产一条新语法」）。 每按一次本幕时钟永久 +5%，每章上限 +50%（10 下到顶），代价随按次递增。第一章没有。 加成只乘在本幕自己的钟上：第二章按的几下不会让第三章的读者也变快。</p>
+<ol><li><strong>微事件</strong>：等待中按「本幕待了多久」确定性地出现一个可点的世界内东西（第二章「一封没署名的</li></ol>
+<p>信」· 第三章「墙上被人抄走的一句话」· 第四章「一份没人署名的退稿」· 第五章「一段对不上的话」· 第六章「一句没有人认领的句子」）。<strong>它和主循环的机制差别是「减法」</strong>——主循环只往钟里加， 微事件花掉一样别的东西（库存字 / 意义）换本幕的钟往前走 45 秒的自然增量，有的还留下噪音。 这是对 AdCap 事件疲劳那条的正面回答：不是「同一套机制换张画」。</p>
+<ol><li><strong>旧动作供新层</strong>：第五章的钟被<strong>旧层产能</strong>喂着（<code>machineUseRate</code> 里那一项 <code>rate(g)/10</code>），</li></ol>
+<p>第五章的动词也花库存字。这一条原来只是文案：参考对局里产能从第二章到结局一动不动 （134/秒），玩家再也没碰过第一幕买的机器。接上之后产能一路涨到 265/秒，一局买机器 42 → 77 台。</p>
+<p><strong>怎么验。</strong> 每一条自带负对照，缺一条就不算做到。全部落在 <code>tests/rhythm-structure.test.mjs</code>，每条负对照都真的改引擎源码再跑一遍：</p>
+<ul><li>快慢结构：把曲线拉平（每一幕的目标秒数取该幕均值，用同一个 <code>reshape</code> 重排），</li></ul>
+<p>U1 的四条判据必须<strong>仍然全绿</strong>，而「首段最短、末段最长」必须失败——两条都验， 才说明形状是设计出来的、而判据守的是「有界」不是「有形状」。</p>
+<ul><li>复利推钟：主动玩家（按动词 + 捡事件）必须比被动玩家短一截（实测 121.7 → 97.6 分钟）；</li></ul>
+<p>再把倍率那一项拆掉（动词还在、代价还照付），主动路径必须退回被动路径的长度。</p>
+<ul><li>微事件：秒数没走够时不可点，走够了才可点，点掉之后要再等；点一次推进的量恰好是</li></ul>
+<p>「增速 × 45 秒」；被动路径上一个都不捡。</p>
+<ul><li>旧动作供新层：把产能那一项拆掉，第五章的钟就不再随旧摊子大小变化。</li></ul>
+<p>另有一条不动的地板：<strong>被动玩仍 ≥ 7200 秒</strong>（实测 7302 秒 / 121.7 分钟）。 主动玩更短是设计意图，不是漏洞。</p>
 <p><strong>被否掉的候选</strong>（连同否掉的理由一起记，免得下次重新发现一遍）：</p>
 <table><thead><tr><th>候选</th><th>否掉的理由</th></tr></thead><tbody><tr><td>每幕两条速度不同的钟并行</td><td>与「复利推钟」解决的是同一件事（让等待期有可权衡的东西），同时做改动面翻倍且不好归因</td></tr><tr><td>一次性充值式推钟</td><td>按完当前这段就回原速，玩家会算出「按它不如等」，按钮变成装饰</td></tr><tr><td>把点击改成纯计划型（不加手部动作）</td><td>那样点击仍是装饰性的，U3 要的东西没被满足</td></tr><tr><td>限时倍率</td><td>和微事件重叠，但更弱：它只改数字，不引入世界里的东西</td></tr></tbody></table>
-<p><strong>状态。</strong> 未达成，进行中。原型与结论存档：<code>prototypes/pacing-options.html</code>（可开可点）、 <code>prototypes/pacing-options.answer.md</code>。</p>
-<p><strong>连带：U1 的判据要改。</strong> 新结构下时长 CV = 109.1 ÷ 273 = <strong>0.40</strong>，而 U1 现在写的是 <code>CV ≤ 0.25</code>， 会直接判这条失败。改成：</p>
+<p><strong>状态。</strong> 已达成（2026-09-21）。四条各自的负对照都在 <code>tests/rhythm-structure.test.mjs</code> 里， 改完 <code>npm run verify:fast</code> 全绿（97 项）。原型与结论存档：<code>prototypes/pacing-options.html</code> （可开可点）、<code>prototypes/pacing-options.answer.md</code>；拟合脚本 <code>scripts/fit-rhythm.mjs</code> （<code>--dry</code> 只打印不写回）。</p>
+<p><strong>连带：U1 的判据要改（本次已改完，U1 那一节是真源）。</strong> 新结构下时长 CV = 109.1 ÷ 273 = <strong>0.40</strong>， 而 U1 当时写的是 <code>CV ≤ 0.25</code>，会直接判这条失败。改成：</p>
 <blockquote><p>时长 CV ≤ 0.45，且 最长 ÷ 最短 ≤ 6，且 没有一段短于 60 秒，且全程 ≥ 7200 秒。</p></blockquote>
 <p>理由：原判据是「塌缩」的代理指标（2026-09 的真问题是后五章全挤在 35 下里演完）， 但把它压到极限会得到 27 个一模一样的房间——而「每个房间都是中等强度」本身就是节奏缺陷。 新判据守的是「有形状、但形状有界」：塌缩仍然拦得住（塌缩是 CV 更大且最短段趋近 0）， 设计出来的快慢不会被误杀。</p>
 <h2>竞品批评自查（2026-09-21）</h2>
@@ -107,7 +115,7 @@ li{margin:5px 0}
 <table><thead><tr><th>类型通病</th><th>谁被点名</th><th>反例 / 解法</th><th>字工厂自查</th></tr></thead><tbody><tr><td>自动化抽走能动性</td><td>全部纯点击类；Alharthi CHI'18 承认重复机制可能诱发点击疲劳</td><td>每阶段换一种手部动词（Universal Paperclips）</td><td><strong>有</strong> → U7 的复利推钟</td></tr><tr><td>均质无纹理</td><td>Clicker Heroes；Pixel Poppers：「a treadmill… the only way to win is not to play」</td><td>有设计的快慢；阈值倍率</td><td><strong>有</strong> → U7 的快慢结构</td></tr><tr><td>旧动词死掉</td><td>AdVenture Capitalist 及多数同类：新层一出旧生成器就没意义</td><td>AdCap 的 Newspapers 加成其他投资；Derivative Clicker 用「买过的数量」给同层永久加成</td><td><strong>有</strong> → U7 的换意义</td></tr><tr><td>中后期墙 + 逼氪</td><td>AdVenture Capitalist：后期「days or weeks between significant upgrades」</td><td>转生；离线收益设上限保护节奏</td><td><strong>无</strong>（免费、有结局、离线 8 小时上限）</td></tr><tr><td>事件疲劳</td><td>AdCap：「mechanics are identical to the main game with different art」</td><td>——</td><td><strong>无</strong>，但 U7 要加事件 → 这条从「别做」变成<strong>验收条件</strong></td></tr><tr><td>没有结局 → 流失</td><td>多数无结局放置游戏</td><td>Universal Paperclips 的四小时作者式结局</td><td><strong>无</strong>（A28 停止印刷是真结局）</td></tr><tr><td>231 小时却毫无喜爱</td><td>Clicker Heroes；Eurogamer：「symptoms of loving a game, without ever feeling a scrap of fondness」</td><td>数字之外要有可回收的东西</td><td><strong>部分</strong>：日志/世界线给了叙事回收，但玩家的操作还没被回收进叙事</td></tr><tr><td>加法没有减法 = 等待不是决定</td><td>Orchard Deck：「addition with no subtraction is a wait, not a decision」</td><td>让产出可消耗、可转化</td><td><strong>有</strong> → U7 的换意义</td></tr></tbody></table>
 <p><strong>「不在其中」和「在其中」一样重要</strong>：它同样是一条要守住的性质，所以每一行都有自己的负对照。 这张表是<strong>证据与决定</strong>，住在需求文档里；<code>/verify</code> 里只留方法，不抄结论。</p>
 <h2>可执行验收</h2>
-<table><thead><tr><th>ID</th><th>必须发生的事实</th><th>验证方式</th></tr></thead><tbody><tr><td>U1</td><td>相邻两条 Aha 之间的秒数与点击数都稳定，顺序不乱、不挤在同一拍</td><td><code>node scripts/pacing.mjs</code> 六口径 + <code>tests/game-v3.test.mjs</code> 节奏断言 + <code>--diff tests/pacing-baseline.json</code></td></tr><tr><td>U2</td><td>从头连续玩，全程不少于两小时</td><td><code>pacingReport().totalSeconds &gt;= 7200</code>，报表里那行「≥2 小时 ✓」</td></tr><tr><td>U3</td><td>第二到六章各有一个可重复动作，按了直接推进当阶段的钟；被动路径仍满足 U1/U2</td><td>节奏断言（被动）+ 参考玩家主动路径读数 + 浏览器真实点击 + 去掉递增代价后 2 小时地板必须被打破</td></tr><tr><td>U4</td><td>节奏读数可复现、可对照、可回归</td><td><code>.claude/skills/verify/SKILL.md</code> rhythm contract；基线文件；<code>--diff</code></td></tr><tr><td>U5</td><td>用户意图单独存档，且与 Aha 契约不再互为副本</td><td><code>tests/intent-audit.test.mjs</code> 的非同一性与完整性断言</td></tr><tr><td>U6</td><td>设计上有据可依（不是凭感觉）</td><td>本节列出的来源；U3 的实现要能对上三条之一</td></tr><tr><td>U7</td><td>每一幕的等待有设计出来的快慢；每章有一个按下去会永久加速本幕时钟的动词；等待中有世界内微事件；旧动作的产出供新层</td><td>四条各自的负对照（见 U7）+ 被动路径仍 ≥7200 秒</td></tr></tbody></table>
+<table><thead><tr><th>ID</th><th>必须发生的事实</th><th>验证方式</th></tr></thead><tbody><tr><td>U1</td><td>相邻两条 Aha 之间的秒数有形状但不失控（CV ≤ 0.45、最长÷最短 ≤ 6、无一段 &lt; 60s），点击数稳定，顺序不乱、不挤在同一拍</td><td><code>node scripts/pacing.mjs</code> 六口径 + <code>tests/game-v3.test.mjs</code> 节奏断言 + <code>--diff tests/pacing-baseline.json</code></td></tr><tr><td>U2</td><td>从头连续玩，全程不少于两小时</td><td><code>pacingReport().totalSeconds &gt;= 7200</code>，报表里那行「≥2 小时 ✓」</td></tr><tr><td>U3</td><td>第二到六章各有一个可重复动作，按了直接推进当阶段的钟；被动路径仍满足 U1/U2</td><td><code>tests/rhythm-structure.test.mjs</code> 的「复利推钟」一条：主动更快 + 拆掉倍率必须退回被动长度；按钮可点由浏览器契约（<code>tests/browser/test_player.py</code>）覆盖</td></tr><tr><td>U4</td><td>节奏读数可复现、可对照、可回归</td><td><code>.claude/skills/verify/SKILL.md</code> rhythm contract；基线文件；<code>--diff</code></td></tr><tr><td>U5</td><td>用户意图单独存档，且与 Aha 契约不再互为副本</td><td><code>tests/intent-audit.test.mjs</code> 的非同一性与完整性断言</td></tr><tr><td>U6</td><td>设计上有据可依（不是凭感觉）</td><td>本节列出的来源；U3 的实现要能对上三条之一</td></tr><tr><td>U7</td><td>每一幕的等待有设计出来的快慢；每章有一个按下去会永久加速本幕时钟的动词；等待中有世界内微事件；旧动作的产出供新层</td><td><code>tests/rhythm-structure.test.mjs</code> 五条（形状 + 四条负对照，每条都真的改源码再跑）+ 被动路径仍 ≥7200 秒</td></tr></tbody></table>
 <h2>来源</h2>
 <ul><li>U6 结论来自对 Universal Paperclips 的公开分析：Oli Z. 的逐阶段拆解</li></ul>
 <p>（&lt;https://oliz.io/blog/2022/game-analysis-universal-paperclips/&gt;）、 Schmalzer 在 *Eludamos* 上的论文 （&lt;https://doi.org/10.7557/23.6174&gt;）、以及一篇明确指出中段死时间的评测 （&lt;https://dinogame.gg/blog/universal-paperclips-review/&gt;）。 「每阶段一种新资源 + 中段仍有死时间」这两点三处互相印证。</p>

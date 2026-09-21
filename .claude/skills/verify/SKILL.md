@@ -1,6 +1,6 @@
 ---
 name: verify
-description: Verify Glyph Factory changes against the exact candidate SHA — launch the dev server, drive the real browser surfaces with the committed driver, run the 28-case Aha invariant/transition suite on chromium and webkit, check the action disclosure contract (affordability disables, never hides), the progression contract (an active rule must run, and its gating resource must be on screen), the Aha legibility contract (every one of A01–A28 must announce itself in the player's log) and the rhythm contract (the seconds, decision-click and raw-click gaps between consecutive Aha moments: firing order, no same-click pairs, total play time ≥ 2 hours, time CV, and — per section, never as one figure — the mean/std of the decision and click gaps, with Act I read separately as the tutorial), and capture visual and interaction evidence. Use for general verification, proving an Aha change is safe, checking the 28/28 claim, verifying an action reveal/enable change, verifying an advance() cadence / Act II progression change, verifying that an Aha is perceivable on the player surface, verifying game pacing / rhythm after a threshold, cost or gate change (two-hour play-time rebuild: tests/pacing-baseline.json), and verifying user intent itself — the intent document is an argument ({{INTENT}}, default intent.md), never hard-coded here.
+description: Verify Glyph Factory changes against the exact candidate SHA — launch the dev server, drive the real browser surfaces with the committed driver, run the 28-case Aha invariant/transition suite on chromium and webkit, check the action disclosure contract (affordability disables, never hides), the progression contract (an active rule must run, and its gating resource must be on screen), the Aha legibility contract (every one of A01–A28 must announce itself in the player's log) and the rhythm contract (the seconds, decision-click and raw-click gaps between consecutive Aha moments: firing order, no same-click pairs, passive play time ≥ 2 hours, the three shape bounds — time CV, longest ÷ shortest, and no gap under 60s — the per-act shape itself, the four source-patching negative controls behind the act verbs / micro-events / fuel feed, and — per section, never as one figure — the mean/std of the decision and click gaps, with Act I read separately as the tutorial), and capture visual and interaction evidence. Use for general verification, proving an Aha change is safe, checking the 28/28 claim, verifying an action reveal/enable change, verifying an advance() cadence / Act II progression change, verifying that an Aha is perceivable on the player surface, verifying game pacing / rhythm after a threshold, cost or gate change (two-hour play-time rebuild: tests/pacing-baseline.json), and verifying user intent itself — the intent document is an argument ({{INTENT}}, default intent.md), never hard-coded here.
 ---
 
 # Verify Glyph Factory
@@ -153,34 +153,41 @@ moments holds"), so a threshold change that wrecks the rhythm fails the fast gat
 | Firing order equals A01…A28 | The list, and the narrative behind it, are ordered. Readers, articles, machine use and noise all grow on their own, so any trigger written as "an absolute value was reached" eventually overtakes the click that was supposed to cause it. |
 | No two moments on one click | The focus card shows one moment. Two on one click means one of them is announced to nobody. |
 | A 0-click gap must be ≥ 60s wide, and there are at most 3 | A designed breath (the night shift writing articles, the machines adopting a glyph) is legitimate; a collision is not. |
-| **Total play time ≥ 7200s** | "A good mean" is defined by the user as *at least two hours of play*. 27 gaps at ~4.5 minutes each. |
-| **Time CV ≤ 0.25** | Nothing fires in five seconds and nothing parks for ten minutes. |
-| **Every gap ∈ [120s, 480s]** | The floor is "this discovery was not really waited for"; the ceiling is "this stretch is idling". |
+| **Total play time ≥ 7200s** | "A good mean" is defined by the user as *at least two hours of play*. Read on the **passive** path (see below). |
+| **Time CV ≤ 0.45, longest ÷ shortest ≤ 6, and no gap < 60s** | Three bounds, not one. CV alone accepts 27 identical rooms, which is itself a pacing defect; CV alone also accepts a collapse (a collapse is a *larger* CV with the shortest gap heading to zero). The ratio catches "one stretch is ten times another"; the floor catches "this discovery was not really waited for". Together they say **有形状、但形状有界**. |
 | mean gap ∈ [3, 7] decisions, over acts II–VI | Under 3 the chapter is one press per insight; over 7 the player is grinding, not discovering. |
 | std ≤ 4 decisions, over acts II–VI | The number this metric exists for. |
-| max gap ≤ 15 decisions, and no ACT I gap is 0 | One stretch may not carry a whole act. |
+| max gap ≤ 20 decisions, and no ACT I gap is 0 | One stretch may not carry a whole act. |
 | **ACT I is the only click-heavy stretch** — exactly two gaps ≥ 100 clicks, and they are A01→A02 and A02→A03 | The tutorial is allowed to be mashing. Nothing later may be; if a third gap crosses 100 clicks, a wait has turned back into hand speed. |
-| click mean ≤ 8, std ≤ 4, max ≤ 15 per gap, over acts II–VI | Where the click unit is actually meaningful. The all-sections click figure is a statement about how long the tutorial is, not about rhythm. |
+| click mean ≤ 8, std ≤ 5, max ≤ 20 per gap, over acts II–VI | Where the click unit is actually meaningful. The all-sections click figure is a statement about how long the tutorial is, not about rhythm. |
 | Every act ≥ 5 decisions, and all 28 fire | The 2026-09 collapse got back in through this door once already. |
+| **Within every act of ≥ 3 gaps: the first gap is the act's shortest and the last is its longest, and tail ≥ 2 × head** | The shape is a *position* claim, not a variance claim — variance alone is satisfied by noise. Asserted separately in `tests/rhythm-structure.test.mjs` because the CV/ratio band above must **also pass when the curve is flattened**; conflating the two would make "shaped" and "bounded" the same test. |
+| **Passive floor, active ceiling** | The two-hour floor is read on the **passive** run (`playthrough(E)` — presses only what the screen asks for). `node scripts/pacing.mjs` also prints the active run (`push + microEvents`), which is *shorter by design*. Reporting the active number against the two-hour floor is a false failure; reporting the passive number as "what a player experiences" is a false pass. |
+| Each of the four 2026-09-21 mechanisms carries its own negative control | `tests/rhythm-structure.test.mjs` patches the engine source and re-runs: flatten ⇒ shape fails while the band passes; remove the compounding multiplier ⇒ the active path returns to the passive length; freeze the event scheduler ⇒ the wait has nothing clickable again; cut the fuel feed ⇒ act V stops tracking the old layer's output. It is not "behaviour changes if I change the code" — it is "the number moves in the direction the design claims". |
 
-**Reference numbers for the 2026-09-21 rebalance (`feat/aha-rhythm`):** 27 gaps,
-**全程 122.9 分钟**, time mean 272.8s / std 18.7s / CV 0.069, range 227–321s; decisions mean
-4.59 / std 5.64 overall and **3.2 / 2.6 over acts II–VI**; clicks mean 40.48 / std 131.60
-overall and **3.28 / 2.68 over acts II–VI**; 0 inversions; 0 same-click pairs; 3 silent beats
-(238s / 280s / 320s).
+**Reference numbers, current (`feat/aha-rhythm`, 2026-09-21 节奏结构版):** 27 gaps, passive path
+**全程 121.7 分钟 / 7302s**, time mean 270.0s / std 108.9s / **CV 0.403**, range 90–490s,
+longest ÷ shortest 5.43; decisions mean 5.89 / std 6.58 overall and **4.60 / 3.59 over acts II–VI**;
+clicks mean 41.78 / std 152.91 overall and **4.68 / 3.60 over acts II–VI**; 0 inversions;
+0 same-click pairs; **1 silent beat** (288s). Active path (push + micro events):
+**97.6 分钟**, 30 presses of the act verb, 22 micro-events.
 
 The click vector, all 27 gaps in A01…A28 order:
-`493 518 4 7 0 3 7 7 1 1 3 5 5 10 6 4 1 1 1 1 4 0 5 1 0 4 1`.
+`217 794 4 7 0 3 7 7 1 1 3 5 5 10 6 16 1 1 1 8 4 3 9 2 2 7 4`.
 The decision vector for the same run:
-`26 18 3 7 0 3 6 7 1 1 3 5 5 10 6 4 1 1 1 1 4 0 5 1 0 4 1`.
+`10 34 3 7 0 3 6 7 1 1 3 5 5 10 6 16 1 1 1 8 4 3 9 2 2 7 4`.
 
-Before this round: 全程 23 分钟, time mean 51.3s with a CV of ~2, 15 of the 27 gaps under
-6 seconds; clicks 23.15 / 68.36 overall and 4.48 / 3.18 over acts II–VI. **So the all-sections
-click figure got worse (23.15 → 40.48 mean, 68.36 → 131.60 std) while the acts-II–VI figure got
-better (4.48 → 3.28 mean, 3.18 → 2.68 std).** Both statements are true and the second is the one
-about rhythm — the first is the price of lengthening the tutorial so that its two gaps also sit
-inside the two-hour budget. Expect this trade every time Act I's duration changes, and say which
-number you are quoting.
+Two earlier revisions, for reading a diff against an old baseline. **Before the 2026-09-21 shape
+change**: 全程 122.9 分钟, time mean 272.8s / std 18.7s / **CV 0.069**, range 227–321s; decisions
+3.20 / 2.62 and clicks 3.28 / 2.68 over acts II–VI; 3 silent beats. **Before the whole rebalance**:
+全程 23 分钟, time mean 51.3s with a CV of ~2, 15 of the 27 gaps under 6 seconds.
+
+**A rising time CV is not automatically a regression.** 0.069 → 0.403 across the shape change was
+the design: the earlier number was the high-water mark of a metric pushed to its limit, and 27
+identical rooms is the defect it was hiding. Read the three bounds together and read the per-act
+shape assertion, never the CV alone. The all-sections *click* figure, by contrast, is still the
+one that moves for measurement reasons (see the Act I bullets above) — expect it to get worse
+every time the tutorial gets longer, and say which number you are quoting.
 
 Three things the numbers do **not** mean. ACT I is excluded from both the decision and the click
 bands on purpose — it is the manual tutorial, its "decisions" are machine purchases, and a longer
@@ -197,49 +204,62 @@ legitimate levers are.
 
 ```
 段        ACT   秒    决策  点击  | 这一段花在哪些动词上
-A01→A02    1    247    26   493  | sell×245 print×222 buy×24 boost×1 research-auto×1
-A02→A03    2    260    18   518  | sell×259 print×241 buy×17 publish×1
-A03→A04    2    287     3     4  | compose-rule×3 print×1
+A01→A02    1    109    10   217  | sell×107 print×100 buy×10
+A02→A03    2    398    34   794  | sell×397 print×363 buy×31 boost×1 research-auto×1 publish×1
+A03→A04    2    130     3     4  | compose-rule×3 print×1
+A04→A05    2    288     7     7  | compose-rule×6 condense×1
+A05→A06    2    288     0     0  | （等读者自己涨上来）
 …（27 行，A01→A02 到 A27→A28）…
-A22→A23    5    280     0     0  | （等机器把字形用起来）
-A25→A26    6    238     0     0  | （等歧义涨上来）
-A27→A28    6    227     1     1  | stop-printing×1
+A16→A17    4    263    16    16  | buy×12 condense×3 editor-autonomy×1
+A22→A23    5    196     3     3  | buy×3（第五章开始，产能重新有用）
+A23→A24    5    334     9     9  | compress-language×5 buy×4
+A27→A28    6    442     4     4  | buy×3 stop-printing×1
 
 口径                     n     均值     标准差     CV     最小   最大
-秒   · 全部 27 段        27   272.80    18.74  0.069    227    321
-秒   · 去掉第一章 25 段   25   274.36    18.51  0.067    227    321
-决策 · 全部 27 段        27     4.59     5.64  1.228      0     26
-决策 · 去掉第一章 25 段   25     3.20     2.62  0.820      0     10
-点击 · 全部 27 段        27    40.48   131.60  3.251      0    518
-点击 · 去掉第一章 25 段   25     3.28     2.68  0.816      0     10
+秒   · 全部 27 段        27   269.98   108.88  0.403     90    490
+秒   · 去掉第一章 25 段   25   271.32   105.37  0.388     90    490
+决策 · 全部 27 段        27     5.89     6.58  1.118      0     34
+决策 · 去掉第一章 25 段   25     4.60     3.59  0.780      0     16
+点击 · 全部 27 段        27    41.78   152.91  3.660      0    794
+点击 · 去掉第一章 25 段   25     4.68     3.60  0.769      0     16
+
+被动 121.7 分钟 → 主动 97.6 分钟（−24.1 分钟；推钟 30 下 · 微事件 22 个）
 ```
+
+`--trace` 这一列现在还会告诉你在哪几段里玩家动手了。**`buy` 出现在第四章以后**是
+2026-09-21 之后才有的形状：第五章的钟被旧层产能喂着，所以「回去把旧摊子做大」重新变回一个
+决定。如果某次改动之后 `buy` 在 A16 之后消失了，先查那条燃料链路，别急着调节奏——那是
+「旧动词死掉」这个类型病又回来了，而它在时长那一列上看不出来。
 
 六个口径不是六份读数，是同一份读数的六个面：三种单位 × 两种范围。**报数时必须说清是哪
 一格**——「点击 std 131.60」和「点击 std 2.68」说的是同一局，前者是教程长度，后者是节奏。
 
 ### Act I 是唯一的旋钮
 
-要压「点击」这一列，只有第一章能动，而唯一的旋钮是 `ACT_GATES[1]` 里那条
-`lifetimeGlyphs`（发行门槛，当前 32000）。下面是五个值各实跑一遍的结果：
+要压「点击」这一列，只有第一章能动。**第二章以后那两个旋钮**：`ACT_GATES[1]` 里那条
+`lifetimeGlyphs`（发行门槛，当前 32000）决定第一章有多长；`AHA_GOALS.A02.need`（打字员几个，
+当前 3）决定第一章的**形状**（首段多短、末段多长），它是 `scripts/fit-rhythm.mjs` 搜出来的，
+不是手写的。下面是发行门槛五个值各实跑一遍的结果：
 
-| 发行门槛 | A02→A03 | 全程 | 时长标准差 | 时长 CV | 点击（全部） | 点击（去第一章） |
-|---|---|---|---|---|---|---|
-| 14000 | 121s | 120.6 分 | 34.2s | 0.128 | 30.22 / 101.10 | 3.36 / 2.73 |
-| 18000 | 153s | 121.2 分 | 29.4s | 0.109 | 32.56 / 106.48 | 3.36 / 2.73 |
-| 22000 | 188s | 121.7 分 | 24.6s | 0.091 | 35.15 / 113.62 | 3.36 / 2.73 |
-| 26000 | 217s | 122.2 分 | 21.4s | 0.079 | 37.19 / 120.35 | 3.24 / 2.67 |
-| **32000（当前）** | 260s | 122.9 分 | **18.7s** | **0.069** | 40.48 / 131.60 | 3.28 / 2.68 |
+| 发行门槛 | A01→A02 | A02→A03 | 全程 | 时长标准差 | 时长 CV | 点击（全部） | 点击（去第一章） |
+|---|---|---|---|---|---|---|---|
+| 14000 | 109s | 259s | 119.5 分 | 105.7s | 0.399 | 31.74 / 102.95 | 4.84 / 4.21 |
+| 18000 | 109s | 291s | 120.0 分 | 105.8s | 0.397 | 34.00 / 114.01 | 4.76 / 3.87 |
+| 22000 | 109s | 326s | 120.6 分 | 106.3s | 0.397 | 36.52 / 126.48 | 4.68 / 3.59 |
+| 26000 | 109s | 355s | 121.0 分 | 107.3s | 0.400 | 38.56 / 136.94 | 4.68 / 3.79 |
+| **32000（当前）** | 109s | 398s | 121.7 分 | **108.9s** | 0.403 | 41.78 / 152.91 | 4.60 / 3.59 |
 
 三件事从这张表里直接读得出来，改这个旋钮之前先读一遍：
 
-1. **五档全程都 ≥ 2 小时**（120.6–122.9 分）。两小时这条线不靠这个旋钮守，靠的是后面
-   25 段的钟。
-2. **「去第一章」那一列几乎不动**（点击 3.24–3.36 / 2.67–2.73）。第一章动不了后面的
-   节奏——所以这是个「你要不要那个总数好看」的取舍，不是节奏问题。
-3. **门槛越低，全部段点击越好看、时长越不匀**：14000 时 `A02→A03` 只有 121s，远在
-   2σ 带（当前带 235–310s）之外。也就是说，压点击的代价是拿一条时长离群点去换。
+1. **五档全程都 ≥ 2 小时**（119.5–121.7 分），**时长 CV 也几乎不动**（0.397–0.403）。
+   两小时和形状这两条线都不靠这个旋钮守，靠的是后面 25 段的阶梯。
+2. **「去第一章」那一列会动，而且方向和 2026-09-21 之前相反**：现在门槛越低，后面几章
+   的点击**越难看**（4.84 → 4.60）。原因在第五章——它的钟被旧层产能喂着，第一章短了，
+   玩家买到的机器就少，第五章就得花更多动作去补。所以「压总点击」不再是免费的：
+   它现在会真的动到后面的节奏。
+3. **全部段点击那一列仍然只反映教程长度**（31.74 → 41.78），这一半结论没变。
 
-当前选择是 32000（时长最匀），代价是全部段点击 40.48 / 131.60 一直难看；这是有意选的，
+当前选择是 32000（后 25 段最干净），代价是全部段点击 41.78 / 152.91 一直难看；这是有意选的，
 理由写在上面的断言表里。要换成别的档，改完必须重跑 `npm run verify:fast`（点击断言的
 `heavy` 列表会跟着变）和 `--diff`。
 
@@ -269,12 +289,26 @@ console.log(d.secondsStd.toFixed(1), d.totalSeconds, c.mean.toFixed(2), c.std.to
 Run `node scripts/pacing.mjs` and `node scripts/pacing.mjs --unit clicks` before and after, plus
 `node scripts/pacing.mjs --diff tests/pacing-baseline.json` (add `--unit clicks` for the click
 column — the diff's per-gap "changed" threshold is unit-aware, 4 decisions vs 50 clicks).
-Four failure shapes to look for: a *reordering*, where a discovery that used to follow another
+Five failure shapes to look for — the first four are about the numbers, the fifth is about the
+machinery behind them. A *reordering*, where a discovery that used to follow another
 now precedes it (a copy change the diff will not show you); a *clumping*, where several gaps go
 to 1–2 and one goes to 15+ (the 2026-09 collapse in miniature); a *shortening*, where the total
 drops below two hours while every other number stays healthy — that is what happened before this
 round, and no assertion in the suite caught it; and a *third heavy gap*, where a gap past Act I
 crosses 100 clicks, which means a wait has become hand speed again.
+
+The fifth: **the rhythm numbers all hold while the machinery behind them has gone inert.** Since
+2026-09-21 four pieces of machinery produce the shape, the floor and the texture — the act verbs
+(one per act from Act II, compounding, escalating cost), the micro-event scheduler (deterministic,
+keyed to `actSeconds`), the fuel feed (Act V's clock reads the old layer's `rate`), and the
+ladders themselves. Each of them can be disconnected without moving a single number in the
+paragraph above, because the reference player is *passive*: it never presses a verb and never
+picks up an event, so a dead verb and a live one look identical in the passive report. That is
+exactly why each one carries a source-patching negative control in
+`tests/rhythm-structure.test.mjs`, and why the report prints the active line next to the passive
+one. **If you are reviewing a diff that touches any of the four, the passive numbers are not
+evidence.** Run the control suite; that is the only thing that distinguishes "the mechanism is
+there" from "the mechanism is still on screen".
 
 Two structural lessons, both worth more than any single number:
 
@@ -856,3 +890,14 @@ overclaimed verdict.
 Re-run every command above before changing this file. Update only when actual launch
 commands, routes, browser harness, or proof requirements change, and keep the "does not
 prove" section current — new F-tests or an ordering assertion would retire a bullet there.
+
+**门槛数字不要在这一节里手抄。** 这一节原来抄过一份，`A02` 那行写着打字员 5 而引擎要的是 8，
+抄的那份还正是「独立验证」的那份（见 `public/aha-review-contract.js` 的头部注释）。现在凡是
+要引用门槛的地方都从引擎读：Python 侧用 `_ladder()` / `_goal()`（`tests/browser/test_player.py`），
+JS 侧直接读 `E.READERS_LADDER` 这类导出。要写进说明文字的，写**读法**，不写数字。
+
+**阶梯是拟合出来的，不是手写的。** 改任何增速、代价、门槛之后，四条阶梯会失配——
+重新拟合用 `node scripts/fit-rhythm.mjs`（先 `--dry` 看读数再写回）。拟合脚本和判据是分开的
+两份东西：脚本负责「怎么分」，`tests/game-v3.test.mjs`（有界）与
+`tests/rhythm-structure.test.mjs`（有形状 + 四条负对照）负责「分了之后算不算数」。改脚本
+不要顺手改断言，改断言之前先改 `{{INTENT}}`。

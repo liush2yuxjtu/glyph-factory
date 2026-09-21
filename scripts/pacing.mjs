@@ -120,6 +120,17 @@ for (const [label, xs] of rows) {
   console.log(`${padW(label, 24)} ${String(t.n).padStart(4)} ${t.m.toFixed(2).padStart(9)} ${t.s.toFixed(2).padStart(9)} `
     + `${(t.s / t.m).toFixed(3).padStart(7)} ${t.lo.toFixed(0).padStart(7)} ${t.hi.toFixed(0).padStart(7)}`);
 }
+// 被动 / 主动：U7 的两条路，量的不是同一件事。被动 = 屏幕上写着什么就做什么——「全程 ≥ 两小时」
+// 这条地板说的就是它。主动 = 还按本幕的复利动词、还捡等待里冒出来的微事件。主动更短是设计意图，
+// 不是漏洞；要读出来的是短了多少、以及短的是不是那两个动词带来的（负对照在
+// tests/rhythm-structure.test.mjs 里，把倍率拆掉主动路径必须退回被动）。
+const active = playthrough(E, { push: true, microEvents: true });
+const passiveMin = (run.end - run.start) / 60000;
+const activeMin = (active.end - active.start) / 60000;
+console.log(`\n被动 ${passiveMin.toFixed(1)} 分钟 → 主动 ${activeMin.toFixed(1)} 分钟`
+  + `（−${(passiveMin - activeMin).toFixed(1)} 分钟；推钟 ${active.byType['push-clock'] || 0} 下 · `
+  + `微事件 ${active.byType['take-event'] || 0} 个）　地板 ${passiveMin >= 120 ? '≥2 小时 ✓' : '不足 2 小时 ✗'}`);
+
 const tut = reports.clicks.list.filter(inTutorial);
 console.log(`\n第一章两段占全剧点击的 ${Math.round((tut.reduce((a, g) => a + g.gap, 0) / run.clicks) * 100)}%`
   + `（${tut.map((g) => g.gap).join(' + ')} / ${run.clicks}）——要压它只能改第一章，见 verify skill 的「Act I 是唯一的旋钮」一节。`);

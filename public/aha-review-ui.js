@@ -22,7 +22,11 @@
     const raw=frame.contentWindow.localStorage.getItem(E.SAVE_KEY);
     if(!raw) return null;
     const value=JSON.parse(raw);
-    delete value.updatedAt; delete value.startedAt;
+    // 玩家那一帧在整个核验过程中一直是活的：它自己的钟在走，每 500ms 存一次档。
+    // 「时间自己会改的」字段因此要排掉，否则读到的是玩家在呼吸，而不是评审动了手——
+    // `actSeconds`（微事件的调度器）和两个时间戳同属这一类。剩下的任何一处差异，
+    // 仍然是「评审改变了真实玩家进度」。
+    for(const key of ['updatedAt','startedAt','actSeconds']) delete value[key];
     return JSON.stringify(value);
   }
   for(const item of E.AHAS) {
@@ -50,14 +54,19 @@
     const results=[], previous=selected;
     try {
       const saved=progress();
-      const reveals=frame.contentWindow.localStorage.getItem('glyph-factory-ui-reveals-v3');
+      const revealsKey='glyph-factory-ui-reveals-v3';
+      const reveals=frame.contentWindow.localStorage.getItem(revealsKey);
       for(const id of audit.ids) {
         say(`正在核验 ${id}：真实状态 + 动作效果…`);
         try { results.push(audit.exercise(trigger(id),id)); }
         catch(error) { results.push({id,pass:false,errors:[error.message]}); }
         await new Promise((resolve)=>requestAnimationFrame(resolve));
       }
-      if(progress()!==saved || frame.contentWindow.localStorage.getItem('glyph-factory-ui-reveals-v3')!==reveals) throw new Error('评审改变了真实玩家进度或发现记录');
+      // 两种隔离各说各的：原来两个条件合成一句「进度或发现记录」，一旦真的坏了，
+      // 读的人得自己再跑一遍才知道是哪一个。错误信息的作用就是省掉那一步。
+      const saveChanged=progress()!==saved;
+      const revealsChanged=frame.contentWindow.localStorage.getItem(revealsKey)!==reveals;
+      if(saveChanged||revealsChanged) throw new Error(`评审改变了真实玩家的${saveChanged?'进度':''}${saveChanged&&revealsChanged?'和':''}${revealsChanged?'发现记录':''}`);
       const failed=results.filter((r)=>!r.pass);
       evidence.textContent=JSON.stringify(results,null,2);
       say(failed.length ? `FAIL · ${failed.map((r)=>r.id).join('、')}；详情见逐项证据。` : '28 / 28 PASS · 状态不变量、真实动作效果、终态与存档隔离全部通过。',failed.length?'fail':'pass');

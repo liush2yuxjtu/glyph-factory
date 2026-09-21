@@ -9,9 +9,27 @@
 // 两份必须一致，否则两次读数不可比。改这里就要同时改那条测试。
 import { readFileSync } from 'node:fs';
 
-export function loadEngine() {
+/** 从一段引擎源码求值出引擎本身。负对照改完源码之后要用它重新起一个引擎。 */
+export function evaluateEngine(src) {
+  return new Function(`${src}\nreturn GlyphEngineV3;`)();
+}
+
+/**
+ * 载入引擎。可以带一处源码替换，用来做负对照：「把这条机制拆掉，读数必须真的变」。
+ *
+ * 替换不上就直接抛：负对照最阴的坏法不是失败，是**它其实没生效**——测试仍然绿，
+ * 而它证明的是一句空话。所以这里把「找不到那段源码」当错误，不当默认值。
+ * @param {[string, string]} [patch] [要替换掉的源码, 换成什么]
+ */
+export function loadEngine(patch) {
   const source = readFileSync(new URL('../public/glyph-engine-v3.js', import.meta.url), 'utf8');
-  return new Function(`${source}\nreturn GlyphEngineV3;`)();
+  const evaluate = evaluateEngine;
+  if (!patch) return evaluate(source);
+  // 函数形式用于多处替换；它自己负责确认替换真的发生了（替换函数里 assert 一下就行）。
+  if (typeof patch === 'function') return evaluate(patch(source));
+  const [from, to] = patch;
+  if (!source.includes(from)) throw new Error(`负对照要替换的源码不在引擎里：${String(from).slice(0, 70)}`);
+  return evaluate(source.replace(from, to));
 }
 
 export const REFERENCE_START = 1789526400000;
@@ -24,15 +42,23 @@ const strip = (s) => JSON.stringify({ ...s, log: 0, updatedAt: 0, ruleCredit: 0 
 
 /**
  * 走完一整局，记录每条 Aha 是在第几次点击之后发生的。
+ *
+ * `push` / `microEvents` 决定这个玩家按不按那一幕的复利动词和等待里冒出来的微事件。
+ * **默认两个都关**——参考对局量的是「被动玩」：不按任何额外的东西，屏幕上写着什么就做什么。
+ * 「全程 ≥ 两小时」这条地板说的就是这条路，把推钟算进去的话，地板量的是主动玩家能压到多短，
+ * 那是另一条需求（U3「主动路径真的更快」）。两条都读，但读的是不同的东西。
+ *
  * @returns {{ stopped: boolean, ahaAt: Map<string, {clicks:number, decisions:number, t:number, act:number}>,
- *             clicks: number, decisions: number, decisionsByAct: Record<number, number>, state: object }}
+ *             clicks: number, decisions: number, decisionsByAct: Record<number, number>,
+ *             byType: Record<string, number>, state: object }}
  */
-export function playthrough(E, { start = REFERENCE_START, maxTicks = 200000 } = {}) {
+export function playthrough(E, { start = REFERENCE_START, maxTicks = 200000, push = false, microEvents = false } = {}) {
   let t = start;
   let g = E.fresh(t);
   const ahaAt = new Map();
   const known = new Set(g.ahaSeen);
   const decisionsByAct = {};
+  const byType = {};
   let clicks = 0;
   let decisions = 0;
 
@@ -60,6 +86,7 @@ export function playthrough(E, { start = REFERENCE_START, maxTicks = 200000 } = 
     if (strip(next) === strip(base)) return false;
     g = next;
     clicks += 1;
+    byType[type] = (byType[type] || 0) + 1;
     if (!NON_DECISIONS.has(type)) {
       decisions += 1;
       decisionsByAct[base.act] = (decisionsByAct[base.act] || 0) + 1;
@@ -81,7 +108,9 @@ export function playthrough(E, { start = REFERENCE_START, maxTicks = 200000 } = 
     if (binding.key === 'credits') return broke();
     if (binding.key === 'meaning') return (g.credits < 60 || g.glyphs < 20) ? broke() : cmd('condense');
     if (binding.key === 'composed') return (g.credits < 40 || g.glyphs < 2) ? broke() : cmd('compose-rule');
-    if (binding.key === 'glyphs') return (g.credits >= 40 && g.glyphs < 2) ? cmd('print') : broke();
+    // 缺字的时候「卖字」是把事情弄反：第五章的推钟动词就是花库存字的，卖了只会更远。
+    // 缺字只有两种补法——印一个（字真的一个都没有了），或者等机器出字。
+    if (binding.key === 'glyphs') return (g.credits >= 40 && g.glyphs < 2) ? cmd('print') : false;
     return false; // 剩下的（读者、噪音、时间）只能等，等不是点击。
   };
   const press = (type, props = {}) => {
@@ -148,6 +177,19 @@ export function playthrough(E, { start = REFERENCE_START, maxTicks = 200000 } = 
         else cmd('print');
       }
     } else {
+      // 主动玩家多做的两件事，顺序和屏幕上一样：先捡等待里冒出来的东西，再按本幕的推钟动词。
+      // 两个都要经过 `commandReady`——「到点了」「付得起」是引擎说了算，不是这里猜的。
+      if (microEvents && E.commandReady(g, 'take-event').ready) cmd('take-event');
+      if (push && E.commandReady(g, 'push-clock').ready) cmd('push-clock');
+      // 第四章以后还买机器：屏幕上那几张机器卡从第一幕起一直都在，而第五章的钟被产能喂着
+      // （引擎的 machineUseRate）——一个看着屏幕玩的玩家在这里会买。不买的话，「旧层还有用」
+      // 就只是设计文档里的一句话，读数是看不出来的。
+      if (g.act >= 4) {
+        const pick = E.UNITS.map((u) => ({ u, c: E.cost(g, u.id) }))
+          .filter(({ u, c }) => g.lifetimeGlyphs >= u.unlock && g.credits >= c * 4 && g[u.id] < 10000)
+          .sort((a, b) => a.c - b.c)[0];
+        if (pick) cmd('buy', { id: pick.u.id });
+      }
       const step = plan();
       // 计划里的事情都做完了，就照着屏幕上那行「下一个阶段 还差 …」补。参考玩家的整个
       // 行为准则就这一条：屏幕让他做什么，他就做什么；屏幕没让他做什么，他就不按。
@@ -157,7 +199,7 @@ export function playthrough(E, { start = REFERENCE_START, maxTicks = 200000 } = 
     g = E.advance(g, t);
     observe();
   }
-  return { stopped: g.stopped, ahaAt, clicks, decisions, decisionsByAct, events, state: g, start, end: t };
+  return { stopped: g.stopped, ahaAt, clicks, decisions, decisionsByAct, byType, events, state: g, start, end: t };
 }
 
 const mean = (xs) => xs.reduce((a, b) => a + b, 0) / xs.length;

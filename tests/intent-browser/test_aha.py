@@ -20,6 +20,19 @@ REVEALS = 'glyph-factory-ui-reveals-v3'
 FIXED = datetime(2026, 9, 18, 12, 0, tzinfo=timezone.utc)
 META = re.compile(r'\bA(?:0[1-9]|1\d|2[0-8])\b|\bAHA\b|\bACT\s+[IVX\d]|Director Mode|导演模式', re.I)
 
+# 门槛数字从引擎的阶梯表里读，不在这里手抄。`tests/browser/test_player.py` 里有一份同样的
+# 读取器（两个目录各自跑各自的 unittest，共享模块要各自加 sys.path，不值得）；两份读的是
+# 同一个引擎，读数不会漂。手抄的那份已经漂过一次：F03 的种子写着歧义 3950，引擎要 4803，
+# 于是「停止印刷」一直是灰的，测试报的是点击超时——症状离病因很远。
+def _ladder(name):
+    source = (ROOT / 'public' / 'glyph-engine-v3.js').read_text(encoding='utf-8')
+    match = re.search(r'const %s = \{([^}]*)\}' % name, source)
+    if not match:
+        raise RuntimeError('engine ladder %s not found; refusing to guess a fixture' % name)
+    return {key.strip(): int(value) for key, value in (part.split(':') for part in match.group(1).split(','))}
+
+AMBIGUITY = _ladder('AMBIGUITY_LADDER')
+
 class Handler(SimpleHTTPRequestHandler):
     def log_message(self, *args): pass
     def list_directory(self, path): self.send_error(404)
@@ -31,6 +44,9 @@ class Handler(SimpleHTTPRequestHandler):
         self.send_header('Cache-Control', 'no-store'); super().end_headers()
 
 class AhaReview(unittest.TestCase):
+    # 存档对比失败时 unittest 默认只打 8 行 diff。这条断言比的是一整份存档，
+    # 截断之后看到的是 `'ds': 4` 这种半截键名——挡住的恰好是它要提供的信息。
+    maxDiff = None
     @classmethod
     def setUpClass(cls):
         if not (ROOT / 'review-dist/aha.html').is_file():
@@ -94,14 +110,21 @@ class AhaReview(unittest.TestCase):
     def test_all_28_verification_is_repeatable_and_preserves_real_save(self):
         self.open()
         self.button('印字').click(); self.button('出售全部库存').click()
-        before=self.saved(); before.pop('updatedAt'); before.pop('startedAt')
+        # 排掉「玩家自己那一帧的钟会推进的」字段：两个时间戳，以及 `actSeconds`（微事件的
+        # 调度器就是它）。玩家那一帧在整个核验过程中一直是活的，它自己走秒不是评审动了存档——
+        # 评审真的动手会改的是 glyphs / act / ahaSeen 这一类。剩下的任何差异仍然是失败。
+        def snapshot():
+            value=self.saved()
+            for key in ('updatedAt','startedAt','actSeconds'): value.pop(key)
+            return value
+        before=snapshot()
         reveals=self.page.evaluate(f"localStorage.getItem('{REVEALS}')")
         for attempt in range(2):
             self.assertEqual(self.run_all(),'pass',self.page.locator('#audit-status').inner_text())
             evidence=json.loads(self.page.locator('#audit-evidence').text_content())
             self.assertEqual(len(evidence),28)
             self.assertTrue(all(item['pass'] for item in evidence))
-        after=self.saved(); after.pop('updatedAt'); after.pop('startedAt')
+        after=snapshot()
         self.assertEqual(after,before)
         self.assertEqual(self.page.evaluate(f"localStorage.getItem('{REVEALS}')"),reveals)
         self.assert_player()
@@ -152,7 +175,9 @@ class AhaReview(unittest.TestCase):
         self.assert_player()
 
     def test_F03_real_deletion_unlocks_final_stop(self):
-        self.seed({'version':3,'act':6,'published':True,'infrastructure':True,'compressedMeaning':50000,'deletedNoise':0,'noise':1500,'ambiguity':3950,'presses':1})
+        # 「消解歧义」会先砍掉 25 点歧义，所以种子要比停机门槛高过那一刀——否则最后一步
+        # 会卡在「还差 歧义 4778/4803」上，而症状是点击超时，离病因很远。
+        self.seed({'version':3,'act':6,'published':True,'infrastructure':True,'compressedMeaning':50000,'deletedNoise':0,'noise':1500,'ambiguity':AMBIGUITY['A28']+25,'presses':1})
         self.open()
         expect(self.button('停止印刷')).to_have_count(0)
         # 歧义没消解之前删不动：分不清哪句是噪音。这条门槛同时把 A27 排在 A26 后面，
