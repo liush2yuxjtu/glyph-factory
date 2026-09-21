@@ -39,6 +39,13 @@ def _ladder(name):
     return {key.strip(): int(value) for key, value in (part.split(":") for part in match.group(1).split(","))}
 
 
+def _constant(name):
+    match = re.search(rf"const {name} = (\d+)", ENGINE_SOURCE)
+    if not match:
+        raise RuntimeError(f"engine constant {name} not found; refusing to guess a fixture")
+    return int(match.group(1))
+
+
 def _goal(aid):
     match = re.search(rf"{aid}:\{{key:'\w+',need:([^}}]+)\}}", ENGINE_SOURCE)
     if not match:
@@ -50,6 +57,7 @@ def _goal(aid):
     return _ladder(ladder)[key]
 
 
+EVENT_EVERY = _constant("EVENT_EVERY")
 READERS = _ladder("READERS_LADDER")
 ARTICLES = _ladder("ARTICLE_LADDER")
 MACHINE = _ladder("MACHINE_LADDER")
@@ -199,6 +207,10 @@ class PlayerContract(unittest.TestCase):
 
     def button(self, label):
         return self.page.get_by_role("button", name=re.compile(re.escape(label)))
+
+    def save(self):
+        """读真实存档。断言写状态有没有真的变，不写「按钮文字变了没有」。"""
+        return self.page.evaluate(f"JSON.parse(localStorage.getItem('{SAVE}'))")
 
     def assert_no_spoilers(self):
         self.assertNotRegex(self.page.locator("body").inner_text(), META_COPY)
@@ -437,6 +449,55 @@ class PlayerContract(unittest.TestCase):
                 for parent, child in ((".metrics", ".metric.primary"), ("#primary-actions", "button")):
                     widths = self.page.locator(parent).evaluate("(el, child) => [el.clientWidth, el.querySelector(child).getBoundingClientRect().width]", child)
                     self.assertLessEqual(abs(widths[0] - widths[1]), 2, f"{parent} leaves an undiscovered empty column")
+
+    def test_intent_act_verb_is_a_real_button_and_speeds_up_this_act(self):
+        # U3 第三层「真实可点」：这件事在引擎里验完不算数，玩家面上得有一个看得见、点得动、
+        # 点了真的改变状态的按钮。断的是「加成记上了 + 代价真的付了」，不是文案有没有变。
+        self.seed({"version": 3, "act": 2, "published": True, "readers": READERS["A04"],
+                   "glyphs": 5000, "credits": 20000, "meaning": 3000, "actSeconds": 0})
+        self.open()
+        verb = self.button("发行新一期")
+        expect(verb).to_be_visible()
+        expect(verb).to_be_enabled()
+        before = self.save()
+        verb.click()
+        self.page.clock.run_for(600)
+        after = self.save()
+        self.assertEqual(after["boosts"][1], before["boosts"][1] + 1, "按了推钟动词，本幕的加成没有记上")
+        self.assertLess(after["meaning"], before["meaning"], "按了推钟动词却没有付出代价")
+        self.assertLess(after["credits"], before["credits"])
+
+    def test_intent_act_verb_does_not_exist_in_act_one(self):
+        # 第一章没有推钟动词（它的手速本身就是动词）。引擎说「这一幕没有」，屏幕上就不该有——
+        # 「这一幕还没有」和「买不起」是两件事：前者不渲染，后者灰着写明还差什么。
+        self.seed({"version": 3, "act": 1, "published": False, "glyphs": 0, "credits": 50, "lifetimeGlyphs": 10})
+        self.open()
+        expect(self.button("印字")).to_be_visible()
+        expect(self.button("发行新一期")).to_have_count(0)
+        expect(self.button("一封没署名的信")).to_have_count(0)
+
+    def test_intent_micro_event_appears_only_when_due_and_advances_the_act_clock(self):
+        # U7 第三条：等待里会出现一个世界内的东西，而且**不是常驻按钮**——没到点的时候屏幕上
+        # 什么都没有，这正是它和主循环的区别。点下去要真的把本幕的钟往前推一段。
+        self.seed({"version": 3, "act": 4, "published": True, "agents": 5, "editorAutonomy": True,
+                   "agentFactories": 1, "digital": True, "archives": 5, "overnightArticles": 200,
+                   "meaning": 500, "credits": 5000, "actSeconds": 0})
+        self.open()
+        expect(self.button("一份没人署名的退稿")).to_have_count(0)
+        self.page.clock.run_for(EVENT_EVERY * 1000 + 4000)
+        event = self.button("一份没人署名的退稿")
+        expect(event).to_be_visible()
+        expect(event).to_be_enabled()
+        before = self.save()
+        event.click()
+        self.page.clock.run_for(600)
+        after = self.save()
+        self.assertEqual(after["eventsTaken"], before["eventsTaken"] + 1)
+        self.assertLess(after["meaning"], before["meaning"], "微事件没有付出代价")
+        # 一次事件 = 本幕的钟往前走 45 秒的自然增量（增速 = agents × 0.5），不是一句文案。
+        self.assertGreater(after["overnightArticles"] - before["overnightArticles"], 90)
+        # 点掉之后要重新等：屏幕上不该马上又有东西可以点。
+        expect(self.button("一份没人署名的退稿")).to_have_count(0)
 
     def test_intent_digital_publishing_replaces_inventory(self):
         self.seed({"version":3,"act":4,"published":True,"agents":5,"agentFactories":1,"glyphs":30,"meaning":300,"overnightArticles":ARTICLES["A20"]})
