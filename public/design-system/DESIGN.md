@@ -234,6 +234,32 @@ G1/G2 都要「门槛」这一组数字。它们原先散在 `glyph-game-v3.js` 
 
 两边都改才是当前唯一正确的做法——这也是把它列为第 2 优先级的原因。
 
+## 6.5 屏幕与流程（2026-09-21 并入）
+
+[`flows.html`](./flows.html) 把 2026-09-20 那次流程审计的产物接进本包：17 个屏幕状态、6 条流程、29 个热点步骤。
+
+它不是设计稿，是**读数**。构建链是 `screens.py`（真实浏览器逐屏读 DOM）→ `rebuild_svg.py`（按读数画 SVG），
+屏幕上的块、按钮文字、启用/禁用状态、栅格列数全部来自实测。列数尤其：`grid-template-columns` 在元素隐藏时
+只回报声明值、还会留下空轨道，只有数首行子元素才得到真实列数（390px 下篇章条实际是 2 列不是 3 列）。
+
+**并入时做的是并轨。** 画谱原本自带一份 `:root`：令牌**名字**与本包相同、**数值**是另抄的——正是 §4.4 批评的
+那种「复制粘贴而非引用」。现在它 link `tokens.css`，本地只留一层别名，零新增色值：
+
+| 原画谱令牌 | 现在的值 |
+|---|---|
+| `--ground` | `var(--paper)` |
+| `--sunk` | `var(--surface-4)` |
+| `--rule` | `var(--ink)` |
+| `--ok-fill` / `--ok-ink` / `--ok-line` | `var(--green)` / `var(--ink)` / `var(--ink)` |
+| `--bad-fill` / `--bad-ink` / `--bad-line` | `var(--danger-bg)` / `var(--danger-ink)` / `var(--rust)` |
+| `--warn-fill` / `--warn-ink` / `--warn-line` | `var(--surface-focus)` / `var(--focus-body)` / `var(--rust)` |
+| `--info-fill` / `--info-ink` / `--info-line` | `var(--review-bg)` / `var(--review-note)` / `var(--blue)` |
+| `--shadow` / `--shadow-soft` | `var(--shadow-3)` / `var(--shadow-1)` |
+| `--mono` / `--sans` / `--serif` | `var(--font-num)` / `var(--font-ui)` / `var(--font-mark)` |
+
+画谱自带的**两套深色主题一并删除**：系统的唯一视觉世界是纸与墨，本包任何一页都不另立一套配色。
+`flows.html` 因此是 `public/` 里第一个**不自带 `:root`** 的页面——§4.3 那张「各页复制一份」的表从它开始可以往下降。
+
 ## 7. 怎么用这个包
 
 ```bash

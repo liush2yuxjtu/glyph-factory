@@ -71,6 +71,11 @@ td code{font-family:var(--font-num);font-size:var(--text-mini)}
       <span>组件设计真源：15 组（12 已上线 + 3 提案），全部变体与状态、intent 契约。</span>
       <code>components.html</code>
     </a>
+    <a class="card" href="./flows.html">
+      <b>流程与屏幕 →</b>
+      <span>17 屏矢量重绘、6 条流程、29 个热点步骤。每屏按真实 DOM 读数画，全部消费 <code>tokens.css</code>。</span>
+      <code>flows.html</code>
+    </a>
     <a class="card" href="./preview/index.html">
       <b>令牌预览 →</b>
       <span>色板、字阶、间距、描边阴影、动效、对比度自检。运行时读取真源。</span>
@@ -93,6 +98,7 @@ td code{font-family:var(--font-num);font-size:var(--text-mini)}
     <tr><th>层</th><th>文件</th><th>地位</th></tr>
     <tr><td>设计数值</td><td><code>tokens.css</code></td><td>唯一真源。改数值只改这里。</td></tr>
     <tr><td>组件设计</td><td><code>components.html</code></td><td>唯一真源。改版式只改这里。</td></tr>
+    <tr><td>屏幕与流程</td><td><code>flows.html</code></td><td>屏幕级真源。每个状态一屏，按真实 DOM 读数重绘，不含截图。</td></tr>
     <tr><td>令牌预览</td><td><code>preview/index.html</code></td><td>派生层，运行时读 <code>tokens.css</code>。</td></tr>
     <tr><td>参考依据</td><td><code>references/</code></td><td>看过的参考屏与它支撑的判断；没看过的不写。</td></tr>
     <tr><td>说明</td><td><code>DESIGN.md</code></td><td>只做说明，不含数值。</td></tr>
