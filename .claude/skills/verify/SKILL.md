@@ -1,6 +1,6 @@
 ---
 name: verify
-description: Verify Glyph Factory changes against the exact candidate SHA — launch the dev server, drive the real browser surfaces with the committed driver, run the 28-case Aha invariant/transition suite on chromium and webkit, check the action disclosure contract (affordability disables, never hides), the progression contract (an active rule must run, and its gating resource must be on screen), the Aha legibility contract (every one of A01–A28 must announce itself in the player's log) and the rhythm contract (the time and decision gaps between consecutive Aha moments: firing order, no same-click pairs, total play time ≥ 2 hours, time CV, and the mean/std of the click gaps), and capture visual and interaction evidence. Use for general verification, proving an Aha change is safe, checking the 28/28 claim, verifying an action reveal/enable change, verifying an advance() cadence / Act II progression change, verifying that an Aha is perceivable on the player surface, or verifying game pacing / rhythm after a threshold, cost or gate change (two-hour play-time rebuild: tests/pacing-baseline.json).
+description: Verify Glyph Factory changes against the exact candidate SHA — launch the dev server, drive the real browser surfaces with the committed driver, run the 28-case Aha invariant/transition suite on chromium and webkit, check the action disclosure contract (affordability disables, never hides), the progression contract (an active rule must run, and its gating resource must be on screen), the Aha legibility contract (every one of A01–A28 must announce itself in the player's log) and the rhythm contract (the seconds, decision-click and raw-click gaps between consecutive Aha moments: firing order, no same-click pairs, total play time ≥ 2 hours, time CV, and — per section, never as one figure — the mean/std of the decision and click gaps, with Act I read separately as the tutorial), and capture visual and interaction evidence. Use for general verification, proving an Aha change is safe, checking the 28/28 claim, verifying an action reveal/enable change, verifying an advance() cadence / Act II progression change, verifying that an Aha is perceivable on the player surface, or verifying game pacing / rhythm after a threshold, cost or gate change (two-hour play-time rebuild: tests/pacing-baseline.json).
 ---
 
 # Verify Glyph Factory
@@ -86,25 +86,52 @@ Say plainly that this is the hand-run equivalent, not `intent-audit` itself.
 
 ### The rhythm contract: the gaps between Aha moments
 
-Two units, two questions. **How long the player waits** between two discoveries (seconds — the
-one the player actually feels, and the one that decides whether the game is two hours long),
-and **how many decisions they make inside that wait** (decision clicks — the one that catches a
-collapse into "one press per insight"). A per-act count answers neither: an act can hold 40
-decisions and still hand the player five insights in five clicks and then 35 clicks of nothing.
+**The question this section answers is "the clicks between two Aha moments"** — how many clicks
+land between discovery N and discovery N+1. There are three readouts of that gap, and the whole
+skill of reading them is knowing which one answers what:
+
+| Readout | What it answers | Where it goes wrong |
+|---|---|---|
+| **seconds** | How long the player waits. This is what decides whether the game is two hours long. | Nothing — it is the primary unit. |
+| **decision clicks** (`decisions`) | How many real choices fit inside that wait. | Under-counts a tutorial; that is the point. |
+| **clicks** (everything) | How much raw pressing the stretch costs. | **Act I makes this number meaningless on its own — read it per-section, never as one figure.** |
+
+A per-act count answers none of them: an act can hold 40 decisions and still hand the player
+five insights in five clicks and then 35 clicks of nothing.
+
+**How to read the click unit honestly.** `clicks` counts everything including `print`, `sell`
+and `toggle-auto`; `decisions` excludes those three because there is no choice in them. In
+acts II–VI the two are nearly the same (the player is making decisions, not mashing). In Act I
+they diverge by two orders of magnitude: the tutorial's policy is "every 500 ms tick, buy if you
+can, otherwise sell, otherwise print", so its click count is ≈ **2 × its seconds** — a 250-second
+tutorial costs ~500 clicks no matter how the act is designed. Consequences:
+
+- **Report the click mean/std per section, not as one number.** All 27 gaps currently read
+  mean 40.48 / std 131.60; the 25 gaps after Act I read **mean 3.28 / std 2.68**. The first pair
+  is a statement about the tutorial's length, the second is a statement about the game's rhythm.
+  Quoting only the first pair says the rhythm got worse when it got better.
+- **Never "fix" the all-sections click std by making the reference player idle during Act I.**
+  That lowers the number by changing the measuring instrument, not the game: a player with a
+  working print button and nothing else to do *will* press it. The first version of this harness
+  invented its own budget and reported 770 clicks in one act that a player following the
+  on-screen text spends 5 on — same mistake, opposite direction.
+- If the all-sections click number must come down, the lever is Act I's **mechanics** (make the
+  tutorial's time pass without requiring presses — auto-sell on by default, a print cooldown),
+  never its measurement. Shortening the tutorial also works and is the cheaper change; it costs
+  one 2σ time outlier, since Act I's two gaps are the only ones the two-hour budget does not pin.
 
 Two things make that measurable instead of a matter of taste:
 
 - The engine is deterministic, so with a fixed start and a fixed policy the whole playthrough
-  — and therefore both gap vectors — is reproducible to the click.
+  — and therefore all three gap vectors — is reproducible to the click.
 - The policy is the game's own guidance, not a walkthrough. `tests/pacing.mjs` presses what the
   chapter calls for and, when it cannot, satisfies exactly the shortfall the engine reports in
   `commandReady().binding` — the same string a player reads on a greyed button (`还差 …`) — or
-  the act-progress line (`gateProgress().binding`). A reference player that invents its own
-  budget measures the bot, not the game; the first version of this harness did exactly that and
-  reported 770 clicks in one act that a player following the on-screen text spends 5 on.
+  the act-progress line (`gateProgress().binding`).
 
 ```bash
-node scripts/pacing.mjs                 # mean/std/CV for both units, per-gap table, total play time
+node scripts/pacing.mjs                 # 三个单位各自的 mean/std/CV，逐段表，全程时长
+node scripts/pacing.mjs --unit clicks    # 逐段表只看点击那一列（默认 decisions）
 node scripts/pacing.mjs --diff <json>   # compare against a saved baseline (see below)
 node scripts/pacing.mjs --trace         # which verbs each gap was spent on
 node scripts/pacing.mjs --json          # machine-readable, for comparing two revisions
@@ -129,27 +156,47 @@ moments holds"), so a threshold change that wrecks the rhythm fails the fast gat
 | mean gap ∈ [3, 7] decisions, over acts II–VI | Under 3 the chapter is one press per insight; over 7 the player is grinding, not discovering. |
 | std ≤ 4 decisions, over acts II–VI | The number this metric exists for. |
 | max gap ≤ 15 decisions, and no ACT I gap is 0 | One stretch may not carry a whole act. |
+| **ACT I is the only click-heavy stretch** — exactly two gaps ≥ 100 clicks, and they are A01→A02 and A02→A03 | The tutorial is allowed to be mashing. Nothing later may be; if a third gap crosses 100 clicks, a wait has turned back into hand speed. |
+| click mean ≤ 8, std ≤ 4, max ≤ 15 per gap, over acts II–VI | Where the click unit is actually meaningful. The all-sections click figure is a statement about how long the tutorial is, not about rhythm. |
 | Every act ≥ 5 decisions, and all 28 fire | The 2026-09 collapse got back in through this door once already. |
 
 **Reference numbers for the 2026-09-21 rebalance (`feat/aha-rhythm`):** 27 gaps,
 **全程 122.9 分钟**, time mean 272.8s / std 18.7s / CV 0.069, range 227–321s; decisions mean
-4.59 / std 5.64 overall and **3.2 / 2.6 over acts II–VI**; 0 inversions; 0 same-click pairs;
-3 silent beats (238s / 280s / 320s). Before this round: 全程 23 分钟, time mean 51.3s with a
-CV of ~2, and 15 of the 27 gaps under 6 seconds.
+4.59 / std 5.64 overall and **3.2 / 2.6 over acts II–VI**; clicks mean 40.48 / std 131.60
+overall and **3.28 / 2.68 over acts II–VI**; 0 inversions; 0 same-click pairs; 3 silent beats
+(238s / 280s / 320s).
 
-Two things the numbers do **not** mean. ACT I is excluded from the decision bands on purpose —
-it is the manual tutorial, its "decisions" are machine purchases, and a longer tutorial inflates
-the spread for reasons that have nothing to do with the later acts. And the three silent beats
-are not empty screens: the player can always print, sell and buy during them; what they cannot
-do is *decide*, which is why the metric reads zero.
+The click vector, all 27 gaps in A01…A28 order:
+`493 518 4 7 0 3 7 7 1 1 3 5 5 10 6 4 1 1 1 1 4 0 5 1 0 4 1`.
+The decision vector for the same run:
+`26 18 3 7 0 3 6 7 1 1 3 5 5 10 6 4 1 1 1 1 4 0 5 1 0 4 1`.
+
+Before this round: 全程 23 分钟, time mean 51.3s with a CV of ~2, 15 of the 27 gaps under
+6 seconds; clicks 23.15 / 68.36 overall and 4.48 / 3.18 over acts II–VI. **So the all-sections
+click figure got worse (23.15 → 40.48 mean, 68.36 → 131.60 std) while the acts-II–VI figure got
+better (4.48 → 3.28 mean, 3.18 → 2.68 std).** Both statements are true and the second is the one
+about rhythm — the first is the price of lengthening the tutorial so that its two gaps also sit
+inside the two-hour budget. Expect this trade every time Act I's duration changes, and say which
+number you are quoting.
+
+Three things the numbers do **not** mean. ACT I is excluded from both the decision and the click
+bands on purpose — it is the manual tutorial, its "decisions" are machine purchases, and a longer
+tutorial inflates both spreads for reasons that have nothing to do with the later acts. The three
+silent beats are not empty screens: the player can always print, sell and buy during them; what
+they cannot do is *decide*, which is why the metric reads zero. And a large all-sections click
+std is not by itself a defect — see the three-bullet list above for what it is and what the
+legitimate levers are.
 
 **How to use it on a change.** Any edit to a threshold, cost, rate or gate moves these vectors.
-Run `node scripts/pacing.mjs --diff test-results/pacing-baseline.json` before and after. Three
-failure shapes to look for: a *reordering*, where a discovery that used to follow another now
-precedes it (a copy change the diff will not show you); a *clumping*, where several gaps go to
-1–2 and one goes to 15+ (the 2026-09 collapse in miniature); and a *shortening*, where the total
+Run `node scripts/pacing.mjs` and `node scripts/pacing.mjs --unit clicks` before and after, plus
+`node scripts/pacing.mjs --diff tests/pacing-baseline.json` (add `--unit clicks` for the click
+column — the diff's per-gap "changed" threshold is unit-aware, 4 decisions vs 50 clicks).
+Four failure shapes to look for: a *reordering*, where a discovery that used to follow another
+now precedes it (a copy change the diff will not show you); a *clumping*, where several gaps go
+to 1–2 and one goes to 15+ (the 2026-09 collapse in miniature); a *shortening*, where the total
 drops below two hours while every other number stays healthy — that is what happened before this
-round, and no assertion in the suite caught it.
+round, and no assertion in the suite caught it; and a *third heavy gap*, where a gap past Act I
+crosses 100 clicks, which means a wait has become hand speed again.
 
 Two structural lessons, both worth more than any single number:
 

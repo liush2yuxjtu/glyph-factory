@@ -227,6 +227,23 @@ test('a plain playthrough reaches the ending, and the rhythm between Aha moments
   for (const g of rep.list.filter((x) => x.act === 1)) {
     assert.ok(g.gap >= 1, `${g.from}→${g.to} 是第一章里的一段零点击间隔`);
   }
+
+  // ── 点击（全部动作，含 print / sell / toggle-auto）──────────────────────
+  // 全部 27 段的点击均值/标准差（当前 40.48 / 131.60）不是一个节奏读数：第一章里参考玩家
+  // 每个 500ms 刻度都按一下（买不起就卖、没字就印），所以那两段的点击数 ≈ 秒数 × 2，
+  // 教程有多长就有多少下。把 27 段放在一起平均，量到的是教程长度，不是节奏。
+  // 能断言的是形状：**整局只有第一章那两段是点击密集的**，其余 25 段每段 0–10 下。
+  // 想让整体数字下来，要改的是第一章的机制或长度，不是量法（见 verify skill 的 rhythm contract）。
+  const clickRep = pacingReport(E, run, 'clicks');
+  const heavy = clickRep.list.filter((g) => g.gap >= 100).map((g) => g.from);
+  assert.deepEqual(heavy, ['A01', 'A02'],
+    `只有第一章的两段允许点击密集，实际还有 ${heavy.join(', ')}`);
+  const laterClicks = clickRep.list.filter((g) => g.from !== 'A01' && g.from !== 'A02').map((g) => g.gap);
+  const cMean = laterClicks.reduce((a, b) => a + b, 0) / laterClicks.length;
+  const cStd = Math.sqrt(laterClicks.reduce((a, b) => a + (b - cMean) ** 2, 0) / laterClicks.length);
+  assert.ok(cMean <= 8, `第一章之后每段平均按了 ${cMean.toFixed(2)} 下，等待期又变成了手速活`);
+  assert.ok(cStd <= 4, `第一章之后点击数的标准差 ${cStd.toFixed(2)} 太宽`);
+  assert.ok(Math.max(...laterClicks) <= 15, `第一章之后有一段按了 ${Math.max(...laterClicks)} 下`);
 });
 
 test('A27 deletion becomes the late-game growth verb', () => {
