@@ -15,6 +15,12 @@ Glyph Factory 的 Aha 不是玩家要阅读的“惊喜说明”，而是玩家�
 3. **Persistent means persistent.** 一旦发现，即使暂时缺钱/缺字/缺资源，界面仍保留，只改为 disabled 或显示需求。
 4. **Replacement must be intentional.** 只有产品范式明确替代旧系统时，旧表面才能退出。
 
+**规则 3 管的是「买不起」，不是「这一幕还没有」。** 有些动作的存在本身依赖当前状态，而不是
+玩家付不付得起——第一章没有推钟动词（它的手速本身就是动词，第二章起才有）；微事件在两次
+之间本来就不存在。这两种是规则 1「Hidden means absent」，不是规则 3，界面上直接不渲染。
+判据写在引擎里（`COMMAND_AVAILABLE`）：`available === false` 不渲染，`available` 但买不起
+才灰着写「还差 …」。加新动作时先问自己属于哪一类，不要默认「所有按钮都常驻」。
+
 ## Player-facing announcement
 
 Aha 的标题与 reveal 是设计语言，玩家永远看不到：日志里的 `A## ·` 行会被隐私层剥掉。
