@@ -124,7 +124,11 @@
       add('city', s.worldScale>=1||seen.has('A14')||cityReady, cityReady, label(ACTIONS.city), en?'The workshop is no longer the whole world.':'工坊不再是全部世界。', 'map-city', {}, 'major');
     }
     else if (s.act === 3) {
-      buttons.push(actionButton(label(ACTIONS.dialect), en?'Another district diverges.':'再观察一个街区。', 'discover-dialect', true));
+      // Through `add`, not pushed directly: this one now costs readers, meaning and credits, and
+      // a button pushed straight into the list would stay lit while the engine refused it.
+      // Reveal latches on the act (monotonic), never on affordability — an action you have
+      // discovered stays on screen, greyed, with the shortfall written on it.
+      add('dialect', s.act >= 3, true, label(ACTIONS.dialect), en?'Another district diverges.':'再观察一个街区。', 'discover-dialect');
       add('concept', s.concepts>0||seen.has('A13')||s.meaning>=25, s.meaning>=25, label(ACTIONS.concept), en?'Spend 25 meaning to change society.':'花25意义，让一个概念进入社会。', 'make-concept');
       // 门槛数字的唯一真源在引擎（E.WORLD_GATE）；渲染层不再抄一份。
       const worldReady=s.concepts>=E.WORLD_GATE.concepts&&s.districts>=E.WORLD_GATE.districts;

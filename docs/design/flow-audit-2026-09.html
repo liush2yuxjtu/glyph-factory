@@ -123,7 +123,7 @@
   <h2>「你看着它就不干活」<em>已经不会了</em></h2>
   <div class="ba">
     <div class="was"><h3>修之前</h3><div class="big">0<span style="font-size:.45em"> 字/60秒</span></div><div class="cap">你盯着屏幕看，机器一动不动。</div></div>
-    <div class="now"><h3>修之后</h3><div class="big">15<span style="font-size:.45em"> 字/60秒</span></div><div class="cap">盯着看和关掉去睡觉，产出完全一致。</div></div>
+    <div class="now"><h3>修之后</h3><div class="big">15<span style="font-size:.45em"> 字/60秒</span></div><div class="cap">盯着看和关掉 60 秒，产出完全一致。<br><span style="color:var(--muted);font-size:13px">（离线结算仍按 8 小时封顶，这是原有设定）</span></div></div>
   </div>
   <p class="body" style="margin-top:22px"><b>根因</b>是每拍算一次 <code>floor(过去时长 / 4秒)</code>，半秒一次地问，永远得 0。修法是跨拍累加余数（<code>ruleCredit</code>）：攒够 4 秒就结算一次，不管你人在不在。这是 <code>PR #14</code> 修的。</p>
 </section>

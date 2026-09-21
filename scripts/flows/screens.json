@@ -344,7 +344,7 @@
   "metrics": [
    {
     "label": "库存文字",
-    "value": "361.1",
+    "value": "361.3",
     "primary": true,
     "hidden": false
    },
@@ -409,7 +409,7 @@
    {
     "cmd": "contract",
     "label": "交付街角委托",
-    "sub": "还差 500 库存字（361.1）",
+    "sub": "还差 500 库存字（361.3）",
     "disabled": true,
     "major": false,
     "danger": false
@@ -529,7 +529,7 @@
   "metrics": [
    {
     "label": "库存文字",
-    "value": "67.3",
+    "value": "67.2",
     "primary": true,
     "hidden": false
    },
@@ -742,7 +742,7 @@
   "metrics": [
    {
     "label": "库存文字",
-    "value": "418.4",
+    "value": "418.5",
     "primary": true,
     "hidden": false
    },
@@ -775,8 +775,8 @@
    {
     "cmd": "discover-dialect",
     "label": "观察一个新方言",
-    "sub": "再观察一个街区。",
-    "disabled": false,
+    "sub": "还差 工坊资金（0 / 480）",
+    "disabled": true,
     "major": false,
     "danger": false
    },
@@ -935,13 +935,13 @@
   "metrics": [
    {
     "label": "库存文字",
-    "value": "538.2",
+    "value": "538.3",
     "primary": true,
     "hidden": true
    },
    {
     "label": "工坊资金",
-    "value": "36.3",
+    "value": "36.4",
     "primary": false,
     "hidden": false
    },
@@ -969,14 +969,14 @@
     "cmd": "editor-autonomy",
     "label": "给编辑 智能体 否决权",
     "sub": "它可以拒绝你的头条。",
-    "disabled": false,
+    "disabled": true,
     "major": false,
     "danger": false
    },
    {
     "cmd": "spawn-agents",
     "label": "允许 智能体 创建 智能体",
-    "sub": "还差 工坊资金（36.3 / 1.3K）",
+    "sub": "还差 工坊资金（36.4 / 1.3K）",
     "disabled": true,
     "major": true,
     "danger": false
@@ -985,14 +985,14 @@
     "cmd": "digitize",
     "label": "切换数字出版",
     "sub": "实体库存开始退出舞台。",
-    "disabled": false,
+    "disabled": true,
     "major": false,
     "danger": false
    },
    {
     "cmd": "train-memory",
     "label": "用档案训练机器",
-    "sub": "还差 工坊资金（36.3 / 2.0K）",
+    "sub": "还差 工坊资金（36.4 / 2.0K）",
     "disabled": true,
     "major": false,
     "danger": false
@@ -1149,13 +1149,13 @@
   "metrics": [
    {
     "label": "库存文字",
-    "value": "938.2",
+    "value": "938.3",
     "primary": true,
     "hidden": true
    },
    {
     "label": "工坊资金",
-    "value": "121",
+    "value": "121.1",
     "primary": false,
     "hidden": false
    },
@@ -1182,7 +1182,7 @@
    {
     "cmd": "compress-language",
     "label": "语义压缩",
-    "sub": "还差 工坊资金（121 / 300）",
+    "sub": "还差 工坊资金（121.1 / 300）",
     "disabled": true,
     "major": true,
     "danger": false
@@ -1225,7 +1225,7 @@
     "name": "夜班打字员",
     "detail": "5 × +2/s · 121 资金",
     "label": "购买",
-    "disabled": true
+    "disabled": false
    },
    {
     "name": "小型印刷机",
@@ -1354,7 +1354,7 @@
    },
    {
     "label": "工坊资金",
-    "value": "362.8",
+    "value": "363.1",
     "primary": false,
     "hidden": false
    },
@@ -1614,7 +1614,7 @@
    {
     "cmd": "stop-printing",
     "label": "停止印刷",
-    "sub": "还差 已消解歧义（0 / 1）",
+    "sub": "已完成",
     "disabled": true,
     "major": false,
     "danger": true
@@ -2033,7 +2033,7 @@
   "metrics": [
    {
     "label": "库存文字",
-    "value": "11.3",
+    "value": "11",
     "primary": true,
     "hidden": false
    },
@@ -2082,7 +2082,7 @@
    {
     "cmd": "condense",
     "label": "压缩 20 字 → 12 意义",
-    "sub": "还差 库存字（11.3 / 20）",
+    "sub": "还差 库存字（11 / 20）",
     "disabled": true,
     "major": false,
     "danger": false
@@ -2130,7 +2130,7 @@
    {
     "cmd": "sell",
     "label": "出售全部库存",
-    "sub": "5.5 资金",
+    "sub": "5 资金",
     "disabled": false,
     "major": false,
     "danger": false
@@ -2138,7 +2138,7 @@
    {
     "cmd": "contract",
     "label": "交付街角委托",
-    "sub": "还差 20 库存字（11.3）",
+    "sub": "还差 20 库存字（11）",
     "disabled": true,
     "major": false,
     "danger": false
@@ -2310,7 +2310,7 @@
   "metrics": [
    {
     "label": "库存文字",
-    "value": "11.4",
+    "value": "11.1",
     "primary": true,
     "hidden": false
    },
@@ -2383,7 +2383,7 @@
    {
     "cmd": "contract",
     "label": "交付街角委托",
-    "sub": "还差 20 库存字（11.4）",
+    "sub": "还差 20 库存字（11.1）",
     "disabled": true,
     "major": false,
     "danger": false
@@ -2557,7 +2557,7 @@
   "metrics": [
    {
     "label": "库存文字",
-    "value": "11.4",
+    "value": "11.2",
     "primary": true,
     "hidden": false
    },
@@ -2638,7 +2638,7 @@
    {
     "cmd": "contract",
     "label": "交付街角委托",
-    "sub": "还差 20 库存字（11.4）",
+    "sub": "还差 20 库存字（11.2）",
     "disabled": true,
     "major": false,
     "danger": false
@@ -2810,7 +2810,7 @@
   "metrics": [
    {
     "label": "库存文字",
-    "value": "11.3",
+    "value": "11",
     "primary": true,
     "hidden": true
    },
@@ -2859,7 +2859,7 @@
    {
     "cmd": "contract",
     "label": "交付街角委托",
-    "sub": "还差 20 库存字（11.3）",
+    "sub": "还差 20 库存字（11）",
     "disabled": true,
     "major": false,
     "danger": false

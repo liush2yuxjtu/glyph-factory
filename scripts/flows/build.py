@@ -401,8 +401,10 @@ def build_wide(s, w, pad):
     left_h = ly - y + 10
 
     hero_h = max(left_h, right_h := (left_h if b["world"] else 0))
+    # Bound unconditionally: the second column is painted below whether or not a world card
+    # produced content for it, and leaving it unbound crashes on a wide screen without one.
+    sub2 = Sheet()
     if b["world"]:
-        sub2 = Sheet()
         e_world(sub2, 0, y + 10, right_w - 20, s, force_h=hero_h - 20)
 
     sh.box(pad, y, left_w, hero_h, fill="var(--panel)", stroke="var(--ink)", sw=2, shadow=True)
