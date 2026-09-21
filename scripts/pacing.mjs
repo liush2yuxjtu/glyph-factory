@@ -1,9 +1,11 @@
 // 节奏读数：跑一遍参考对局，把相邻两条 Aha 之间的点击间隔打出来。
 //
-//   node scripts/pacing.mjs            # 人读的报告
-//   node scripts/pacing.mjs --json     # 机器读，给调参循环用
+//   node scripts/pacing.mjs                      # 人读的报告
+//   node scripts/pacing.mjs --json               # 机器读，给调参循环用
+//   node scripts/pacing.mjs --diff <baseline>    # 和一份存下来的读数比（改门槛之后必跑）
 //
 // 唯一真源是 tests/pacing.mjs，和 tests/game-v3.test.mjs 里的「通关」断言共用同一个驱动。
+import { readFileSync } from 'node:fs';
 import { loadEngine, playthrough, pacingReport, gaps } from '../tests/pacing.mjs';
 
 const E = loadEngine();
@@ -13,6 +15,43 @@ const raw = pacingReport(E, run, 'clicks');
 
 if (process.argv.includes('--json')) {
   console.log(JSON.stringify({ decisions: rep, clicks: raw, finished: run.stopped }, null, 2));
+  process.exit(0);
+}
+
+// 比对模式。三种坏形状各有各的读法：读数变了但方向对（更好）→ 就该更新 baseline；
+// 重排（两条换了位置）→ diff 里看不见的文案级改动；抱团（几条塌到 1、一条涨上去）→
+// 门槛又开始重复计算同一份资源；变短（全程掉到两小时以下）→ 之前没任何断言拦得住的那种。
+const diffAt = process.argv.indexOf('--diff');
+if (diffAt >= 0) {
+  const path = process.argv[diffAt + 1];
+  if (!path) { console.error('用法: node scripts/pacing.mjs --diff <baseline.json>'); process.exit(2); }
+  const base = JSON.parse(readFileSync(path, 'utf8'));
+  const b = base.decisions;
+  const line = (label, was, now, unit = '') =>
+    console.log(`${label.padEnd(14)} ${String(was).padStart(10)}${unit}  →  ${String(now).padStart(10)}${unit}`);
+  console.log(`基线: ${path}\n`);
+  line('全程(秒)', Math.round(b.totalSeconds), Math.round(rep.totalSeconds), 's');
+  line('时长均值', b.secondsMean.toFixed(1), rep.secondsMean.toFixed(1), 's');
+  line('时长标准差', b.secondsStd.toFixed(1), rep.secondsStd.toFixed(1), 's');
+  line('时长 CV', b.secondsCv.toFixed(3), rep.secondsCv.toFixed(3));
+  line('决策均值', b.mean.toFixed(2), rep.mean.toFixed(2));
+  line('决策标准差', b.std.toFixed(2), rep.std.toFixed(2));
+  line('逆序', b.inverted.length, rep.inverted.length);
+  line('同拍', b.sameTick.length, rep.sameTick.length);
+  line('静默拍', b.silent.length, rep.silent.length);
+  console.log('\n逐段（秒 / 决策）：');
+  const byTo = new Map(rep.list.map((g) => [g.to, g]));
+  let moved = 0;
+  for (const old of b.list) {
+    const now = byTo.get(old.to);
+    if (!now) { console.log(`  ${old.from}→${old.to}  ${old.seconds.toFixed(0)}s → 消失了`); moved += 1; continue; }
+    const ds = now.seconds - old.seconds;
+    const dd = now.gap - old.gap;
+    const flag = Math.abs(ds) > 60 || Math.abs(dd) > 4 ? '  ← 变了' : '';
+    if (flag) moved += 1;
+    console.log(`  ${old.from}→${old.to}  ${old.seconds.toFixed(0)}s→${now.seconds.toFixed(0)}s  ${old.gap}→${now.gap}${flag}`);
+  }
+  console.log(moved ? `\n${moved} / ${b.list.length} 段有变化。` : '\n没有变化：读数和基线一致。');
   process.exit(0);
 }
 
@@ -36,12 +75,21 @@ const units = [['decisions', rep], ['clicks', raw]];
 for (const [name, r] of units) {
   console.log(`── ${name} ──  均值 ${r.mean.toFixed(2)}  标准差 ${r.std.toFixed(2)}  CV ${r.cv.toFixed(3)}  范围 ${r.min}–${r.max}`);
 }
+const secs = rep.seconds;
+const total = rep.totalSeconds;
+console.log(`── 时长 ──  均值 ${rep.secondsMean.toFixed(1)}s  标准差 ${rep.secondsStd.toFixed(1)}s  `
+  + `CV ${rep.secondsCv.toFixed(3)}  范围 ${Math.min(...secs).toFixed(0)}–${Math.max(...secs).toFixed(0)}s  `
+  + `全程 ${(total / 60).toFixed(1)} 分钟${total >= 7200 ? '（≥2 小时 ✓）' : '（不足 2 小时 ✗）'}`);
 console.log();
 
 console.log(`${pad('间隔', 16)} ${pad('ACT', 5)} ${'decisions'.padStart(10)} ${'clicks'.padStart(8)} ${'秒'.padStart(8)}`);
 for (const g of rep.list) {
   const c = gaps(E, run, 'clicks').find((x) => x.to === g.to);
-  const flag = g.inverted ? '  ← 逆序' : g.sameTick ? '  ← 同拍' : g.gap === 0 ? '  ← 静默拍' : (g.gap > Math.ceil(rep.mean + 2 * rep.std) ? '  ← 过长' : '');
+  // 判定以时长为主：玩家感觉到的是「等了多久」，点击数是这个等待里塞了几次判断。
+  const slow = g.seconds > rep.secondsMean + 2 * rep.secondsStd;
+  const fast = g.seconds < rep.secondsMean - 2 * rep.secondsStd;
+  const flag = g.inverted ? '  ← 逆序' : g.sameTick ? '  ← 同拍' : g.gap === 0 ? '  ← 静默拍'
+    : slow ? '  ← 过长' : fast ? '  ← 过短' : '';
   console.log(`${pad(`${g.from}→${g.to}`, 16)} ${pad(g.act, 5)} ${num(g.gap, 10)} ${num(c ? c.gap : 0, 8)} ${num(g.seconds, 8)}${flag}`);
 }
 if (rep.inverted.length) console.log(`\n逆序（后一条先发生）: ${rep.inverted.join(', ')}`);

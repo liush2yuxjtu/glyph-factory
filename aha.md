@@ -78,6 +78,7 @@ Aha 的标题与 reveal 是设计语言，玩家永远看不到：日志里的 `
 | I09 | 内部评审不写入玩家存档；播放器不暴露内部术语 | 两个 iframe、存档隔离、DOM 与可访问性树 |
 | I10 | 生产产物不包含 Aha/Intent/Lab/Director 评审入口 | 真实构建白名单与 HTTP 404 |
 | I11 | A01–A28 每个触发时玩家日志出现对应世界线，且它是玩家读到的最新一行 | 真实玩家构建逐条驱动 28 个动作并断言日志首行；负对照抽掉世界线后同一断言必须失败 |
+| I12 | 相邻两条 Aha 之间的等待时长与判断次数都稳定，顺序不乱、不挤在同一拍，全程不少于两小时 | `node scripts/pacing.mjs`（参考对局读数）与 `tests/game-v3.test.mjs` 的节奏断言；改过门槛之后必须 `node scripts/pacing.mjs --diff tests/pacing-baseline.json` 对照基线。读法与判据见 `.claude/skills/verify/SKILL.md` 的「rhythm contract」一节 |
 
 ## Review boundary
 

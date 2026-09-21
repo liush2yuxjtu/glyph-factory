@@ -1,0 +1,695 @@
+{
+  "decisions": {
+    "unit": "decisions",
+    "values": [
+      26,
+      18,
+      3,
+      7,
+      0,
+      3,
+      6,
+      7,
+      1,
+      1,
+      3,
+      5,
+      5,
+      10,
+      6,
+      4,
+      1,
+      1,
+      1,
+      1,
+      4,
+      0,
+      5,
+      1,
+      0,
+      4,
+      1
+    ],
+    "list": [
+      {
+        "from": "A01",
+        "to": "A02",
+        "act": 1,
+        "gap": 26,
+        "seconds": 246.5,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A02",
+        "to": "A03",
+        "act": 2,
+        "gap": 18,
+        "seconds": 260,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A03",
+        "to": "A04",
+        "act": 2,
+        "gap": 3,
+        "seconds": 287,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A04",
+        "to": "A05",
+        "act": 2,
+        "gap": 7,
+        "seconds": 283.5,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A05",
+        "to": "A06",
+        "act": 2,
+        "gap": 0,
+        "seconds": 320.5,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A06",
+        "to": "A07",
+        "act": 2,
+        "gap": 3,
+        "seconds": 284.5,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A07",
+        "to": "A08",
+        "act": 2,
+        "gap": 6,
+        "seconds": 282,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A08",
+        "to": "A09",
+        "act": 2,
+        "gap": 7,
+        "seconds": 283,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A09",
+        "to": "A10",
+        "act": 2,
+        "gap": 1,
+        "seconds": 283,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A10",
+        "to": "A11",
+        "act": 2,
+        "gap": 1,
+        "seconds": 283.5,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A11",
+        "to": "A12",
+        "act": 3,
+        "gap": 3,
+        "seconds": 284,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A12",
+        "to": "A13",
+        "act": 3,
+        "gap": 5,
+        "seconds": 282,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A13",
+        "to": "A14",
+        "act": 3,
+        "gap": 5,
+        "seconds": 282.5,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A14",
+        "to": "A15",
+        "act": 3,
+        "gap": 10,
+        "seconds": 254.5,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A15",
+        "to": "A16",
+        "act": 4,
+        "gap": 6,
+        "seconds": 259.5,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A16",
+        "to": "A17",
+        "act": 4,
+        "gap": 4,
+        "seconds": 280.5,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A17",
+        "to": "A18",
+        "act": 4,
+        "gap": 1,
+        "seconds": 280,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A18",
+        "to": "A19",
+        "act": 4,
+        "gap": 1,
+        "seconds": 270.5,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A19",
+        "to": "A20",
+        "act": 4,
+        "gap": 1,
+        "seconds": 245.5,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A20",
+        "to": "A21",
+        "act": 4,
+        "gap": 1,
+        "seconds": 278,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A21",
+        "to": "A22",
+        "act": 5,
+        "gap": 4,
+        "seconds": 262,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A22",
+        "to": "A23",
+        "act": 5,
+        "gap": 0,
+        "seconds": 280,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A23",
+        "to": "A24",
+        "act": 5,
+        "gap": 5,
+        "seconds": 283.5,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A24",
+        "to": "A25",
+        "act": 6,
+        "gap": 1,
+        "seconds": 282,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A25",
+        "to": "A26",
+        "act": 6,
+        "gap": 0,
+        "seconds": 238,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A26",
+        "to": "A27",
+        "act": 6,
+        "gap": 4,
+        "seconds": 262.5,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A27",
+        "to": "A28",
+        "act": 6,
+        "gap": 1,
+        "seconds": 227,
+        "inverted": false,
+        "sameTick": false
+      }
+    ],
+    "mean": 4.592592592592593,
+    "std": 5.6388812868646685,
+    "min": 0,
+    "max": 26,
+    "cv": 1.227820925365694,
+    "seconds": [
+      246.5,
+      260,
+      287,
+      283.5,
+      320.5,
+      284.5,
+      282,
+      283,
+      283,
+      283.5,
+      284,
+      282,
+      282.5,
+      254.5,
+      259.5,
+      280.5,
+      280,
+      270.5,
+      245.5,
+      278,
+      262,
+      280,
+      283.5,
+      282,
+      238,
+      262.5,
+      227
+    ],
+    "secondsMean": 272.7962962962963,
+    "secondsStd": 18.736110539128198,
+    "secondsCv": 0.06868168957388654,
+    "totalSeconds": 7376,
+    "zero": [
+      "A06",
+      "A23",
+      "A26"
+    ],
+    "inverted": [],
+    "sameTick": [],
+    "silent": [
+      {
+        "pair": "A05→A06",
+        "seconds": 321
+      },
+      {
+        "pair": "A22→A23",
+        "seconds": 280
+      },
+      {
+        "pair": "A25→A26",
+        "seconds": 238
+      }
+    ],
+    "decisionsByAct": {
+      "1": 45,
+      "2": 28,
+      "3": 29,
+      "4": 12,
+      "5": 6,
+      "6": 5
+    },
+    "clicks": 1114,
+    "decisions": 125
+  },
+  "clicks": {
+    "unit": "clicks",
+    "values": [
+      493,
+      518,
+      4,
+      7,
+      0,
+      3,
+      7,
+      7,
+      1,
+      1,
+      3,
+      5,
+      5,
+      10,
+      6,
+      4,
+      1,
+      1,
+      1,
+      1,
+      4,
+      0,
+      5,
+      1,
+      0,
+      4,
+      1
+    ],
+    "list": [
+      {
+        "from": "A01",
+        "to": "A02",
+        "act": 1,
+        "gap": 493,
+        "seconds": 246.5,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A02",
+        "to": "A03",
+        "act": 2,
+        "gap": 518,
+        "seconds": 260,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A03",
+        "to": "A04",
+        "act": 2,
+        "gap": 4,
+        "seconds": 287,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A04",
+        "to": "A05",
+        "act": 2,
+        "gap": 7,
+        "seconds": 283.5,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A05",
+        "to": "A06",
+        "act": 2,
+        "gap": 0,
+        "seconds": 320.5,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A06",
+        "to": "A07",
+        "act": 2,
+        "gap": 3,
+        "seconds": 284.5,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A07",
+        "to": "A08",
+        "act": 2,
+        "gap": 7,
+        "seconds": 282,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A08",
+        "to": "A09",
+        "act": 2,
+        "gap": 7,
+        "seconds": 283,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A09",
+        "to": "A10",
+        "act": 2,
+        "gap": 1,
+        "seconds": 283,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A10",
+        "to": "A11",
+        "act": 2,
+        "gap": 1,
+        "seconds": 283.5,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A11",
+        "to": "A12",
+        "act": 3,
+        "gap": 3,
+        "seconds": 284,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A12",
+        "to": "A13",
+        "act": 3,
+        "gap": 5,
+        "seconds": 282,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A13",
+        "to": "A14",
+        "act": 3,
+        "gap": 5,
+        "seconds": 282.5,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A14",
+        "to": "A15",
+        "act": 3,
+        "gap": 10,
+        "seconds": 254.5,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A15",
+        "to": "A16",
+        "act": 4,
+        "gap": 6,
+        "seconds": 259.5,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A16",
+        "to": "A17",
+        "act": 4,
+        "gap": 4,
+        "seconds": 280.5,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A17",
+        "to": "A18",
+        "act": 4,
+        "gap": 1,
+        "seconds": 280,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A18",
+        "to": "A19",
+        "act": 4,
+        "gap": 1,
+        "seconds": 270.5,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A19",
+        "to": "A20",
+        "act": 4,
+        "gap": 1,
+        "seconds": 245.5,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A20",
+        "to": "A21",
+        "act": 4,
+        "gap": 1,
+        "seconds": 278,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A21",
+        "to": "A22",
+        "act": 5,
+        "gap": 4,
+        "seconds": 262,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A22",
+        "to": "A23",
+        "act": 5,
+        "gap": 0,
+        "seconds": 280,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A23",
+        "to": "A24",
+        "act": 5,
+        "gap": 5,
+        "seconds": 283.5,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A24",
+        "to": "A25",
+        "act": 6,
+        "gap": 1,
+        "seconds": 282,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A25",
+        "to": "A26",
+        "act": 6,
+        "gap": 0,
+        "seconds": 238,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A26",
+        "to": "A27",
+        "act": 6,
+        "gap": 4,
+        "seconds": 262.5,
+        "inverted": false,
+        "sameTick": false
+      },
+      {
+        "from": "A27",
+        "to": "A28",
+        "act": 6,
+        "gap": 1,
+        "seconds": 227,
+        "inverted": false,
+        "sameTick": false
+      }
+    ],
+    "mean": 40.48148148148148,
+    "std": 131.5962879050842,
+    "min": 0,
+    "max": 518,
+    "cv": 3.250777468835566,
+    "seconds": [
+      246.5,
+      260,
+      287,
+      283.5,
+      320.5,
+      284.5,
+      282,
+      283,
+      283,
+      283.5,
+      284,
+      282,
+      282.5,
+      254.5,
+      259.5,
+      280.5,
+      280,
+      270.5,
+      245.5,
+      278,
+      262,
+      280,
+      283.5,
+      282,
+      238,
+      262.5,
+      227
+    ],
+    "secondsMean": 272.7962962962963,
+    "secondsStd": 18.736110539128198,
+    "secondsCv": 0.06868168957388654,
+    "totalSeconds": 7376,
+    "zero": [
+      "A06",
+      "A23",
+      "A26"
+    ],
+    "inverted": [],
+    "sameTick": [],
+    "silent": [
+      {
+        "pair": "A05→A06",
+        "seconds": 321
+      },
+      {
+        "pair": "A22→A23",
+        "seconds": 280
+      },
+      {
+        "pair": "A25→A26",
+        "seconds": 238
+      }
+    ],
+    "decisionsByAct": {
+      "1": 45,
+      "2": 28,
+      "3": 29,
+      "4": 12,
+      "5": 6,
+      "6": 5
+    },
+    "clicks": 1114,
+    "decisions": 125
+  },
+  "finished": true
+}

@@ -45,7 +45,9 @@ export function playthrough(E, { start = REFERENCE_START, maxTicks = 200000 } = 
     for (const id of g.ahaSeen) {
       if (known.has(id)) continue;
       known.add(id);
-      ahaAt.set(id, { clicks, decisions, t, act: g.act, obs });
+      // `state` 是那一拍的状态快照，只给排查用：一段间隔为什么长，看它两端哪几个字段
+      // 在动就知道了（探针脚本直接读它）。读数本身只用上面几个数。
+      ahaAt.set(id, { clicks, decisions, t, act: g.act, obs, state: g });
       fired = true;
     }
     if (fired) obs += 1;
@@ -135,7 +137,7 @@ export function playthrough(E, { start = REFERENCE_START, maxTicks = 200000 } = 
       .filter(({ u, c }) => g.lifetimeGlyphs >= u.unlock && g.credits >= c && g[u.id] < 10000)
       .sort((a, b) => a.c - b.c)[0];
     if (g.act === 1) {
-      const ready = g.lifetimeGlyphs >= 5000 && g.presses >= 1;
+      const ready = g.lifetimeGlyphs >= E.ACT_GATES[1][0].need && g.presses >= 1;
       cmd('publish');
       if (!g.published) {
         if (ready) { if (g.credits < 300) cmd('sell'); }
@@ -190,6 +192,11 @@ export function pacingReport(E, run, unit = 'decisions') {
   const values = list.map((x) => x.gap);
   const m = mean(values);
   const sd = stdev(values);
+  // 秒数那一列不是附属信息：用户要的「至少能玩两小时」只能在这里读。
+  // 间隔是按点击数的，但玩家实际花掉的是时间——两个都稳，节奏才算稳。
+  const secs = list.map((x) => x.seconds);
+  const secMean = mean(secs);
+  const secStd = stdev(secs);
   return {
     unit,
     values,
@@ -200,6 +207,11 @@ export function pacingReport(E, run, unit = 'decisions') {
     max: Math.max(...values),
     // 变异系数：标准差 ÷ 均值。均值会随动作总数漂移，CV 才是「节奏匀不匀」的可比数字。
     cv: sd / m,
+    seconds: secs,
+    secondsMean: secMean,
+    secondsStd: secStd,
+    secondsCv: secStd / secMean,
+    totalSeconds: run.stopped ? (run.end - run.start) / 1000 : null,
     zero: list.filter((x) => x.gap === 0).map((x) => x.to),
     inverted: list.filter((x) => x.inverted).map((x) => `${x.from}→${x.to}`),
     sameTick: list.filter((x) => x.sameTick).map((x) => `${x.from}→${x.to}`),

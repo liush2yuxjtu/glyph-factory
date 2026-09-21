@@ -25,7 +25,7 @@ test('finished v2 save migrates into Act II with resources preserved', () => {
 
 test('publishing Tomorrow transitions into Act II instead of ending the game', () => {
   let g = E.fresh(t);
-  g = { ...g, lifetimeGlyphs: 5000, glyphs: 200, credits: 300, presses: 1, contracts: 3 };
+  g = { ...g, lifetimeGlyphs: 32000, glyphs: 200, credits: 300, presses: 1, contracts: 3 };
   g = doIt(g, 'publish');
   assert.equal(g.published, true);
   assert.equal(g.act, 2);
@@ -45,7 +45,7 @@ test('director snapshot for A22 is deterministic and machine-language ready', ()
 test('A03 composition turns glyph relationship into an automatic rule', () => {
   // Carving a rule now costs credits as well as stock: a rule is machinery you pay for, and
   // the ACT II economy needs a sink or the later acts have nothing to spend into.
-  let g = { ...E.fresh(t), act: 2, published: true, glyphs: 10, credits: 40 };
+  let g = { ...E.fresh(t), act: 2, published: true, glyphs: 10, credits: 40, readers: 120 };
   g = doIt(g, 'compose-rule');
   assert.equal(g.ruleActive, true);
   assert.equal(g.composed, 1);
@@ -69,8 +69,8 @@ test('A06 readership creates demand after publication', () => {
   // `meaning >= 10` is part of A06 now: a newspaper manufactures demand only for something
   // the player has already learned is worth printing. Without it the readers crossed 100 on
   // their own and A06 announced itself before A05 had ever happened.
-  const g = E.advance({ ...E.fresh(t), act: 2, published: true, readers: 99, composed: 20, meaning: 10 }, t + 10000);
-  assert.ok(g.readers > 100);
+  const g = E.advance({ ...E.fresh(t), act: 2, published: true, readers: 435, composed: 20, meaning: 10 }, t + 10000);
+  assert.ok(g.readers > 440);
   assert.ok(g.demand > 1);
   assert.ok(E.ahaUnlocked(g, 'A06'));
 });
@@ -79,9 +79,9 @@ test('A10 scarcity arrives with the viral word, not before it', () => {
   // Paper runs out because something went viral. Readership alone cannot produce the crisis:
   // readers grow by themselves, and they reached the old threshold while the player was still
   // working out A08/A09 — the crisis then fired four clicks *before* the word ever spread.
-  const quiet = E.advance({ ...E.fresh(t), act: 2, published: true, readers: 1999 }, t + 10000);
+  const quiet = E.advance({ ...E.fresh(t), act: 2, published: true, readers: 1000 }, t + 10000);
   assert.equal(quiet.paperCrisis, false, 'a readership alone does not exhaust the paper');
-  const loud = E.advance({ ...E.fresh(t), act: 2, published: true, readers: 1999, viralWords: 1 }, t + 10000);
+  const loud = E.advance({ ...E.fresh(t), act: 2, published: true, readers: 1339, viralWords: 1 }, t + 10000);
   assert.equal(loud.paperCrisis, true, 'and it does as soon as the word is out');
   assert.ok(E.ahaUnlocked(loud, 'A10'));
   assert.ok(!E.ahaUnlocked(quiet, 'A10'));
@@ -90,7 +90,7 @@ test('A10 scarcity arrives with the viral word, not before it', () => {
 test('A13 concepts spend meaning and change society', () => {
   // A concept needs a district to live in and a press to print it: `concepts < districts` is
   // what stops `discover-dialect` (+25 meaning) from funding this command one click at a time.
-  let g = { ...E.fresh(t), act: 3, meaning: 100, districts: 2, worldScale: 1, credits: 200 };
+  let g = { ...E.fresh(t), act: 3, meaning: 100, districts: 2, worldScale: 1, credits: 200, readers: 3960 };
   g = doIt(g, 'make-concept');
   assert.equal(g.concepts, 1);
   assert.equal(g.societyEffects, 1);
@@ -108,7 +108,7 @@ test('a concept cannot outnumber the districts that carry it', () => {
 test('A16 and A18 move from authorship to self-expanding agents', () => {
   // Delegation that can replicate itself costs meaning and credits, doubling with each factory:
   // a flat price made agentFactories a free faucet that multiplied everything downstream.
-  let g = { ...E.fresh(t), act: 3, worldScale: 2, districts: 4, concepts: 2, meaning: 400, credits: 2000 };
+  let g = { ...E.fresh(t), act: 3, worldScale: 2, districts: 4, concepts: 2, meaning: 400, credits: 2000, readers: 10950, overnightArticles: 280 };
   g = doIt(g, 'launch-agents');
   assert.equal(g.act, 4);
   assert.equal(g.agents, 1);
@@ -120,7 +120,7 @@ test('A16 and A18 move from authorship to self-expanding agents', () => {
 });
 
 test('a second agent factory costs more than the first', () => {
-  const base = { ...E.fresh(t), act: 4, agents: 5, editorAutonomy: true, digital: true, meaning: 5000, credits: 5000 };
+  const base = { ...E.fresh(t), act: 4, agents: 5, editorAutonomy: true, digital: true, meaning: 5000, credits: 5000, overnightArticles: 280 };
   const one = doIt(base, 'spawn-agents');
   const two = doIt(one, 'spawn-agents');
   assert.equal(two.agentFactories, 2);
@@ -130,7 +130,7 @@ test('a second agent factory costs more than the first', () => {
 });
 
 test('A22 machine glyph emerges from autonomous digital archive', () => {
-  let g = { ...E.fresh(t), act: 4, agents: 5, editorAutonomy: true, agentFactories: 3, digital: true, archives: 5 };
+  let g = { ...E.fresh(t), act: 4, agents: 5, editorAutonomy: true, agentFactories: 3, digital: true, archives: 5, overnightArticles: 9660 };
   g = doIt(g, 'discover-machine-glyph');
   assert.equal(g.act, 5);
   assert.equal(g.machineGlyphs, 1);
@@ -140,17 +140,23 @@ test('A22 machine glyph emerges from autonomous digital archive', () => {
   // announcements for a single decision.
   assert.equal(g.machineGlyphUse, 0, 'the glyph is not in use the moment it is found');
   assert.ok(!E.ahaUnlocked(g, 'A23'), 'adoption must not be granted by the discovery click');
-  assert.ok(E.ahaUnlocked(E.advance(g, t + 40000), 'A23'), 'machines adopt the glyph as they use it');
+  assert.ok(E.ahaUnlocked(E.advance(g, t + 240000), 'A23'), 'machines adopt the glyph as they use it');
 });
 
 test('A24 compression folds meaning into a compact representation, and takes more than one press', () => {
   // 100 meaning → 10,000 compressed meaning per press. The A24 threshold is five presses, so
   // the act does not collapse into a single click the moment the glyph is discovered.
-  let g = { ...E.fresh(t), act: 5, meaning: 1000, machineGlyphs: 1, machineGlyphUse: 1000, credits: 3000 };
+  // 每一次压缩的机器用量门槛都更高一级：压一遍不等于把语言折叠完了，
+  // 机器得先把上一级的用法真的用起来。所以五次之间必须让时间真的走。
+  const use = (g, i) => { const s = { ...g, updatedAt: t }; return E.advance(s, t + (i + 1) * 600000); };
+  let g = { ...E.fresh(t), act: 5, meaning: 1000, machineGlyphs: 1, machineGlyphUse: E.AHA_CLOCK.A23[1], credits: 3000 };
   g = doIt(g, 'compress-language', { amount: 100 });
   assert.equal(g.compressedMeaning, 10000);
   assert.ok(!E.ahaUnlocked(g, 'A24'), 'one press is not the whole insight');
-  for (let i = 0; i < 4; i++) g = doIt(g, 'compress-language', { amount: 100 });
+  for (let i = 1; i < 5; i++) {
+    g = use(g, i);
+    g = doIt(g, 'compress-language', { amount: 100 });
+  }
   assert.equal(g.compressedMeaning, 50000);
   assert.ok(E.ahaUnlocked(g, 'A24'));
   // Compressing a language no machine is using is compressing nothing.
@@ -164,9 +170,14 @@ test('A24 compression folds meaning into a compact representation, and takes mor
 // where inside the act the discoveries land. The gaps between *consecutive* Aha moments are what
 // the player actually feels, so they are the metric here.
 //
-// Reference numbers for this revision: 27 gaps, mean 4.3 decisions, std 3.9, no gaps fired out
-// of order, no two on the same click, and the only 0-click gaps are passive breaths of 25s+.
+// Reference numbers for this revision: 27 gaps, 全程 122.9 分钟, 时长 均值 272.8s / 标准差 18.7s
+// (CV 0.069), 决策 均值 4.59 / 标准差 5.64（去掉第一章的教学拍之后 3.2 / 2.6）,
+// 0 逆序, 0 同拍, 3 处静默拍（238–320s, 都是「等世界跟上」的那几拍）。
 // The bands below are deliberately wide — they exist to catch a collapse, not to freeze tuning.
+//
+// 时长是主判据：玩家感觉到的是「等了多久」。点击数是这个等待里塞了几次判断。
+// 两个都管，是因为两种坏法各有一种：节奏塌缩（一条发现 1 下就过）读点击，
+// 而「游戏只有 20 分钟」读秒——2026-09-21 之前后者能过全部断言，全程却只有 23 分钟。
 test('a plain playthrough reaches the ending, and the rhythm between Aha moments holds', () => {
   const run = playthrough(E);
   assert.equal(run.stopped, true, 'a player following the legal actions must be able to finish');
@@ -186,27 +197,49 @@ test('a plain playthrough reaches the ending, and the rhythm between Aha moments
   // 静默拍可以存在（读者、文章、机器用量都是自己涨上去的那几拍），但必须是「等了一会儿」
   // 而不是「同一下」，而且不能多——一局里大部分发现都是零点击的等待，就是节奏又塌了。
   for (const beat of rep.silent) {
-    assert.ok(beat.seconds >= 20, `${beat.pair}: ${beat.seconds}s apart is a collision, not a breath`);
+    assert.ok(beat.seconds >= 60, `${beat.pair}: ${beat.seconds}s apart is a collision, not a breath`);
   }
   assert.ok(rep.silent.length <= 3, `${rep.silent.length} discoveries arrived without a click between them`);
-  // 节拍本身：均值不许塌到「一路点下去」也不许拉成「半天看不到一个」。
-  assert.ok(rep.mean >= 3 && rep.mean <= 7, `mean gap ${rep.mean.toFixed(2)} is outside the 3–7 band`);
-  // 标准差是这次真正在管的那条：修之前是 10.6（后面几章的戏全挤在几段里演完）。
-  assert.ok(rep.std <= 5, `gap std ${rep.std.toFixed(2)} is too wide`);
-  assert.ok(rep.max <= 20, `a gap of ${rep.max} means one stretch carries a whole act`);
+
+  // ── 时长 ────────────────────────────────────────────────────────────────
+  // 「均值好」这条的用户定义是「至少能玩两小时」，读的是全程秒数，不是任何一段的平均。
+  assert.ok(rep.totalSeconds >= 7200, `全程 ${(rep.totalSeconds / 60).toFixed(1)} 分钟，不足两小时`);
+  // 每一段都在同一个数量级里：不许出现「五秒演完一幕」也不许「一段等十分钟」。
+  assert.ok(rep.secondsCv <= 0.25, `时长 CV ${rep.secondsCv.toFixed(3)}：有的发现等很久，有的立刻就来`);
+  const shortest = Math.min(...rep.seconds);
+  const longest = Math.max(...rep.seconds);
+  assert.ok(shortest >= 120, `有一段的间隔只有 ${shortest}s，那一段的发现等于没等`);
+  assert.ok(longest <= 480, `有一段的间隔长到 ${longest}s，那一段在空转`);
+
+  // ── 点击 ────────────────────────────────────────────────────────────────
+  // 判定去掉第一章：它是手速教学，玩家做的判断本来就是「买哪台机器」，
+  // 一局 100+ 次买机器会把标准差抬到一个和后面几章无关的高度。
+  // 按 `from` 而不是 `act` 过滤：A02→A03 归在 act 2（发行把幕推到 2），
+  // 但那一段玩家做的仍然是第一章的手速活。
+  const grown = rep.list.filter((g) => g.from !== 'A01' && g.from !== 'A02');
+  const gaps2 = grown.map((g) => g.gap);
+  const mean2 = gaps2.reduce((a, b) => a + b, 0) / gaps2.length;
+  const std2 = Math.sqrt(gaps2.reduce((a, b) => a + (b - mean2) ** 2, 0) / gaps2.length);
+  assert.ok(mean2 >= 3 && mean2 <= 7, `第二章之后的间隔均值 ${mean2.toFixed(2)} 落在 3–7 之外`);
+  assert.ok(std2 <= 4, `第二章之后的间隔标准差 ${std2.toFixed(2)} 太宽`);
+  assert.ok(Math.max(...gaps2) <= 15, `有一段塞了 ${Math.max(...gaps2)} 次判断，那一段自己成了一幕`);
+  // 教学章可以长、可以密，但不许出现「一次点击都没有」的一段——那说明第一章没东西可做。
+  for (const g of rep.list.filter((x) => x.act === 1)) {
+    assert.ok(g.gap >= 1, `${g.from}→${g.to} 是第一章里的一段零点击间隔`);
+  }
 });
 
 test('A27 deletion becomes the late-game growth verb', () => {
   // The mass delete is unlocked by resolving ambiguity: while the world is still ambiguous
   // the player cannot tell noise from signal, and A27 raced ahead of A26.
-  let g = { ...E.fresh(t), act: 6, infrastructure: true, noise: 1500, ambiguity: 100, ambiguityResolved: true, compressedMeaning: 50000 };
+  let g = { ...E.fresh(t), act: 6, infrastructure: true, noise: 1500, ambiguity: 2450, ambiguityResolved: true, compressedMeaning: 50000 };
   g = doIt(g, 'delete-noise', { amount: 1000 });
   assert.equal(g.deletedNoise, 1000);
   assert.ok(E.ahaUnlocked(g, 'A27'));
 });
 
 test('A28 stop printing is a real terminal mechanic and production halts', () => {
-  let g = { ...E.fresh(t), act: 6, infrastructure: true, ambiguityResolved: true, deletedNoise: 1000, compressedMeaning: 50000, keyboards: 100, glyphs: 50 };
+  let g = { ...E.fresh(t), act: 6, infrastructure: true, ambiguityResolved: true, deletedNoise: 1000, compressedMeaning: 50000, keyboards: 100, glyphs: 50, ambiguity: 3850 };
   g = doIt(g, 'stop-printing');
   assert.equal(g.stopped, true);
   assert.equal(E.rate(g), 0);

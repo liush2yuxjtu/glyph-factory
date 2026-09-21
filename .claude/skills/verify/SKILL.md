@@ -1,6 +1,6 @@
 ---
 name: verify
-description: Verify Glyph Factory changes against the exact candidate SHA — launch the dev server, drive the real browser surfaces with the committed driver, run the 28-case Aha invariant/transition suite on chromium and webkit, check the action disclosure contract (affordability disables, never hides), the progression contract (an active rule must run, and its gating resource must be on screen), the Aha legibility contract (every one of A01–A28 must announce itself in the player's log) and the rhythm contract (the gaps between consecutive Aha moments: order, no same-click pairs, mean and standard deviation of the click gaps), and capture visual and interaction evidence. Use for general verification, proving an Aha change is safe, checking the 28/28 claim, verifying an action reveal/enable change, verifying an advance() cadence / Act II progression change, verifying that an Aha is perceivable on the player surface, or verifying game pacing / rhythm after a threshold, cost or gate change.
+description: Verify Glyph Factory changes against the exact candidate SHA — launch the dev server, drive the real browser surfaces with the committed driver, run the 28-case Aha invariant/transition suite on chromium and webkit, check the action disclosure contract (affordability disables, never hides), the progression contract (an active rule must run, and its gating resource must be on screen), the Aha legibility contract (every one of A01–A28 must announce itself in the player's log) and the rhythm contract (the time and decision gaps between consecutive Aha moments: firing order, no same-click pairs, total play time ≥ 2 hours, time CV, and the mean/std of the click gaps), and capture visual and interaction evidence. Use for general verification, proving an Aha change is safe, checking the 28/28 claim, verifying an action reveal/enable change, verifying an advance() cadence / Act II progression change, verifying that an Aha is perceivable on the player surface, or verifying game pacing / rhythm after a threshold, cost or gate change (two-hour play-time rebuild: tests/pacing-baseline.json).
 ---
 
 # Verify Glyph Factory
@@ -86,15 +86,16 @@ Say plainly that this is the hand-run equivalent, not `intent-audit` itself.
 
 ### The rhythm contract: the gaps between Aha moments
 
-A per-act count says an act did not collapse. It says nothing about **where inside the act**
-the discoveries land: an act can hold 40 decisions and still hand the player five insights in
-five clicks and then 35 clicks of nothing. The rhythm metric is therefore per **gap between
-consecutive Aha moments** — how many clicks the player makes between Aha N and Aha N+1.
+Two units, two questions. **How long the player waits** between two discoveries (seconds — the
+one the player actually feels, and the one that decides whether the game is two hours long),
+and **how many decisions they make inside that wait** (decision clicks — the one that catches a
+collapse into "one press per insight"). A per-act count answers neither: an act can hold 40
+decisions and still hand the player five insights in five clicks and then 35 clicks of nothing.
 
 Two things make that measurable instead of a matter of taste:
 
 - The engine is deterministic, so with a fixed start and a fixed policy the whole playthrough
-  — and therefore the gap vector — is reproducible to the click.
+  — and therefore both gap vectors — is reproducible to the click.
 - The policy is the game's own guidance, not a walkthrough. `tests/pacing.mjs` presses what the
   chapter calls for and, when it cannot, satisfies exactly the shortfall the engine reports in
   `commandReady().binding` — the same string a player reads on a greyed button (`还差 …`) — or
@@ -103,10 +104,15 @@ Two things make that measurable instead of a matter of taste:
   reported 770 clicks in one act that a player following the on-screen text spends 5 on.
 
 ```bash
-node scripts/pacing.mjs           # mean/std/CV, per-gap table, per-act clicks and seconds
-node scripts/pacing.mjs --trace   # which verbs each gap was spent on
-node scripts/pacing.mjs --json    # machine-readable, for comparing two revisions
+node scripts/pacing.mjs                 # mean/std/CV for both units, per-gap table, total play time
+node scripts/pacing.mjs --diff <json>   # compare against a saved baseline (see below)
+node scripts/pacing.mjs --trace         # which verbs each gap was spent on
+node scripts/pacing.mjs --json          # machine-readable, for comparing two revisions
 ```
+
+**The baseline to compare against is `tests/pacing-baseline.json`** (committed; regenerate with
+`node scripts/pacing.mjs --json > tests/pacing-baseline.json` only when a rebalance is the intended
+change, and say so in the commit message).
 
 `npm run verify:fast` runs the same playthrough inside the suite
 (`tests/game-v3.test.mjs`, "a plain playthrough reaches the ending, and the rhythm between Aha
@@ -116,40 +122,68 @@ moments holds"), so a threshold change that wrecks the rhythm fails the fast gat
 |---|---|
 | Firing order equals A01…A28 | The list, and the narrative behind it, are ordered. Readers, articles, machine use and noise all grow on their own, so any trigger written as "an absolute value was reached" eventually overtakes the click that was supposed to cause it. |
 | No two moments on one click | The focus card shows one moment. Two on one click means one of them is announced to nobody. |
-| A 0-click gap must be ≥ 20s wide, and there are at most 3 | A designed breath (the night shift writing articles) is legitimate; a collision is not. |
-| mean gap ∈ [3, 7] decisions | Under 3 the chapter is one press per insight; over 7 the player is grinding, not discovering. |
-| std ≤ 5 | The number this metric exists for. |
-| max gap ≤ 20 | One stretch may not carry a whole act. |
+| A 0-click gap must be ≥ 60s wide, and there are at most 3 | A designed breath (the night shift writing articles, the machines adopting a glyph) is legitimate; a collision is not. |
+| **Total play time ≥ 7200s** | "A good mean" is defined by the user as *at least two hours of play*. 27 gaps at ~4.5 minutes each. |
+| **Time CV ≤ 0.25** | Nothing fires in five seconds and nothing parks for ten minutes. |
+| **Every gap ∈ [120s, 480s]** | The floor is "this discovery was not really waited for"; the ceiling is "this stretch is idling". |
+| mean gap ∈ [3, 7] decisions, over acts II–VI | Under 3 the chapter is one press per insight; over 7 the player is grinding, not discovering. |
+| std ≤ 4 decisions, over acts II–VI | The number this metric exists for. |
+| max gap ≤ 15 decisions, and no ACT I gap is 0 | One stretch may not carry a whole act. |
 | Every act ≥ 5 decisions, and all 28 fire | The 2026-09 collapse got back in through this door once already. |
 
-Reference numbers for the 2026-09-21 rebalance: **27 gaps, mean 4.59 decisions, std 3.75,
-CV 0.82, 0 inversions, 0 same-click pairs, 2 silent beats (25s and 39s)**. Before it: mean
-4.85, std 10.61, CV 2.19, 6 inversions (A05/A06, A09/A10, A13/A14, A19/A20, A23/A24,
-A26/A27) and 2 same-click pairs. The full vector, in A01…A28 order:
-`16 11 3 1 5 3 6 7 1 1 3 5 5 10 6 4 1 11 5 5 4 0 5 1 0 4 1`. ACT I keeps the two largest
-gaps (16 and 11) because it is the manual tutorial act; excluding it the remaining 25 gaps
-sit at mean 3.88, std 2.80, and the tail is the two act climaxes (A14→A15 = 10 at the world
-gate, A18→A19 = 11 across the agent factories).
+**Reference numbers for the 2026-09-21 rebalance (`feat/aha-rhythm`):** 27 gaps,
+**全程 122.9 分钟**, time mean 272.8s / std 18.7s / CV 0.069, range 227–321s; decisions mean
+4.59 / std 5.64 overall and **3.2 / 2.6 over acts II–VI**; 0 inversions; 0 same-click pairs;
+3 silent beats (238s / 280s / 320s). Before this round: 全程 23 分钟, time mean 51.3s with a
+CV of ~2, and 15 of the 27 gaps under 6 seconds.
 
-Read the units honestly: `decisions` excludes `print`/`sell`/`toggle-auto` (no choice in
-them), `clicks` counts everything. A01→A02 is 321 clicks but 16 decisions — the difference is
-a tutorial that is supposed to be clicked through, not a defect to flatten.
+Two things the numbers do **not** mean. ACT I is excluded from the decision bands on purpose —
+it is the manual tutorial, its "decisions" are machine purchases, and a longer tutorial inflates
+the spread for reasons that have nothing to do with the later acts. And the three silent beats
+are not empty screens: the player can always print, sell and buy during them; what they cannot
+do is *decide*, which is why the metric reads zero.
 
-**How to use it on a change.** Any edit to a threshold, cost, rate or gate moves this vector.
-Run `node scripts/pacing.mjs --json` before and after and compare `mean`, `std`, `inverted`,
-`sameTick` and the per-gap list. Two failure shapes to look for: a *reordering*, where a
-discovery that used to follow another now precedes it (that is a copy change the diff will not
-show you), and a *clumping*, where several gaps go to 1-2 and one goes to 15+ (that is the
-2026-09 collapse in miniature).
+**How to use it on a change.** Any edit to a threshold, cost, rate or gate moves these vectors.
+Run `node scripts/pacing.mjs --diff test-results/pacing-baseline.json` before and after. Three
+failure shapes to look for: a *reordering*, where a discovery that used to follow another now
+precedes it (a copy change the diff will not show you); a *clumping*, where several gaps go to
+1–2 and one goes to 15+ (the 2026-09 collapse in miniature); and a *shortening*, where the total
+drops below two hours while every other number stays healthy — that is what happened before this
+round, and no assertion in the suite caught it.
 
-The lever that moved this metric most was not a number but a shape: **an act gate that asks
-for the same resource the act's discoveries spend.** While Act II's gate demanded `meaning`
-on top of the meaning each discovery costs, the reference player accumulated the whole
-chapter's meaning during one passive wait and then paid for the next three discoveries out of
-stock — three gaps of 1 in a row. Dropping `meaning` from that gate and pricing it into the
-discoveries themselves (reading a letter 35, coining a word 55, spreading one 70) took the
-act from `1 8 1 1 6 5 1` to `1 5 3 6 7 1 1`. Any gate that double-counts a currency the
-chapter already spends will flatten the rhythm the same way.
+Two structural lessons, both worth more than any single number:
+
+1. **Every discovery needs its own clock, and that clock must be unlocked by the discovery
+   before it.** A resource that is already growing when an act starts has been silently paying
+   for that act's later insights during the earlier wait, so they arrive in a burst. This is why
+   `AHA_CLOCK` exists (engine, next to `AHA_GOALS`): one entry per discovery, naming the resource
+   and the reading at which it fires, read by *both* `clockMet()`, which decides when the
+   discovery happens, and `COMMAND_COSTS`, which decides when the button lights up. The button's
+   `还差 读者 700/740` and the engine's own gate are then the same number by construction.
+   Act IV's clock is literally the newsroom: `overnightArticles`, at `agents × 0.5` per second.
+2. **A gate must not ask for a resource the chapter's own discoveries spend.** While Act II's
+   gate demanded `meaning` on top of the meaning each discovery costs, the reference player
+   accumulated the whole chapter's meaning during one passive wait and paid for the next three
+   discoveries out of stock — three gaps of 1 in a row. Dropping `meaning` from that gate and
+   pricing it into the discoveries themselves (reading a letter 35, coining a word 55, spreading
+   one 70) took the act from `1 8 1 1 6 5 1` to `1 5 3 6 7 1 1`.
+
+Corollary to (1): a clock that is fed by an *unbounded* quantity is not a clock. `composed`
+grows forever once the rule runs, and it used to feed readership directly
+(`0.35 + composed × 0.015`), so Act III's reader rate ran away to 4/s and its clock stopped
+meaning anything. It is capped at twelve compositions now, and A09's "传播速度登场" is a real
+multiplier on the natural rate (`× 3`) rather than a one-shot `+750` readers that skipped 750
+worth of scale in a single click.
+
+### Wait states are part of the contract, not a gap in it
+
+Four review states (A16, A17, A22, A25) have **no enabled action on purpose**: the player is
+waiting for a clock. They are declared explicitly in `public/aha-review-contract.js` under
+`clocks`, each with the condition that says what is being waited for, and `stateErrors` fails if
+a state is supposed to be a wait and is not. The reason is the disclosure contract's mirror
+image: "there is nothing to click here" must never be an all-purpose excuse, so every wait has to
+name its clock.
+
 
 ### Build before any browser suite
 

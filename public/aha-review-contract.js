@@ -3,21 +3,28 @@
   'use strict';
   const rules = [
     ['A01','keyboards',1], ['A02','typists',5], ['A03','published',true],
-    ['A04','composed',3], ['A05','meaning',10], ['A06','readers',100],
+    ['A04','composed',3], ['A05','meaning',10], ['A06','readers',440],
     ['A07','letters',1], ['A08','organicWords',1], ['A09','viralWords',1],
     ['A10','paperCrisis',true], ['A11','deletedNoise',1], ['A12','districts',2],
     ['A13','concepts',1], ['A14','worldScale',1], ['A15','worldScale',2],
     ['A16','agents',1], ['A17','editorAutonomy',true], ['A18','agentFactories',1],
-    ['A19','overnightArticles',100], ['A20','digital',true], ['A21','archives',1],
-    ['A22','machineGlyphs',1], ['A23','machineGlyphUse',1000], ['A24','compressedMeaning',50000],
-    ['A25','infrastructure',true], ['A26','ambiguity',100], ['A27','deletedNoise',1000], ['A28','stopped',true],
+    ['A19','overnightArticles',1800], ['A20','digital',true], ['A21','archives',1],
+    ['A22','machineGlyphs',1], ['A23','machineGlyphUse',11200], ['A24','compressedMeaning',50000],
+    ['A25','infrastructure',true], ['A26','ambiguity',1100], ['A27','deletedNoise',1000], ['A28','stopped',true],
   ];
   const acts = [1,1,2,2,2,2,2,2,2,2,2,3,3,3,3,4,4,4,4,4,4,5,5,5,6,6,6,6];
   // 28 个状态里有两种「此刻没有按钮可点」是设计本身：结局，以及几拍必须自己等出来的
   // 发现（机器要先用起来、歧义要先攒够）。这两种不能只写一句「跳过」——等的那一拍要写清楚
   // 在等什么，否则「没有可点的东西」就成了万能挡箭牌。
   const a26Need = rules.find((r) => r[0] === 'A26')[2];
+  // Agent 写完一桌稿子需要的时间，就是第四章里两拍之间的那几百篇文章。数字和引擎的
+  // AHA_CLOCK.A17 / A18 是同一对刻度。
+  const articles = { A17: 140, A18: 280 };
   const clocks = {
+    // Agent 上线之后，编辑要读到足够多的稿子才有资格说「不」。这一拍没有按钮可点，
+    // 屏幕上那句「还差 夜间文章 …」就是这一拍的全部内容。
+    A16: (s) => s.act === 4 && s.agents >= 1 && !s.editorAutonomy && s.overnightArticles < articles.A17,
+    A17: (s) => s.act === 4 && s.editorAutonomy === true && !s.agentFactories && s.overnightArticles < articles.A18,
     // 字形刚被发现，一台机器都还没在用它。压缩要等这一步。
     A22: (s) => s.act === 5 && s.machineGlyphs >= 1 && s.machineGlyphUse < rules.find((r) => r[0] === 'A23')[2] && !s.infrastructure,
     // 语言刚接管基础设施，歧义正在自己上涨。删与停机都要等它涨够。

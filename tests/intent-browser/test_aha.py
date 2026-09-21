@@ -123,7 +123,7 @@ class AhaReview(unittest.TestCase):
 
     def test_F02_city_and_world_require_real_actions(self):
         self.seed({'version':3,'act':2,'published':True,'paperCrisis':True,'composed':10,'meaning':400,'deletedNoise':1,
-                   'readers':5000,'credits':5000})
+                   'readers':20000,'credits':5000})
         self.open()
         expect(self.real_frame().locator('#world-card')).to_be_hidden()
         # 进城和地图是两件事：读完第二章就进城（读者、意义、删除三样都到位），
@@ -137,7 +137,7 @@ class AhaReview(unittest.TestCase):
         self.button('展开城市地图').click()
         self.assertEqual(self.saved()['worldScale'],1)
         # A dialect is grown by a population rather than minted by a button: each observation
-        # needs more readers than the last (`readers >= 600 x (districts + 1)`). Zooming out
+        # needs more readers than the last (`DIALECT_READERS`, one step per dialect). Zooming out
         # takes the city to three districts and two concepts — one click per insight is exactly
         # the collapse this replaced.
         for _ in range(2):
@@ -152,7 +152,7 @@ class AhaReview(unittest.TestCase):
         self.assert_player()
 
     def test_F03_real_deletion_unlocks_final_stop(self):
-        self.seed({'version':3,'act':6,'published':True,'infrastructure':True,'compressedMeaning':50000,'deletedNoise':0,'noise':1500,'ambiguity':100,'presses':1})
+        self.seed({'version':3,'act':6,'published':True,'infrastructure':True,'compressedMeaning':50000,'deletedNoise':0,'noise':1500,'ambiguity':3950,'presses':1})
         self.open()
         expect(self.button('停止印刷')).to_have_count(0)
         # 歧义没消解之前删不动：分不清哪句是噪音。这条门槛同时把 A27 排在 A26 后面，

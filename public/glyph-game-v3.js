@@ -103,7 +103,7 @@
           buttons.push(actionButton(label(ACTIONS.contract), sub, 'contract', s.glyphs>=c.glyphs));
         } else buttons.push(actionButton(label(ACTIONS.contract), tr('done'), 'contract', false));
       }
-      add('publish', s.lifetimeGlyphs>=5000, E.canPublish(s), label(ACTIONS.publish), E.canPublish(s)?(en?'Not an ending. What you print starts growing on its own.':'这不是结局。你印出来的东西，会开始自己生长。'):lack(en?'200 stock + 300 credits':'库存 200 字 + 300 资金', `${fmt(s.glyphs,1)} / ${fmt(s.credits,1)}`), 'publish', {}, 'major');
+      add('publish', s.lifetimeGlyphs>=E.ACT_GATES[1][0].need, E.canPublish(s), label(ACTIONS.publish), E.canPublish(s)?(en?'Not an ending. What you print starts growing on its own.':'这不是结局。你印出来的东西，会开始自己生长。'):lack(en?'200 stock + 300 credits':'库存 200 字 + 300 资金', `${fmt(s.glyphs,1)} / ${fmt(s.credits,1)}`), 'publish', {}, 'major');
     }
     else if (s.act === 2) {
       buttons.push(actionButton(label(ACTIONS.print), en?'Old verbs still work, for now.':'旧玩法还在，但意义开始改变。', 'print', true, {}, 'major'));
