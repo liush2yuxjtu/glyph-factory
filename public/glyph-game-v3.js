@@ -81,7 +81,7 @@
           buttons.push(actionButton(label(ACTIONS.contract), sub, 'contract', s.glyphs>=c.glyphs));
         } else buttons.push(actionButton(label(ACTIONS.contract), tr('done'), 'contract', false));
       }
-      add('publish', s.lifetimeGlyphs>=5000, E.canPublish(s), label(ACTIONS.publish), E.canPublish(s)?(en?'This opens ACT II.':'这不是结局；它会打开 ACT II。'):lack(en?'200 stock + 300 credits':'库存 200 字 + 300 资金', `${fmt(s.glyphs,1)} / ${fmt(s.credits,1)}`), 'publish', {}, 'major');
+      add('publish', s.lifetimeGlyphs>=5000, E.canPublish(s), label(ACTIONS.publish), E.canPublish(s)?(en?'Not an ending. What you print starts growing on its own.':'这不是结局。你印出来的东西，会开始自己生长。'):lack(en?'200 stock + 300 credits':'库存 200 字 + 300 资金', `${fmt(s.glyphs,1)} / ${fmt(s.credits,1)}`), 'publish', {}, 'major');
     }
     else if (s.act === 2) {
       buttons.push(actionButton(label(ACTIONS.print), en?'Old verbs still work, for now.':'旧玩法还在，但意义开始改变。', 'print', true, {}, 'major'));
@@ -97,7 +97,8 @@
       add('organic', s.organicWords>0||seen.has('A08')||s.letters>=1, s.letters>=1, label(ACTIONS.organic), en?'The audience writes back.':'让读者也成为作者。', 'organic-word');
       add('viral', s.viralWords>0||seen.has('A09')||s.organicWords>=1, s.organicWords>=1, label(ACTIONS.viral), en?'Propagation > production':'传播速度 > 生产速度', 'viral-word');
       add('delete2', s.deletedNoise>0||seen.has('A11')||s.noise>=1, s.noise>=1, label(ACTIONS.delete), en?'Deletion is now productive.':'删除第一次成为生产行为。', 'delete-noise');
-      const cityReady=s.paperCrisis&&s.meaning>=50&&s.deletedNoise>=1;
+      // 门槛数字的唯一真源在引擎（E.ACT_GATES）；渲染层不再抄一份。
+      const cityReady=E.gateProgress(s).done;
       add('city', s.worldScale>=1||seen.has('A14')||cityReady, cityReady, label(ACTIONS.city), en?'The workshop is no longer the whole world.':'工坊不再是全部世界。', 'map-city', {}, 'major');
     }
     else if (s.act === 3) {
@@ -112,7 +113,7 @@
       add('spawn', s.agentFactories>=1||seen.has('A18')||s.editorAutonomy, s.editorAutonomy, label(ACTIONS.spawn), en?'Delegation becomes self-replication.':'委托变成自我扩张。', 'spawn-agents', {}, 'major');
       add('digitize', s.digital||seen.has('A20')||s.agentFactories>=1, s.agentFactories>=1, label(ACTIONS.digitize), en?'Physical inventory stops mattering.':'实体库存开始退出舞台。', 'digitize');
       add('memory', s.archives>=1||seen.has('A21')||s.digital, s.digital, label(ACTIONS.memory), en?'Past writing becomes model memory.':'过去的文字变成机器记忆。', 'train-memory');
-      const machineReady=s.archives>=1&&s.agentFactories>=1;
+      const machineReady=E.gateProgress(s).done;
       add('machine', s.machineGlyphs>=1||seen.has('A22')||machineReady, machineReady, label(ACTIONS.machine), en?'Source: unknown.':'来源：未知。', 'discover-machine-glyph', {}, 'major');
     }
     else if (s.act === 5) {
@@ -122,7 +123,7 @@
     else if (s.act === 6) {
       add('delete6', s.deletedNoise>0||seen.has('A27')||s.noise>=1, s.noise>=1, label(ACTIONS.delete), en?'Remove 500 noise.':'一次删除500噪音。', 'delete-noise', {amount:500}, 'major');
       add('ambiguity', seen.has('A26')||s.ambiguity>0, s.ambiguity>0, label(ACTIONS.ambiguity), en?'Clarity becomes a resource.':'清晰度变成一种资源。', 'resolve-ambiguity');
-      const stopReady=s.deletedNoise>=1000&&s.compressedMeaning>=10000;
+      const stopReady=E.gateProgress(s).done;
       add('stop', s.stopped||stopReady, !s.stopped&&stopReady, label(ACTIONS.stop), s.stopped?tr('done'):(en?'The final action is now possible.':'最后一个动作现在才出现。'), 'stop-printing', {}, 'danger');
     }
     // Auto-sell is a permanent setting, not an Act I verb: keep its toggle beside the primary action in every act, or publishing with it on strands the player with no way to stop it draining stock.
@@ -148,7 +149,9 @@
   function renderAhas(s) {
     const active=currentAha(s); const seen=new Set(s.ahaSeen||[]);
     const visible = preview ? E.AHAS : E.AHAS.filter((item)=>seen.has(item.id));
-    $('aha-list').replaceChildren(...visible.map((item)=>{ const div=document.createElement('button'); div.type='button'; div.className=`aha-item seen ${item.id===active.id?'active':''}`; const copy=ahaCopy(item); div.innerHTML=`<b>${item.id} · ${copy[0]}</b><span>ACT ${item.act}</span>`; div.addEventListener('click',()=>{ directorOpen=true; $('director').hidden=false; $('director-select').value=item.id; selectPreview(item.id); render(); }); return div; }));
+    // 每条带上门槛进度：面板回答的不再只是「发生过什么」，还有「还差多少」。
+    // 只渲染已出现的条目——列出 28 条待办等于把整个发现过程剧透掉。
+    $('aha-list').replaceChildren(...visible.map((item)=>{ const div=document.createElement('button'); div.type='button'; div.className=`aha-item seen ${item.id===active.id?'active':''}`; const copy=ahaCopy(item); const goal=E.ahaGoal(s,item.id); const pct=goal?Math.min(100,Math.round(goal.have/goal.need*100)):0; const bar=goal?`<u aria-hidden="true"><i style="width:${pct}%"></i></u><em>${fmt(goal.have,1)}/${fmt(goal.need)}</em>`:''; div.innerHTML=`<b>${item.id} · ${copy[0]}</b><span>ACT ${item.act}</span>${bar}`; div.addEventListener('click',()=>{ directorOpen=true; $('director').hidden=false; $('director-select').value=item.id; selectPreview(item.id); render(); }); return div; }));
     $('aha-count').textContent=`${seen.size} / 28`;
     const copy=ahaCopy(active); $('aha-id').textContent=`${active.id} · ${seen.has(active.id)?tr('seen'):tr('next')}`; $('aha-title').textContent=copy[0]; $('aha-copy').textContent=copy[1];
   }
@@ -198,8 +201,36 @@
     $('below-layout')?.classList.toggle('single', visibleBelow <= 1);
   }
 
+  // 玩家面唯一一处「离下一个阶段还差多少」。数字全部来自 E.gateProgress（引擎唯一真源），
+  // 文案是玩家语言：不含 A## / AHA / ACT / 机制解释，这条被浏览器隐私契约逐帧扫描。
+  // 门槛全部达成时整块让位给主行动按钮——发现之后不该继续占版面。
+  function renderActProgress(s) {
+    const host = $('act-progress');
+    if (!host) return;
+    const gate = E.gateProgress(s);
+    if (!gate || gate.done || s.stopped) { host.hidden = true; return; }
+    host.hidden = false;
+    const en = locale === 'en';
+    const binding = gate.binding;
+    $('act-progress-label').textContent = en ? 'Next stage' : '下一个阶段';
+    $('act-progress-note').textContent = en
+      ? `Needs ${binding.labelEn} (${fmt(binding.have,1)} / ${fmt(binding.need)})`
+      : `还差 ${binding.label}（${fmt(binding.have,1)} / ${fmt(binding.need)}）`;
+    const met = gate.conds.filter((c) => c.met).length;
+    const track = $('act-progress-track');
+    track.setAttribute('aria-label', en
+      ? `Step ${met + 1} of ${gate.conds.length}, ${met} complete`
+      : `第 ${met + 1} 步，共 ${gate.conds.length} 步，已完成 ${met} 步`);
+    track.replaceChildren(...gate.conds.map((c) => {
+      const i = document.createElement('i');
+      i.className = c.met ? 'done' : (c.key === binding.key ? 'now' : '');
+      i.title = `${en ? c.labelEn : c.label} ${fmt(c.have,1)}/${fmt(c.need)}`;
+      return i;
+    }));
+  }
+
   function renderText() { document.documentElement.lang=locale==='en'?'en':'zh-CN'; $('lang-toggle').textContent=locale==='en'?'中文':'EN'; $('director-toggle').textContent=tr('director'); $('glyphs-label').textContent=tr('inventory'); $('credits-label').textContent=tr('credits'); $('readers-label').textContent=tr('readers'); $('meaning-label').textContent=tr('meaning'); $('noise-label').textContent=tr('noise'); $('systems-title').textContent=tr('systems'); $('systems-note').textContent=tr('systemsNote'); $('log-title').textContent=tr('log'); $('export').textContent=tr('export'); $('reset').textContent=tr('reset'); $('director-preview').textContent=tr('preview'); $('director-apply').textContent=tr('apply'); $('director-exit').textContent=tr('exit'); }
-  function render() { const s=shown(); renderText(); const [title,copy]=actCopy(s); $('act-kicker').textContent=`ACT ${['I','II','III','IV','V','VI'][s.act-1]} · ${E.ACTS[s.act-1].range}`; $('act-title').textContent=title; $('act-copy').textContent=copy; $('glyphs').textContent=fmt(s.glyphs,1); $('credits').textContent=fmt(s.credits,1); $('readers').textContent=fmt(s.readers); $('meaning').textContent=fmt(s.meaning,1); $('noise').textContent=fmt(s.noise,1); $('rate').textContent=fmt(E.rate(s),1); $('total').textContent=fmt(s.lifetimeGlyphs); $('status').textContent=`${tr('business')} · ACT ${s.act}/6${preview?' · DIRECTOR PREVIEW':''}`; $('ending').hidden=!s.stopped; $('director').hidden=!directorOpen || isPlayerAudience(); renderActs(s); renderWorld(s); renderActions(s); renderMachines(s); renderAhas(s); $('log').textContent=(s.log||[]).map((x,i)=>`${i?'·':'›'} ${x}`).join('\n'); renderDisclosure(s); if (!preview) save(); }
+  function render() { const s=shown(); renderText(); const [title,copy]=actCopy(s); $('act-kicker').textContent=`ACT ${['I','II','III','IV','V','VI'][s.act-1]} · ${E.ACTS[s.act-1].range}`; $('act-title').textContent=title; $('act-copy').textContent=copy; $('glyphs').textContent=fmt(s.glyphs,1); $('credits').textContent=fmt(s.credits,1); $('readers').textContent=fmt(s.readers); $('meaning').textContent=fmt(s.meaning,1); $('noise').textContent=fmt(s.noise,1); $('rate').textContent=fmt(E.rate(s),1); $('total').textContent=fmt(s.lifetimeGlyphs); $('status').textContent=`${tr('business')} · ACT ${s.act}/6${preview?' · DIRECTOR PREVIEW':''}`; $('ending').hidden=!s.stopped; $('director').hidden=!directorOpen || isPlayerAudience(); renderActs(s); renderWorld(s); renderActProgress(s); renderActions(s); renderMachines(s); renderAhas(s); $('log').textContent=(s.log||[]).map((x,i)=>`${i?'·':'›'} ${x}`).join('\n'); renderDisclosure(s); if (!preview) save(); }
 
   E.AHAS.forEach((item)=>{ const option=document.createElement('option'); option.value=item.id; option.textContent=`${item.id} · ${item.title}`; $('director-select').append(option); });
   $('director-toggle').addEventListener('click',()=>{directorOpen=!directorOpen;$('director').hidden=!directorOpen;});

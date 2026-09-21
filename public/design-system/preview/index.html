@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>字工厂 · 令牌预览 / Tokens</title>
+<!-- 数值全部实时读取 ../tokens.css，本页不写任何设计数值。 -->
+<link rel="stylesheet" href="../tokens.css">
+<style>
+*{box-sizing:border-box}
+html{background:var(--stage);color:var(--ink);color-scheme:light}
+body{margin:0;font:var(--text-body)/var(--leading-body) var(--font-ui);
+     background:radial-gradient(#76816d1f 1px,transparent 1px);background-size:6px 6px}
+.page{max-width:1180px;margin:0 auto;background:var(--paper);
+      border-inline:var(--bw-hair) solid var(--shell-edge);padding:var(--pad-shell)}
+.bar{display:flex;flex-wrap:wrap;gap:var(--space-3);align-items:center;margin-bottom:var(--space-8)}
+.bar a{color:var(--ink);font-size:var(--text-meta);font-weight:var(--weight-label)}
+h1{font-size:var(--text-title);margin:0 0 var(--space-2)}
+.sub{margin:0 0 var(--space-9);color:var(--muted);font-size:var(--text-meta)}
+section{margin:0 0 var(--space-9)}
+section>h2{font-size:var(--text-body);margin:0 0 var(--space-3);
+           border-bottom:var(--bw-bold) solid var(--ink);padding-bottom:var(--space-2)}
+.hint{margin:0 0 var(--space-5);font-size:var(--text-meta);color:var(--muted)}
+
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:var(--space-3)}
+.sw{border:var(--bw-hair) solid var(--ink);background:var(--panel)}
+.sw .chip{height:56px;border-bottom:var(--bw-hair) solid var(--ink)}
+.sw .meta{padding:var(--space-3)}
+.sw .name{display:block;font:var(--weight-label) var(--text-meta)/1.4 var(--font-num)}
+.sw .val{display:block;font:var(--text-micro)/1.4 var(--font-num);color:var(--muted);text-transform:uppercase}
+.sw .use{display:block;margin-top:var(--space-2);font-size:var(--text-micro);color:var(--muted)}
+.sw.ink .chip{color:var(--paper)}
+
+.rows{border:var(--bw-hair) solid var(--line)}
+.row{display:grid;grid-template-columns:200px 1fr;gap:var(--space-5);
+     padding:var(--space-4) var(--space-5);border-bottom:var(--bw-hair) solid var(--line);align-items:baseline}
+.row:last-child{border-bottom:0}
+.row .k{font:var(--text-mini)/1.5 var(--font-num);color:var(--muted)}
+.row .v{font-size:var(--text-mini);color:var(--muted);font-family:var(--font-num)}
+.spec{padding:var(--space-5)}
+.spec-title{font-size:var(--text-metric)}
+.spec-act{font-size:var(--text-act)}
+.spec-body{font-size:var(--text-body)}
+.spec-meta{font-size:var(--text-meta)}
+.spec-mini{font-size:var(--text-mini)}
+.spec-micro{font-size:var(--text-micro)}
+.spec-num{font-family:var(--font-num);font-weight:var(--weight-strong)}
+.spec-mark{font-family:var(--font-mark);font-weight:var(--weight-black);font-size:var(--text-stamp)}
+.eb{color:var(--rust);font-size:var(--text-mini);font-weight:var(--weight-heavy);letter-spacing:var(--tracking-eyebrow);margin:0}
+.weights span{display:block;font-size:var(--text-body)}
+
+.scale{display:grid;gap:var(--space-2)}
+.scale div{display:flex;align-items:center;gap:var(--space-4)}
+.scale i{display:block;height:14px;background:var(--green);border:var(--bw-hair) solid var(--ink)}
+.scale b{font:var(--text-micro)/1 var(--font-num);color:var(--muted);min-width:120px}
+
+.bd{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:var(--space-5)}
+.bd .demo{background:var(--panel);padding:var(--space-5);text-align:center;
+          font:var(--text-mini)/1.6 var(--font-num)}
+.bd .cap{margin:var(--space-3) 0 0;font-size:var(--text-micro);color:var(--muted)}
+
+.motion{display:flex;gap:var(--space-9);flex-wrap:wrap;align-items:center}
+.pulse{width:70px;height:70px;border:4px solid var(--green);border-radius:var(--radius-round);
+       box-shadow:0 0 0 12px #c8ef7020,0 0 0 24px #c8ef7010;flex:0 0 auto}
+@media(prefers-reduced-motion:no-preference){
+  .pulse{animation:pulse var(--dur-pulse) ease-in-out infinite}
+  @keyframes pulse{50%{transform:scale(var(--pulse-scale));opacity:var(--pulse-opacity)}}
+}
+.press{background:var(--panel);border:var(--bw-line) solid var(--ink);box-shadow:var(--shadow-1);
+       padding:var(--space-4) var(--space-5);font-weight:var(--weight-label)}
+.press.off{transform:translate(var(--press-shift),var(--press-shift));box-shadow:none;background:var(--green)}
+/* 窄屏：pulse 的外发光有 24px 半径，横排会糊到相邻文字上，所以整组竖排 */
+@media(max-width:560px){
+  .motion{gap:var(--space-7)}
+  /* 只让文字组独占整行；.pulse 自己也是 div，必须排除，否则会被拉成椭圆 */
+  .motion>div:not(.pulse){flex:1 1 100%}
+  .motion>.pulse{flex:0 0 70px;margin-left:var(--space-6)}
+}
+
+.contrast{display:grid;gap:var(--space-3)}
+.cc{display:flex;justify-content:space-between;gap:var(--space-4);align-items:center;
+    padding:var(--space-4) var(--space-5);border:var(--bw-hair) solid var(--line);font-size:var(--text-meta)}
+.cc b{font-family:var(--font-num)}
+.pass{color:#2f6b2f;font-weight:var(--weight-heavy)}
+.fail{color:var(--rust);font-weight:var(--weight-heavy)}
+.note{margin:var(--space-6) 0 0;padding:var(--space-5);border-left:5px solid var(--rust);
+      background:var(--surface-focus);font-size:var(--text-meta);color:var(--focus-body)}
+</style>
+</head>
+<body>
+<main class="page">
+  <nav class="bar" aria-label="设计系统导航">
+    <a href="../index.html">← 设计系统首页</a>
+    <a href="../components.html">组件陈列 / Components →</a>
+  </nav>
+
+  <h1>令牌预览</h1>
+  <p class="sub">本页所有色块与数值都是运行时从 <code>../tokens.css</code> 读出来的。改 tokens.css，本页跟随。</p>
+
+  <section>
+    <h2>A · 基础色 / Core palette</h2>
+    <p class="hint">8 个基础色沿用 <code>public/play.html</code> 的原始变量名，改名会破坏未来直接 link 的可能。</p>
+    <div class="swatches" id="core"></div>
+  </section>
+
+  <section>
+    <h2>B · 扩展面 / Extended surfaces</h2>
+    <p class="hint">原先散落在 play.html 内联 CSS 里的硬编码值，已收编为命名令牌。</p>
+    <div class="swatches" id="extended"></div>
+  </section>
+
+  <section>
+    <h2>C · 世界模型 / World model</h2>
+    <p class="hint">深色卡专用的一组，不与其他面混用。</p>
+    <div class="swatches" id="world"></div>
+  </section>
+
+  <section>
+    <h2>D · 字阶与字体</h2>
+    <p class="hint">正文用系统 sans；所有数字用等宽防跳动；印章是唯一的衬线字形。</p>
+    <div class="rows">
+      <div class="row"><span class="k">--font-ui / --text-body</span><span class="spec spec-body">从一个字，到会自己演化的语言系统。</span></div>
+      <div class="row"><span class="k">--text-title</span><span class="spec spec-title">字工厂</span></div>
+      <div class="row"><span class="k">--text-act</span><span class="spec spec-act">手工与自动化</span></div>
+      <div class="row"><span class="k">--text-metric / --font-num</span><span class="spec spec-num" style="font-size:var(--text-metric)">38.2K</span></div>
+      <div class="row"><span class="k">--text-meta</span><span class="spec spec-meta">营业中 · ACT 2/6</span></div>
+      <div class="row"><span class="k">--text-mini</span><span class="spec spec-mini">ACT II · 字开始生长</span></div>
+      <div class="row"><span class="k">--text-micro</span><span class="spec spec-micro">DISTRICTS / 街区</span></div>
+      <div class="row"><span class="k">--font-mark / --text-stamp</span><span class="spec spec-mark">字</span></div>
+      <div class="row"><span class="k">--tracking-eyebrow</span><span class="eb">GLYPH FACTORY · ACTS ENGINE v3</span></div>
+    </div>
+    <div class="rows" style="margin-top:var(--space-5)">
+      <div class="row weights"><span class="k">字重 / Weight</span><span>
+        <span style="font-weight:var(--weight-body)">500 body · 正文</span>
+        <span style="font-weight:var(--weight-label)">750 label · 按钮</span>
+        <span style="font-weight:var(--weight-strong)">800 strong · 数值</span>
+        <span style="font-weight:var(--weight-heavy)">850 heavy · eyebrow</span>
+        <span style="font-weight:var(--weight-black)">900 black · 印章</span>
+      </span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>E · 间距</h2>
+    <p class="hint">4px 步进的离散刻度，没有中间值。</p>
+    <div class="scale" id="space"></div>
+  </section>
+
+  <section>
+    <h2>F · 描边、圆角、阴影</h2>
+    <p class="hint">系统是直角的：全局唯一圆角是 pulse 的 50%。阴影是<strong>硬偏移</strong>（无模糊无扩散），模拟铅字压印。</p>
+    <div class="bd">
+      <div><div class="demo" style="border:var(--bw-hair) solid var(--ink)">--bw-hair 1px</div><p class="cap">细线：格内描边、世界卡分隔</p></div>
+      <div><div class="demo" style="border:var(--bw-line) solid var(--ink)">--bw-line 1.5px</div><p class="cap">按钮、面板、下拉</p></div>
+      <div><div class="demo" style="border:var(--bw-bold) solid var(--ink)">--bw-bold 2px</div><p class="cap">主卡、当前 chip、报头底线</p></div>
+      <div><div class="demo" style="border:var(--bw-block) double var(--ink)">--bw-block 3px double</div><p class="cap">仅结局卡使用</p></div>
+      <div><div class="demo" style="box-shadow:var(--shadow-1)">--shadow-1 2px</div><p class="cap">按钮</p></div>
+      <div><div class="demo" style="box-shadow:var(--shadow-2)">--shadow-2 3px</div><p class="cap">评审面板</p></div>
+      <div><div class="demo" style="box-shadow:var(--shadow-3)">--shadow-3 / --shadow 4px</div><p class="cap">主卡</p></div>
+      <div><div class="demo" style="border-radius:var(--radius-round);width:70px;height:70px;margin:0 auto">50%</div><p class="cap">唯一圆角：pulse</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>G · 动效与交互</h2>
+    <p class="hint">全系统只有一个 <code>@keyframes</code>，且只在 <code>prefers-reduced-motion:no-preference</code> 下启用。没有 transition——按下就是按下。</p>
+    <div class="motion">
+      <div class="pulse" aria-hidden="true"></div>
+      <div>
+        <p class="hint" style="margin:0 0 var(--space-3)">press 反馈：位移 <code>--press-shift</code>，阴影归零</p>
+        <div style="display:flex;gap:var(--space-5)">
+          <span class="press">默认</span>
+          <span class="press off">:active</span>
+        </div>
+      </div>
+      <div>
+        <p class="hint" style="margin:0 0 var(--space-3)">focus 环：<code>--focus-ring</code> / <code>--focus-offset</code></p>
+        <span class="press" style="outline:var(--focus-ring) solid var(--rust);outline-offset:var(--focus-offset)">focus-visible</span>
+      </div>
+      <div>
+        <p class="hint" style="margin:0 0 var(--space-3)">disabled：不透明度 <code>--disabled-opacity</code></p>
+        <span class="press" style="opacity:var(--disabled-opacity)">disabled</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>H · 对比度自检</h2>
+    <p class="hint">按 WCAG 2.1 相对亮度公式在本页运行时实算，取的是 tokens.css 的真实值。</p>
+    <div class="contrast" id="contrast"></div>
+    <p class="note">结论：其余全部过 AA。<strong>--muted (#657064) 在 --paper (#efe9d8) 上是 4.27:1，低于 AA 正文线 4.5:1</strong>，只够 AA-large；它当前用于 9–11px 辅助信息，属于已知取舍，改进方案列入 DESIGN.md 的待办。</p>
+  </section>
+
+  <section>
+    <h2>J · 提案层 / Proposed</h2>
+    <p class="hint">
+      2026-09-20 依据 Mobbin 参考新加的令牌，服务于 <code>components.html</code> 第 13–15 节。
+      <strong>尚未进入运行时。</strong>本层承诺零新增颜色——下面逐条实算验证这个承诺。
+    </p>
+    <div class="rows" id="proposed"></div>
+    <p class="note" id="proposed-verdict"></p>
+  </section>
+
+  <section>
+    <h2>I · 响应断点</h2>
+    <p class="hint">两个断点：<code>820px</code> 收成单列、<code>460px</code> 进一步压字号。缩窄浏览器窗口即可现场看到。</p>
+    <div class="rows">
+      <div class="row"><span class="k">≤820px</span><span class="v">hero / below 单列 · act-strip 3 列 · 世界卡去最小高 · 报头链接隐藏</span></div>
+      <div class="row"><span class="k">≤460px</span><span class="v">act-strip 2 列 · 品牌 h1 降级到 25px · 世界指标 2 列</span></div>
+      <div class="row"><span class="k">所有宽度</span><span class="v">按钮最小高度 --touch 44px · 主栅格用 auto-fit 自适应，不写死列数</span></div>
+    </div>
+  </section>
+
+  <footer class="bar" style="margin:var(--space-9) 0 0">
+    <a href="../index.html">首页</a><a href="../components.html">组件陈列</a>
+    <span style="font-size:var(--text-micro);color:var(--muted)">数值真源：tokens.css</span>
+  </footer>
+</main>
+
+<script>
+const css = getComputedStyle(document.documentElement);
+const read = (n) => css.getPropertyValue(n).trim();
+
+const CORE = [
+  ['--ink', '正文、边框、深底'],
+  ['--paper', '页面底色'],
+  ['--panel', '卡片与按钮底'],
+  ['--muted', '次要文字'],
+  ['--line', '细分隔线'],
+  ['--green', '当前态 / 强调'],
+  ['--rust', '警示 / eyebrow'],
+  ['--blue', '评审面板'],
+  ['--gold', '已声明未使用'],
+];
+const EXT = [
+  ['--stage', 'iframe 外底色'], ['--shell-edge', '外壳描边'],
+  ['--surface', '指标格'], ['--surface-2', '机器卡'],
+  ['--surface-3', 'Aha 未发生'], ['--surface-4', 'chip 未到达'],
+  ['--surface-done', 'chip 已完成'], ['--surface-seen', 'Aha 已发生'],
+  ['--surface-seen-edge', 'Aha 已发生描边'], ['--surface-focus', 'Aha 焦点卡'],
+  ['--focus-body', '焦点卡正文'], ['--danger-bg', '危险按钮底'],
+  ['--danger-ink', '危险按钮字'], ['--review-bg', '评审面板底'],
+  ['--review-note', '评审说明字'], ['--ending-bg', '结局卡'],
+  ['--stamp-shadow', '印章投影'],
+];
+const WORLD = [
+  ['--world-bg', '世界卡底'], ['--world-ink', '世界卡文字'],
+  ['--world-line', '世界卡分隔'], ['--world-grid', '指标栅格线'],
+  ['--world-cell', '指标格底'], ['--world-label', '指标标签'],
+  ['--world-sky', '天空'], ['--world-ground', '地面'],
+  ['--world-sun', '高光'], ['--world-soil', '土层'], ['--world-block', '楼体'],
+  ['--world-block-2', '楼体次色'], ['--world-stopped', '停机'],
+  ['--log-ink', '日志正文'],
+];
+
+function renderSwatches(target, list, dark) {
+  const host = document.getElementById(target);
+  host.replaceChildren(...list.map(([name, use]) => {
+    const value = read(name);
+    const el = document.createElement('div');
+    el.className = 'sw' + (dark ? ' ink' : '');
+    el.innerHTML = `<div class="chip" style="background:var(${name})"></div>
+      <div class="meta"><span class="name">${name}</span>
+      <span class="val">${value}</span><span class="use">${use}</span></div>`;
+    return el;
+  }));
+}
+renderSwatches('core', CORE, false);
+renderSwatches('extended', EXT, false);
+renderSwatches('world', WORLD, true);
+
+// 提案层自检：它只应产出别名，不应引入任何新色值
+const PROPOSED = [
+  ['--progress-h', '分段进度条高度'], ['--progress-track', '未完成段描边'],
+  ['--progress-done', '已完成段'], ['--progress-todo', '未到段'],
+  ['--progress-dot', '当前段圆点'], ['--progress-label', '进度说明字'],
+  ['--row-bg', '成就行底'], ['--row-bg-earned', '已达成底'],
+  ['--row-edge-earned', '已达成描边'], ['--row-anchor', '图标锚点尺寸'],
+  ['--row-bar-h', '成就进度条高度'],
+  ['--burst-bg', '全屏时刻底'], ['--burst-ink', '全屏时刻字'],
+  ['--burst-muted', '全屏时刻说明'], ['--burst-figure', '全屏大数字'],
+  ['--burst-pill', '单位胶囊底'], ['--burst-dot', '进度点'],
+];
+const runtimeColors = new Set([...CORE, ...EXT, ...WORLD].map(([n]) => read(n).toLowerCase()));
+const novel = [];
+document.getElementById('proposed').replaceChildren(...PROPOSED.map(([name, use]) => {
+  const value = read(name);
+  const isColor = value.startsWith('#');
+  const known = !isColor || runtimeColors.has(value.toLowerCase());
+  if (!known) novel.push(`${name} = ${value}`);
+  const el = document.createElement('div');
+  el.className = 'row';
+  el.innerHTML = `<span class="k">${name}</span>
+    <span class="v">${value} <span class="${known ? 'pass' : 'fail'}">${isColor ? (known ? '别名·零新色值' : '新色值') : '尺寸'}</span>
+    <span style="color:var(--muted)"> · ${use}</span></span>`;
+  return el;
+}));
+const verdict = document.getElementById('proposed-verdict');
+verdict.innerHTML = novel.length === 0
+  ? `自检通过：${PROPOSED.length} 个提案令牌里，所有色值都能在既有 40 个色值令牌里找到同名值，<strong>没有引入任何一种新颜色</strong>。提案组件增加的是信息层次，不是新配色。`
+  : `自检失败：发现 ${novel.length} 个新色值 —— ${novel.join('、')}`;
+
+document.getElementById('space').replaceChildren(...[1,2,3,4,5,6,7,8,9,10].map((i) => {
+  const name = `--space-${i}`;
+  const row = document.createElement('div');
+  row.innerHTML = `<b>${name} · ${read(name)}</b><i style="width:var(${name})"></i>`;
+  return row;
+}));
+
+// WCAG 2.1 对比度，实算 tokens.css 的值
+function lum(hex) {
+  const v = hex.replace('#', '');
+  const full = v.length === 3 ? v.split('').map((c) => c + c).join('') : v;
+  const [r, g, b] = [0, 2, 4].map((i) => {
+    const c = parseInt(full.slice(i, i + 2), 16) / 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+const ratio = (a, b) => {
+  const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m);
+  return (x + 0.05) / (y + 0.05);
+};
+const PAIRS = [
+  ['--ink', '--paper', '正文 / 纸面'],
+  ['--ink', '--panel', '正文 / 面板'],
+  ['--ink', '--green', '正文 / 强调绿'],
+  ['--muted', '--paper', '次要文字 / 纸面'],
+  ['--muted', '--panel', '次要文字 / 面板'],
+  ['--rust', '--panel', '警示字 / 面板'],
+  ['--danger-ink', '--danger-bg', '危险按钮'],
+  ['--paper', '--rust', '浅字 / 锈色'],
+  ['--green', '--ink', '绿字 / 墨底（major 按钮）'],
+  ['--log-ink', '--ink', '日志正文'],
+  ['--world-ink', '--world-bg', '世界卡正文'],
+  ['--world-label', '--world-cell', '世界卡标签'],
+  ['--review-note', '--review-bg', '评审说明'],
+];
+document.getElementById('contrast').replaceChildren(...PAIRS.map(([fg, bg, label]) => {
+  const f = read(fg), b = read(bg);
+  const r = ratio(f.startsWith('#') ? f : '#000', b.startsWith('#') ? b : '#fff');
+  const ok = r >= 4.5;
+  const el = document.createElement('div');
+  el.className = 'cc';
+  el.innerHTML = `<span><b style="color:${f};background:${b};padding:2px 6px;border:1px solid var(--line)">${label}</b></span>
+    <span><b>${f}</b> on <b>${b}</b> · ${r.toFixed(2)}:1
+    <span class="${ok ? 'pass' : 'fail'}">${ok ? 'AA' : '低于 AA'}</span></span>`;
+  return el;
+}));
+</script>
+</body>
+</html>

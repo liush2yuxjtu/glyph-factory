@@ -1,0 +1,170 @@
+/* ============================================================================
+   字工厂 / Glyph Factory — 设计数值真源 (Design Token Truth Source)
+   ----------------------------------------------------------------------------
+   这是本设计系统里**唯一**可以填写设计数值的文件。
+   DESIGN.md 只做说明，components.html / preview/ 是消费者，全部 link 本文件。
+
+   取值口径：与运行中的 public/play.html :root 逐值一致（2026-09-20 核对）。
+   命名分两层：
+     · 基础 8 色沿用 play.html 已有变量名，保证未来 play.html 可直接 link 本文件；
+     · 其余是从 play.html 内联 CSS 里提取出来的硬编码值，统一加前缀命名。
+
+   改动纪律：改这里 → 消费页面自动跟随。不要在 html 页面里另写一份数值。
+   ========================================================================= */
+
+:root {
+  /* ── 基础色（play.html :root 原文，勿改名） ─────────────────────────── */
+  --ink: #17201a;          /* 主墨色：正文、边框、深底、log 背景 */
+  --paper: #efe9d8;        /* 纸面：shell 底色 */
+  --panel: #fffaf0;        /* 面板：卡片与按钮底 */
+  --muted: #657064;        /* 次要文字：状态行、说明 */
+  --line: #bcc4ae;         /* 细分隔线、未激活卡片描边 */
+  --green: #c8ef70;        /* 强调：当前态、可购买、成功 */
+  --rust: #a34e34;         /* 警示：eyebrow、danger 文字、focus 环 */
+  --blue: #3e6fb0;         /* 评审面板：导演模式 */
+
+  /* --gold 在 play.html 中已声明但零引用，保留仅为兼容，勿在新代码使用 */
+  --gold: #e2bd67;
+
+  /* ── 扩展面（原为 play.html 内联硬编码） ───────────────────────────── */
+  --stage: #cfd4c2;              /* iframe 之外 / html 底色 */
+  --shell-edge: #adb69f;         /* shell 左右描边 */
+  --surface: #f4f1e4;            /* 指标格底 */
+  --surface-2: #f3f0e4;          /* 机器卡底 */
+  --surface-3: #eeecdf;          /* Aha 卡（未发生）底 */
+  --surface-4: #e4e6d8;          /* 篇章 chip（未到达）底 */
+  --surface-done: #d9e8be;       /* 篇章 chip（已完成）底 */
+  --surface-seen: #dfeac6;       /* Aha 卡（已发生）底 */
+  --surface-seen-edge: #82936b;  /* Aha 卡（已发生）描边 */
+  --surface-focus: #eee1d6;      /* Aha focus 卡底 */
+  --focus-body: #4d574d;         /* Aha focus 正文 */
+  --danger-bg: #f1d9ce;          /* danger 按钮底 */
+  --danger-ink: #752f20;         /* danger 按钮字 */
+  --review-bg: #e5edf7;          /* 导演模式面板底 */
+  --review-note: #405b7d;        /* 导演模式说明字 */
+  --stamp-shadow: #9ea98b;       /* 印章阴影 */
+  --ending-bg: #ece8d5;          /* 结局卡底 */
+
+  /* ── 世界模型（深色卡） ─────────────────────────────────────────────── */
+  --world-bg: #293a34;
+  --world-ink: #eef2d9;
+  --world-line: #647668;
+  --world-grid: #536159;
+  --world-cell: #26332e;
+  --world-label: #aebcae;
+  --world-sky: #283e47;
+  --world-ground: #6e7f65;
+  --world-soil: #76704d;
+  --world-sun: #d7d08f;
+  --world-block: #1f3438;
+  --world-block-2: #334c4b;
+  --world-stopped: #e9e3cc;      /* 停机后的 pulse 与省略号 */
+  --log-ink: #cfdfb8;            /* 日志正文 */
+
+  /* ── 排版 ──────────────────────────────────────────────────────────── */
+  --font-ui: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-num: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-mark: serif;                     /* 印章「字」字形 */
+
+  --text-body: 14px;
+  --leading-body: 1.5;
+  --text-meta: 11px;
+  --text-mini: 10px;
+  --text-micro: 9px;
+  --text-sub: 9px;                        /* 按钮副标题 .action-sub */
+
+  --text-title: clamp(28px, 4vw, 42px);   /* 品牌 h1 */
+  --text-act: clamp(28px, 4vw, 44px);     /* ACT 标题 */
+  --text-metric: clamp(20px, 3vw, 32px);  /* 指标数值 */
+  --text-ending: clamp(26px, 5vw, 48px);  /* 结局标题 */
+  --text-stamp: 36px;
+
+  --tracking-eyebrow: .16em;
+  --tracking-wide: .12em;
+  --tracking-tight: -.02em;
+
+  --weight-body: 500;
+  --weight-label: 750;
+  --weight-strong: 800;
+  --weight-heavy: 850;
+  --weight-black: 900;
+
+  /* ── 间距 ──────────────────────────────────────────────────────────── */
+  --space-1: 4px;
+  --space-2: 6px;
+  --space-3: 8px;
+  --space-4: 10px;
+  --space-5: 12px;
+  --space-6: 14px;
+  --space-7: 16px;
+  --space-8: 18px;
+  --space-9: 24px;
+  --space-10: 28px;
+
+  --pad-shell: 24px clamp(14px, 3vw, 34px) 28px;
+  --gap-grid: 18px;                       /* hero / below 主栅格间距 */
+  --gap-cell: 8px;                         /* 指标格、按钮栅格间距 */
+  --touch: 44px;                           /* 最小可点高度 */
+
+  /* ── 描边、圆角、阴影 ─────────────────────────────────────────────── */
+  --radius: 0;                             /* 系统为直角；唯一圆角见下 */
+  --radius-round: 50%;
+
+  --bw-hair: 1px;
+  --bw-line: 1.5px;
+  --bw-bold: 2px;
+  --bw-block: 3px;
+
+  /* 硬偏移投影：无模糊、无扩散，模拟铅字压印 */
+  --shadow-1: 2px 2px 0 var(--ink);
+  --shadow-2: 3px 3px 0 var(--ink);
+  --shadow-3: 4px 4px 0 var(--ink);
+  --shadow-review: 3px 3px 0 var(--blue);
+  --shadow-stamp: 4px 4px 0 var(--stamp-shadow);
+  --shadow: var(--shadow-3);               /* play.html 旧名，勿在新代码使用 */
+
+  /* ── 交互 ──────────────────────────────────────────────────────────── */
+  --press-shift: 2px;                      /* :active 位移量，同时清零阴影 */
+  --focus-ring: 3px;
+  --focus-offset: 3px;
+  --disabled-opacity: .42;
+
+  /* ── 动效 ──────────────────────────────────────────────────────────── */
+  --dur-pulse: 2.6s;                       /* 唯一动画：世界 pulse */
+  --pulse-scale: 1.08;
+  --pulse-opacity: .65;
+
+  /* ══════════════════════════════════════════════════════════════════════
+     Mobbin 参考驱动层（2026-09-20）
+     ──────────────────────────────────────────────────────────────────────
+     依据见 references/mobbin-2026-09.md。
+     纪律：本层**不引入任何新的颜色字面量**，只做既有令牌的别名 + 几何尺寸。
+     自检在 preview/index.html 的 J 节逐条实算。
+
+     --burst-* 属于**已撤回**的提案 15（未上线）。保留是因为 components.html
+     第 15 节还在用它做设计记录；任何新代码都不要引用。
+     ══════════════════════════════════════════════════════════════════════ */
+
+  /* 分段进度条 —— 已上线：玩家面 #act-progress。依据 Monarch "Getting Started" */
+  --progress-h: 10px;
+  --progress-track: var(--line);
+  --progress-done: var(--green);
+  --progress-todo: var(--surface-4);
+  --progress-dot: var(--ink);
+  --progress-label: var(--muted);
+
+  /* 成就行 —— 已上线：评审面 #aha-list。依据 Duolingo Achievements */
+  --row-bg: var(--surface-3);
+  --row-bg-earned: var(--surface-seen);
+  --row-edge-earned: var(--surface-seen-edge);
+  --row-anchor: 44px;                      /* 左侧图标锚点，与 --touch 对齐 */
+  --row-bar-h: 8px;
+
+  /* Aha 全屏时刻 —— 已撤回（PR #14 用日志世界线解决了同一问题）。勿在新代码引用 */
+  --burst-bg: var(--ink);
+  --burst-ink: var(--green);
+  --burst-muted: var(--log-ink);
+  --burst-figure: clamp(56px, 18vw, 120px);
+  --burst-pill: var(--world-cell);
+  --burst-dot: 14px;
+}
