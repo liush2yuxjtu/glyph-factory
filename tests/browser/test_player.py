@@ -1,7 +1,7 @@
 """Player-contract tests against dist/, never public/ or a Director preview.
 
 Run: python3 -m unittest discover -s tests/browser -p 'test_*.py' -v
-Use GLYPH_BROWSER=webkit for the second CI browser. Each test gets a clean
+Use GLYPH_BROWSER=webkit for the second browser; both engines must be run. Each test gets a clean
 browser context, controlled clock, real storage and real production scripts.
 """
 from datetime import datetime, timedelta, timezone

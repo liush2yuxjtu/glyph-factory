@@ -47,7 +47,7 @@ green `npm run verify` is therefore supporting evidence only; the fail-closed ru
 is the authoritative form of the same suite. Still drive the user-facing surface for UI
 changes.
 
-### `npm run intent-audit` — the canonical gate, and the two ways it has lied
+### `npm run intent-audit` — the canonical gate
 
 `public/aha.md` ("Non-negotiable result semantics") makes `npm run intent-audit` the
 authoritative acceptance run: static contract + player Chromium/WebKit + Aha
@@ -59,24 +59,38 @@ package.json package-lock.json vercel.json` into
 `fast` → `review-build` → `player-chromium` → `player-webkit` → `aha-chromium` →
 `aha-webkit` → `diff-check`.
 
-It runs end to end as of 2026-09-22: all seven stages PASS, 229 tests,
+**The script is `.claude/skills/verify/audit.mjs`, not a file in `scripts/`.** It is
+verification orchestration — the job the deleted `Player merge gate` used to do — so it
+belongs to this skill rather than to the repository's product scripts. `npm run intent-audit`
+stays the entry point, which keeps the references in `public/aha.html`, `public/intent.html`,
+`tests/intent-audit.test.mjs` and `aha.md` true. The script is deliberately outside
+`sourceSha256`: a changed tool is not a changed candidate.
+
+**It aborted on stage one for two distinct reasons, both of them in how it reads `node --test`
+output and neither of them a product defect.** Read them together — they are the same failure
+wearing two hats, and the second one is not fixed by fixing the first:
+
+1. **Wrong field prefix** (2026-09-20 → 09-22). `verify-player.mjs` shells out to `node --test`;
+   Node ≥ 20 prints `ℹ tests 92` where the parser required `# tests (\d+)`. The fast stage
+   *passed* and the audit then rejected it.
+2. **ANSI colour** (fixed 2026-09-22). The reporter wraps those lines in escape sequences, so
+   the line no longer *starts* with `#` or `ℹ` — and the anchor misses **both** shapes at once.
+   Same symptom: "fast gate did not prove nonempty, unskipped success" on a run whose own log
+   ends in `ℹ fail 0`. Fixed by stripping ANSI in `run()` before anything parses the text.
+
+Neither fix loosened the floor: the parser now accepts either prefix and treats a **missing**
+tally as a failure rather than as zero (`tally('fail') !== '0'`), so an unrun or unparsed stage
+is still not a pass. Verified after both fixes: all seven stages PASS,
 `test-results/intent-audit/report.json` with `status: "PASS"`.
 
-**Both of its historical failures were the same shape — the gate aborting inside the step it
-had just passed**, and both were in how it *reads* `node --test` output, never in the product:
+When it fails, read `report.json` — `status`, the per-stage `status` / `exitCode` / `tests`,
+and `error`, which names the stage that died. A stage missing from `stages` did not run. And
+**when it dies on `fast`, read `test-results/intent-audit/fast.log` before believing it**: a
+reporter formatting change looks exactly like a product failure, and twice now it has cost a
+full re-run to tell the two apart.
 
-1. **Wrong field prefix.** `verify-player.mjs` shells out to `node --test`; Node ≥ 20's spec
-   reporter prints `ℹ tests 91` where the audit's parser required `# tests (\d+)`. The fast
-   stage was rejected *after* passing. Fixed by accepting either prefix.
-2. **ANSI colour.** The reporter wraps those lines in escape sequences, so the line no longer
-   *starts* with `#` or `ℹ` and every `^`-anchored reading misses. Same symptom — "fast gate
-   did not prove nonempty, unskipped success" on a run whose own log ends in `ℹ fail 0`.
-   Fixed by stripping ANSI before parsing, in `scripts/intent-audit.mjs`.
-
-Neither fix loosened the floor — a missing field is still unproven (`undefined !== 0`). The
-lesson to carry: **when this gate goes red on `fast`, read `test-results/intent-audit/fast.log`
-before believing it.** A formatting change looks exactly like a product failure, and twice now
-it has cost a full re-run to tell them apart. The hand-run equivalent, if the gate is broken:
+**Do not hand-run the stages and present them as an audit** — that is a weaker claim and must
+be labelled as one. If the gate itself is broken, the honest form is:
 
 ```bash
 npm run verify:fast
@@ -88,7 +102,7 @@ GLYPH_BROWSER=webkit   python3 scripts/run-browser-contracts.py aha
 git diff --check
 ```
 
-Say plainly that this is the hand-run equivalent, not `intent-audit` itself.
+…then say in so many words that this was the hand-run equivalent, not `intent-audit` itself.
 
 ### The rhythm contract: the gaps between Aha moments
 
@@ -425,6 +439,27 @@ Every browser suite serves a built artifact, so `dist/` must exist first or the 
 `npm run verify:fast` and `npm run build:review` both write `dist/`; `npm run build:review`
 additionally writes `review-dist/` and is the one to use when you need the Aha suite. A
 cold `run-browser-contracts.py player` on a fresh clone fails for this reason alone.
+
+## There is no CI — every gate in this file runs here
+
+This repository has no GitHub Actions. Two workflows used to exist —
+`.github/workflows/game.yml` (fast contracts → player/aha browser matrix → `Player merge gate`
+→ Vercel deploy) and `.github/workflows/replit-localization.yml`. Their coverage moved into
+this skill; for each check, the command below is now the **only** place it runs.
+
+| What used to be a workflow job | Run this instead |
+|---|---|
+| `Fast engine and player-build contracts` | `npm run verify:fast` |
+| `Build the separate internal review artifact` | `npm run build:review` |
+| `Player regression (chromium / webkit)` | `GLYPH_BROWSER=chromium python3 scripts/run-browser-contracts.py player`, then `webkit` |
+| Aha suite, both engines | `... run-browser-contracts.py aha` under each `GLYPH_BROWSER` |
+| `Validate internal review video` (ffprobe ≥ 20 s) | `npm test` — `tests/preview-v3.test.mjs` reads the EBML `Duration` element directly, so this now works on macOS, which has no ffprobe |
+| Replit verifier fixtures + public Replit acceptance | **removed 2026-09-22, not replaced.** `test_verifier.py` and `verify_live.py` were deleted with the workflow, so `deploy/replit-localization/glyph-language.js` now ships with no coverage at all. Do not re-add the live check as a substitute here — the decision was to stop checking that adapter |
+| `Player merge gate` | `npm run intent-audit` — one command, the same seven stages, fail-closed, reporting to `test-results/intent-audit/report.json`. No summary job to read any more, so an unrun or skipped stage is a FAIL — never a pass by omission |
+| Vercel deploy | not this skill's job. `vercel.json` sets `outputDirectory: dist`, so Vercel's Git integration deploys the push on its own. A READY badge was never a verification result and still is not |
+
+Nothing runs these on your behalf. Report each stage that you actually ran, name the ones you
+did not, and do not describe an unrun stage as passing.
 
 ## Drive
 
@@ -846,9 +881,10 @@ failures, or unexpected successes. Exit code is 0/1. It writes
 `test-results/intent-audit/aha-<browser>.json`.
 
 37 = 28 generated `test_state_AXX_real_invariant_and_action` cases (`test_aha.py` 末尾那个
-`for number in range(1,29)` 循环）+ 9 hand-written contract tests. Run both engines: they are
-separate CI matrix rows and WebKit is where `getClientRects()`/`:has()` visibility differences
-would show up.
+`for number in range(1,29)` 循环）+ 9 hand-written contract tests. Run both engines separately
+and report each: WebKit is where `getClientRects()`/`:has()` visibility differences would show
+up, and one engine standing in for the other is not a PASS. There is no CI lane left to catch
+the second engine (`#19` deleted the workflows), so this is the only place it gets run.
 
 The player suite is the other half of the leak boundary — run it too when the diff touches
 `build-static.mjs`, the privacy layer, or `play.html`:
@@ -1024,6 +1060,12 @@ overclaimed verdict.
   Act III and by then the panel shows the Act III set. A06's world line describes reader
   growth instead, which is real and visible, but the resource the Aha is named after has no
   carrier anywhere. Reported, not fixed — rebalancing it is a pacing decision.
+- **`intent-audit` proves the stages it ran, not the ones you skipped.** Its green means all
+  seven stages passed on the recorded `commit` and `sourceSha256` — check that the sha
+  matches your candidate, because a run against a different tree is evidence for that tree.
+  It still says nothing about a deployment, and the Replit localization adapter now has no
+  coverage anywhere. With `#19` deleting CI, this is also the *only* gate: there is no remote
+  job that will run these stages for you, and no PR check that can stand in for them.
 - **`public/design-system/flows.html` is now two rebalances older than the engine.** It is
   redrawn from `scripts/flows/screens.json`, which was captured from a build before the
   2026-09-21 rebalance, so its gate tables and readings describe the previous flow (notably
@@ -1081,8 +1123,10 @@ overclaimed verdict.
   `act === 3`, even at `cityReady`. Legibility for Act II belongs on the metric row and in
   `#primary-actions`, which is where `renderActions()` already carries the shortfall idiom.
 - **Playwright version drift.** `tests/browser/requirements.txt` pins `1.57.0`; a machine
-  may have a newer one. CI installs the pin. Only the sync API is used, so either works,
-  but a version-only difference is not a candidate regression.
+  may have a newer one. Nothing installs the pin for you any more — this repository has no
+  CI runner, so `python -m playwright install` on the machine you are on is now the only
+  source of the browsers. Only the sync API is used, so either version works, but a
+  version-only difference is not a candidate regression.
 - **The suite installs its own clock.** `page.clock.install(FIXED)` + `pause_at` +
   `run_for(1500)` in teardown make the run deterministic; do not add wall-clock `sleep`s.
 - **Teardown fails the test on any console error, page error, or failed request.** A test
