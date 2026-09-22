@@ -47,7 +47,7 @@ green `npm run verify` is therefore supporting evidence only; the fail-closed ru
 is the authoritative form of the same suite. Still drive the user-facing surface for UI
 changes.
 
-### `npm run intent-audit` — the canonical gate, and its current defect
+### `npm run intent-audit` — the canonical gate, and the two ways it has lied
 
 `public/aha.md` ("Non-negotiable result semantics") makes `npm run intent-audit` the
 authoritative acceptance run: static contract + player Chromium/WebKit + Aha
@@ -59,18 +59,24 @@ package.json package-lock.json vercel.json` into
 `fast` → `review-build` → `player-chromium` → `player-webkit` → `aha-chromium` →
 `aha-webkit` → `diff-check`.
 
-It runs end to end as of 2026-09-21. Between 2026-09-20 and then it aborted on its own first
-stage: `verify-player.mjs` shells out to `node --test`, Node ≥ 20 prints `ℹ tests 91` where the
-audit's parser required `# tests (\d+)`, and the fast stage was rejected *after* passing. That
-was a reporter-format drift, never a product regression, but it made the canonical gate
-unusable and the hand-run below was the workaround. `scripts/intent-audit.mjs` now accepts
-either prefix (`ℹ` or `#`) and still treats a missing field as unproven, so the
-nonempty/unskipped floor is unchanged. Verified on this machine: all seven stages PASS, 217
-tests, `test-results/intent-audit/report.json` with `status: "PASS"`.
+It runs end to end as of 2026-09-22: all seven stages PASS, 229 tests,
+`test-results/intent-audit/report.json` with `status: "PASS"`.
 
-If it aborts on the fast stage again, read that stage's own log
-(`test-results/intent-audit/fast.log`) before assuming a product failure: a reporter format
-change looks exactly like a red gate. The hand-run equivalent, if the gate itself is broken:
+**Both of its historical failures were the same shape — the gate aborting inside the step it
+had just passed**, and both were in how it *reads* `node --test` output, never in the product:
+
+1. **Wrong field prefix.** `verify-player.mjs` shells out to `node --test`; Node ≥ 20's spec
+   reporter prints `ℹ tests 91` where the audit's parser required `# tests (\d+)`. The fast
+   stage was rejected *after* passing. Fixed by accepting either prefix.
+2. **ANSI colour.** The reporter wraps those lines in escape sequences, so the line no longer
+   *starts* with `#` or `ℹ` and every `^`-anchored reading misses. Same symptom — "fast gate
+   did not prove nonempty, unskipped success" on a run whose own log ends in `ℹ fail 0`.
+   Fixed by stripping ANSI before parsing, in `scripts/intent-audit.mjs`.
+
+Neither fix loosened the floor — a missing field is still unproven (`undefined !== 0`). The
+lesson to carry: **when this gate goes red on `fast`, read `test-results/intent-audit/fast.log`
+before believing it.** A formatting change looks exactly like a product failure, and twice now
+it has cost a full re-run to tell them apart. The hand-run equivalent, if the gate is broken:
 
 ```bash
 npm run verify:fast
@@ -191,11 +197,18 @@ every time the tutorial gets longer, and say which number you are quoting.
 
 Three things the numbers do **not** mean. ACT I is excluded from both the decision and the click
 bands on purpose — it is the manual tutorial, its "decisions" are machine purchases, and a longer
-tutorial inflates both spreads for reasons that have nothing to do with the later acts. The three
-silent beats are not empty screens: the player can always print, sell and buy during them; what
-they cannot do is *decide*, which is why the metric reads zero. And a large all-sections click
-std is not by itself a defect — see the three-bullet list above for what it is and what the
+tutorial inflates both spreads for reasons that have nothing to do with the later acts. The
+remaining silent beat is not an empty screen: the player can always print, sell and buy during
+it; what they cannot do is *decide*, which is why the metric reads zero. And a large all-sections
+click std is not by itself a defect — see the three-bullet list above for what it is and what the
 legitimate levers are.
+
+**A shape assertion is not a variance assertion, and both are needed.** The per-act row in the
+table above is positional — *which* gap is short and *which* is long — and it lives in a
+different file from the CV band on purpose. Variance alone is satisfied by noise, and the band
+alone is satisfied by 27 identical rooms; a suite with only one of them cannot tell "designed
+fast-and-slow" from either failure. Their separation is also what makes the flattening control
+meaningful: flatten the curve and the band must still pass while the shape must fail.
 
 ### 原始读数：一张表，六个口径
 
@@ -336,12 +349,19 @@ worth of scale in a single click.
 
 ### Wait states are part of the contract, not a gap in it
 
-Four review states (A16, A17, A22, A25) have **no enabled action on purpose**: the player is
-waiting for a clock. They are declared explicitly in `public/aha-review-contract.js` under
-`clocks`, each with the condition that says what is being waited for, and `stateErrors` fails if
-a state is supposed to be a wait and is not. The reason is the disclosure contract's mirror
-image: "there is nothing to click here" must never be an all-purpose excuse, so every wait has to
-name its clock.
+Four review states (A16, A17, A22, A25) have **no action that advances the act on purpose**: the
+player is waiting for a clock. They are declared explicitly in `public/aha-review-contract.js`
+under `clocks`, each with the condition that says what is being waited for, and `stateErrors`
+fails if a state is supposed to be a wait and is not. The reason is the disclosure contract's
+mirror image: "there is nothing to click here" must never be an all-purpose excuse, so every wait
+has to name its clock.
+
+Note the wording: since 2026-09-21 these states are no longer *empty screens*. Each act from II
+on renders its compounding verb, so a wait state now has something enabled on it — a thing that
+shortens the wait rather than ending it. `exercise()` keys off `clocks[id]` and therefore still
+skips the click, which is correct: the assertion is "this state is a wait", not "this state is
+blank". Do not tighten it into "zero enabled buttons" — that is exactly the state the rhythm
+work removed.
 
 
 ### 用户意图：这一节验的是 `{{INTENT}}`，不是这份技能里写死的需求
@@ -476,6 +496,15 @@ rewarded them for** — `publish` needs 200 stock, `compose-rule` needs 2, `cond
 20. A reveal that also gates on stock produces a button that never appears, with no
 in-game explanation. That was the state before 2026-09-20, when `publish` used
 `E.canPublish(s)` for reveal *and* enable.
+
+**The mirror case, added 2026-09-21: "this act does not have it" is not "you cannot afford
+it".** Two commands exist only in some states — each act's compounding verb (Act I has none,
+its hand speed *is* the verb) and the micro-event (nothing exists between two of them). Those
+render nothing at all, and that is rule 1 of `aha.md` (*hidden means absent*), not rule 3.
+The engine decides which case applies, in `COMMAND_AVAILABLE`: `commandReady()` returns
+`{ available, ready, … }`, `available === false` means do not render, and `available` but not
+`ready` means grey with the shortfall. Do not "fix" a missing button by making it permanent —
+ask which of the two it is. `aha.md`'s disclosure contract carries the same paragraph.
 
 Verify a disclosure change at both layers:
 
@@ -694,9 +723,17 @@ iframe's `inner_text` *and* `aria_snapshot` contain no match for
 `META` (`tests/intent-browser/test_aha.py:19`) — `A01..A28`, `AHA`, `ACT <n>`,
 `Director Mode`, `导演模式`.
 
-`rules`/`acts` are a hand-rewritten second copy of the engine's thresholds, not an import
-of `GlyphEngineV3.AHAS`. Loosening a gate in the engine therefore breaks this check rather
-than silently passing it. The only intentional coupling is catalogue identity and order.
+**What is independent here, and what is not.** `rules`/`acts` are a hand-written mapping of
+*which state field each Aha is gated on* and *which act it belongs to* — not an import of
+`GlyphEngineV3.AHAS` — and `stateErrors` never calls `trigger()` or `clockMet()`, so an engine
+whose gating logic is wrong still fails this check.
+
+The **threshold values**, however, are read from the engine's ladder tables
+(`GlyphEngineV3.READERS_LADDER` etc., 2026-09-21). They used to be a second hand copy, and that
+copy had already drifted: its `A02` row said `typists 5` where the engine required 8. A second
+copy of a *tuned number* is a copy that will drift; a second implementation of the *checking
+logic* is the thing worth having. If you want the numbers pinned independently, pin them
+against `intent.md` and `node scripts/pacing.mjs`, not against a third transcription.
 
 ### Build
 
@@ -731,7 +768,7 @@ The player suite is the other half of the leak boundary — run it too when the 
 `build-static.mjs`, the privacy layer, or `play.html`:
 
 ```bash
-GLYPH_BROWSER=chromium python3 scripts/run-browser-contracts.py player   # floor 19, currently 26
+GLYPH_BROWSER=chromium python3 scripts/run-browser-contracts.py player   # floor 19, currently 29
 ```
 
 ### Run — in-app 28/28
@@ -762,7 +799,16 @@ meaningful if these are green in the same run:
 
 `test_all_28_verification_is_repeatable_and_preserves_real_save` runs the whole audit twice
 and asserts the real player save and `glyph-factory-ui-reveals-v3` are byte-identical
-before and after (ignoring `updatedAt`/`startedAt`).
+before and after (ignoring `updatedAt`, `startedAt` and `actSeconds`).
+
+That ignore-list is the whole subtlety. The player iframe stays **live** for the entire sweep —
+its own 500 ms timer keeps running and keeps autosaving — so any field the passage of time
+moves will differ across the comparison. `actSeconds` (the micro-event scheduler's counter)
+joined the list on 2026-09-21 for exactly that reason: without it the test fails on "the review
+changed the player's save" when all that happened is the player's own clock ticking. The same
+three fields are excluded inside the review page's own isolation check
+(`public/aha-review-ui.js`). **When you add a save field that grows with time, add it to both
+lists** — otherwise you get a red that reads like a security failure and is actually a clock.
 
 ## Evidence
 
@@ -807,22 +853,34 @@ overclaimed verdict.
   guarantee comes from `build-static.mjs` baking `data-audience="player"` and the
   `!important` hide rules into `dist/`, which `test_player.py` then asserts on the real
   artifact. Do not quote the 28/28 as a player-package claim.
-- **The disclosure contract test is static.** `affordability never hides a discovered
-  action` reads source text. It proves reveal ≠ enable and that no reveal in either parsed
-  form reads `s.glyphs`/`s.credits`; a reveal registered by some third form is still
+- **The disclosure contract test is static, and it says nothing about the third state.**
+  `affordability never hides a discovered action` reads source text. It proves reveal ≠ enable
+  and that no reveal in either parsed form reads `s.glyphs`/`s.credits`; a reveal registered by
+  some third form is still
   invisible to it. It does **not** prove the button actually renders visible, that
   `rememberReveal` latches it, that `enabled` is correct, or that the shortfall copy says
   the right thing. Only the seeded browser recipe above covers that, and only for the
   actions you actually seed.
-- **The rhythm metric is one reference player.** It is a deterministic playthrough with a
-  stated policy, not a distribution over players. It cannot show that a *different* legal
-  route is equally well paced, and it says nothing about wall-clock feel: a 0-click beat is
-  scored as a gap of 0 even when it lasts 200 seconds, and two revisions with identical gap
-  vectors can differ in total play time. Read it next to the per-act seconds column.
+- **The rhythm metric is one reference player, on the passive path.** It is a deterministic
+  playthrough with a stated policy, not a distribution over players, and the policy it uses is
+  the one that *never presses* an act verb or a micro-event — so the numbers above describe a
+  player who ignores half of what is on screen. That is deliberate (it is what the two-hour
+  floor means), but it also means the passive report is **blind to whether those mechanisms
+  still work**: a dead verb and a live one produce identical passive numbers. Read the active
+  line, and run `tests/rhythm-structure.test.mjs`, whenever the diff touches them. Separately:
+  a 0-click beat is scored as a gap of 0 even when it lasts 200 seconds, and two revisions with
+  identical gap vectors can differ in total play time — read it next to the per-act seconds
+  column.
+- **The shape assertion is positional, and only that.** "First gap shortest, last gap longest,
+  tail ≥ 2 × head" says the fast/slow structure sits where the design put it. It does not say
+  the magnitudes are *good*, that the pattern reads as intended to a player, or that a
+  differently-routed playthrough shares it. Magnitudes are judgements about `{{INTENT}}`'s
+  stated shape (currently `head ×0.45 / tail ×1.7`), and the only thing separating "designed"
+  from "measured" is the flattening control.
 - **The cadence test proves tick-equivalence, not balance.** `live ticks == one jump` says the
   rule's output is no longer lost to tick granularity. It says nothing about whether the
   resulting curves are balanced — readership is quadratic in time once `composed` grows, and
-  no test bounds that. It is also why gap 1 of the playthrough opens at 321 clicks: the
+  no test bounds that. It is also why gap 1 of the playthrough opens at 217 clicks: the
   tutorial act is hand-printing, and that is a design choice, not a regression.
 - **The Aha legibility sweep proves transport, not quality.** It asserts the authored
   sentence reaches the newest line of the player's log with no meta leak. It does not judge
@@ -846,18 +904,39 @@ overclaimed verdict.
   Act III and by then the panel shows the Act III set. A06's world line describes reader
   growth instead, which is real and visible, but the resource the Aha is named after has no
   carrier anywhere. Reported, not fixed — rebalancing it is a pacing decision.
-- **`public/design-system/flows.html` is now older than the engine.** It is redrawn from
-  `scripts/flows/screens.json`, which was captured from a build before the 2026-09-21
-  rebalance, so its gate tables and readings describe the previous flow (notably `map-city`
-  as an Act II exit). Rebuilding it needs a fresh browser capture from a running build, which
+- **`public/design-system/flows.html` is now two rebalances older than the engine.** It is
+  redrawn from `scripts/flows/screens.json`, which was captured from a build before the
+  2026-09-21 rebalance, so its gate tables and readings describe the previous flow (notably
+  `map-city` as an Act II exit). The same rebalance added two player-facing action surfaces —
+  each act's compounding verb and the micro-event — so the captured `#primary-actions` grid is
+  now short by one or two buttons per act as well. Rebuilding it needs a fresh browser capture
+  from a running build, which
   is not part of any committed script. Until that capture is redone, cite the engine and
   `node scripts/pacing.mjs` — not the flows page — as the current flow truth.
+- **The four mechanism controls prove coupling, not tuning.** `tests/rhythm-structure.test.mjs`
+  patches source and asserts the number moves in the direction the design claims — cut the fuel
+  feed and Act V stops tracking the old layer, remove the multiplier and the active path returns
+  to the passive length. What that establishes is *"this mechanism is load-bearing"*. It does not
+  establish that the magnitudes are right, that a player perceives them, or that the verbs are
+  affordable at the moments they appear. Those are `{{INTENT}}` judgements, read off
+  `node scripts/pacing.mjs` and the browser suites.
+- **A negative control that silently does not apply is worse than none.** `loadEngine` takes
+  either a `[from, to]` pair or a transform function. The pair form checks itself — it throws if
+  the anchor string is absent — which is why the multiplier control uses it. The function form
+  cannot, so every transform-based control (flattening, fuel feed) begins by asserting its own
+  anchor is present. **Keep that when you add one**: a control that quietly patches nothing
+  leaves the suite green while proving an empty sentence.
 - **No run in this session executed the Aha suite against a deployment.** Every result here
   is a local artifact built from the working tree; `report.json` says so in its own `scope`
   field. A local green is not a Preview or production claim.
 
 ## Gotchas
 
+- **`aha.md` has a committed byte-for-byte copy at `public/aha.md`.** `tests/intent-audit.test.mjs`
+  asserts the two are identical, but `verify:fast` runs the Node suite *before*
+  `build-static.mjs`, so editing the canonical file without copying it fails the gate on a test
+  that looks unrelated to whatever you changed — and the audit reports it as a `fast`-stage
+  failure, which reads like a product regression. `cp aha.md public/aha.md` and commit both.
 - **`review-dist/` is required and is not built by `npm run dev`.** A fresh clone fails the
   suite with a build error, not a test failure. Same for `dist/` — see "Build before any
   browser suite" above; the failure reads as `setUpClass ERROR`, not as a test failure, so
