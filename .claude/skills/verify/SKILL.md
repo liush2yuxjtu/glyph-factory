@@ -47,7 +47,7 @@ green `npm run verify` is therefore supporting evidence only; the fail-closed ru
 is the authoritative form of the same suite. Still drive the user-facing surface for UI
 changes.
 
-### `npm run intent-audit` — the canonical gate, and its current defect
+### `npm run intent-audit` — the canonical gate
 
 `public/aha.md` ("Non-negotiable result semantics") makes `npm run intent-audit` the
 authoritative acceptance run: static contract + player Chromium/WebKit + Aha
@@ -59,34 +59,24 @@ package.json package-lock.json vercel.json` into
 `fast` → `review-build` → `player-chromium` → `player-webkit` → `aha-chromium` →
 `aha-webkit` → `diff-check`.
 
-**As of 2026-09-20 it aborts on the first stage on this machine** (`scripts/intent-audit.mjs:40-42`):
+**The script is `.claude/skills/verify/audit.mjs`, not a file in `scripts/`.** It is
+verification orchestration — the job the deleted `Player merge gate` used to do — so it
+belongs to this skill rather than to the repository's product scripts. `npm run intent-audit`
+stays the entry point, which keeps the references in `public/aha.html`, `public/intent.html`,
+`tests/intent-audit.test.mjs` and `aha.md` true. The script is deliberately outside
+`sourceSha256`: a changed tool is not a changed candidate.
 
-```
-error: "Fast gate did not prove nonempty, unskipped success"
-stages: [{ name: "fast", status: "PASS", exitCode: 0 }]
-```
+**It aborted on stage one from 2026-09-20 until 2026-09-22.** `verify-player.mjs` shells out
+to `node --test`, and Node ≥ 20 prints `ℹ tests 92` where the parser required
+`# tests (\d+)`. The fast stage *passed* and the audit then rejected it, so a reporter-format
+drift read as a product failure. The parser now accepts both shapes and treats a missing
+tally as a failure rather than as zero. Verified after the fix: all seven stages PASS, 218
+tests across them, `commit 161a589`, `status: PASS`.
 
-The fast stage *passes*; the audit's parser then rejects it. `verify-player.mjs` shells out
-to `node --test`, and Node ≥ 20 prints `ℹ tests 83` (an illustrative count, not this repo's
-total) where the audit's regex requires
-`# tests (\d+)`. This is a Node-reporter-format drift, not a product regression. It is not
-count- or content-dependent — the regex matches the reporter's *prefix*, so a clean
-checkout fails the same way; verified directly with
-`/^# tests (\d+)$/m.test('ℹ tests 83') === false`. Fixing it is a one-line regex change in
-`scripts/intent-audit.mjs`; until then, reproduce the audit by running its five substantive
-stages by hand and reporting them individually:
-
-```bash
-npm run verify:fast
-npm run build:review
-GLYPH_BROWSER=chromium python3 scripts/run-browser-contracts.py player
-GLYPH_BROWSER=webkit   python3 scripts/run-browser-contracts.py player
-GLYPH_BROWSER=chromium python3 scripts/run-browser-contracts.py aha
-GLYPH_BROWSER=webkit   python3 scripts/run-browser-contracts.py aha
-git diff --check
-```
-
-Say plainly that this is the hand-run equivalent, not `intent-audit` itself.
+When it fails, read `report.json` — `status`, the per-stage `status` / `exitCode` / `tests`,
+and `error`, which names the stage that died. A stage missing from `stages` did not run.
+**Do not hand-run the stages and present them as an audit**; that is a weaker claim and must
+be labelled as one.
 
 ### Build before any browser suite
 
@@ -119,7 +109,7 @@ this skill; for each check, the command below is now the **only** place it runs.
 | Aha suite, both engines | `... run-browser-contracts.py aha` under each `GLYPH_BROWSER` |
 | `Validate internal review video` (ffprobe ≥ 20 s) | `npm test` — `tests/preview-v3.test.mjs` reads the EBML `Duration` element directly, so this now works on macOS, which has no ffprobe |
 | Replit verifier fixtures + public Replit acceptance | **removed 2026-09-22, not replaced.** `test_verifier.py` and `verify_live.py` were deleted with the workflow, so `deploy/replit-localization/glyph-language.js` now ships with no coverage at all. Do not re-add the live check as a substitute here — the decision was to stop checking that adapter |
-| `Player merge gate` | the rows above, all green, **on the same commit**. There is no summary job to read any more, so an unrun or skipped stage is a FAIL — never a pass by omission |
+| `Player merge gate` | `npm run intent-audit` — one command, the same seven stages, fail-closed, reporting to `test-results/intent-audit/report.json`. No summary job to read any more, so an unrun or skipped stage is a FAIL — never a pass by omission |
 | Vercel deploy | not this skill's job. `vercel.json` sets `outputDirectory: dist`, so Vercel's Git integration deploys the push on its own. A READY badge was never a verification result and still is not |
 
 Nothing runs these on your behalf. Report each stage that you actually ran, name the ones you
@@ -668,9 +658,11 @@ overclaimed verdict.
   Act III and by then the panel shows the Act III set. A06's world line describes reader
   growth instead, which is real and visible, but the resource the Aha is named after has no
   carrier anywhere. Reported, not fixed — rebalancing it is a pacing decision.
-- **`npm run intent-audit` did not run.** While its regex defect stands, there is no
-  single command whose green means "all layers passed". Report the five hand-run stages
-  individually and say that is what you did — do not present them as `intent-audit` PASS.
+- **`intent-audit` proves the stages it ran, not the ones you skipped.** Its green means all
+  seven stages passed on the recorded `commit` and `sourceSha256` — check that the sha
+  matches your candidate, because a run against a different tree is evidence for that tree.
+  It still says nothing about a deployment, and the Replit localization adapter now has no
+  coverage anywhere.
 - **No run in this session executed the Aha suite against a deployment.** Every result here
   is a local artifact built from the working tree; `report.json` says so in its own `scope`
   field. A local green is not a Preview or production claim.
