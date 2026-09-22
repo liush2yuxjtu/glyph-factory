@@ -112,7 +112,7 @@
       buttons.push(actionButton(label(ACTIONS.print), en?'Old verbs still work, for now.':'旧玩法还在，但意义开始改变。', 'print', true, {}, 'major'));
       // Once the rule is running, the button must report what it is producing. Repeating the
       // discovery copy forever is how a working button reads as broken.
-      const ruleReaders = (s.composed * E.RULE_READERS).toFixed(2);
+      const ruleReaders = E.ruleReadersPerSecond(s).toFixed(2);
       const composeSub = s.glyphs < 2 ? lack(en?'2 stock':'2 库存字', fmt(s.glyphs,1))
         : s.ruleActive ? (en?`Carved ${fmt(s.composed)} · readers +${ruleReaders}/s`:`已刻 ${fmt(s.composed)} 条 · 读者 +${ruleReaders}/秒`)
         : (en?'2 glyphs → one repeatable relationship':'2 字 → 一条可重复规则');
@@ -129,7 +129,10 @@
       // Reveal latches on the act (monotonic), never on affordability — an action you have
       // discovered stays on screen, greyed, with the shortfall written on it.
       add('dialect', s.act >= 3, true, label(ACTIONS.dialect), en?'Another district diverges.':'再观察一个街区。', 'discover-dialect');
-      add('concept', s.concepts>0||seen.has('A13')||s.meaning>=25, s.meaning>=25, label(ACTIONS.concept), en?'Spend 25 meaning to change society.':'花25意义，让一个概念进入社会。', 'make-concept');
+      // 代价从引擎读。写死过一次「花25意义」，而引擎扣的是 50——一个点下去比按钮上写的贵一倍
+      // 的动作，是披露契约最不能有的那种谎：不是「点了没反应」，是「反应比说好的大」。
+      const conceptCost = E.COMMAND_COSTS['make-concept'](s).find(([key]) => key === 'meaning')[1];
+      add('concept', s.concepts>0||seen.has('A13')||s.meaning>=25, s.meaning>=25, label(ACTIONS.concept), en?`Spend ${conceptCost} meaning to change society.`:`花${conceptCost}意义，让一个概念进入社会。`, 'make-concept');
       // 地图是这一章画出来的，不是上一章的出口。要有两种以上街区，地图上才有东西可看——
       // 门槛数字来自引擎（E.COMMAND_COSTS），按钮自己会写「还差 街区 1/2」。
       add('city', s.worldScale>=1||seen.has('A14')||s.districts>=2, true, label(ACTIONS.city), en?'The workshop is no longer the whole world.':'工坊不再是全部世界。', 'map-city', {}, 'major');

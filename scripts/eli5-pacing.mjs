@@ -60,8 +60,16 @@ const variants = [14000, 18000, 22000, 26000, 32000].map((gate) => {
   const dd = pacingReport(e2, r2, 'decisions'), cc = pacingReport(e2, r2, 'clicks');
   return { gate, secStd: dd.secondsStd, secCv: dd.secondsCv, clk: st(cc.list.map((x) => x.gap)), total: dd.totalSeconds, gap2: dd.list[1].seconds };
 });
+// 轴上限从数据里取，别写死。写死过一次 360，而重排后最长的一段是 490——柱子被裁到画布外，
+// 图上看上去「挺均匀的」。刻度写死就等于让图去迎合一个过期的事实。
+const axisMax = (values, floor) => Math.max(floor, Math.ceil(Math.max(...values) / 60) * 60);
+const secMax = axisMax(secs, 360);
+const clkMax = axisMax(clks, 560);
 const vW = 640, vH = 216, vP = 46;
 const vx = (i) => vP + (i / (variants.length - 1)) * (vW - vP * 2);
+// 两条线各自归一化到自己的量程：secStd 约 105、点击均值约 35，共用一个上限会把其中一条压平。
+const vStdMax = axisMax(variants.map((v) => v.secStd), 40);
+const vClkMax = axisMax(variants.map((v) => v.clk.m), 44);
 const vline = (get, max, colour) => variants.map((v, i) => `${i ? 'L' : 'M'}${vx(i).toFixed(1)},${(vH - 40 - (get(v) / max) * (vH - 76)).toFixed(1)}`).join(' ');
 const vdots = (get, max, colour) => variants.map((v, i) =>
   `<circle cx="${vx(i).toFixed(1)}" cy="${(vH - 40 - (get(v) / max) * (vH - 76)).toFixed(1)}" r="3.5" fill="${colour}"/>`).join('');
@@ -114,9 +122,9 @@ li b{font-weight:700}.cost{color:var(--rust)}
   <p class="sub">同 27 段，同一局。上面一张是「等了几秒」，下面一张是「按了几下」——两张图共用横轴。</p>
   <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="27 段间隔的秒数与点击数">
     ${bands.join('')}
-    <line class="grid" x1="${PAD}" y1="${H - 34 - ((H - 70) * 300) / 360}" x2="${W - PAD}" y2="${H - 34 - ((H - 70) * 300) / 360}"/>
-    <text class="axis" x="4" y="${H - 34 - ((H - 70) * 300) / 360 + 4}">300s</text>
-    ${bars(secs, 360, 'var(--ink)', (v) => Math.round(v) + 's', false)}
+    <line class="grid" x1="${PAD}" y1="${H - 34 - ((H - 70) * 300) / secMax}" x2="${W - PAD}" y2="${H - 34 - ((H - 70) * 300) / secMax}"/>
+    <text class="axis" x="4" y="${H - 34 - ((H - 70) * 300) / secMax + 4}">300s</text>
+    ${bars(secs, secMax, 'var(--ink)', (v) => Math.round(v) + 's', false)}
     <line class="rule" x1="${PAD}" y1="${H - 34}" x2="${W - PAD}" y2="${H - 34}"/>
     <text class="axis" x="${W - PAD}" y="26" text-anchor="end">秒 · 均值 ${secA.m.toFixed(0)}s · 标准差 ${secA.s.toFixed(1)}s</text>
   </svg>
@@ -130,11 +138,11 @@ li b{font-weight:700}.cost{color:var(--rust)}
     ${bands.join('')}
     <line class="grid" x1="${PAD}" y1="${H - 34 - ((H - 70) * 500) / 560}" x2="${W - PAD}" y2="${H - 34 - ((H - 70) * 500) / 560}"/>
     <text class="axis" x="4" y="${H - 34 - ((H - 70) * 500) / 560 + 4}">500</text>
-    <line x1="${PAD}" y1="${H - 34 - ((H - 70) * 10) / 560}" x2="${W - PAD}" y2="${H - 34 - ((H - 70) * 10) / 560}"
+    <line x1="${PAD}" y1="${H - 34 - ((H - 70) * 10) / clkMax}" x2="${W - PAD}" y2="${H - 34 - ((H - 70) * 10) / clkMax}"
           stroke="var(--rust)" stroke-width="1" stroke-dasharray="4 3" opacity=".8"/>
-    <text class="axis" x="4" y="${H - 34 - ((H - 70) * 10) / 560 + 4}" style="fill:var(--rust)">10</text>
-    <text class="axis" x="${W - PAD - 2}" y="${H - 34 - ((H - 70) * 10) / 560 - 6}" text-anchor="end" style="fill:var(--rust)">后面 25 段全在这条红线下，每段 0–10 下</text>
-    ${bars(clks, 560, '#8a9a76', (v) => String(v))}
+    <text class="axis" x="4" y="${H - 34 - ((H - 70) * 10) / clkMax + 4}" style="fill:var(--rust)">10</text>
+    <text class="axis" x="${W - PAD - 2}" y="${H - 34 - ((H - 70) * 10) / clkMax - 6}" text-anchor="end" style="fill:var(--rust)">后面 25 段全在这条红线下，每段 0–10 下</text>
+    ${bars(clks, clkMax, '#8a9a76', (v) => String(v))}
     <line class="rule" x1="${PAD}" y1="${H - 34}" x2="${W - PAD}" y2="${H - 34}"/>
     <text class="axis" x="${W - PAD}" y="26" text-anchor="end">点击 · 均值 ${clkA.m.toFixed(1)} · 标准差 ${clkA.s.toFixed(1)}</text>
   </svg>
@@ -154,9 +162,9 @@ li b{font-weight:700}.cost{color:var(--rust)}
   <h2>要动，只能动第一章</h2>
   <p class="sub">唯一的旋钮是第一章的发行门槛（现在 ${CURRENT / 1000}k）。下面是五个值各跑一遍的实测。</p>
   <svg viewBox="0 0 ${vW} ${vH}" role="img" aria-label="门槛与时长标准差、点击均值的关系">
-    <path class="series" stroke="var(--ink)" d="${vline((v) => v.secStd, 40)}"/>
-    <path class="series" stroke="var(--rust)" d="${vline((v) => v.clk.m, 44)}"/>
-    ${vdots((v) => v.secStd, 40, 'var(--ink)')}${vdots((v) => v.clk.m, 44, 'var(--rust)')}
+    <path class="series" stroke="var(--ink)" d="${vline((v) => v.secStd, vStdMax)}"/>
+    <path class="series" stroke="var(--rust)" d="${vline((v) => v.clk.m, vClkMax)}"/>
+    ${vdots((v) => v.secStd, vStdMax, 'var(--ink)')}${vdots((v) => v.clk.m, vClkMax, 'var(--rust)')}
     ${vlab}
     <text class="axis" x="${W - PAD}" y="24" text-anchor="end">黑＝时长标准差（越低越好）</text>
     <text class="axis" x="${W - PAD}" y="40" text-anchor="end" style="fill:var(--rust)">红＝点击均值（越低越好）</text>

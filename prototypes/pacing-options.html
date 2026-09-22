@@ -193,7 +193,11 @@ const Model = (() => {
     if (s.push === 'off') return {...s, log:[...s.log, '推钟现在是关的——切到「复利」或「一次性充值」再按。']};
     const n = (s.pushes[act] || 0) + 1;
     if (s.push === 'topup') {
-      const gaps = s.gaps.map((g, i) => i === s.gaps.indexOf(at) ? {...g, topup: g.topup + TOPUP_SECONDS} : g);
+      // 当前播放头所在的那一段。两个坑：`at` 在这个作用域里根本不存在（点了会抛
+      // ReferenceError，而原型自己的规矩是「点了没反应」也不允许）；就算把它取出来，
+      // `project()` 返回的是拷贝，`indexOf` 比不出身份——只能按 id 找。
+      const current = project(s).at;
+      const gaps = s.gaps.map((g) => (g.from === current.from && g.to === current.to ? {...g, topup: g.topup + TOPUP_SECONDS} : g));
       return {...s, gaps, pushes:{...s.pushes, [act]: n}, log:[...s.log, `${act===1?'':''}第 ${act} 章「${ACTS[act-1].verb}」：这一段缩短 ${TOPUP_SECONDS} 秒。下一段回到原速。`]};
     }
     const capped = (n - 1) * COMPOUND_STEP >= COMPOUND_CAP;

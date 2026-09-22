@@ -111,6 +111,11 @@ const GlyphEngineV3 = (() => {
   // 写死绝对量的微事件在快幕里没感觉、在慢幕里像中奖——按增速折算，它在哪一幕分量都一样。
   const readerRate = (g) => (0.35 + Math.min(g.composed, 12) * RULE_READERS) * (1 + g.viralWords * 2)
     + g.agents * 1.5 + g.districts * 1.5 + g.concepts * 2.5;
+  // 自动刻字这条规则**自己**每秒给读者加多少（不含读者自然增长与 Agent/街区/概念那几项）。
+  // 渲染层拿它显示「已刻 N 条 · 读者 +X/秒」。公式只写这一份：原来按钮上写的是
+  // `composed × RULE_READERS`，既没有 12 条的封顶、也没有传播倍率，于是 composed 一过 12
+  // 按钮就一直在报一个偏大的数——一个看上去很精确、而且没人会去核对的谎话。
+  const ruleReadersPerSecond = (g) => Math.min(g.composed, 12) * RULE_READERS * (1 + g.viralWords * 2);
   const articleRate = (g) => g.agents * 0.5;
   // 第五章的钟被**旧层的产能**喂着：第一章那几台机器一直在出字，机器读得越多，这个新字
   // 被用得越快。这是「旧动作供新层」（U7 第 4 条）落地的地方，也是这一章唯一一个「回去把
@@ -613,6 +618,10 @@ const GlyphEngineV3 = (() => {
   // 已经用掉的一次性动作不再算「就绪」。留着亮按钮等于告诉玩家还能再按一次，而引擎会
   // 静默拒绝——这正是「按钮亮着但点了没反应」那类问题的反方向版本。
   const COMMAND_SPENT = {
+    // 传播是一次性的：它把自然增速翻三倍，而增速是**乘**进读者里的。可重复按的话，
+    // 每按一次就再翻一倍，读者钟会被推着越跑越快，后面所有以读者为刻度的发现一起塌掉——
+    // 「被无界量喂着的钟不是钟」，这条和 `composed` 封顶 12 是同一件事，只是从动作那一侧漏进来的。
+    'viral-word': (g) => integer(g.viralWords, 1e6) >= 1,
     'map-city': (g) => Boolean(g.worldScale),
     'map-world': (g) => g.worldScale >= 2,
     'launch-agents': (g) => integer(g.agents, 1e7) >= 1,
@@ -684,7 +693,7 @@ const GlyphEngineV3 = (() => {
       // 第二章的动词因此有了自己的节拍——每一个发现都要先用「压缩」把废话变成意义，
       // 而不是读者数字涨到了就自动发生。
       g = { ...g, meaning:num(g.meaning-55), credits:num(g.credits-120), organicWords:g.organicWords+1, demand:num(g.demand+1.5) };
-    } else if (type === 'viral-word' && g.organicWords >= 1 && g.readers >= AHA_CLOCK.A09[1] && g.meaning >= 70) {
+    } else if (type === 'viral-word' && g.organicWords >= 1 && g.viralWords < 1 && g.readers >= AHA_CLOCK.A09[1] && g.meaning >= 70) {
       // 传播同样是选择：把哪一个词推出去，是这一章里唯一需要判断的动作。
       // 它不再一次送 750 个读者——那会让 A09→A10 只剩 87 秒——而是把自然增速翻三倍，
       // 也就是这条发现自己说的那句话：传播速度登场。后面的刻度为此写得更宽。
@@ -839,6 +848,6 @@ const GlyphEngineV3 = (() => {
     return syncAhas(g);
   }
 
-  return { VERSION,SAVE_KEY,OFFLINE_CAP,PRICE,RULE_PERIOD,RULE_READERS,UNITS,CONTRACTS,ACTS,AHAS,AHA_WORLD,ACT_GATES,WORLD_GATE,AHA_GOALS,AHA_CLOCK,LADDER_ENTRY,READERS_LADDER,ARTICLE_LADDER,MACHINE_LADDER,AMBIGUITY_LADDER,BOOST_STEP,BOOST_CAP,BOOST_MAX,BOOST_CLOCK,ACT_VERBS,BOOST_COSTS,EVENTS,EVENT_EVERY,EVENT_SECONDS,EVENT_CLOCK,clockRate,eventDue,boostCount,gateProgress,ahaGoal,commandReady,fieldLabel,fresh,restore,advance,act,rate,cost,actIndex,ahaUnlocked,directorState,canPublish };
+  return { VERSION,SAVE_KEY,OFFLINE_CAP,PRICE,RULE_PERIOD,RULE_READERS,ruleReadersPerSecond,UNITS,CONTRACTS,ACTS,AHAS,AHA_WORLD,ACT_GATES,WORLD_GATE,AHA_GOALS,AHA_CLOCK,LADDER_ENTRY,READERS_LADDER,ARTICLE_LADDER,MACHINE_LADDER,AMBIGUITY_LADDER,BOOST_STEP,BOOST_CAP,BOOST_MAX,BOOST_CLOCK,ACT_VERBS,BOOST_COSTS,COMMAND_COSTS,EVENTS,EVENT_EVERY,EVENT_SECONDS,EVENT_CLOCK,clockRate,eventDue,boostCount,gateProgress,ahaGoal,commandReady,fieldLabel,fresh,restore,advance,act,rate,cost,actIndex,ahaUnlocked,directorState,canPublish };
 })();
 if (typeof window !== 'undefined') window.GlyphEngineV3 = GlyphEngineV3;

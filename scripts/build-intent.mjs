@@ -16,7 +16,7 @@
 // 支持的 Markdown 子集就是这份文档用到的那几种：标题、引用、粗体、行内码、
 // 有序/无序列表、表格、分隔线、链接。不做通用渲染器。
 import { readFileSync, writeFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = fileURLToPath(new URL('../', import.meta.url)).replace(/\/$/, '');
 
@@ -64,6 +64,10 @@ export function renderIntent(md) {
       list.items.push((ul || ol)[1]);
       continue;
     }
+    // 缩进的续行属于上一条列表项，不是新段落。没有这一支的话，intent.md 里每一条换行写
+    // 的长条目都会被切成「一个单词的列表 + 一段脱离编号的正文」——生成页看上去像坏了，
+    // 而所有断言照样全绿。
+    if (list && /^\s+\S/.test(line)) { list.items[list.items.length - 1] += ` ${line.trim()}`; continue; }
     flushQuote(); flushList();
     para.push(line.trim());
   }
@@ -107,7 +111,9 @@ ${out.join('\n')}
 `;
 }
 
-if (process.argv[1] && import.meta.url.endsWith(process.argv[1].split('/').pop())) {
+// 入口判定用规范化路径比，不比 basename：basename 撞名会误判，而 Windows 上
+// `split('/')` 连切都切不开（这个仓库目前只跑 macOS/Linux，但那是运维事实、不是代码契约）。
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const html = renderIntent(readFileSync(`${ROOT}/intent.md`, 'utf8'));
   writeFileSync(`${ROOT}/public/intent.html`, html);
   console.log(`written public/intent.html · ${html.length} chars`);

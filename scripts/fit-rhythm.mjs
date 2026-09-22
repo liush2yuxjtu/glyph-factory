@@ -12,6 +12,7 @@
 // 按幕归一化」。判据（CV ≤ 0.45、最长÷最短 ≤ 6、无一段短于 60 秒、全程 ≥ 7200 秒）在
 // tests/game-v3.test.mjs 里，形状本身在 tests/rhythm-structure.test.mjs 里——这里都不重复。
 import { readFileSync, writeFileSync } from 'node:fs';
+import { pathToFileURL } from 'node:url';
 import { playthrough, gaps } from '../tests/pacing.mjs';
 
 const ENGINE = new URL('../public/glyph-engine-v3.js', import.meta.url);
@@ -170,7 +171,9 @@ export function fit({ rounds = 8, totalTarget = 7300, log = console.log } = {}) 
   return src;
 }
 
-if (process.argv[1] && import.meta.url.endsWith(process.argv[1].split('/').pop())) {
+// 入口判定用规范化路径比，不比 basename：basename 撞名会误判，而 Windows 上
+// `split('/')` 连切都切不开（这个仓库目前只跑 macOS/Linux，但那是运维事实、不是代码契约）。
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const dry = process.argv.includes('--dry');
   const at = process.argv.indexOf('--rounds');
   const src = fit({ rounds: at >= 0 ? Number(process.argv[at + 1]) || 8 : 8 });

@@ -75,9 +75,23 @@
     }
     return {id, snapshot, errors};
   }
+  // 等待态里被点亮、而且能推进这一幕的动作。推钟动词和微事件不算——它们只让等待短一点，
+  // 是 2026-09-21 之后特意加进去的；`transitions` 里那批才是「一步跨过这一幕」的动作。
+  function progressionLeak(doc) {
+    return [...doc.querySelectorAll('#primary-actions button:enabled')]
+      .filter((b) => visible(b) && transitions[b.dataset.command])
+      .map((b) => b.dataset.command);
+  }
   function exercise(doc, id) {
     const result = inspect(doc, id);
     if (result.errors.length || id === 'A28' || clocks[id]) {
+      // 等待态原来直接返回，于是「某个推进动作在等待态被点亮」没有任何断言拦得住——
+      // 而那恰好是这个契约存在的理由。等待态要说的是「没有能推进这一幕的按钮」，
+      // 不是「一个按钮都没有」：后者正是这一轮节奏工作去掉的东西。
+      if (clocks[id]) {
+        const leaked = progressionLeak(doc);
+        if (leaked.length) result.errors.push(`a progression action is enabled during a wait: ${leaked.join(', ')}`);
+      }
       return {...result, pass: result.errors.length === 0, command: id === 'A28' ? 'terminal' : (clocks[id] ? 'clock' : null)};
     }
     const button = [...doc.querySelectorAll('#primary-actions button:enabled')].find((b) => visible(b) && transitions[b.dataset.command]);

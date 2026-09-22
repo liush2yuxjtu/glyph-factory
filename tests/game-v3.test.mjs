@@ -90,6 +90,32 @@ test('A10 scarcity arrives with the viral word, not before it', () => {
   assert.ok(!E.ahaUnlocked(quiet, 'A10'));
 });
 
+test('a viral word is one-shot: the reader clock cannot be multiplied on demand', () => {
+  // 「传播速度登场」把自然增速翻三倍，而增速是**乘**进读者里的。可重复按的话，每按一次
+  // 再翻一倍——玩家只要有意义就能把读者钟一路推快，第二、三章所有以读者为刻度的发现一起塌。
+  // 这和 `composed` 封顶 12 是同一件事：被无界量喂着的钟不是钟，只是这次从动作那一侧漏进来。
+  const base = { ...E.fresh(t), act: 2, published: true, organicWords: 1, readers: 1339, meaning: 900 };
+  const once = doIt(base, 'viral-word');
+  assert.equal(once.viralWords, 1);
+  const twice = doIt(once, 'viral-word');
+  assert.equal(twice.viralWords, 1, '第二次按不能再加一层倍率');
+  assert.equal(JSON.stringify({ ...twice, log: 0 }), JSON.stringify({ ...once, log: 0 }), '第二次按不该改变任何状态');
+  // 用掉的动词要报「已完成」，否则按钮亮着而引擎静默拒绝——那是披露契约明令禁止的形状。
+  assert.equal(E.commandReady(once, 'viral-word').spent, true);
+  assert.equal(E.commandReady(once, 'viral-word').ready, false);
+  assert.ok(E.clockRate(once) > E.clockRate(base), '一次传播仍然要真的把读者速度推上去');
+});
+
+test('renderer numbers that belong to the engine are read from it, not restated', () => {
+  // 渲染层各写死过一次，两次都写错：规则产率写成 `composed × RULE_READERS`（漏了 12 条封顶
+  // 与传播倍率，composed 一过 12 就一直偏大），概念代价写着「花25意义」而引擎扣 50。
+  // 写死的数字就是允许两份不一致，所以这里断的是「它去读引擎」，不是「它写对了」。
+  const controller = readFileSync(new URL('../public/glyph-game-v3.js', import.meta.url), 'utf8');
+  assert.match(controller, /E\.ruleReadersPerSecond\(/, '规则产率要从引擎读');
+  assert.match(controller, /E\.COMMAND_COSTS\['make-concept'\]\(/, '概念代价要从引擎读');
+  assert.doesNotMatch(controller, /composed \* E\.RULE_READERS/, '不要再把封顶前的公式抄一遍');
+});
+
 test('A13 concepts spend meaning and change society', () => {
   // A concept needs a district to live in and a press to print it: `concepts < districts` is
   // what stops `discover-dialect` (+25 meaning) from funding this command one click at a time.

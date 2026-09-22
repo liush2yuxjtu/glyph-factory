@@ -25,10 +25,17 @@ test('user intent is its own document, and it is verifiable intent by intent',()
   for(const id of ids)
     for(const [name,source] of [['intent.md',intentMd],['public/intent.html',intentHtml]])
       assert.match(source,new RegExp(`\\b${id}\\b`),`${id} is missing from ${name}`);
-  // 每条意图都要能被验：原话（用户怎么说）+ 怎么验（证据在哪）+ 状态（做没做）
-  assert.ok((intentMd.match(/\*\*怎么验。\*\*/g)||[]).length>=6,'每条意图都要写清怎么验');
-  assert.ok((intentMd.match(/\*\*状态。\*\*/g)||[]).length>=6,'每条意图都要写清状态');
-  assert.match(intentMd,/> .+\n/,'原话要留引用块，不许改写成转述');
+  // 每条意图都要能被验：原话（用户怎么说）+ 怎么验（证据在哪）+ 状态（做没做）。
+  // 断言必须**逐条**下：只数全篇的话，新加的 U8 可以一条字段都不写而全绿——U1…U7 已经
+  // 把全局下限占满了。这类「下限被前面的条目填满」的写法，是这个文件里第三次出现同一个坏法。
+  const sections=intentMd.split(/^## /m).slice(1).filter((block)=>/^U\d+ · /.test(block));
+  assert.ok(sections.length>=6,`只切出 ${sections.length} 条意图，切分本身可能坏了`);
+  for(const block of sections){
+    const id=block.match(/^(U\d+) · /)[1];
+    assert.match(block,/> .+/m,`${id} 缺「原话」引用块——用户怎么说的一句都不能少`);
+    assert.match(block,/\*\*怎么验。\*\*/,`${id} 没写「怎么验」`);
+    assert.match(block,/\*\*状态。\*\*/,`${id} 没写「状态」`);
+  }
   // HTML 是生成物，别手改
   assert.match(intentHtml,/build-intent\.mjs/,'生成的 HTML 要写明它是从哪来的');
 });
