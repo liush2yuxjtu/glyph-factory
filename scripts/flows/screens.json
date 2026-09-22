@@ -4,10 +4,10 @@
   "layout": {
    "metrics": 1,
    "actions": 1,
-   "machines": 1,
-   "world": 2,
-   "acts": 6,
-   "aha": 2,
+   "machines": 0,
+   "world": 0,
+   "acts": 0,
+   "aha": 0,
    "hero": 1,
    "below": 1
   },
@@ -21,8 +21,8 @@
   "actTitle": "手工与自动化",
   "actCopy": "先亲手印。然后让机器接管重复劳动。",
   "ahaId": "A01 · NEXT",
-  "ahaTitle": "机器替我按按钮",
-  "ahaCopy": "我的工作不是点，是设计增长。",
+  "ahaTitle": "",
+  "ahaCopy": "",
   "ahaCount": "0 / 28",
   "systemsTitle": "系统",
   "systemsNote": "系统一旦出现，就留在桌面上。",
@@ -92,7 +92,8 @@
     "sub": "手动生产",
     "disabled": false,
     "major": true,
-    "danger": false
+    "danger": false,
+    "event": false
    }
   ],
   "world": [
@@ -114,6 +115,7 @@
    }
   ],
   "machines": [],
+  "ahas": [],
   "acts": [
    {
     "text": "ACT I · 手工与自动化",
@@ -121,13 +123,12 @@
     "state": "current"
    }
   ],
-  "ahas": [],
   "log": [
    "› 台灯亮了。点击「印一个字」，开始你的工坊。"
   ],
   "id": "P01",
   "name": "全新存档",
-  "note": "玩家面 · 全新存档（只有一项指标、一个动作）",
+  "note": "玩家面 · 全新存档 · 1 个动作 · 1 项可见指标",
   "surface": "player"
  },
  {
@@ -135,10 +136,10 @@
   "layout": {
    "metrics": 2,
    "actions": 1,
-   "machines": 1,
-   "world": 2,
-   "acts": 6,
-   "aha": 2,
+   "machines": 0,
+   "world": 0,
+   "acts": 0,
+   "aha": 0,
    "hero": 1,
    "below": 1
   },
@@ -146,15 +147,15 @@
   "lang": "zh-CN",
   "audience": "player",
   "status": "营业中",
-  "rate": "0.5",
-  "total": "63",
+  "rate": "0",
+  "total": "1",
   "actKicker": "ACT I · A01–A02",
   "actTitle": "手工与自动化",
   "actCopy": "先亲手印。然后让机器接管重复劳动。",
-  "ahaId": "A01 · 已发生",
-  "ahaTitle": "机器替我按按钮",
-  "ahaCopy": "我的工作不是点，是设计增长。",
-  "ahaCount": "1 / 28",
+  "ahaId": "A01 · NEXT",
+  "ahaTitle": "",
+  "ahaCopy": "",
+  "ahaCount": "0 / 28",
   "systemsTitle": "系统",
   "systemsNote": "系统一旦出现，就留在桌面上。",
   "logTitle": "工坊日志",
@@ -175,8 +176,8 @@
    "actions": true,
    "notice": true,
    "world": false,
-   "systems": true,
-   "machines": true,
+   "systems": false,
+   "machines": false,
    "ahaHead": false,
    "ahaList": false,
    "logPanel": true,
@@ -187,13 +188,13 @@
   "metrics": [
    {
     "label": "库存文字",
-    "value": "62.5",
+    "value": "0",
     "primary": true,
     "hidden": false
    },
    {
     "label": "工坊资金",
-    "value": "9",
+    "value": "0.5",
     "primary": false,
     "hidden": false
    },
@@ -223,29 +224,23 @@
     "sub": "手动生产",
     "disabled": false,
     "major": true,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "sell",
     "label": "出售全部库存",
-    "sub": "31 资金",
-    "disabled": false,
+    "sub": "0 资金",
+    "disabled": true,
     "major": false,
-    "danger": false
-   },
-   {
-    "cmd": "contract",
-    "label": "交付街角委托",
-    "sub": "20 → 20",
-    "disabled": false,
-    "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    }
   ],
   "world": [
    {
     "label": "自动化",
-    "value": "0.5/s"
+    "value": "0/s"
    },
    {
     "label": "委托",
@@ -260,14 +255,8 @@
     "value": "0"
    }
   ],
-  "machines": [
-   {
-    "name": "机械键盘",
-    "detail": "1 × +0.5/s · 7 资金",
-    "label": "购买",
-    "disabled": false
-   }
-  ],
+  "machines": [],
+  "ahas": [],
   "acts": [
    {
     "text": "ACT I · 手工与自动化",
@@ -275,16 +264,12 @@
     "state": "current"
    }
   ],
-  "ahas": [
-   "A01 · 机器替我按按钮"
-  ],
   "log": [
-   "› 机械键盘开始自己动。你不再是唯一在按按钮的人。",
-   "· 台灯亮了。点击「印一个字」，开始你的工坊。"
+   "› 台灯亮了。点击「印一个字」，开始你的工坊。"
   ],
   "id": "P02",
   "name": "首次出售",
-  "note": "玩家面 · 出售首次真实可用",
+  "note": "玩家面 · 出售首次可用 · 2 个动作 · 2 项可见指标",
   "surface": "player"
  },
  {
@@ -293,9 +278,9 @@
    "metrics": 2,
    "actions": 1,
    "machines": 2,
-   "world": 2,
-   "acts": 6,
-   "aha": 2,
+   "world": 0,
+   "acts": 0,
+   "aha": 0,
    "hero": 1,
    "below": 1
   },
@@ -303,15 +288,15 @@
   "lang": "zh-CN",
   "audience": "player",
   "status": "营业中",
-  "rate": "21",
-  "total": "3.1K",
+  "rate": "12.5",
+  "total": "955",
   "actKicker": "ACT I · A01–A02",
   "actTitle": "手工与自动化",
   "actCopy": "先亲手印。然后让机器接管重复劳动。",
-  "ahaId": "A01 · 已发生",
-  "ahaTitle": "机器替我按按钮",
-  "ahaCopy": "我的工作不是点，是设计增长。",
-  "ahaCount": "1 / 28",
+  "ahaId": "A02 · 已发生",
+  "ahaTitle": "",
+  "ahaCopy": "",
+  "ahaCount": "2 / 28",
   "systemsTitle": "系统",
   "systemsNote": "系统一旦出现，就留在桌面上。",
   "logTitle": "工坊日志",
@@ -344,13 +329,13 @@
   "metrics": [
    {
     "label": "库存文字",
-    "value": "361.3",
+    "value": "13.6",
     "primary": true,
     "hidden": false
    },
    {
     "label": "工坊资金",
-    "value": "640",
+    "value": "4.5",
     "primary": false,
     "hidden": false
    },
@@ -380,7 +365,8 @@
     "sub": "手动生产",
     "disabled": false,
     "major": true,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "toggle-auto",
@@ -388,15 +374,17 @@
     "sub": "关闭",
     "disabled": false,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "sell",
     "label": "出售全部库存",
-    "sub": "180.5 资金",
+    "sub": "6.5 资金",
     "disabled": false,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "boost",
@@ -404,54 +392,54 @@
     "sub": "已完成",
     "disabled": true,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "contract",
     "label": "交付街角委托",
-    "sub": "还差 500 库存字（361.3）",
+    "sub": "还差 20 库存字（13.6）",
     "disabled": true,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    }
   ],
   "world": [
    {
     "label": "自动化",
-    "value": "21/s"
+    "value": "12.5/s"
    },
    {
     "label": "委托",
-    "value": "2/3"
+    "value": "0/3"
    },
    {
     "label": "打字员",
-    "value": "3"
+    "value": "4"
    },
    {
     "label": "印刷机",
-    "value": "1"
+    "value": "0"
    }
   ],
   "machines": [
    {
     "name": "机械键盘",
-    "detail": "6 × +0.5/s · 29 资金",
+    "detail": "9 × +0.5/s · 70 资金",
     "label": "购买",
-    "disabled": false
+    "disabled": true
    },
    {
     "name": "夜班打字员",
-    "detail": "3 × +2/s · 64 资金",
+    "detail": "4 × +2/s · 88 资金",
     "label": "购买",
-    "disabled": false
-   },
-   {
-    "name": "小型印刷机",
-    "detail": "1 × +12/s · 157 资金",
-    "label": "购买",
-    "disabled": false
+    "disabled": true
    }
+  ],
+  "ahas": [
+   "A01 · ACT 112.5/1",
+   "A02 · ACT 14/3"
   ],
   "acts": [
    {
@@ -460,16 +448,23 @@
     "state": "current"
    }
   ],
-  "ahas": [
-   "A01 · 机器替我按按钮"
-  ],
   "log": [
-   "› 机械键盘开始自己动。你不再是唯一在按按钮的人。",
-   "· 台灯亮了。点击「印一个字」，开始你的工坊。"
+   "› 自动售货台研发完成。",
+   "· 购入夜班打字员。",
+   "· 购入机械键盘。",
+   "· 复写纸研发完成。",
+   "· 打字员开始互相校对。他们不只是数字了，他们成了一个部门。",
+   "· 购入夜班打字员。",
+   "· 购入机械键盘。",
+   "· 购入夜班打字员。",
+   "· 购入机械键盘。",
+   "· 购入夜班打字员。",
+   "· 购入机械键盘。",
+   "· 购入机械键盘。"
   ],
   "id": "P03",
   "name": "自动化",
-  "note": "玩家面 · 三台机器都出现",
+  "note": "玩家面 · 三台机器都出现 · 5 个动作 · 2 项可见指标",
   "surface": "player"
  },
  {
@@ -478,9 +473,9 @@
    "metrics": 2,
    "actions": 1,
    "machines": 2,
-   "world": 2,
-   "acts": 6,
-   "aha": 2,
+   "world": 0,
+   "acts": 0,
+   "aha": 0,
    "hero": 1,
    "below": 1
   },
@@ -488,15 +483,15 @@
   "lang": "zh-CN",
   "audience": "player",
   "status": "营业中",
-  "rate": "21",
-  "total": "5.2K",
+  "rate": "134",
+  "total": "88.2K",
   "actKicker": "ACT II · A03–A11",
   "actTitle": "字开始生长",
   "actCopy": "关系、读者、意义和噪音，都开始成为机器。",
-  "ahaId": "A11 · 已发生",
-  "ahaTitle": "删字第一次更值钱",
-  "ahaCopy": "最大的敌人不是缺字，而是噪音。",
-  "ahaCount": "6 / 28",
+  "ahaId": "A05 · 已发生",
+  "ahaTitle": "",
+  "ahaCopy": "",
+  "ahaCount": "5 / 28",
   "systemsTitle": "系统",
   "systemsNote": "系统一旦出现，就留在桌面上。",
   "logTitle": "工坊日志",
@@ -529,43 +524,44 @@
   "metrics": [
    {
     "label": "库存文字",
-    "value": "67.2",
+    "value": "55.8K",
     "primary": true,
     "hidden": false
    },
    {
     "label": "工坊资金",
-    "value": "0",
+    "value": "309.5",
     "primary": false,
     "hidden": false
    },
    {
     "label": "读者",
-    "value": "320",
+    "value": "218",
     "primary": false,
     "hidden": false
    },
    {
     "label": "意义",
-    "value": "18",
+    "value": "12",
     "primary": false,
     "hidden": false
    },
    {
     "label": "噪音",
-    "value": "6.1",
+    "value": "34.4",
     "primary": false,
     "hidden": false
    }
   ],
   "actions": [
    {
-    "cmd": "print",
-    "label": "印字",
-    "sub": "旧玩法还在，但意义开始改变。",
-    "disabled": false,
+    "cmd": "push-clock",
+    "label": "发行新一期",
+    "sub": "还差 意义（12 / 30）",
+    "disabled": true,
     "major": true,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "toggle-auto",
@@ -573,86 +569,117 @@
     "sub": "关闭",
     "disabled": false,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
+   },
+   {
+    "cmd": "take-event",
+    "label": "一封没署名的信",
+    "sub": "花掉 库存字 30",
+    "disabled": false,
+    "major": false,
+    "danger": false,
+    "event": true
+   },
+   {
+    "cmd": "print",
+    "label": "印字",
+    "sub": "旧玩法还在，但意义开始改变。",
+    "disabled": false,
+    "major": true,
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "compose-rule",
     "label": "刻模：木 + 木 → 林",
-    "sub": "还差 工坊资金（0 / 40）",
-    "disabled": true,
+    "sub": "已刻 81 条 · 读者 +0.18/秒",
+    "disabled": false,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "condense",
     "label": "压缩 20 字 → 12 意义",
-    "sub": "还差 工坊资金（0 / 60）",
-    "disabled": true,
-    "major": false,
-    "danger": false
-   },
-   {
-    "cmd": "read-letter",
-    "label": "打开一封读者来信",
-    "sub": "读者 320",
+    "sub": "字数开始变成意义。",
     "disabled": false,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "delete-noise",
     "label": "删除噪音",
-    "sub": "删除第一次成为生产行为。",
-    "disabled": false,
+    "sub": "还差 纸张危机（0 / 1）",
+    "disabled": true,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "sell",
     "label": "出售全部库存",
-    "sub": "33.5 资金",
+    "sub": "27.9K 资金",
     "disabled": false,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
+   },
+   {
+    "cmd": "contract",
+    "label": "交付街角委托",
+    "sub": "20 → 20",
+    "disabled": false,
+    "major": false,
+    "danger": false,
+    "event": false
    }
   ],
   "world": [
    {
     "label": "读者",
-    "value": "320"
+    "value": "218"
    },
    {
     "label": "需求",
-    "value": "1.6"
+    "value": "1.4"
    },
    {
     "label": "组合字",
-    "value": "4"
+    "value": "81"
    },
    {
     "label": "已删除噪音",
-    "value": "2"
+    "value": "0"
    }
   ],
   "machines": [
    {
     "name": "机械键盘",
-    "detail": "6 × +0.5/s · 29 资金",
+    "detail": "20 × +0.5/s · 1743 资金",
     "label": "购买",
     "disabled": true
    },
    {
     "name": "夜班打字员",
-    "detail": "3 × +2/s · 64 资金",
+    "detail": "14 × +2/s · 2181 资金",
     "label": "购买",
     "disabled": true
    },
    {
     "name": "小型印刷机",
-    "detail": "1 × +12/s · 157 资金",
+    "detail": "8 × +12/s · 1819 资金",
     "label": "购买",
     "disabled": true
    }
+  ],
+  "ahas": [
+   "A01 · ACT 1134/1",
+   "A02 · ACT 114/3",
+   "A03 · ACT 21/1",
+   "A04 · ACT 281/3",
+   "A05 · ACT 212/10"
   ],
   "acts": [
    {
@@ -666,23 +693,23 @@
     "state": "current"
    }
   ],
-  "ahas": [
-   "A01 · 机器替我按按钮",
-   "A03 · 木 + 木 → 林",
-   "A04 · 规则开始自动运行",
-   "A05 · 意义比字数值钱",
-   "A06 · 报纸制造需求",
-   "A11 · 删字第一次更值钱"
-  ],
   "log": [
-   "› 删掉一句废话，剩下的那句就贵了。删除第一次成为生产。",
-   "· 读过报纸的人，开始想要下一份。文字在制造对文字的需求。",
-   "· 有人愿意用一千个废字的价钱，换一句重要的话。",
-   "· 刻好的模子在自己转动。你没有碰它，它也在出字。"
+   "› 有人愿意用一千个废字的价钱，换一句重要的话。",
+   "· 刻模成功：木 + 木 → 林。",
+   "· 刻模成功：木 + 木 → 林。",
+   "· 刻模成功：木 + 木 → 林。",
+   "· 刻模成功：木 + 木 → 林。",
+   "· 刻模成功：木 + 木 → 林。",
+   "· 刻模成功：木 + 木 → 林。",
+   "· 刻好的模子在自己转动。你没有碰它，它也在出字。",
+   "· 刻模成功：木 + 木 → 林。",
+   "· 刻模成功：木 + 木 → 林。",
+   "· 刻模成功：木 + 木 → 林。",
+   "· 木和木之间长出了林。这不只是一个新字，这是一条可以重复的规则。"
   ],
   "id": "P04",
   "name": "ACT II · 字开始生长",
-  "note": "玩家面 · ACT II 动词，世界面仍未出现",
+  "note": "玩家面 · 推钟动词与微事件首次出现，世界面仍未出现 · 9 个动作 · 5 项可见指标",
   "surface": "player"
  },
  {
@@ -692,8 +719,8 @@
    "actions": 1,
    "machines": 2,
    "world": 2,
-   "acts": 6,
-   "aha": 2,
+   "acts": 0,
+   "aha": 0,
    "hero": 1,
    "below": 1
   },
@@ -701,15 +728,15 @@
   "lang": "zh-CN",
   "audience": "player",
   "status": "营业中",
-  "rate": "38",
-  "total": "9.0K",
+  "rate": "134",
+  "total": "362.8K",
   "actKicker": "ACT III · A12–A15",
   "actTitle": "文字改变城市",
   "actCopy": "文字不再是库存，而开始改变社会。",
-  "ahaId": "A14 · 已发生",
-  "ahaTitle": "城市地图出现",
-  "ahaCopy": "工坊原来只是世界里的一个点。",
-  "ahaCount": "13 / 28",
+  "ahaId": "A12 · 已发生",
+  "ahaTitle": "",
+  "ahaCopy": "",
+  "ahaCount": "12 / 28",
   "systemsTitle": "系统",
   "systemsNote": "系统一旦出现，就留在桌面上。",
   "logTitle": "工坊日志",
@@ -742,13 +769,13 @@
   "metrics": [
    {
     "label": "库存文字",
-    "value": "418.5",
+    "value": "196.4K",
     "primary": true,
     "hidden": false
    },
    {
     "label": "工坊资金",
-    "value": "0",
+    "value": "65.3K",
     "primary": false,
     "hidden": false
    },
@@ -760,55 +787,85 @@
    },
    {
     "label": "意义",
-    "value": "90",
+    "value": "4.3",
     "primary": false,
     "hidden": false
    },
    {
     "label": "噪音",
-    "value": "40.1",
+    "value": "209.4",
     "primary": false,
     "hidden": false
    }
   ],
   "actions": [
    {
-    "cmd": "discover-dialect",
-    "label": "观察一个新方言",
-    "sub": "还差 工坊资金（0 / 480）",
+    "cmd": "push-clock",
+    "label": "张贴告示",
+    "sub": "还差 意义（4.3 / 30）",
     "disabled": true,
-    "major": false,
-    "danger": false
+    "major": true,
+    "danger": false,
+    "event": false
    },
    {
-    "cmd": "make-concept",
-    "label": "创造一个概念",
-    "sub": "还差 工坊资金（0 / 400）",
+    "cmd": "toggle-auto",
+    "label": "切换自动出售",
+    "sub": "关闭",
+    "disabled": false,
+    "major": false,
+    "danger": false,
+    "event": false
+   },
+   {
+    "cmd": "discover-dialect",
+    "label": "观察一个新方言",
+    "sub": "还差 意义（4.3 / 40）",
     "disabled": true,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
+   },
+   {
+    "cmd": "map-city",
+    "label": "展开城市地图",
+    "sub": "还差 意义（4.3 / 40）",
+    "disabled": true,
+    "major": true,
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "sell",
     "label": "出售全部库存",
-    "sub": "209 资金",
+    "sub": "98.2K 资金",
     "disabled": false,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
+   },
+   {
+    "cmd": "contract",
+    "label": "交付街角委托",
+    "sub": "20 → 20",
+    "disabled": false,
+    "major": false,
+    "danger": false,
+    "event": false
    }
   ],
   "world": [
    {
     "label": "街区",
-    "value": "3"
+    "value": "2"
    },
    {
     "label": "概念",
-    "value": "1"
+    "value": "0"
    },
    {
     "label": "社会变化",
-    "value": "1"
+    "value": "0"
    },
    {
     "label": "地图范围",
@@ -818,22 +875,36 @@
   "machines": [
    {
     "name": "机械键盘",
-    "detail": "8 × +0.5/s · 52 资金",
+    "detail": "20 × +0.5/s · 1743 资金",
     "label": "购买",
-    "disabled": true
+    "disabled": false
    },
    {
     "name": "夜班打字员",
-    "detail": "5 × +2/s · 121 资金",
+    "detail": "14 × +2/s · 2181 资金",
     "label": "购买",
-    "disabled": true
+    "disabled": false
    },
    {
     "name": "小型印刷机",
-    "detail": "2 × +12/s · 222 资金",
+    "detail": "8 × +12/s · 1819 资金",
     "label": "购买",
-    "disabled": true
+    "disabled": false
    }
+  ],
+  "ahas": [
+   "A01 · ACT 1134/1",
+   "A02 · ACT 114/3",
+   "A03 · ACT 21/1",
+   "A04 · ACT 2593/3",
+   "A05 · ACT 24.3/10",
+   "A06 · ACT 22.4K/370",
+   "A07 · ACT 21/1",
+   "A08 · ACT 21/1",
+   "A09 · ACT 21/1",
+   "A10 · ACT 21/1",
+   "A11 · ACT 25/1",
+   "A12 · ACT 32/2"
   ],
   "acts": [
    {
@@ -852,30 +923,23 @@
     "state": "current"
    }
   ],
-  "ahas": [
-   "A01 · 机器替我按按钮",
-   "A02 · 员工组成编辑部",
-   "A03 · 木 + 木 → 林",
-   "A04 · 规则开始自动运行",
-   "A05 · 意义比字数值钱",
-   "A06 · 报纸制造需求",
-   "A07 · 读者开始回信",
-   "A08 · 读者自己造新词",
-   "A10 · 纸张危机：少写",
-   "A11 · 删字第一次更值钱",
-   "A12 · 街区长出方言",
-   "A13 · 概念改变城市",
-   "A14 · 城市地图出现"
-  ],
   "log": [
-   "› 地图展开了。你的工坊在里面，只是一个小方块。",
-   "· 一个词不再只是描述世界，它开始规定世界。",
-   "· 隔着两条街，同一个字已经不是同一个意思了。",
-   "· 删掉一句废话，剩下的那句就贵了。删除第一次成为生产。"
+   "› 隔着两条街，同一个字已经不是同一个意思了。",
+   "· 地图摊开在桌上：你终于看见了工坊外面的部分。",
+   "· 删掉一句废话，剩下的那句就贵了。删除第一次成为生产。",
+   "· 纸不够了。再提高产量只会更糟——现在要比的是每张纸上写了什么。",
+   "· 那个词自己跑了起来。今天它在街上，明天它会在别的城市。",
+   "· 读者自己造了一个词。它不在你的字表里，但它已经在被使用。",
+   "· 信箱里出现第一封回信：「你们印的那篇，我读了三遍。」写信的人，昨天还是读者。",
+   "· 读过报纸的人，开始想要下一份。文字在制造对文字的需求。",
+   "· 有人愿意用一千个废字的价钱，换一句重要的话。",
+   "· 刻模成功：木 + 木 → 林。",
+   "· 刻模成功：木 + 木 → 林。",
+   "· 刻模成功：木 + 木 → 林。"
   ],
   "id": "P05",
   "name": "ACT III · 城市",
-  "note": "玩家面 · 城市地图被发现，hero 展开双栏",
+  "note": "玩家面 · 城市地图在这一幕才画得出来，hero 展开双栏 · 6 个动作 · 5 项可见指标",
   "surface": "player"
  },
  {
@@ -885,8 +949,8 @@
    "actions": 1,
    "machines": 2,
    "world": 2,
-   "acts": 6,
-   "aha": 2,
+   "acts": 0,
+   "aha": 0,
    "hero": 1,
    "below": 1
   },
@@ -894,15 +958,15 @@
   "lang": "zh-CN",
   "audience": "player",
   "status": "营业中",
-  "rate": "38",
-  "total": "40.0K",
+  "rate": "190.5",
+  "total": "713.2K",
   "actKicker": "ACT IV · A16–A21",
   "actTitle": "机器开始写",
   "actCopy": "把判断交出去，再把“创造代理”的权力交出去。",
-  "ahaId": "A21 · 已发生",
-  "ahaTitle": "档案变成机器记忆",
-  "ahaCopy": "过去的每个字，都是训练材料。",
-  "ahaCount": "21 / 28",
+  "ahaId": "A20 · 已发生",
+  "ahaTitle": "",
+  "ahaCopy": "",
+  "ahaCount": "20 / 28",
   "systemsTitle": "系统",
   "systemsNote": "系统一旦出现，就留在桌面上。",
   "logTitle": "工坊日志",
@@ -935,51 +999,80 @@
   "metrics": [
    {
     "label": "库存文字",
-    "value": "538.3",
+    "value": "545.3K",
     "primary": true,
     "hidden": true
    },
    {
     "label": "工坊资金",
-    "value": "36.4",
+    "value": "21.1K",
     "primary": false,
     "hidden": false
    },
    {
     "label": "读者",
-    "value": "9.0K",
+    "value": "33.7K",
     "primary": false,
     "hidden": false
    },
    {
     "label": "意义",
-    "value": "422.1",
+    "value": "2.4K",
     "primary": false,
     "hidden": false
    },
    {
     "label": "噪音",
-    "value": "224.8",
+    "value": "932.8",
     "primary": false,
     "hidden": false
    }
   ],
   "actions": [
    {
+    "cmd": "push-clock",
+    "label": "让 智能体 加班",
+    "sub": "这一幕以后每一段都快 5%（现在 +0%）",
+    "disabled": false,
+    "major": true,
+    "danger": false,
+    "event": false
+   },
+   {
+    "cmd": "toggle-auto",
+    "label": "切换自动出售",
+    "sub": "关闭",
+    "disabled": false,
+    "major": false,
+    "danger": false,
+    "event": false
+   },
+   {
+    "cmd": "take-event",
+    "label": "一份没人署名的退稿",
+    "sub": "花掉 意义 60",
+    "disabled": false,
+    "major": false,
+    "danger": false,
+    "event": true
+   },
+   {
     "cmd": "editor-autonomy",
     "label": "给编辑 智能体 否决权",
     "sub": "它可以拒绝你的头条。",
     "disabled": true,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "spawn-agents",
     "label": "允许 智能体 创建 智能体",
-    "sub": "还差 工坊资金（36.4 / 1.3K）",
-    "disabled": true,
+    "sub": "委托变成自我扩张。",
+    "disabled": false,
     "major": true,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "digitize",
@@ -987,54 +1080,87 @@
     "sub": "实体库存开始退出舞台。",
     "disabled": true,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "train-memory",
     "label": "用档案训练机器",
-    "sub": "还差 工坊资金（36.4 / 2.0K）",
+    "sub": "还差 夜间文章（3.8K / 8.6K）",
     "disabled": true,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
+   },
+   {
+    "cmd": "contract",
+    "label": "交付街角委托",
+    "sub": "20 → 20",
+    "disabled": false,
+    "major": false,
+    "danger": false,
+    "event": false
    }
   ],
   "world": [
    {
     "label": "智能体",
-    "value": "6"
+    "value": "17.8"
    },
    {
     "label": "智能体工厂",
-    "value": "1"
+    "value": "2"
    },
    {
     "label": "自动文章",
-    "value": "141"
+    "value": "3.8K"
    },
    {
     "label": "档案记忆",
-    "value": "2"
+    "value": "0"
    }
   ],
   "machines": [
    {
     "name": "机械键盘",
-    "detail": "8 × +0.5/s · 52 资金",
+    "detail": "25 × +0.5/s · 7527 资金",
     "label": "购买",
-    "disabled": true
+    "disabled": false
    },
    {
     "name": "夜班打字员",
-    "detail": "5 × +2/s · 121 资金",
+    "detail": "17 × +2/s · 5731 资金",
     "label": "购买",
-    "disabled": true
+    "disabled": false
    },
    {
     "name": "小型印刷机",
-    "detail": "2 × +12/s · 222 资金",
+    "detail": "12 × +12/s · 7394 资金",
     "label": "购买",
-    "disabled": true
+    "disabled": false
    }
+  ],
+  "ahas": [
+   "A01 · ACT 1190.5/1",
+   "A02 · ACT 117/3",
+   "A03 · ACT 21/1",
+   "A04 · ACT 21.1K/3",
+   "A05 · ACT 22.4K/10",
+   "A06 · ACT 233.7K/370",
+   "A07 · ACT 21/1",
+   "A08 · ACT 21/1",
+   "A09 · ACT 21/1",
+   "A10 · ACT 21/1",
+   "A11 · ACT 25/1",
+   "A12 · ACT 33/2",
+   "A13 · ACT 32/1",
+   "A14 · ACT 32/1",
+   "A15 · ACT 32/2",
+   "A16 · ACT 417.8/1",
+   "A17 · ACT 41/1",
+   "A18 · ACT 42/1",
+   "A19 · ACT 43.8K/1.7K",
+   "A20 · ACT 41/1"
   ],
   "acts": [
    {
@@ -1058,38 +1184,23 @@
     "state": "current"
    }
   ],
-  "ahas": [
-   "A01 · 机器替我按按钮",
-   "A02 · 员工组成编辑部",
-   "A03 · 木 + 木 → 林",
-   "A04 · 规则开始自动运行",
-   "A05 · 意义比字数值钱",
-   "A06 · 报纸制造需求",
-   "A07 · 读者开始回信",
-   "A08 · 读者自己造新词",
-   "A09 · 一个词突然传播",
-   "A10 · 纸张危机：少写",
-   "A11 · 删字第一次更值钱",
-   "A12 · 街区长出方言",
-   "A13 · 概念改变城市",
-   "A14 · 城市地图出现",
-   "A15 · 地图缩到世界",
-   "A16 · 记者 Agent 自己选题",
-   "A17 · 编辑第一次说“不”",
-   "A18 · Agent 创造 Agent",
-   "A19 · 醒来时文章堆满了桌子",
-   "A20 · 数字出版：库存消失",
-   "A21 · 档案变成机器记忆"
-  ],
   "log": [
-   "› 过去写下的每一个字，都成了它的教材。",
-   "· 书不再堆在仓库里。库存这个概念开始过时了。",
+   "› 书不再堆在仓库里。库存这个概念开始过时了。",
    "· 你不在的时候，系统也没有停。第二天早上，文章已经堆满了桌子。",
-   "· Agent 开始自己招募 Agent。工厂在扩张自己。"
+   "· Agent 开始自己招募 Agent。工厂在扩张自己。",
+   "· 编辑 Agent 退回了你今天的头条：「这条不该发。」",
+   "· 购入机械键盘。",
+   "· 购入小型印刷机。",
+   "· 购入机械键盘。",
+   "· 购入夜班打字员。",
+   "· 购入小型印刷机。",
+   "· 购入机械键盘。",
+   "· 购入夜班打字员。",
+   "· 购入小型印刷机。"
   ],
   "id": "P06",
   "name": "ACT IV · 机器开始写",
-  "note": "玩家面 · 数字出版让库存指标退场",
+  "note": "玩家面 · 数字出版让库存指标退场 · 8 个动作 · 4 项可见指标",
   "surface": "player"
  },
  {
@@ -1099,8 +1210,8 @@
    "actions": 1,
    "machines": 2,
    "world": 2,
-   "acts": 6,
-   "aha": 2,
+   "acts": 0,
+   "aha": 0,
    "hero": 1,
    "below": 1
   },
@@ -1108,15 +1219,15 @@
   "lang": "zh-CN",
   "audience": "player",
   "status": "营业中",
-  "rate": "38",
-  "total": "90.0K",
+  "rate": "236",
+  "total": "869.7K",
   "actKicker": "ACT V · A22–A24",
   "actTitle": "机器语言",
   "actCopy": "系统开始创造人类没有设计过的符号。",
-  "ahaId": "A22 · 已发生",
-  "ahaTitle": "出现一个你没造过的字",
-  "ahaCopy": "这个字，不是我造的。",
-  "ahaCount": "17 / 28",
+  "ahaId": "A23 · 已发生",
+  "ahaTitle": "",
+  "ahaCopy": "",
+  "ahaCount": "23 / 28",
   "systemsTitle": "系统",
   "systemsNote": "系统一旦出现，就留在桌面上。",
   "logTitle": "工坊日志",
@@ -1149,43 +1260,62 @@
   "metrics": [
    {
     "label": "库存文字",
-    "value": "938.3",
+    "value": "701.4K",
     "primary": true,
     "hidden": true
    },
    {
     "label": "工坊资金",
-    "value": "121.1",
+    "value": "56.0K",
     "primary": false,
     "hidden": false
    },
    {
     "label": "读者",
-    "value": "30.1K",
+    "value": "68.1K",
     "primary": false,
     "hidden": false
    },
    {
     "label": "意义",
-    "value": "274.1",
+    "value": "10.2K",
     "primary": false,
     "hidden": false
    },
    {
     "label": "噪音",
-    "value": "932.2",
+    "value": "14.9K",
     "primary": false,
     "hidden": false
    }
   ],
   "actions": [
    {
+    "cmd": "push-clock",
+    "label": "喂机器一批文本",
+    "sub": "这一幕以后每一段都快 5%（现在 +0%）",
+    "disabled": false,
+    "major": true,
+    "danger": false,
+    "event": false
+   },
+   {
+    "cmd": "toggle-auto",
+    "label": "切换自动出售",
+    "sub": "关闭",
+    "disabled": false,
+    "major": false,
+    "danger": false,
+    "event": false
+   },
+   {
     "cmd": "compress-language",
     "label": "语义压缩",
-    "sub": "还差 工坊资金（121.1 / 300）",
-    "disabled": true,
+    "sub": "100意义 → 10,000压缩意义",
+    "disabled": false,
     "major": true,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "contract",
@@ -1193,7 +1323,8 @@
     "sub": "20 → 20",
     "disabled": false,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    }
   ],
   "world": [
@@ -1203,7 +1334,7 @@
    },
    {
     "label": "机器使用",
-    "value": "960"
+    "value": "12.4K"
    },
    {
     "label": "已压缩意义",
@@ -1211,28 +1342,53 @@
    },
    {
     "label": "人类意义",
-    "value": "274"
+    "value": "10.2K"
    }
   ],
   "machines": [
    {
     "name": "机械键盘",
-    "detail": "8 × +0.5/s · 52 资金",
+    "detail": "28 × +0.5/s · 18110 资金",
     "label": "购买",
     "disabled": false
    },
    {
     "name": "夜班打字员",
-    "detail": "5 × +2/s · 121 资金",
+    "detail": "21 × +2/s · 20782 资金",
     "label": "购买",
     "disabled": false
    },
    {
     "name": "小型印刷机",
-    "detail": "2 × +12/s · 222 资金",
+    "detail": "15 × +12/s · 21170 资金",
     "label": "购买",
-    "disabled": true
+    "disabled": false
    }
+  ],
+  "ahas": [
+   "A01 · ACT 1236/1",
+   "A02 · ACT 121/3",
+   "A03 · ACT 21/1",
+   "A04 · ACT 21.3K/3",
+   "A05 · ACT 210.2K/10",
+   "A06 · ACT 268.1K/370",
+   "A07 · ACT 21/1",
+   "A08 · ACT 21/1",
+   "A09 · ACT 21/1",
+   "A10 · ACT 21/1",
+   "A11 · ACT 25/1",
+   "A12 · ACT 33/2",
+   "A13 · ACT 32/1",
+   "A14 · ACT 32/1",
+   "A15 · ACT 32/2",
+   "A16 · ACT 430/1",
+   "A17 · ACT 41/1",
+   "A18 · ACT 42/1",
+   "A19 · ACT 412.5K/1.7K",
+   "A20 · ACT 41/1",
+   "A21 · ACT 44/1",
+   "A22 · ACT 51/1",
+   "A23 · ACT 512.4K/12.3K"
   ],
   "acts": [
    {
@@ -1261,34 +1417,23 @@
     "state": "current"
    }
   ],
-  "ahas": [
-   "A01 · 机器替我按按钮",
-   "A02 · 员工组成编辑部",
-   "A03 · 木 + 木 → 林",
-   "A04 · 规则开始自动运行",
-   "A05 · 意义比字数值钱",
-   "A06 · 报纸制造需求",
-   "A10 · 纸张危机：少写",
-   "A11 · 删字第一次更值钱",
-   "A12 · 街区长出方言",
-   "A13 · 概念改变城市",
-   "A14 · 城市地图出现",
-   "A15 · 地图缩到世界",
-   "A16 · 记者 Agent 自己选题",
-   "A18 · Agent 创造 Agent",
-   "A20 · 数字出版：库存消失",
-   "A21 · 档案变成机器记忆",
-   "A22 · 出现一个你没造过的字"
-  ],
   "log": [
-   "› 这个字不是你造的。字表第一次向外长了一格。",
+   "› 机器之间的对话，已经不再需要翻译成人话。",
+   "· 购入夜班打字员。",
+   "· 购入小型印刷机。",
+   "· 购入机械键盘。",
+   "· 这个字不是你造的。字表第一次向外长了一格。",
+   "· 03:17:42 · 发现未知字形。来源：机器之间。",
    "· 过去写下的每一个字，都成了它的教材。",
-   "· 书不再堆在仓库里。库存这个概念开始过时了。",
-   "· Agent 开始自己招募 Agent。工厂在扩张自己。"
+   "· 购入夜班打字员。",
+   "· 购入小型印刷机。",
+   "· 购入机械键盘。",
+   "· 购入夜班打字员。",
+   "· 购入机械键盘。"
   ],
   "id": "P07",
   "name": "ACT V · 机器语言",
-  "note": "玩家面 · 全游戏最薄的一屏",
+  "note": "玩家面 · 动作最少的一幕 · 4 个动作 · 4 项可见指标",
   "surface": "player"
  },
  {
@@ -1298,8 +1443,8 @@
    "actions": 1,
    "machines": 2,
    "world": 2,
-   "acts": 6,
-   "aha": 2,
+   "acts": 0,
+   "aha": 0,
    "hero": 1,
    "below": 1
   },
@@ -1307,15 +1452,15 @@
   "lang": "zh-CN",
   "audience": "player",
   "status": "营业中",
-  "rate": "38",
-  "total": "200.0K",
+  "rate": "280",
+  "total": "1.1M",
   "actKicker": "ACT VI · A25–A28",
   "actTitle": "从增长到沉默",
   "actCopy": "优化目标从“制造更多”翻转成“删除噪音”。",
   "ahaId": "A27 · 已发生",
-  "ahaTitle": "目标从生产变成删除",
-  "ahaCopy": "无限生产的终点可能是噪音。",
-  "ahaCount": "22 / 28",
+  "ahaTitle": "",
+  "ahaCopy": "",
+  "ahaCount": "27 / 28",
   "systemsTitle": "系统",
   "systemsNote": "系统一旦出现，就留在桌面上。",
   "logTitle": "工坊日志",
@@ -1348,43 +1493,71 @@
   "metrics": [
    {
     "label": "库存文字",
-    "value": "1.2K",
+    "value": "949.0K",
     "primary": true,
     "hidden": true
    },
    {
     "label": "工坊资金",
-    "value": "363.1",
+    "value": "135.6K",
     "primary": false,
     "hidden": false
    },
    {
     "label": "读者",
-    "value": "90.2K",
+    "value": "134.1K",
     "primary": false,
     "hidden": false
    },
    {
     "label": "意义",
-    "value": "842.3",
+    "value": "22.2K",
     "primary": false,
     "hidden": false
    },
    {
     "label": "噪音",
-    "value": "4.3K",
+    "value": "45.2K",
     "primary": false,
     "hidden": false
    }
   ],
   "actions": [
    {
-    "cmd": "delete-noise",
-    "label": "删除噪音",
-    "sub": "一次删除500噪音。",
+    "cmd": "push-clock",
+    "label": "投产一条新语法",
+    "sub": "这一幕以后每一段都快 5%（现在 +0%）",
     "disabled": false,
     "major": true,
-    "danger": false
+    "danger": false,
+    "event": false
+   },
+   {
+    "cmd": "toggle-auto",
+    "label": "切换自动出售",
+    "sub": "关闭",
+    "disabled": false,
+    "major": false,
+    "danger": false,
+    "event": false
+   },
+   {
+    "cmd": "take-event",
+    "label": "一句没有人认领的句子",
+    "sub": "花掉 意义 120",
+    "disabled": false,
+    "major": false,
+    "danger": false,
+    "event": true
+   },
+   {
+    "cmd": "delete-noise",
+    "label": "删除噪音",
+    "sub": "一次删除250噪音。",
+    "disabled": false,
+    "major": true,
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "resolve-ambiguity",
@@ -1392,7 +1565,17 @@
     "sub": "清晰度变成一种资源。",
     "disabled": false,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
+   },
+   {
+    "cmd": "stop-printing",
+    "label": "停止印刷",
+    "sub": "还差 歧义（2.2K / 4.8K）",
+    "disabled": true,
+    "major": false,
+    "danger": true,
+    "event": false
    },
    {
     "cmd": "contract",
@@ -1400,7 +1583,8 @@
     "sub": "20 → 20",
     "disabled": false,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    }
   ],
   "world": [
@@ -1410,36 +1594,65 @@
    },
    {
     "label": "歧义",
-    "value": "181"
+    "value": "2.2K"
    },
    {
     "label": "已删除",
-    "value": "1.2K"
+    "value": "1.0K"
    },
    {
     "label": "已压缩意义",
-    "value": "30.0K"
+    "value": "50.0K"
    }
   ],
   "machines": [
    {
     "name": "机械键盘",
-    "detail": "8 × +0.5/s · 52 资金",
+    "detail": "32 × +0.5/s · 58388 资金",
     "label": "购买",
     "disabled": false
    },
    {
     "name": "夜班打字员",
-    "detail": "5 × +2/s · 121 资金",
+    "detail": "24 × +2/s · 54615 资金",
     "label": "购买",
     "disabled": false
    },
    {
     "name": "小型印刷机",
-    "detail": "2 × +12/s · 222 资金",
+    "detail": "18 × +12/s · 60616 资金",
     "label": "购买",
     "disabled": false
    }
+  ],
+  "ahas": [
+   "A01 · ACT 1280/1",
+   "A02 · ACT 124/3",
+   "A03 · ACT 21/1",
+   "A04 · ACT 21.6K/3",
+   "A05 · ACT 222.2K/10",
+   "A06 · ACT 2134.1K/370",
+   "A07 · ACT 21/1",
+   "A08 · ACT 21/1",
+   "A09 · ACT 21/1",
+   "A10 · ACT 21/1",
+   "A11 · ACT 21.0K/1",
+   "A12 · ACT 33/2",
+   "A13 · ACT 32/1",
+   "A14 · ACT 32/1",
+   "A15 · ACT 32/2",
+   "A16 · ACT 446.1/1",
+   "A17 · ACT 41/1",
+   "A18 · ACT 42/1",
+   "A19 · ACT 431.0K/1.7K",
+   "A20 · ACT 41/1",
+   "A21 · ACT 44/1",
+   "A22 · ACT 51/1",
+   "A23 · ACT 575.9K/12.3K",
+   "A24 · ACT 550.0K/50.0K",
+   "A25 · ACT 61/1",
+   "A26 · ACT 62.2K/1.0K",
+   "A27 · ACT 61.0K/1.0K"
   ],
   "acts": [
    {
@@ -1473,39 +1686,23 @@
     "state": "current"
    }
   ],
-  "ahas": [
-   "A01 · 机器替我按按钮",
-   "A02 · 员工组成编辑部",
-   "A03 · 木 + 木 → 林",
-   "A04 · 规则开始自动运行",
-   "A05 · 意义比字数值钱",
-   "A06 · 报纸制造需求",
-   "A10 · 纸张危机：少写",
-   "A11 · 删字第一次更值钱",
-   "A12 · 街区长出方言",
-   "A13 · 概念改变城市",
-   "A14 · 城市地图出现",
-   "A15 · 地图缩到世界",
-   "A16 · 记者 Agent 自己选题",
-   "A18 · Agent 创造 Agent",
-   "A20 · 数字出版：库存消失",
-   "A21 · 档案变成机器记忆",
-   "A22 · 出现一个你没造过的字",
-   "A23 · 机器之间有自己的语言",
-   "A24 · 意义被压成一个符号",
-   "A25 · 语言成为社会操作系统",
-   "A26 · 新资源：歧义",
-   "A27 · 目标从生产变成删除"
-  ],
   "log": [
    "› 目标翻过来了：不再是写更多，而是删掉更多。",
+   "· 购入机械键盘。",
+   "· 购入小型印刷机。",
+   "· 购入夜班打字员。",
    "· 文字太多，同一句话开始有两种意思。含混不清第一次有了代价。",
+   "· 购入机械键盘。",
+   "· 购入小型印刷机。",
    "· 城市开始按你的语法运转。你不是出版商，你是它的运行层。",
-   "· 所有的字被压成了一个符号。它还在继续变小。"
+   "· 语言不再只是内容，它开始驱动城市的系统。",
+   "· 购入夜班打字员。",
+   "· 所有的字被压成了一个符号。它还在继续变小。",
+   "· 购入机械键盘。"
   ],
   "id": "P08",
   "name": "ACT VI · 终局条件成立",
-  "note": "玩家面 · 最后一个按钮出现",
+  "note": "玩家面 · 最后一个按钮出现 · 7 个动作 · 4 项可见指标",
   "surface": "player"
  },
  {
@@ -1515,8 +1712,8 @@
    "actions": 1,
    "machines": 2,
    "world": 2,
-   "acts": 6,
-   "aha": 2,
+   "acts": 0,
+   "aha": 0,
    "hero": 1,
    "below": 1
   },
@@ -1525,14 +1722,14 @@
   "audience": "player",
   "status": "营业中",
   "rate": "0",
-  "total": "200.0K",
+  "total": "1.2M",
   "actKicker": "ACT VI · A25–A28",
   "actTitle": "从增长到沉默",
   "actCopy": "优化目标从“制造更多”翻转成“删除噪音”。",
   "ahaId": "A28 · 已发生",
-  "ahaTitle": "最后一个按钮：停止印刷",
-  "ahaCopy": "最后一个动作不是生产，是停止——增长到此为止。",
-  "ahaCount": "20 / 28",
+  "ahaTitle": "",
+  "ahaCopy": "",
+  "ahaCount": "28 / 28",
   "systemsTitle": "系统",
   "systemsNote": "系统一旦出现，就留在桌面上。",
   "logTitle": "工坊日志",
@@ -1565,31 +1762,31 @@
   "metrics": [
    {
     "label": "库存文字",
-    "value": "1.2K",
+    "value": "1.1M",
     "primary": true,
     "hidden": true
    },
    {
     "label": "工坊资金",
-    "value": "0",
+    "value": "231.6K",
     "primary": false,
     "hidden": false
    },
    {
     "label": "读者",
-    "value": "90.0K",
+    "value": "172.0K",
     "primary": false,
     "hidden": false
    },
    {
     "label": "意义",
-    "value": "800",
+    "value": "29.9K",
     "primary": false,
     "hidden": false
    },
    {
     "label": "噪音",
-    "value": "2.6K",
+    "value": "62.8K",
     "primary": false,
     "hidden": false
    }
@@ -1598,18 +1795,20 @@
    {
     "cmd": "delete-noise",
     "label": "删除噪音",
-    "sub": "一次删除500噪音。",
+    "sub": "一次删除250噪音。",
     "disabled": true,
     "major": true,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "resolve-ambiguity",
     "label": "消解 25 歧义",
-    "sub": "还差 歧义（40 / 100）",
+    "sub": "清晰度变成一种资源。",
     "disabled": true,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "stop-printing",
@@ -1617,7 +1816,8 @@
     "sub": "已完成",
     "disabled": true,
     "major": false,
-    "danger": true
+    "danger": true,
+    "event": false
    },
    {
     "cmd": "contract",
@@ -1625,7 +1825,8 @@
     "sub": "20 → 20",
     "disabled": true,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    }
   ],
   "world": [
@@ -1635,36 +1836,66 @@
    },
    {
     "label": "歧义",
-    "value": "40"
+    "value": "4.8K"
    },
    {
     "label": "已删除",
-    "value": "1.4K"
+    "value": "1.0K"
    },
    {
     "label": "已压缩意义",
-    "value": "30.0K"
+    "value": "50.0K"
    }
   ],
   "machines": [
    {
     "name": "机械键盘",
-    "detail": "8 × +0.5/s · 52 资金",
+    "detail": "33 × +0.5/s · 78240 资金",
     "label": "购买",
-    "disabled": true
+    "disabled": false
    },
    {
     "name": "夜班打字员",
-    "detail": "5 × +2/s · 121 资金",
+    "detail": "25 × +2/s · 75369 资金",
     "label": "购买",
-    "disabled": true
+    "disabled": false
    },
    {
     "name": "小型印刷机",
-    "detail": "2 × +12/s · 222 资金",
+    "detail": "19 × +12/s · 86074 资金",
     "label": "购买",
-    "disabled": true
+    "disabled": false
    }
+  ],
+  "ahas": [
+   "A01 · ACT 10/1",
+   "A02 · ACT 125/3",
+   "A03 · ACT 21/1",
+   "A04 · ACT 21.7K/3",
+   "A05 · ACT 229.9K/10",
+   "A06 · ACT 2172.0K/370",
+   "A07 · ACT 21/1",
+   "A08 · ACT 21/1",
+   "A09 · ACT 21/1",
+   "A10 · ACT 21/1",
+   "A11 · ACT 21.0K/1",
+   "A12 · ACT 33/2",
+   "A13 · ACT 32/1",
+   "A14 · ACT 32/1",
+   "A15 · ACT 32/2",
+   "A16 · ACT 453.5/1",
+   "A17 · ACT 41/1",
+   "A18 · ACT 42/1",
+   "A19 · ACT 441.9K/1.7K",
+   "A20 · ACT 41/1",
+   "A21 · ACT 44/1",
+   "A22 · ACT 51/1",
+   "A23 · ACT 5106.1K/12.3K",
+   "A24 · ACT 550.0K/50.0K",
+   "A25 · ACT 61/1",
+   "A26 · ACT 64.8K/1.0K",
+   "A27 · ACT 61.0K/1.0K",
+   "A28 · ACT 61/1"
   ],
   "acts": [
    {
@@ -1698,37 +1929,23 @@
     "state": "current"
    }
   ],
-  "ahas": [
-   "A02 · 员工组成编辑部",
-   "A03 · 木 + 木 → 林",
-   "A04 · 规则开始自动运行",
-   "A05 · 意义比字数值钱",
-   "A06 · 报纸制造需求",
-   "A11 · 删字第一次更值钱",
-   "A12 · 街区长出方言",
-   "A13 · 概念改变城市",
-   "A14 · 城市地图出现",
-   "A15 · 地图缩到世界",
-   "A16 · 记者 Agent 自己选题",
-   "A18 · Agent 创造 Agent",
-   "A20 · 数字出版：库存消失",
-   "A21 · 档案变成机器记忆",
-   "A22 · 出现一个你没造过的字",
-   "A23 · 机器之间有自己的语言",
-   "A24 · 意义被压成一个符号",
-   "A25 · 语言成为社会操作系统",
-   "A27 · 目标从生产变成删除",
-   "A28 · 最后一个按钮：停止印刷"
-  ],
   "log": [
    "› 车间安静下来。第一次，没有新的字被造出来。",
+   "· 世界已经写完了。现在，去读它。",
+   "· 购入小型印刷机。",
+   "· 购入机械键盘。",
+   "· 购入夜班打字员。",
    "· 目标翻过来了：不再是写更多，而是删掉更多。",
-   "· 城市开始按你的语法运转。你不是出版商，你是它的运行层。",
-   "· 所有的字被压成了一个符号。它还在继续变小。"
+   "· 购入机械键盘。",
+   "· 购入小型印刷机。",
+   "· 购入夜班打字员。",
+   "· 文字太多，同一句话开始有两种意思。含混不清第一次有了代价。",
+   "· 购入机械键盘。",
+   "· 购入小型印刷机。"
   ],
   "id": "P09",
   "name": "停止印刷之后",
-  "note": "玩家面 · 终局：全部动作禁用",
+  "note": "玩家面 · 终局：全部动作禁用 · 4 个动作 · 4 项可见指标",
   "surface": "player"
  },
  {
@@ -1745,7 +1962,7 @@
   },
   "title": "字工厂 · Acts Engine v3",
   "lang": "zh-CN",
-  "audience": null,
+  "audience": "review",
   "status": "营业中 · ACT 1/6 · DIRECTOR PREVIEW",
   "rate": "0.5",
   "total": "10",
@@ -1788,7 +2005,7 @@
   "metrics": [
    {
     "label": "库存文字",
-    "value": "0.2",
+    "value": "0",
     "primary": true,
     "hidden": false
    },
@@ -1824,7 +2041,8 @@
     "sub": "手动生产",
     "disabled": false,
     "major": true,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "sell",
@@ -1832,7 +2050,8 @@
     "sub": "0 资金",
     "disabled": true,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "boost",
@@ -1840,7 +2059,8 @@
     "sub": "还差 45 资金（0）",
     "disabled": true,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "research-auto",
@@ -1848,23 +2068,26 @@
     "sub": "还差 60 资金（0）",
     "disabled": true,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "contract",
     "label": "交付街角委托",
-    "sub": "还差 20 库存字（0.2）",
+    "sub": "还差 20 库存字（0）",
     "disabled": true,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "publish",
     "label": "发行《明日》",
-    "sub": "还差 库存 200 字 + 300 资金（0.2 / 0）",
+    "sub": "还差 库存 200 字 + 300 资金（0 / 0）",
     "disabled": true,
     "major": true,
-    "danger": false
+    "danger": false,
+    "event": false
    }
   ],
   "world": [
@@ -1905,6 +2128,36 @@
     "disabled": true
    }
   ],
+  "ahas": [
+   "A01 · 机器替我按按钮ACT 10.5/1",
+   "A02 · 员工组成编辑部ACT 10/3",
+   "A03 · 木 + 木 → 林ACT 20/1",
+   "A04 · 规则开始自动运行ACT 20/3",
+   "A05 · 意义比字数值钱ACT 20/10",
+   "A06 · 报纸制造需求ACT 20/370",
+   "A07 · 读者开始回信ACT 20/1",
+   "A08 · 读者自己造新词ACT 20/1",
+   "A09 · 一个词突然传播ACT 20/1",
+   "A10 · 纸张危机：少写ACT 20/1",
+   "A11 · 删字第一次更值钱ACT 20/1",
+   "A12 · 街区长出方言ACT 30/2",
+   "A13 · 概念改变城市ACT 30/1",
+   "A14 · 城市地图出现ACT 30/1",
+   "A15 · 地图缩到世界ACT 30/2",
+   "A16 · 记者 Agent 自己选题ACT 40/1",
+   "A17 · 编辑第一次说“不”ACT 40/1",
+   "A18 · Agent 创造 AgentACT 40/1",
+   "A19 · 醒来时文章堆满了桌子ACT 40/1.7K",
+   "A20 · 数字出版：库存消失ACT 40/1",
+   "A21 · 档案变成机器记忆ACT 40/1",
+   "A22 · 出现一个你没造过的字ACT 50/1",
+   "A23 · 机器之间有自己的语言ACT 50/12.3K",
+   "A24 · 意义被压成一个符号ACT 50/50.0K",
+   "A25 · 语言成为社会操作系统ACT 60/1",
+   "A26 · 新资源：歧义ACT 60/1.0K",
+   "A27 · 目标从生产变成删除ACT 60/1.0K",
+   "A28 · 最后一个按钮：停止印刷ACT 60/1"
+  ],
   "acts": [
    {
     "text": "ACT I · 手工与自动化",
@@ -1937,44 +2190,13 @@
     "state": "future"
    }
   ],
-  "ahas": [
-   "A01 · 机器替我按按钮",
-   "A02 · 员工组成编辑部",
-   "A03 · 木 + 木 → 林",
-   "A04 · 规则开始自动运行",
-   "A05 · 意义比字数值钱",
-   "A06 · 报纸制造需求",
-   "A07 · 读者开始回信",
-   "A08 · 读者自己造新词",
-   "A09 · 一个词突然传播",
-   "A10 · 纸张危机：少写",
-   "A11 · 删字第一次更值钱",
-   "A12 · 街区长出方言",
-   "A13 · 概念改变城市",
-   "A14 · 城市地图出现",
-   "A15 · 地图缩到世界",
-   "A16 · 记者 Agent 自己选题",
-   "A17 · 编辑第一次说“不”",
-   "A18 · Agent 创造 Agent",
-   "A19 · 醒来时文章堆满了桌子",
-   "A20 · 数字出版：库存消失",
-   "A21 · 档案变成机器记忆",
-   "A22 · 出现一个你没造过的字",
-   "A23 · 机器之间有自己的语言",
-   "A24 · 意义被压成一个符号",
-   "A25 · 语言成为社会操作系统",
-   "A26 · 新资源：歧义",
-   "A27 · 目标从生产变成删除",
-   "A28 · 最后一个按钮：停止印刷"
-  ],
   "log": [
    "› 台灯亮了。点击「印一个字」，开始你的工坊。"
   ],
   "id": "R01",
   "name": "A01 · ACT I",
-  "note": "评审面 · 导演态 A01",
-  "surface": "review",
-  "directorAha": "A01"
+  "note": "评审面 · 导演态 A01 · 6 个动作 · 5 项可见指标",
+  "surface": "review"
  },
  {
   "viewport": "390x844",
@@ -1990,10 +2212,10 @@
   },
   "title": "字工厂 · Acts Engine v3",
   "lang": "zh-CN",
-  "audience": null,
+  "audience": "review",
   "status": "营业中 · ACT 2/6 · DIRECTOR PREVIEW",
-  "rate": "23.5",
-  "total": "5.0K",
+  "rate": "19.5",
+  "total": "32.0K",
   "actKicker": "ACT II · A03–A11",
   "actTitle": "字开始生长",
   "actCopy": "关系、读者、意义和噪音，都开始成为机器。",
@@ -2033,13 +2255,13 @@
   "metrics": [
    {
     "label": "库存文字",
-    "value": "11",
+    "value": "5.0K",
     "primary": true,
     "hidden": false
    },
    {
     "label": "工坊资金",
-    "value": "0",
+    "value": "20.0K",
     "primary": false,
     "hidden": false
    },
@@ -2051,7 +2273,7 @@
    },
    {
     "label": "意义",
-    "value": "0",
+    "value": "3.0K",
     "primary": false,
     "hidden": false
    },
@@ -2064,36 +2286,58 @@
   ],
   "actions": [
    {
+    "cmd": "push-clock",
+    "label": "发行新一期",
+    "sub": "这一幕以后每一段都快 5%（现在 +0%）",
+    "disabled": false,
+    "major": true,
+    "danger": false,
+    "event": false
+   },
+   {
+    "cmd": "take-event",
+    "label": "一封没署名的信",
+    "sub": "花掉 库存字 30",
+    "disabled": false,
+    "major": false,
+    "danger": false,
+    "event": true
+   },
+   {
     "cmd": "print",
     "label": "印字",
     "sub": "旧玩法还在，但意义开始改变。",
     "disabled": false,
     "major": true,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "compose-rule",
     "label": "刻模：木 + 木 → 林",
-    "sub": "还差 工坊资金（0 / 40）",
+    "sub": "还差 读者（20 / 65）",
     "disabled": true,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "condense",
     "label": "压缩 20 字 → 12 意义",
-    "sub": "还差 库存字（11 / 20）",
+    "sub": "还差 读者（20 / 217）",
     "disabled": true,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "read-letter",
     "label": "打开一封读者来信",
-    "sub": "还差 读者（20.2 / 250）",
+    "sub": "还差 读者（20 / 521）",
     "disabled": true,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "organic-word",
@@ -2101,7 +2345,8 @@
     "sub": "还差 读者来信（0 / 1）",
     "disabled": true,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "viral-word",
@@ -2109,39 +2354,35 @@
     "sub": "还差 自造词（0 / 1）",
     "disabled": true,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "delete-noise",
     "label": "删除噪音",
-    "sub": "删除第一次成为生产行为。",
+    "sub": "还差 noise（0 / 1）",
     "disabled": true,
     "major": false,
-    "danger": false
-   },
-   {
-    "cmd": "map-city",
-    "label": "展开城市地图",
-    "sub": "工坊不再是全部世界。",
-    "disabled": true,
-    "major": true,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "sell",
     "label": "出售全部库存",
-    "sub": "5 资金",
+    "sub": "2.5K 资金",
     "disabled": false,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "contract",
     "label": "交付街角委托",
-    "sub": "还差 20 库存字（11）",
-    "disabled": true,
+    "sub": "20 → 20",
+    "disabled": false,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    }
   ],
   "world": [
@@ -2167,20 +2408,50 @@
     "name": "机械键盘",
     "detail": "3 × +0.5/s · 13 credits",
     "label": "购买",
-    "disabled": true
+    "disabled": false
    },
    {
     "name": "夜班打字员",
-    "detail": "5 × +2/s · 121 credits",
+    "detail": "3 × +2/s · 64 credits",
     "label": "购买",
-    "disabled": true
+    "disabled": false
    },
    {
     "name": "小型印刷机",
     "detail": "1 × +12/s · 157 credits",
     "label": "购买",
-    "disabled": true
+    "disabled": false
    }
+  ],
+  "ahas": [
+   "A01 · 机器替我按按钮ACT 119.5/1",
+   "A02 · 员工组成编辑部ACT 13/3",
+   "A03 · 木 + 木 → 林ACT 21/1",
+   "A04 · 规则开始自动运行ACT 20/3",
+   "A05 · 意义比字数值钱ACT 23.0K/10",
+   "A06 · 报纸制造需求ACT 220/370",
+   "A07 · 读者开始回信ACT 20/1",
+   "A08 · 读者自己造新词ACT 20/1",
+   "A09 · 一个词突然传播ACT 20/1",
+   "A10 · 纸张危机：少写ACT 20/1",
+   "A11 · 删字第一次更值钱ACT 20/1",
+   "A12 · 街区长出方言ACT 30/2",
+   "A13 · 概念改变城市ACT 30/1",
+   "A14 · 城市地图出现ACT 30/1",
+   "A15 · 地图缩到世界ACT 30/2",
+   "A16 · 记者 Agent 自己选题ACT 40/1",
+   "A17 · 编辑第一次说“不”ACT 40/1",
+   "A18 · Agent 创造 AgentACT 40/1",
+   "A19 · 醒来时文章堆满了桌子ACT 40/1.7K",
+   "A20 · 数字出版：库存消失ACT 40/1",
+   "A21 · 档案变成机器记忆ACT 40/1",
+   "A22 · 出现一个你没造过的字ACT 50/1",
+   "A23 · 机器之间有自己的语言ACT 50/12.3K",
+   "A24 · 意义被压成一个符号ACT 50/50.0K",
+   "A25 · 语言成为社会操作系统ACT 60/1",
+   "A26 · 新资源：歧义ACT 60/1.0K",
+   "A27 · 目标从生产变成删除ACT 60/1.0K",
+   "A28 · 最后一个按钮：停止印刷ACT 60/1"
   ],
   "acts": [
    {
@@ -2214,44 +2485,13 @@
     "state": "future"
    }
   ],
-  "ahas": [
-   "A01 · 机器替我按按钮",
-   "A02 · 员工组成编辑部",
-   "A03 · 木 + 木 → 林",
-   "A04 · 规则开始自动运行",
-   "A05 · 意义比字数值钱",
-   "A06 · 报纸制造需求",
-   "A07 · 读者开始回信",
-   "A08 · 读者自己造新词",
-   "A09 · 一个词突然传播",
-   "A10 · 纸张危机：少写",
-   "A11 · 删字第一次更值钱",
-   "A12 · 街区长出方言",
-   "A13 · 概念改变城市",
-   "A14 · 城市地图出现",
-   "A15 · 地图缩到世界",
-   "A16 · 记者 Agent 自己选题",
-   "A17 · 编辑第一次说“不”",
-   "A18 · Agent 创造 Agent",
-   "A19 · 醒来时文章堆满了桌子",
-   "A20 · 数字出版：库存消失",
-   "A21 · 档案变成机器记忆",
-   "A22 · 出现一个你没造过的字",
-   "A23 · 机器之间有自己的语言",
-   "A24 · 意义被压成一个符号",
-   "A25 · 语言成为社会操作系统",
-   "A26 · 新资源：歧义",
-   "A27 · 目标从生产变成删除",
-   "A28 · 最后一个按钮：停止印刷"
-  ],
   "log": [
    "› 台灯亮了。点击「印一个字」，开始你的工坊。"
   ],
   "id": "R02",
   "name": "A03 · ACT II",
-  "note": "评审面 · 导演态 A03",
-  "surface": "review",
-  "directorAha": "A03"
+  "note": "评审面 · 导演态 A03 · 11 个动作 · 5 项可见指标",
+  "surface": "review"
  },
  {
   "viewport": "390x844",
@@ -2267,10 +2507,10 @@
   },
   "title": "字工厂 · Acts Engine v3",
   "lang": "zh-CN",
-  "audience": null,
+  "audience": "review",
   "status": "营业中 · ACT 3/6 · DIRECTOR PREVIEW",
-  "rate": "23.5",
-  "total": "5.0K",
+  "rate": "19.5",
+  "total": "32.0K",
   "actKicker": "ACT III · A12–A15",
   "actTitle": "文字改变城市",
   "actCopy": "文字不再是库存，而开始改变社会。",
@@ -2310,7 +2550,7 @@
   "metrics": [
    {
     "label": "库存文字",
-    "value": "11.1",
+    "value": "5.0K",
     "primary": true,
     "hidden": false
    },
@@ -2341,28 +2581,58 @@
   ],
   "actions": [
    {
+    "cmd": "push-clock",
+    "label": "张贴告示",
+    "sub": "这一幕以后每一段都快 5%（现在 +0%）",
+    "disabled": false,
+    "major": true,
+    "danger": false,
+    "event": false
+   },
+   {
+    "cmd": "take-event",
+    "label": "墙上被人抄走的一句话",
+    "sub": "花掉 意义 40",
+    "disabled": false,
+    "major": false,
+    "danger": false,
+    "event": true
+   },
+   {
     "cmd": "discover-dialect",
     "label": "观察一个新方言",
     "sub": "再观察一个街区。",
     "disabled": false,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "make-concept",
     "label": "创造一个概念",
-    "sub": "花25意义，让一个概念进入社会。",
+    "sub": "花50意义，让一个概念进入社会。",
     "disabled": false,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
+   },
+   {
+    "cmd": "map-city",
+    "label": "展开城市地图",
+    "sub": "工坊不再是全部世界。",
+    "disabled": true,
+    "major": true,
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "map-world",
     "label": "把地图缩到世界",
-    "sub": "城市只是网络中的一个节点。",
+    "sub": "还差 概念（0 / 2）",
     "disabled": true,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "launch-agents",
@@ -2370,23 +2640,26 @@
     "sub": "还差 地图范围（1 / 2）",
     "disabled": true,
     "major": true,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "sell",
     "label": "出售全部库存",
-    "sub": "5.5 资金",
+    "sub": "2.5K 资金",
     "disabled": false,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "contract",
     "label": "交付街角委托",
-    "sub": "还差 20 库存字（11.1）",
-    "disabled": true,
+    "sub": "20 → 20",
+    "disabled": false,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    }
   ],
   "world": [
@@ -2416,7 +2689,7 @@
    },
    {
     "name": "夜班打字员",
-    "detail": "5 × +2/s · 121 credits",
+    "detail": "3 × +2/s · 64 credits",
     "label": "购买",
     "disabled": false
    },
@@ -2426,6 +2699,36 @@
     "label": "购买",
     "disabled": false
    }
+  ],
+  "ahas": [
+   "A01 · 机器替我按按钮ACT 119.5/1",
+   "A02 · 员工组成编辑部ACT 13/3",
+   "A03 · 木 + 木 → 林ACT 21/1",
+   "A04 · 规则开始自动运行ACT 23/3",
+   "A05 · 意义比字数值钱ACT 25.0K/10",
+   "A06 · 报纸制造需求ACT 2200.0K/370",
+   "A07 · 读者开始回信ACT 21/1",
+   "A08 · 读者自己造新词ACT 21/1",
+   "A09 · 一个词突然传播ACT 21/1",
+   "A10 · 纸张危机：少写ACT 21/1",
+   "A11 · 删字第一次更值钱ACT 21/1",
+   "A12 · 街区长出方言ACT 32/2",
+   "A13 · 概念改变城市ACT 30/1",
+   "A14 · 城市地图出现ACT 31/1",
+   "A15 · 地图缩到世界ACT 31/2",
+   "A16 · 记者 Agent 自己选题ACT 40/1",
+   "A17 · 编辑第一次说“不”ACT 40/1",
+   "A18 · Agent 创造 AgentACT 40/1",
+   "A19 · 醒来时文章堆满了桌子ACT 40/1.7K",
+   "A20 · 数字出版：库存消失ACT 40/1",
+   "A21 · 档案变成机器记忆ACT 40/1",
+   "A22 · 出现一个你没造过的字ACT 50/1",
+   "A23 · 机器之间有自己的语言ACT 50/12.3K",
+   "A24 · 意义被压成一个符号ACT 50/50.0K",
+   "A25 · 语言成为社会操作系统ACT 60/1",
+   "A26 · 新资源：歧义ACT 60/1.0K",
+   "A27 · 目标从生产变成删除ACT 61/1.0K",
+   "A28 · 最后一个按钮：停止印刷ACT 60/1"
   ],
   "acts": [
    {
@@ -2459,36 +2762,6 @@
     "state": "future"
    }
   ],
-  "ahas": [
-   "A01 · 机器替我按按钮",
-   "A02 · 员工组成编辑部",
-   "A03 · 木 + 木 → 林",
-   "A04 · 规则开始自动运行",
-   "A05 · 意义比字数值钱",
-   "A06 · 报纸制造需求",
-   "A07 · 读者开始回信",
-   "A08 · 读者自己造新词",
-   "A09 · 一个词突然传播",
-   "A10 · 纸张危机：少写",
-   "A11 · 删字第一次更值钱",
-   "A12 · 街区长出方言",
-   "A13 · 概念改变城市",
-   "A14 · 城市地图出现",
-   "A15 · 地图缩到世界",
-   "A16 · 记者 Agent 自己选题",
-   "A17 · 编辑第一次说“不”",
-   "A18 · Agent 创造 Agent",
-   "A19 · 醒来时文章堆满了桌子",
-   "A20 · 数字出版：库存消失",
-   "A21 · 档案变成机器记忆",
-   "A22 · 出现一个你没造过的字",
-   "A23 · 机器之间有自己的语言",
-   "A24 · 意义被压成一个符号",
-   "A25 · 语言成为社会操作系统",
-   "A26 · 新资源：歧义",
-   "A27 · 目标从生产变成删除",
-   "A28 · 最后一个按钮：停止印刷"
-  ],
   "log": [
    "› 地图展开了。你的工坊在里面，只是一个小方块。",
    "· A14 · 城市地图出现：工坊原来只是世界里的一个点。",
@@ -2496,9 +2769,8 @@
   ],
   "id": "R03",
   "name": "A12 · ACT III",
-  "note": "评审面 · 导演态 A12",
-  "surface": "review",
-  "directorAha": "A12"
+  "note": "评审面 · 导演态 A12 · 9 个动作 · 5 项可见指标",
+  "surface": "review"
  },
  {
   "viewport": "390x844",
@@ -2514,10 +2786,10 @@
   },
   "title": "字工厂 · Acts Engine v3",
   "lang": "zh-CN",
-  "audience": null,
+  "audience": "review",
   "status": "营业中 · ACT 4/6 · DIRECTOR PREVIEW",
-  "rate": "23.5",
-  "total": "5.0K",
+  "rate": "19.5",
+  "total": "32.0K",
   "actKicker": "ACT IV · A16–A21",
   "actTitle": "机器开始写",
   "actCopy": "把判断交出去，再把“创造代理”的权力交出去。",
@@ -2557,7 +2829,7 @@
   "metrics": [
    {
     "label": "库存文字",
-    "value": "11.2",
+    "value": "5.0K",
     "primary": true,
     "hidden": false
    },
@@ -2588,60 +2860,85 @@
   ],
   "actions": [
    {
-    "cmd": "editor-autonomy",
-    "label": "给编辑 Agent 否决权",
-    "sub": "它可以拒绝你的头条。",
+    "cmd": "push-clock",
+    "label": "让 Agent 加班",
+    "sub": "这一幕以后每一段都快 5%（现在 +0%）",
+    "disabled": false,
+    "major": true,
+    "danger": false,
+    "event": false
+   },
+   {
+    "cmd": "take-event",
+    "label": "一份没人署名的退稿",
+    "sub": "花掉 意义 60",
     "disabled": false,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": true
+   },
+   {
+    "cmd": "editor-autonomy",
+    "label": "给编辑 Agent 否决权",
+    "sub": "还差 夜间文章（0 / 131）",
+    "disabled": true,
+    "major": false,
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "spawn-agents",
     "label": "允许 Agent 创建 Agent",
-    "sub": "委托变成自我扩张。",
+    "sub": "还差 夜间文章（0 / 263）",
     "disabled": true,
     "major": true,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "digitize",
     "label": "切换数字出版",
-    "sub": "实体库存开始退出舞台。",
+    "sub": "还差 夜间文章（0 / 3.8K）",
     "disabled": true,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "train-memory",
     "label": "用档案训练机器",
-    "sub": "过去的文字变成机器记忆。",
+    "sub": "还差 夜间文章（0 / 8.6K）",
     "disabled": true,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "discover-machine-glyph",
     "label": "检查未知字形 ◫",
-    "sub": "来源：未知。",
+    "sub": "还差 档案记忆（0 / 4）",
     "disabled": true,
     "major": true,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "sell",
     "label": "出售全部库存",
-    "sub": "5.5 资金",
+    "sub": "2.5K 资金",
     "disabled": false,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "contract",
     "label": "交付街角委托",
-    "sub": "还差 20 库存字（11.2）",
-    "disabled": true,
+    "sub": "20 → 20",
+    "disabled": false,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    }
   ],
   "world": [
@@ -2671,7 +2968,7 @@
    },
    {
     "name": "夜班打字员",
-    "detail": "5 × +2/s · 121 credits",
+    "detail": "3 × +2/s · 64 credits",
     "label": "购买",
     "disabled": false
    },
@@ -2681,6 +2978,36 @@
     "label": "购买",
     "disabled": false
    }
+  ],
+  "ahas": [
+   "A01 · 机器替我按按钮ACT 119.5/1",
+   "A02 · 员工组成编辑部ACT 13/3",
+   "A03 · 木 + 木 → 林ACT 21/1",
+   "A04 · 规则开始自动运行ACT 23/3",
+   "A05 · 意义比字数值钱ACT 250.0K/10",
+   "A06 · 报纸制造需求ACT 2200.0K/370",
+   "A07 · 读者开始回信ACT 21/1",
+   "A08 · 读者自己造新词ACT 21/1",
+   "A09 · 一个词突然传播ACT 21/1",
+   "A10 · 纸张危机：少写ACT 21/1",
+   "A11 · 删字第一次更值钱ACT 21/1",
+   "A12 · 街区长出方言ACT 34/2",
+   "A13 · 概念改变城市ACT 32/1",
+   "A14 · 城市地图出现ACT 32/1",
+   "A15 · 地图缩到世界ACT 32/2",
+   "A16 · 记者 Agent 自己选题ACT 41/1",
+   "A17 · 编辑第一次说“不”ACT 40/1",
+   "A18 · Agent 创造 AgentACT 40/1",
+   "A19 · 醒来时文章堆满了桌子ACT 40/1.7K",
+   "A20 · 数字出版：库存消失ACT 40/1",
+   "A21 · 档案变成机器记忆ACT 40/1",
+   "A22 · 出现一个你没造过的字ACT 50/1",
+   "A23 · 机器之间有自己的语言ACT 50/12.3K",
+   "A24 · 意义被压成一个符号ACT 50/50.0K",
+   "A25 · 语言成为社会操作系统ACT 60/1",
+   "A26 · 新资源：歧义ACT 60/1.0K",
+   "A27 · 目标从生产变成删除ACT 61/1.0K",
+   "A28 · 最后一个按钮：停止印刷ACT 60/1"
   ],
   "acts": [
    {
@@ -2714,44 +3041,13 @@
     "state": "future"
    }
   ],
-  "ahas": [
-   "A01 · 机器替我按按钮",
-   "A02 · 员工组成编辑部",
-   "A03 · 木 + 木 → 林",
-   "A04 · 规则开始自动运行",
-   "A05 · 意义比字数值钱",
-   "A06 · 报纸制造需求",
-   "A07 · 读者开始回信",
-   "A08 · 读者自己造新词",
-   "A09 · 一个词突然传播",
-   "A10 · 纸张危机：少写",
-   "A11 · 删字第一次更值钱",
-   "A12 · 街区长出方言",
-   "A13 · 概念改变城市",
-   "A14 · 城市地图出现",
-   "A15 · 地图缩到世界",
-   "A16 · 记者 Agent 自己选题",
-   "A17 · 编辑第一次说“不”",
-   "A18 · Agent 创造 Agent",
-   "A19 · 醒来时文章堆满了桌子",
-   "A20 · 数字出版：库存消失",
-   "A21 · 档案变成机器记忆",
-   "A22 · 出现一个你没造过的字",
-   "A23 · 机器之间有自己的语言",
-   "A24 · 意义被压成一个符号",
-   "A25 · 语言成为社会操作系统",
-   "A26 · 新资源：歧义",
-   "A27 · 目标从生产变成删除",
-   "A28 · 最后一个按钮：停止印刷"
-  ],
   "log": [
    "› 台灯亮了。点击「印一个字」，开始你的工坊。"
   ],
   "id": "R04",
   "name": "A16 · ACT IV",
-  "note": "评审面 · 导演态 A16",
-  "surface": "review",
-  "directorAha": "A16"
+  "note": "评审面 · 导演态 A16 · 9 个动作 · 5 项可见指标",
+  "surface": "review"
  },
  {
   "viewport": "390x844",
@@ -2767,10 +3063,10 @@
   },
   "title": "字工厂 · Acts Engine v3",
   "lang": "zh-CN",
-  "audience": null,
+  "audience": "review",
   "status": "营业中 · ACT 5/6 · DIRECTOR PREVIEW",
-  "rate": "23.5",
-  "total": "5.0K",
+  "rate": "19.5",
+  "total": "32.0K",
   "actKicker": "ACT V · A22–A24",
   "actTitle": "机器语言",
   "actCopy": "系统开始创造人类没有设计过的符号。",
@@ -2810,7 +3106,7 @@
   "metrics": [
    {
     "label": "库存文字",
-    "value": "11",
+    "value": "5.0K",
     "primary": true,
     "hidden": true
    },
@@ -2828,41 +3124,62 @@
    },
    {
     "label": "意义",
-    "value": "100.8",
+    "value": "100",
     "primary": false,
     "hidden": false
    },
    {
     "label": "噪音",
-    "value": "11.9",
+    "value": "10",
     "primary": false,
     "hidden": false
    }
   ],
   "actions": [
    {
+    "cmd": "push-clock",
+    "label": "喂机器一批文本",
+    "sub": "还差 库存字（5.0K / 40.0K）",
+    "disabled": true,
+    "major": true,
+    "danger": false,
+    "event": false
+   },
+   {
+    "cmd": "take-event",
+    "label": "一段对不上的话",
+    "sub": "花掉 库存字 500",
+    "disabled": false,
+    "major": false,
+    "danger": false,
+    "event": true
+   },
+   {
     "cmd": "compress-language",
     "label": "语义压缩",
-    "sub": "100意义 → 10,000压缩意义",
-    "disabled": false,
+    "sub": "还差 机器用量（0 / 12.3K）",
+    "disabled": true,
     "major": true,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "infrastructure",
     "label": "让语言接管基础设施",
-    "sub": "语言已经可以接管基础设施。",
+    "sub": "还差 意义（100 / 400）",
     "disabled": true,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "contract",
     "label": "交付街角委托",
-    "sub": "还差 20 库存字（11）",
-    "disabled": true,
+    "sub": "20 → 20",
+    "disabled": false,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    }
   ],
   "world": [
@@ -2872,7 +3189,7 @@
    },
    {
     "label": "MACHINE USE",
-    "value": "14"
+    "value": "0"
    },
    {
     "label": "COMPRESSED",
@@ -2880,7 +3197,7 @@
    },
    {
     "label": "HUMAN MEANING",
-    "value": "101"
+    "value": "100"
    }
   ],
   "machines": [
@@ -2892,7 +3209,7 @@
    },
    {
     "name": "夜班打字员",
-    "detail": "5 × +2/s · 121 credits",
+    "detail": "3 × +2/s · 64 credits",
     "label": "购买",
     "disabled": false
    },
@@ -2902,6 +3219,36 @@
     "label": "购买",
     "disabled": false
    }
+  ],
+  "ahas": [
+   "A01 · 机器替我按按钮ACT 119.5/1",
+   "A02 · 员工组成编辑部ACT 13/3",
+   "A03 · 木 + 木 → 林ACT 21/1",
+   "A04 · 规则开始自动运行ACT 23/3",
+   "A05 · 意义比字数值钱ACT 2100/10",
+   "A06 · 报纸制造需求ACT 2200.0K/370",
+   "A07 · 读者开始回信ACT 21/1",
+   "A08 · 读者自己造新词ACT 21/1",
+   "A09 · 一个词突然传播ACT 21/1",
+   "A10 · 纸张危机：少写ACT 21/1",
+   "A11 · 删字第一次更值钱ACT 21/1",
+   "A12 · 街区长出方言ACT 34/2",
+   "A13 · 概念改变城市ACT 32/1",
+   "A14 · 城市地图出现ACT 32/1",
+   "A15 · 地图缩到世界ACT 32/2",
+   "A16 · 记者 Agent 自己选题ACT 45/1",
+   "A17 · 编辑第一次说“不”ACT 41/1",
+   "A18 · Agent 创造 AgentACT 41/1",
+   "A19 · 醒来时文章堆满了桌子ACT 49.7K/1.7K",
+   "A20 · 数字出版：库存消失ACT 41/1",
+   "A21 · 档案变成机器记忆ACT 41/1",
+   "A22 · 出现一个你没造过的字ACT 51/1",
+   "A23 · 机器之间有自己的语言ACT 50/12.3K",
+   "A24 · 意义被压成一个符号ACT 50/50.0K",
+   "A25 · 语言成为社会操作系统ACT 60/1",
+   "A26 · 新资源：歧义ACT 60/1.0K",
+   "A27 · 目标从生产变成删除ACT 61/1.0K",
+   "A28 · 最后一个按钮：停止印刷ACT 60/1"
   ],
   "acts": [
    {
@@ -2935,44 +3282,13 @@
     "state": "future"
    }
   ],
-  "ahas": [
-   "A01 · 机器替我按按钮",
-   "A02 · 员工组成编辑部",
-   "A03 · 木 + 木 → 林",
-   "A04 · 规则开始自动运行",
-   "A05 · 意义比字数值钱",
-   "A06 · 报纸制造需求",
-   "A07 · 读者开始回信",
-   "A08 · 读者自己造新词",
-   "A09 · 一个词突然传播",
-   "A10 · 纸张危机：少写",
-   "A11 · 删字第一次更值钱",
-   "A12 · 街区长出方言",
-   "A13 · 概念改变城市",
-   "A14 · 城市地图出现",
-   "A15 · 地图缩到世界",
-   "A16 · 记者 Agent 自己选题",
-   "A17 · 编辑第一次说“不”",
-   "A18 · Agent 创造 Agent",
-   "A19 · 醒来时文章堆满了桌子",
-   "A20 · 数字出版：库存消失",
-   "A21 · 档案变成机器记忆",
-   "A22 · 出现一个你没造过的字",
-   "A23 · 机器之间有自己的语言",
-   "A24 · 意义被压成一个符号",
-   "A25 · 语言成为社会操作系统",
-   "A26 · 新资源：歧义",
-   "A27 · 目标从生产变成删除",
-   "A28 · 最后一个按钮：停止印刷"
-  ],
   "log": [
    "› 台灯亮了。点击「印一个字」，开始你的工坊。"
   ],
   "id": "R05",
   "name": "A22 · ACT V",
-  "note": "评审面 · 导演态 A22",
-  "surface": "review",
-  "directorAha": "A22"
+  "note": "评审面 · 导演态 A22 · 5 个动作 · 4 项可见指标",
+  "surface": "review"
  },
  {
   "viewport": "390x844",
@@ -2988,10 +3304,10 @@
   },
   "title": "字工厂 · Acts Engine v3",
   "lang": "zh-CN",
-  "audience": null,
+  "audience": "review",
   "status": "营业中 · ACT 6/6 · DIRECTOR PREVIEW",
   "rate": "0",
-  "total": "5.0K",
+  "total": "32.0K",
   "actKicker": "ACT VI · A25–A28",
   "actTitle": "从增长到沉默",
   "actCopy": "优化目标从“制造更多”翻转成“删除噪音”。",
@@ -3031,7 +3347,7 @@
   "metrics": [
    {
     "label": "库存文字",
-    "value": "0",
+    "value": "5.0K",
     "primary": true,
     "hidden": true
    },
@@ -3064,10 +3380,11 @@
    {
     "cmd": "delete-noise",
     "label": "删除噪音",
-    "sub": "一次删除500噪音。",
+    "sub": "一次删除250噪音。",
     "disabled": true,
     "major": true,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "resolve-ambiguity",
@@ -3075,7 +3392,8 @@
     "sub": "清晰度变成一种资源。",
     "disabled": true,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "stop-printing",
@@ -3083,15 +3401,17 @@
     "sub": "已完成",
     "disabled": true,
     "major": false,
-    "danger": true
+    "danger": true,
+    "event": false
    },
    {
     "cmd": "contract",
     "label": "交付街角委托",
-    "sub": "还差 20 库存字（0）",
+    "sub": "20 → 20",
     "disabled": true,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    }
   ],
   "world": [
@@ -3101,7 +3421,7 @@
    },
    {
     "label": "AMBIGUITY / 歧义",
-    "value": "100"
+    "value": "4.8K"
    },
    {
     "label": "DELETED / 删除",
@@ -3109,7 +3429,7 @@
    },
    {
     "label": "COMPRESSED",
-    "value": "10.0K"
+    "value": "50.0K"
    }
   ],
   "machines": [
@@ -3121,7 +3441,7 @@
    },
    {
     "name": "夜班打字员",
-    "detail": "5 × +2/s · 121 credits",
+    "detail": "3 × +2/s · 64 credits",
     "label": "购买",
     "disabled": false
    },
@@ -3131,6 +3451,36 @@
     "label": "购买",
     "disabled": false
    }
+  ],
+  "ahas": [
+   "A01 · 机器替我按按钮ACT 10/1",
+   "A02 · 员工组成编辑部ACT 13/3",
+   "A03 · 木 + 木 → 林ACT 21/1",
+   "A04 · 规则开始自动运行ACT 23/3",
+   "A05 · 意义比字数值钱ACT 2100/10",
+   "A06 · 报纸制造需求ACT 2200.0K/370",
+   "A07 · 读者开始回信ACT 21/1",
+   "A08 · 读者自己造新词ACT 21/1",
+   "A09 · 一个词突然传播ACT 21/1",
+   "A10 · 纸张危机：少写ACT 21/1",
+   "A11 · 删字第一次更值钱ACT 21.0K/1",
+   "A12 · 街区长出方言ACT 34/2",
+   "A13 · 概念改变城市ACT 32/1",
+   "A14 · 城市地图出现ACT 32/1",
+   "A15 · 地图缩到世界ACT 32/2",
+   "A16 · 记者 Agent 自己选题ACT 45/1",
+   "A17 · 编辑第一次说“不”ACT 41/1",
+   "A18 · Agent 创造 AgentACT 41/1",
+   "A19 · 醒来时文章堆满了桌子ACT 49.7K/1.7K",
+   "A20 · 数字出版：库存消失ACT 41/1",
+   "A21 · 档案变成机器记忆ACT 41/1",
+   "A22 · 出现一个你没造过的字ACT 51/1",
+   "A23 · 机器之间有自己的语言ACT 541.3K/12.3K",
+   "A24 · 意义被压成一个符号ACT 550.0K/50.0K",
+   "A25 · 语言成为社会操作系统ACT 61/1",
+   "A26 · 新资源：歧义ACT 64.8K/1.0K",
+   "A27 · 目标从生产变成删除ACT 61.0K/1.0K",
+   "A28 · 最后一个按钮：停止印刷ACT 61/1"
   ],
   "acts": [
    {
@@ -3164,44 +3514,13 @@
     "state": "current"
    }
   ],
-  "ahas": [
-   "A01 · 机器替我按按钮",
-   "A02 · 员工组成编辑部",
-   "A03 · 木 + 木 → 林",
-   "A04 · 规则开始自动运行",
-   "A05 · 意义比字数值钱",
-   "A06 · 报纸制造需求",
-   "A07 · 读者开始回信",
-   "A08 · 读者自己造新词",
-   "A09 · 一个词突然传播",
-   "A10 · 纸张危机：少写",
-   "A11 · 删字第一次更值钱",
-   "A12 · 街区长出方言",
-   "A13 · 概念改变城市",
-   "A14 · 城市地图出现",
-   "A15 · 地图缩到世界",
-   "A16 · 记者 Agent 自己选题",
-   "A17 · 编辑第一次说“不”",
-   "A18 · Agent 创造 Agent",
-   "A19 · 醒来时文章堆满了桌子",
-   "A20 · 数字出版：库存消失",
-   "A21 · 档案变成机器记忆",
-   "A22 · 出现一个你没造过的字",
-   "A23 · 机器之间有自己的语言",
-   "A24 · 意义被压成一个符号",
-   "A25 · 语言成为社会操作系统",
-   "A26 · 新资源：歧义",
-   "A27 · 目标从生产变成删除",
-   "A28 · 最后一个按钮：停止印刷"
-  ],
   "log": [
    "› 台灯亮了。点击「印一个字」，开始你的工坊。"
   ],
   "id": "R06",
   "name": "A28 · 终局",
-  "note": "评审面 · 导演态 A28",
-  "surface": "review",
-  "directorAha": "A28"
+  "note": "评审面 · 导演态 A28 · 4 个动作 · 4 项可见指标",
+  "surface": "review"
  },
  {
   "viewport": "1280x900",
@@ -3217,10 +3536,10 @@
   },
   "title": "字工厂 · Acts Engine v3",
   "lang": "zh-CN",
-  "audience": null,
+  "audience": "review",
   "status": "营业中 · ACT 4/6 · DIRECTOR PREVIEW",
-  "rate": "23.5",
-  "total": "5.0K",
+  "rate": "19.5",
+  "total": "32.0K",
   "actKicker": "ACT IV · A16–A21",
   "actTitle": "机器开始写",
   "actCopy": "把判断交出去，再把“创造代理”的权力交出去。",
@@ -3260,7 +3579,7 @@
   "metrics": [
    {
     "label": "库存文字",
-    "value": "11.4",
+    "value": "5.0K",
     "primary": true,
     "hidden": false
    },
@@ -3291,60 +3610,85 @@
   ],
   "actions": [
    {
-    "cmd": "editor-autonomy",
-    "label": "给编辑 Agent 否决权",
-    "sub": "它可以拒绝你的头条。",
+    "cmd": "push-clock",
+    "label": "让 Agent 加班",
+    "sub": "这一幕以后每一段都快 5%（现在 +0%）",
+    "disabled": false,
+    "major": true,
+    "danger": false,
+    "event": false
+   },
+   {
+    "cmd": "take-event",
+    "label": "一份没人署名的退稿",
+    "sub": "花掉 意义 60",
     "disabled": false,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": true
+   },
+   {
+    "cmd": "editor-autonomy",
+    "label": "给编辑 Agent 否决权",
+    "sub": "还差 夜间文章（0 / 131）",
+    "disabled": true,
+    "major": false,
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "spawn-agents",
     "label": "允许 Agent 创建 Agent",
-    "sub": "委托变成自我扩张。",
+    "sub": "还差 夜间文章（0 / 263）",
     "disabled": true,
     "major": true,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "digitize",
     "label": "切换数字出版",
-    "sub": "实体库存开始退出舞台。",
+    "sub": "还差 夜间文章（0 / 3.8K）",
     "disabled": true,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "train-memory",
     "label": "用档案训练机器",
-    "sub": "过去的文字变成机器记忆。",
+    "sub": "还差 夜间文章（0 / 8.6K）",
     "disabled": true,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "discover-machine-glyph",
     "label": "检查未知字形 ◫",
-    "sub": "来源：未知。",
+    "sub": "还差 档案记忆（0 / 4）",
     "disabled": true,
     "major": true,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "sell",
     "label": "出售全部库存",
-    "sub": "5.5 资金",
+    "sub": "2.5K 资金",
     "disabled": false,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "contract",
     "label": "交付街角委托",
-    "sub": "还差 20 库存字（11.4）",
-    "disabled": true,
+    "sub": "20 → 20",
+    "disabled": false,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    }
   ],
   "world": [
@@ -3374,7 +3718,7 @@
    },
    {
     "name": "夜班打字员",
-    "detail": "5 × +2/s · 121 credits",
+    "detail": "3 × +2/s · 64 credits",
     "label": "购买",
     "disabled": false
    },
@@ -3384,6 +3728,36 @@
     "label": "购买",
     "disabled": false
    }
+  ],
+  "ahas": [
+   "A01 · 机器替我按按钮ACT 119.5/1",
+   "A02 · 员工组成编辑部ACT 13/3",
+   "A03 · 木 + 木 → 林ACT 21/1",
+   "A04 · 规则开始自动运行ACT 23/3",
+   "A05 · 意义比字数值钱ACT 250.0K/10",
+   "A06 · 报纸制造需求ACT 2200.0K/370",
+   "A07 · 读者开始回信ACT 21/1",
+   "A08 · 读者自己造新词ACT 21/1",
+   "A09 · 一个词突然传播ACT 21/1",
+   "A10 · 纸张危机：少写ACT 21/1",
+   "A11 · 删字第一次更值钱ACT 21/1",
+   "A12 · 街区长出方言ACT 34/2",
+   "A13 · 概念改变城市ACT 32/1",
+   "A14 · 城市地图出现ACT 32/1",
+   "A15 · 地图缩到世界ACT 32/2",
+   "A16 · 记者 Agent 自己选题ACT 41/1",
+   "A17 · 编辑第一次说“不”ACT 40/1",
+   "A18 · Agent 创造 AgentACT 40/1",
+   "A19 · 醒来时文章堆满了桌子ACT 40/1.7K",
+   "A20 · 数字出版：库存消失ACT 40/1",
+   "A21 · 档案变成机器记忆ACT 40/1",
+   "A22 · 出现一个你没造过的字ACT 50/1",
+   "A23 · 机器之间有自己的语言ACT 50/12.3K",
+   "A24 · 意义被压成一个符号ACT 50/50.0K",
+   "A25 · 语言成为社会操作系统ACT 60/1",
+   "A26 · 新资源：歧义ACT 60/1.0K",
+   "A27 · 目标从生产变成删除ACT 61/1.0K",
+   "A28 · 最后一个按钮：停止印刷ACT 60/1"
   ],
   "acts": [
    {
@@ -3417,44 +3791,13 @@
     "state": "future"
    }
   ],
-  "ahas": [
-   "A01 · 机器替我按按钮",
-   "A02 · 员工组成编辑部",
-   "A03 · 木 + 木 → 林",
-   "A04 · 规则开始自动运行",
-   "A05 · 意义比字数值钱",
-   "A06 · 报纸制造需求",
-   "A07 · 读者开始回信",
-   "A08 · 读者自己造新词",
-   "A09 · 一个词突然传播",
-   "A10 · 纸张危机：少写",
-   "A11 · 删字第一次更值钱",
-   "A12 · 街区长出方言",
-   "A13 · 概念改变城市",
-   "A14 · 城市地图出现",
-   "A15 · 地图缩到世界",
-   "A16 · 记者 Agent 自己选题",
-   "A17 · 编辑第一次说“不”",
-   "A18 · Agent 创造 Agent",
-   "A19 · 醒来时文章堆满了桌子",
-   "A20 · 数字出版：库存消失",
-   "A21 · 档案变成机器记忆",
-   "A22 · 出现一个你没造过的字",
-   "A23 · 机器之间有自己的语言",
-   "A24 · 意义被压成一个符号",
-   "A25 · 语言成为社会操作系统",
-   "A26 · 新资源：歧义",
-   "A27 · 目标从生产变成删除",
-   "A28 · 最后一个按钮：停止印刷"
-  ],
   "log": [
    "› 台灯亮了。点击「印一个字」，开始你的工坊。"
   ],
   "id": "D01",
   "name": "ACT IV · 1280",
-  "surface": "review",
-  "directorAha": "A16",
-  "note": "评审面 · 桌面构图 D01"
+  "note": "评审面 · 桌面构图 D01 · 9 个动作 · 5 项可见指标",
+  "surface": "review"
  },
  {
   "viewport": "1280x900",
@@ -3470,7 +3813,7 @@
   },
   "title": "字工厂 · Acts Engine v3",
   "lang": "zh-CN",
-  "audience": null,
+  "audience": "review",
   "status": "营业中 · ACT 1/6 · DIRECTOR PREVIEW",
   "rate": "0.5",
   "total": "10",
@@ -3513,7 +3856,7 @@
   "metrics": [
    {
     "label": "库存文字",
-    "value": "0.2",
+    "value": "0",
     "primary": true,
     "hidden": false
    },
@@ -3549,7 +3892,8 @@
     "sub": "手动生产",
     "disabled": false,
     "major": true,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "sell",
@@ -3557,7 +3901,8 @@
     "sub": "0 资金",
     "disabled": true,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "boost",
@@ -3565,7 +3910,8 @@
     "sub": "还差 45 资金（0）",
     "disabled": true,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "research-auto",
@@ -3573,23 +3919,26 @@
     "sub": "还差 60 资金（0）",
     "disabled": true,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "contract",
     "label": "交付街角委托",
-    "sub": "还差 20 库存字（0.2）",
+    "sub": "还差 20 库存字（0）",
     "disabled": true,
     "major": false,
-    "danger": false
+    "danger": false,
+    "event": false
    },
    {
     "cmd": "publish",
     "label": "发行《明日》",
-    "sub": "还差 库存 200 字 + 300 资金（0.2 / 0）",
+    "sub": "还差 库存 200 字 + 300 资金（0 / 0）",
     "disabled": true,
     "major": true,
-    "danger": false
+    "danger": false,
+    "event": false
    }
   ],
   "world": [
@@ -3630,6 +3979,36 @@
     "disabled": true
    }
   ],
+  "ahas": [
+   "A01 · 机器替我按按钮ACT 10.5/1",
+   "A02 · 员工组成编辑部ACT 10/3",
+   "A03 · 木 + 木 → 林ACT 20/1",
+   "A04 · 规则开始自动运行ACT 20/3",
+   "A05 · 意义比字数值钱ACT 20/10",
+   "A06 · 报纸制造需求ACT 20/370",
+   "A07 · 读者开始回信ACT 20/1",
+   "A08 · 读者自己造新词ACT 20/1",
+   "A09 · 一个词突然传播ACT 20/1",
+   "A10 · 纸张危机：少写ACT 20/1",
+   "A11 · 删字第一次更值钱ACT 20/1",
+   "A12 · 街区长出方言ACT 30/2",
+   "A13 · 概念改变城市ACT 30/1",
+   "A14 · 城市地图出现ACT 30/1",
+   "A15 · 地图缩到世界ACT 30/2",
+   "A16 · 记者 Agent 自己选题ACT 40/1",
+   "A17 · 编辑第一次说“不”ACT 40/1",
+   "A18 · Agent 创造 AgentACT 40/1",
+   "A19 · 醒来时文章堆满了桌子ACT 40/1.7K",
+   "A20 · 数字出版：库存消失ACT 40/1",
+   "A21 · 档案变成机器记忆ACT 40/1",
+   "A22 · 出现一个你没造过的字ACT 50/1",
+   "A23 · 机器之间有自己的语言ACT 50/12.3K",
+   "A24 · 意义被压成一个符号ACT 50/50.0K",
+   "A25 · 语言成为社会操作系统ACT 60/1",
+   "A26 · 新资源：歧义ACT 60/1.0K",
+   "A27 · 目标从生产变成删除ACT 60/1.0K",
+   "A28 · 最后一个按钮：停止印刷ACT 60/1"
+  ],
   "acts": [
    {
     "text": "ACT I · 手工与自动化",
@@ -3662,43 +4041,12 @@
     "state": "future"
    }
   ],
-  "ahas": [
-   "A01 · 机器替我按按钮",
-   "A02 · 员工组成编辑部",
-   "A03 · 木 + 木 → 林",
-   "A04 · 规则开始自动运行",
-   "A05 · 意义比字数值钱",
-   "A06 · 报纸制造需求",
-   "A07 · 读者开始回信",
-   "A08 · 读者自己造新词",
-   "A09 · 一个词突然传播",
-   "A10 · 纸张危机：少写",
-   "A11 · 删字第一次更值钱",
-   "A12 · 街区长出方言",
-   "A13 · 概念改变城市",
-   "A14 · 城市地图出现",
-   "A15 · 地图缩到世界",
-   "A16 · 记者 Agent 自己选题",
-   "A17 · 编辑第一次说“不”",
-   "A18 · Agent 创造 Agent",
-   "A19 · 醒来时文章堆满了桌子",
-   "A20 · 数字出版：库存消失",
-   "A21 · 档案变成机器记忆",
-   "A22 · 出现一个你没造过的字",
-   "A23 · 机器之间有自己的语言",
-   "A24 · 意义被压成一个符号",
-   "A25 · 语言成为社会操作系统",
-   "A26 · 新资源：歧义",
-   "A27 · 目标从生产变成删除",
-   "A28 · 最后一个按钮：停止印刷"
-  ],
   "log": [
    "› 台灯亮了。点击「印一个字」，开始你的工坊。"
   ],
   "id": "D02",
   "name": "ACT I · 1280",
-  "surface": "review",
-  "directorAha": "A01",
-  "note": "评审面 · 桌面构图 D02"
+  "note": "评审面 · 桌面构图 D02 · 6 个动作 · 5 项可见指标",
+  "surface": "review"
  }
 ]

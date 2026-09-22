@@ -49,7 +49,7 @@ p{margin:0 0 12px;max-width:70ch}
 
 /* definition cards */
 .defs{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))}
-.def{border:1.5px solid var(--ink);background:var(--panel);padding:16px 16px 14px;box-shadow:var(--shadow-3-1)}
+.def{border:1.5px solid var(--ink);background:var(--panel);padding:16px 16px 14px;box-shadow:var(--shadow-3)}
 .def h3{margin:0 0 6px;font-size:15px}
 .def dl{margin:10px 0 0;display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:13px}
 .def dt{font-family:var(--mono);font-size:10.5px;color:var(--rust);letter-spacing:.06em;padding-top:3px}
@@ -63,7 +63,10 @@ p{margin:0 0 12px;max-width:70ch}
 .screens:active,.strip:active{cursor:grabbing}
 .screens>*,.strip>*{flex:0 0 auto;scroll-snap-align:start}
 .screens .screen,.strip figure{width:clamp(292px,78vw,376px)}
-.screen{border:1.5px solid var(--ink);background:var(--panel);box-shadow:var(--shadow-3-1);display:flex;flex-direction:column}
+/* 宽画布（1280 的桌面构图）svg 是 640 单位，但 figure 被上面那条钉死在 376，
+   于是它右溢 261px、直接画到轨道里下一张屏上面。让"装着宽画布的那张 figure"跟着变宽。 */
+.screens .screen:has(.wideframe),.strip figure:has(.wideframe){width:clamp(320px,92vw,640px)}
+.screen{border:1.5px solid var(--ink);background:var(--panel);box-shadow:var(--shadow-3);display:flex;flex-direction:column}
 .screen svg.sch,.strip svg.sch{display:block;width:100%;height:auto}
 .screen svg.sch{border-bottom:1.5px solid var(--ink)}
 .wideframe{display:block;width:clamp(320px,92vw,640px)}
@@ -153,7 +156,7 @@ footer b{color:var(--ink)}
       </div>
     </div>
     <p class="meta">
-      <b>7ebd57b</b>
+      构建基准 <!-- SHA -->
       public/glyph-engine-v3.js<br>
       public/glyph-game-v3.js<br>
       public/player-privacy-v3.js
@@ -221,55 +224,55 @@ footer b{color:var(--ink)}
     <figure class="screen">
       <img src="shots/p01.png" alt="玩家首屏，只有一个「印字」按钮与一项库存文字指标" loading="lazy" width="780" height="1688">
       <div class="cap"><div class="hd"><span class="sid">P01</span><h4>全新存档</h4></div>
-        <ul class="facts"><li class="on">库存文字</li><li class="on">印字</li><li class="off">世界模型 隐藏</li></ul>
+        <!-- FACTS:P01 -->
         <p class="why">四项指标只出现一项，动作只有一个。披露契约 S01 的运行时证据。</p></div>
     </figure>
     <figure class="screen">
       <img src="shots/p02.png" alt="玩家首次出售后，出现资金指标与出售、委托按钮" loading="lazy" width="780" height="1688">
       <div class="cap"><div class="hd"><span class="sid">P02</span><h4>首次出售</h4></div>
-        <ul class="facts"><li class="on">+工坊资金</li><li class="on">出售全部库存</li><li class="on">交付街角委托</li><li class="on">机械键盘</li></ul>
+        <!-- FACTS:P02 -->
         <p class="why">S02：出售第一次真正可用。库存归零后按钮仍在。</p></div>
     </figure>
     <figure class="screen">
       <img src="shots/p03.png" alt="玩家自动化阶段，三台机器卡片与自动出售开关" loading="lazy" width="780" height="1688">
       <div class="cap"><div class="hd"><span class="sid">P03</span><h4>自动化</h4></div>
-        <ul class="facts"><li class="on">三台机器</li><li class="on">切换自动出售</li><li class="off">研发复写纸</li></ul>
+        <!-- FACTS:P03 -->
         <p class="why">机器卡片按「拥有或买得起」逐个出现，不是一次性铺开。</p></div>
     </figure>
     <figure class="screen">
       <img src="shots/p04.png" alt="ACT II 玩家面，四个新动词，世界模型仍未出现，机器面板消失" loading="lazy" width="780" height="1688">
       <div class="cap"><div class="hd"><span class="sid">P04</span><h4>ACT II · 字开始生长</h4></div>
-        <ul class="facts"><li class="on">+意义</li><li class="on">+噪音</li><li class="on">刻模</li><li class="off">机器面板消失</li></ul>
-        <p class="why">S10：城市未发现，世界面不存在。同时 ACT I 的机器面板与购买入口一起消失（见 M5）。</p></div>
+        <!-- FACTS:P04 -->
+        <p class="why">S10：城市未发现，世界面不存在。机器面板和购买入口都还在——M5 修好之后每一幕都渲染，这一屏的读数就是证据。</p></div>
     </figure>
     <figure class="screen">
       <img src="shots/p05.png" alt="ACT III 玩家面，世界模型卡片首次出现，由单栏展开为双栏" loading="lazy" width="780" height="1688">
       <div class="cap"><div class="hd"><span class="sid">P05</span><h4>ACT III · 城市</h4></div>
-        <ul class="facts"><li class="on">世界模型 可见</li><li class="off">地图=城市</li><li class="on">观察一个新方言</li></ul>
+        <!-- FACTS:P05 -->
         <p class="why">S11：城市被发现，hero 由单栏扩成双栏，ACT II 的动词整组退场。</p></div>
     </figure>
     <figure class="screen">
       <img src="shots/p06.png" alt="ACT IV 玩家面，库存文字指标消失，五个智能体相关动词" loading="lazy" width="780" height="1688">
       <div class="cap"><div class="hd"><span class="sid">P06</span><h4>ACT IV · 机器开始写</h4></div>
-        <ul class="facts"><li class="off">库存文字 消失</li><li class="on">5 个智能体动词</li><li class="off">地图=传播网络</li></ul>
+        <!-- FACTS:P06 -->
         <p class="why">S20 对应的唯一一处「有意替换」：数字出版让实体库存指标退场。</p></div>
     </figure>
     <figure class="screen">
       <img src="shots/p07.png" alt="ACT V 玩家面，整个界面只剩一个「语义压缩」按钮" loading="lazy" width="780" height="1688">
       <div class="cap"><div class="hd"><span class="sid">P07</span><h4>ACT V · 机器语言</h4></div>
-        <ul class="facts"><li class="on">语义压缩</li><li class="off">仅 1 个动作</li><li class="off">地图=机器语言</li></ul>
-        <p class="why">全游戏最薄的一屏：一个动作承担整个 ACT V 的推进。</p></div>
+        <!-- FACTS:P07 -->
+        <p class="why">推钟动词（喂机器一批文本）与微事件都在这一屏上：ACT V 不再是「一个动作承担整幕」——那是加推钟之前的事。</p></div>
     </figure>
     <figure class="screen">
       <img src="shots/p08.png" alt="ACT VI 玩家面，删除、消解歧义、停止印刷三个动作" loading="lazy" width="780" height="1688">
       <div class="cap"><div class="hd"><span class="sid">P08</span><h4>ACT VI · 终局条件成立</h4></div>
-        <ul class="facts"><li class="on">停止印刷</li><li class="on">消解 25 歧义</li><li class="off">地图=世界</li></ul>
+        <!-- FACTS:P08 -->
         <p class="why">S21 到 S22 之间：删除成为生产动作，最后一个按钮出现。</p></div>
     </figure>
     <figure class="screen">
       <img src="shots/p09.png" alt="停止印刷之后，终局文案出现，所有动作禁用" loading="lazy" width="780" height="1688">
       <div class="cap"><div class="hd"><span class="sid">P09</span><h4>停止印刷之后</h4></div>
-        <ul class="facts"><li class="on">终局文案 可见</li><li class="off">全部动作禁用</li><li class="off">地图=静默</li></ul>
+        <!-- FACTS:P09 -->
         <p class="why">S22：<code>stopped=true</code>、产率 0、所有动作 disabled，导出与重置仍然可用。</p></div>
     </figure>
   </div>
@@ -279,32 +282,32 @@ footer b{color:var(--ink)}
   <div class="screens">
     <figure class="screen rev"><img src="shots/r01.png" alt="导演模式 A01 状态" loading="lazy" width="780" height="1688">
       <div class="cap"><div class="hd"><span class="sid">R01</span><h4>A01 · ACT I</h4></div>
-        <ul class="facts"><li>6 幕条</li><li>28 项 Aha 目录</li></ul></div></figure>
+        <!-- FACTS:R01 --></div></figure>
     <figure class="screen rev"><img src="shots/r02.png" alt="导演模式 A03 状态，ACT II" loading="lazy" width="780" height="1688">
       <div class="cap"><div class="hd"><span class="sid">R02</span><h4>A03 · ACT II</h4></div>
-        <ul class="facts"><li>刻模可用</li><li>压缩待命</li></ul></div></figure>
+        <!-- FACTS:R02 --></div></figure>
     <figure class="screen rev"><img src="shots/r03.png" alt="导演模式 A12 状态，ACT III" loading="lazy" width="780" height="1688">
       <div class="cap"><div class="hd"><span class="sid">R03</span><h4>A12 · ACT III</h4></div>
-        <ul class="facts"><li>地图=城市</li><li>4 个动作</li></ul></div></figure>
+        <!-- FACTS:R03 --></div></figure>
     <figure class="screen rev"><img src="shots/r04.png" alt="导演模式 A16 状态，ACT IV" loading="lazy" width="780" height="1688">
       <div class="cap"><div class="hd"><span class="sid">R04</span><h4>A16 · ACT IV</h4></div>
-        <ul class="facts"><li>地图=传播网络</li><li>库存仍在</li></ul></div></figure>
+        <!-- FACTS:R04 --></div></figure>
     <figure class="screen rev"><img src="shots/r05.png" alt="导演模式 A22 状态，ACT V" loading="lazy" width="780" height="1688">
       <div class="cap"><div class="hd"><span class="sid">R05</span><h4>A22 · ACT V</h4></div>
-        <ul class="facts"><li>地图=机器语言</li><li>压缩可用</li></ul></div></figure>
+        <!-- FACTS:R05 --></div></figure>
     <figure class="screen rev"><img src="shots/r06.png" alt="导演模式 A28 状态，终局" loading="lazy" width="780" height="1688">
       <div class="cap"><div class="hd"><span class="sid">R06</span><h4>A28 · 终局</h4></div>
-        <ul class="facts"><li>地图=静默</li><li>终局文案可见</li></ul></div></figure>
+        <!-- FACTS:R06 --></div></figure>
   </div>
 
   <h3>桌面构图</h3>
   <div class="screens">
     <figure class="screen rev"><img src="shots/d01.png" alt="1280 宽度下的 ACT IV 评审面" loading="lazy" width="1280" height="900">
       <div class="cap"><div class="hd"><span class="sid">D01</span><h4>ACT IV · 1280</h4></div>
-        <ul class="facts"><li>双栏 hero</li><li>系统面板</li><li>Aha 目录</li></ul></div></figure>
+        <!-- FACTS:D01 --></div></figure>
     <figure class="screen rev"><img src="shots/d02.png" alt="1280 宽度下的 ACT I 评审面" loading="lazy" width="1280" height="900">
       <div class="cap"><div class="hd"><span class="sid">D02</span><h4>ACT I · 1280</h4></div>
-        <ul class="facts"><li>三台机器卡</li><li>六幕条全亮</li></ul></div></figure>
+        <!-- FACTS:D02 --></div></figure>
   </div>
 </section>
 
@@ -312,129 +315,22 @@ footer b{color:var(--ink)}
 <section id="flows">
   <div class="sec-head"><span class="num">03</span><h2>六条流程</h2>
     <span class="note">热点取自 <code>#primary-actions</code> 的 data-command</span></div>
-  <p>每条流程的「成本」是<b>无头推演</b>出来的（每 500ms 一拍，与实际 <code>setInterval</code> 一致）：
-    一个只使用当前屏幕真实可用动作的玩家，走完这一幕要按几下、经过多少游戏内秒数。</p>
+  <p>「实测」一列来自<b>一次真实对局</b>（<code>tests/pacing.mjs</code>，每 500ms 一拍，与实际
+    <code>setInterval</code> 一致）：一个只按屏幕上写着的东西走的玩家，走完这一幕要几下、经过多少秒。
+    这一局是<b>主动玩</b>——他会按每一幕的推钟动词、会捡等待里冒出来的微事件；被动玩（什么都不额外按）
+    的读数单独写在节奏契约里，那是「至少两小时」这条地板的依据。</p>
+  <p>下面的步骤表<b>是生成的，不是手写的</b>：<code>node scripts/flows/flows.mjs</code> 从引擎的
+    <code>COMMAND_COSTS</code> / <code>ACT_VERBS</code> / <code>EVENTS</code> / <code>ACT_GATES</code>
+    现算，动作名取采集到的真实按钮文字。<code>tests/flows-sync.test.mjs</code> 断言入库的那份与当场
+    重算的逐字节一致——所以「表里写着」等于「引擎现在就是这样」。手写过一次，重排之后表里留了两个
+    不再是事实的句子，页面照旧印着；现在那件事会直接让快闸变红。</p>
 
-  <!-- F01 -->
-  <article class="flow">
-    <div class="flow-head"><span class="fid">F01</span><h3>ACT I · 手工与自动化</h3>
-      <span class="stat"><span class="chip">屏幕 <b>P01→P03</b></span><span class="chip">2 个 Aha</span><span class="chip">出口 <b>发行《明日》</b></span></span></div>
-    <div class="strip">
-      <figure><img src="shots/p01.png" alt="首屏" loading="lazy" width="780" height="1688"><figcaption><b>P01</b>全新存档</figcaption></figure>
-      <figure><img src="shots/p02.png" alt="首次出售" loading="lazy" width="780" height="1688"><figcaption><b>P02</b>首次出售</figcaption></figure>
-      <figure><img src="shots/p03.png" alt="自动化" loading="lazy" width="780" height="1688"><figcaption><b>P03</b>自动化</figcaption></figure>
-      <figure><img src="shots/p04.png" alt="ACT II" loading="lazy" width="780" height="1688"><figcaption><b>P04</b>ACT II 开启</figcaption></figure>
-    </div>
-    <div class="tw"><table>
-      <thead><tr><th>步</th><th>热点</th><th>状态变化</th><th>门条件</th></tr></thead>
-      <tbody>
-        <tr><td class="n">1</td><td class="cmd">印字 · print</td><td class="n">glyphs +1（复写纸后 +4）</td><td class="gate">无</td></tr>
-        <tr><td class="n">2</td><td class="cmd">出售全部库存 · sell</td><td class="n">credits += ⌊glyphs⌋ × 0.5</td><td class="gate">首次出现于 <code>lifetimeGlyphs≥1</code></td></tr>
-        <tr><td class="n">3</td><td class="cmd">购买 · buy</td><td class="n">rate +0.5 / +2 / +12 每秒</td><td class="gate">解锁 <code>lifetime≥10 / 100 / 800</code>；成本 <code>5·1.34ⁿ / 24·1.38ⁿ / 110·1.42ⁿ</code></td></tr>
-        <tr><td class="n">4</td><td class="cmd">研发复写纸 · boost</td><td class="n">manualBoost = true</td><td class="gate"><code>lifetime≥150</code> 且 45 资金</td></tr>
-        <tr><td class="n">5</td><td class="cmd">研发自动出售 · research-auto</td><td class="n">autoSellUnlocked = true</td><td class="gate"><code>lifetime≥300</code> 且 60 资金</td></tr>
-        <tr><td class="n">6</td><td class="cmd">交付街角委托 · contract</td><td class="n">扣字，得 20 / 85 / 350 资金</td><td class="gate">三张委托依次 20 / 100 / 500 字</td></tr>
-        <tr><td class="n">7</td><td class="cmd">发行《明日》 · publish</td><td class="n">act=2，readers=20，demand=1</td><td class="gate"><code>lifetime≥5000</code> 且 <code>presses≥1</code> 且 <code>glyphs≥200</code> 且 <code>credits≥300</code></td></tr>
-      </tbody>
-    </table></div>
-  </article>
-
-  <!-- F02 -->
-  <article class="flow">
-    <div class="flow-head"><span class="fid">F02</span><h3>ACT II · 字开始生长</h3>
-      <span class="stat"><span class="chip">屏幕 <b>P03→P04</b></span><span class="chip">A03–A11</span><span class="chip">9 个 Aha</span><span class="chip">实测 <b>154 次点击 / 327 秒</b></span></span></div>
-    <div class="strip">
-      <figure><img src="shots/p04.png" alt="ACT II 起点" loading="lazy" width="780" height="1688"><figcaption><b>P04</b>ACT II 起点</figcaption></figure>
-      <figure><img src="shots/p05.png" alt="ACT III 城市" loading="lazy" width="780" height="1688"><figcaption><b>P05</b>城市地图展开</figcaption></figure>
-    </div>
-    <div class="tw"><table>
-      <thead><tr><th>步</th><th>热点</th><th>状态变化</th><th>门条件</th></tr></thead>
-      <tbody>
-        <tr><td class="n">1</td><td class="cmd">刻模：木+木→林 · compose-rule</td><td class="n">glyphs −2，composed +1</td><td class="gate"><code>act≥2</code> 且 <code>glyphs≥2</code>。置 <code>ruleActive</code> 后本应自动运行（见 M1）</td></tr>
-        <tr><td class="n">2</td><td class="cmd">压缩 20 字 → 12 意义 · condense</td><td class="n">glyphs −20，meaning +12，noise +1</td><td class="gate"><code>glyphs≥20</code>；每按必增噪音</td></tr>
-        <tr><td class="n">3</td><td class="cmd">打开一封读者来信 · read-letter</td><td class="n">letters +1，meaning +10</td><td class="gate"><code>readers≥250</code>，<b>无上限无冷却</b>（见 M7）</td></tr>
-        <tr><td class="n">4</td><td class="cmd">允许读者造一个新词 · organic-word</td><td class="n">organicWords +1，demand +1.5</td><td class="gate"><code>letters≥1</code>，无上限</td></tr>
-        <tr><td class="n">5</td><td class="cmd">让这个词传播 · viral-word</td><td class="n">readers +750，demand +3</td><td class="gate"><code>organicWords≥1</code>，<b>无上限无冷却</b>（见 M7）</td></tr>
-        <tr><td class="n">6</td><td class="cmd">删除噪音 · delete-noise</td><td class="n">noise −5，deletedNoise +5，meaning +0.25</td><td class="gate"><code>noise≥1</code></td></tr>
-        <tr><td class="n">7</td><td class="cmd">展开城市地图 · map-city</td><td class="n">act=3，districts=2，worldScale=1</td><td class="gate"><code>act===2</code> 且 <code>paperCrisis</code> 且 <code>meaning≥50</code> 且 <code>deletedNoise≥1</code></td></tr>
-      </tbody>
-    </table></div>
-  </article>
-
-  <!-- F03 -->
-  <article class="flow">
-    <div class="flow-head"><span class="fid">F03</span><h3>ACT III · 文字改变城市</h3>
-      <span class="stat"><span class="chip">屏幕 <b>P05</b></span><span class="chip">A12–A15</span><span class="chip">实测 <b>6 次点击 / 7 秒</b></span></span></div>
-    <div class="strip">
-      <figure><img src="shots/p05.png" alt="城市" loading="lazy" width="780" height="1688"><figcaption><b>P05</b>城市</figcaption></figure>
-      <figure><img src="shots/p06.png" alt="传播网络" loading="lazy" width="780" height="1688"><figcaption><b>P06</b>传播网络</figcaption></figure>
-    </div>
-    <div class="tw"><table>
-      <thead><tr><th>步</th><th>热点</th><th>状态变化</th><th>门条件</th></tr></thead>
-      <tbody>
-        <tr><td class="n">1</td><td class="cmd">观察一个新方言 · discover-dialect</td><td class="n">districts +1，meaning +25</td><td class="gate"><code>act≥3</code>，<b>无上限无成本</b>（见 M7）</td></tr>
-        <tr><td class="n">2</td><td class="cmd">创造一个概念 · make-concept</td><td class="n">meaning −25，concepts +1，societyEffects +1</td><td class="gate"><code>meaning≥25</code></td></tr>
-        <tr><td class="n">3</td><td class="cmd">把地图缩到世界 · map-world</td><td class="n">worldScale = 2</td><td class="gate"><code>act===3</code> 且 <code>concepts≥2</code> 且 <code>districts≥3</code></td></tr>
-        <tr><td class="n">4</td><td class="cmd">上线记者 Agent · launch-agents</td><td class="n">act=4，agents=1，生产接管</td><td class="gate"><code>act===3</code> 且 <code>worldScale≥2</code></td></tr>
-      </tbody>
-    </table></div>
-  </article>
-
-  <!-- F04 -->
-  <article class="flow">
-    <div class="flow-head"><span class="fid">F04</span><h3>ACT IV · 机器开始写</h3>
-      <span class="stat"><span class="chip">屏幕 <b>P06</b></span><span class="chip">A16–A21</span><span class="chip">实测 <b>5 次点击 / 4.5 秒</b></span></span></div>
-    <div class="strip">
-      <figure><img src="shots/p06.png" alt="ACT IV" loading="lazy" width="780" height="1688"><figcaption><b>P06</b>ACT IV</figcaption></figure>
-      <figure><img src="shots/p07.png" alt="ACT V" loading="lazy" width="780" height="1688"><figcaption><b>P07</b>ACT V</figcaption></figure>
-    </div>
-    <div class="tw"><table>
-      <thead><tr><th>步</th><th>热点</th><th>状态变化</th><th>门条件</th></tr></thead>
-      <tbody>
-        <tr><td class="n">1</td><td class="cmd">给编辑 Agent 否决权 · editor-autonomy</td><td class="n">editorAutonomy = true，meaning +100</td><td class="gate"><code>act≥4</code> 且 <code>agents≥1</code>，可重复（见 M7）</td></tr>
-        <tr><td class="n">2</td><td class="cmd">允许 Agent 创建 Agent · spawn-agents</td><td class="n">agentFactories +1，agents +4</td><td class="gate"><code>editorAutonomy</code>，可重复</td></tr>
-        <tr><td class="n">3</td><td class="cmd">切换数字出版 · digitize</td><td class="n">digital = true，overnightArticles +100</td><td class="gate"><code>agentFactories≥1</code>；同时关掉库存指标与自动出售</td></tr>
-        <tr><td class="n">4</td><td class="cmd">用档案训练机器 · train-memory</td><td class="n">archives +1，meaning +500</td><td class="gate"><code>digital</code>，可重复</td></tr>
-        <tr><td class="n">5</td><td class="cmd">检查未知字形 ◫ · discover-machine-glyph</td><td class="n">act=5，machineGlyphs=1，machineGlyphUse=1000</td><td class="gate"><code>act===4</code> 且 <code>archives≥1</code> 且 <code>agentFactories≥1</code></td></tr>
-      </tbody>
-    </table></div>
-  </article>
-
-  <!-- F05 -->
-  <article class="flow">
-    <div class="flow-head"><span class="fid">F05</span><h3>ACT V · 机器语言</h3>
-      <span class="stat"><span class="chip">屏幕 <b>P07</b></span><span class="chip">A22–A24</span><span class="chip">实测 <b>2 次点击 / 3 秒</b></span></span></div>
-    <div class="strip">
-      <figure><img src="shots/p07.png" alt="机器语言" loading="lazy" width="780" height="1688"><figcaption><b>P07</b>机器语言</figcaption></figure>
-      <figure><img src="shots/p08.png" alt="基础设施" loading="lazy" width="780" height="1688"><figcaption><b>P08</b>基础设施</figcaption></figure>
-    </div>
-    <div class="tw"><table>
-      <thead><tr><th>步</th><th>热点</th><th>状态变化</th><th>门条件</th></tr></thead>
-      <tbody>
-        <tr><td class="n">1</td><td class="cmd">语义压缩 · compress-language</td><td class="n">meaning −100，compressedMeaning +10000</td><td class="gate"><code>act≥5</code> 且 <code>meaning≥100</code></td></tr>
-        <tr><td class="n">2</td><td class="cmd">让语言接管基础设施 · infrastructure</td><td class="n">act=6，ambiguity=100，noise +1500</td><td class="gate"><code>act===5</code> 且 <code>compressedMeaning≥10000</code></td></tr>
-      </tbody>
-    </table></div>
-  </article>
-
-  <!-- F06 -->
-  <article class="flow">
-    <div class="flow-head"><span class="fid">F06</span><h3>ACT VI · 从增长到沉默</h3>
-      <span class="stat"><span class="chip">屏幕 <b>P08→P09</b></span><span class="chip">A25–A28</span><span class="chip">实测 <b>5 次点击 / 6.5 秒</b></span><span class="chip">终局 <b>stopped</b></span></span></div>
-    <div class="strip">
-      <figure><img src="shots/p08.png" alt="终局条件成立" loading="lazy" width="780" height="1688"><figcaption><b>P08</b>条件成立</figcaption></figure>
-      <figure><img src="shots/p09.png" alt="停止印刷之后" loading="lazy" width="780" height="1688"><figcaption><b>P09</b>静默</figcaption></figure>
-    </div>
-    <div class="tw"><table>
-      <thead><tr><th>步</th><th>热点</th><th>状态变化</th><th>门条件</th></tr></thead>
-      <tbody>
-        <tr><td class="n">1</td><td class="cmd">删除噪音 · delete-noise<span class="muted"> {amount:500}</span></td><td class="n">noise −500，deletedNoise +500</td><td class="gate"><code>act≥6</code> 时一次删 500，否则 5</td></tr>
-        <tr><td class="n">2</td><td class="cmd">消解 25 歧义 · resolve-ambiguity</td><td class="n">ambiguity −25，deletedNoise +250</td><td class="gate"><code>ambiguity&gt;0</code>，可重复（见 M7）</td></tr>
-        <tr><td class="n">3</td><td class="cmd">停止印刷 · stop-printing</td><td class="n">stopped = true，autoSell = false</td><td class="gate"><code>act===6</code> 且 <code>deletedNoise≥1000</code> 且 <code>compressedMeaning≥10000</code></td></tr>
-        <tr><td class="n">4</td><td class="cmd">（终局后）</td><td class="n">引擎层：<code>stopped</code> 时除 reset 外一切命令原样返回</td><td class="gate">导出存档与重新开始仍在页脚可用</td></tr>
-      </tbody>
-    </table></div>
-  </article>
+  <!-- FLOW:F01 -->
+  <!-- FLOW:F02 -->
+  <!-- FLOW:F03 -->
+  <!-- FLOW:F04 -->
+  <!-- FLOW:F05 -->
+  <!-- FLOW:F06 -->
 </section>
 
 <!-- 4 -->
@@ -449,7 +345,7 @@ footer b{color:var(--ink)}
     <tbody>
       <tr><td class="cmd">S01</td><td class="gate">Fresh：只有「库存文字 + 印字」</td><td class="n">P01</td><td class="gate">1 项指标、1 个动作，实测通过</td></tr>
       <tr><td class="cmd">S02</td><td class="gate">First sale：首次真实可用，归零后保留</td><td class="n">P02</td><td class="gate">出售按钮在库存 0 时仍在（disabled）</td></tr>
-      <tr><td class="cmd">S03</td><td class="gate">Automation：机器成为永久工作台的一部分</td><td class="n">P03</td><td class="gate">三台机器卡按发现依次出现；<b>但 ACT II 起整块消失</b>（M5）</td></tr>
+      <tr><td class="cmd">S03</td><td class="gate">Automation：机器成为永久工作台的一部分</td><td class="n">P03</td><td class="gate">三台机器卡按发现依次出现，<b>并且整局都在</b>：原来 ACT II 起整块消失（M5），已在 2026-09-21 修掉，本页 P04–P09 每一屏都能看到机器卡</td></tr>
       <tr><td class="cmd">S10</td><td class="gate">Before city：world 面不存在，hero 单栏</td><td class="n">P04</td><td class="gate"><code>#world-card.hidden</code> 为 true，hero 单栏</td></tr>
       <tr><td class="cmd">S11</td><td class="gate">City discovered：world 出现，展开双栏</td><td class="n">P05</td><td class="gate">进入 ACT III 当帧出现</td></tr>
       <tr><td class="cmd">S12</td><td class="gate">Network：地图进一步扩大</td><td class="n">P06</td><td class="gate">标尺文字 城市 → 传播网络 → 机器语言 → 世界</td></tr>
@@ -481,10 +377,10 @@ footer b{color:var(--ink)}
     <div class="pass">
       <span class="lbl">本轮怎么取的证</span>
       <ul>
-        <li><code>node --test tests/*.test.mjs</code> → <b>82 通过 / 0 失败</b>（含源码与产物引擎逐动作等价、字节级可复现构建）。</li>
+        <li><code>npm run intent-audit</code> → <b>七步全过</b>；项数以 <code>test-results/intent-audit/report.json</code> 为准（写死在这里的数会漂，这一节已经漂过一次）。</li>
         <li>无头状态机推演：<code>glyph-engine-v3.js</code> 原样加载，每 500ms 一拍，只按当前屏幕真实存在的动作推进，一直走到 <code>stopped=true</code>。</li>
         <li>真实浏览器：playwright chromium，390×844 与 1280×900，<code>public/</code> 直接以静态站点提供（<code>127.0.0.1:4399</code>），玩家面走真实的隐私剥离脚本；每一屏的 DOM 读数落成 <code>screens.json</code>，本文的 SVG 全部由它绘制。</li>
-        <li>玩家面隐私套件 <code>run-browser-contracts.py player</code>：<b>22/22 PASS</b>，零失败零跳过零预期失败。</li>
+        <li>玩家面隐私套件 <code>run-browser-contracts.py player</code>：<b>PASS</b>，零失败零跳过零预期失败（项数见 <code>test-results/intent-audit/player-*.json</code>）。</li>
         <li>评审面驱动 <code>driver.py review</code>：28 个导演态、终局静默态、跨刷新持久化全部 PASS。</li>
         <li>结论口径：<b>契约层一致</b>，问题全部出在节奏、可见性与动词生命周期上——它们不在任何现有断言里。</li>
       </ul>
@@ -492,6 +388,26 @@ footer b{color:var(--ink)}
   </div>
 
   <h3>不一致清单</h3>
+  <p class="muted" style="margin:0 0 14px">以下是 <b>2026-09-20</b> 那次审计的发现，<b>原文保留</b>——
+    它们是这一轮所有改动的由来。截至 2026-09-22，11 条全部已修；每条的守门断言在下面这张表里，
+    改回去就会红。读这一节时请把它当成「当时发现了什么」，而不是「现在哪里有问题」。</p>
+  <div class="tw"><table>
+    <thead><tr><th>发现</th><th>现状</th><th>守在哪</th></tr></thead>
+    <tbody>
+      <tr><td class="n">M1</td><td>已修：<code>ruleCredit</code> 跨拍累加，实时运行与一次性结算等价</td><td><code>tests/game-v3.test.mjs</code>「an active rule composes on the live 500ms tick」</td></tr>
+      <tr><td class="n">M2</td><td>已修：节奏按相邻两条 Aha 重排，每幕一个可重复动词</td><td>节奏断言（每幕 ≥5 次决策）+ <code>tests/rhythm-structure.test.mjs</code></td></tr>
+      <tr><td class="n">M3</td><td>已修：<code>currentAha()</code> 改读 <code>ahaSeen</code> 的末位，不再被低序号盖住</td><td>28 条世界线的浏览器扫描 + <code>tests/game-v3.test.mjs</code> 的可感知性断言</td></tr>
+      <tr><td class="n">M4</td><td>已修：资金在每一幕都有来源（出售、委托、数字出版后的读者收入）</td><td><code>tests/browser/test_player.py</code> 每幕的出售与委托</td></tr>
+      <tr><td class="n">M5</td><td>已修：机器面板在每一幕都渲染，旧动词不消失只降级</td><td>同上的机器卡用例</td></tr>
+      <tr><td class="n">M6</td><td>已修：自动出售开关在每一幕都渲染</td><td><code>tests/progressive-disclosure.test.mjs</code>「<code>toggle-auto</code> 恰好出现一次」</td></tr>
+      <tr><td class="n">M7</td><td>已修：六个动作各自有上限或成本；<code>viral-word</code> 在 2026-09-22 收成一次性</td><td><code>tests/game-v3.test.mjs</code>「a viral word is one-shot」</td></tr>
+      <tr><td class="n">M8</td><td>已修；<b>2026-09-22 又发现同类的两处</b>（概念代价写着 25 而引擎扣 50、刻模的产率漏了封顶与传播倍率），一并改成从引擎读</td><td><code>tests/game-v3.test.mjs</code>「renderer numbers … are read from it, not restated」</td></tr>
+      <tr><td class="n">M9</td><td>已修：参考对局进了 <code>tests/game-v3.test.mjs</code>，从死状态走到结局</td><td>同上那条节奏断言</td></tr>
+      <tr><td class="n">M10</td><td>已修：幕切换统一读 <code>ACT_GATES</code> + <code>gateMet()</code></td><td><code>tests/game-v3.test.mjs</code>「director snapshots … land in the correct act」</td></tr>
+      <tr><td class="n">M11</td><td>已修：发行按钮改成置灰并写明缺什么，不再「不渲染也没提示」</td><td><code>tests/progressive-disclosure.test.mjs</code>「affordability never hides a discovered action」</td></tr>
+    </tbody>
+  </table></div>
+
   <div class="ledger">
 
     <div class="row bad">
@@ -609,49 +525,36 @@ footer b{color:var(--ink)}
       <p class="ev">把「合法动作走到 A28」「每幕点击数上限」「每个 Aha 至少一次成为当前揭示」写成断言，M1/M2/M3/M11 就都有了守卫。</p></div>
   </div>
 
-  <h3>与并行分支的对账</h3>
-  <p class="muted">本文全部结论针对 <code>7ebd57b</code>（<code>main</code>）。仓库里另有一条在飞的分支
-    <code>fix/aha-legibility</code>（<code>9dfafe3</code>，独立 worktree），其中一部分条目已经处理。
-    下面是直接读该分支源码得到的对照，不是转述：</p>
-  <div class="ledger">
-    <div class="row ok"><div class="top"><span class="mid lo">已处理</span><h4>M1 · 实时自动组合</h4></div>
-      <p class="ev">该分支的 <code>advance()</code> 改用跨拍累加器 <code>ruleCredit</code>：
-        <code>pairs = min(⌊glyphs/2⌋, ⌊(ruleCredit+elapsed)/4⌋)</code>，并把 <code>RULE_PERIOD</code>／<code>RULE_READERS</code> 导出给渲染层。
-        多次 500ms tick 与一次等长跳跃等价，实时游玩终于会真的产出组合字。</p></div>
-    <div class="row ok"><div class="top"><span class="mid lo">已处理</span><h4>M6 的一半 · 自动出售开关在所有幕可达</h4></div>
-      <p class="ev">该分支把 <code>toggle-auto</code> 从 <code>act===1</code> 分支提到通用位置（<code>buttons.splice(1,0,…)</code>），
-        带着自动出售进入 ACT II 后不再被锁死；底层机制未变，仍需玩家自己关掉。</p></div>
-    <div class="row warn"><div class="top"><span class="mid mid2">仍存在</span><h4>在该分支上同样成立</h4></div>
-      <p class="ev"><code>currentAha()</code> 仍是「目录序最大」（M3）；<code>renderMachines()</code> 仍是 <code>if (s.act===1)</code>（M5）；
-        <code>map-city</code> 仍一次给 2 个街区、<code>digitize</code> 仍送 100 篇、<code>discover-machine-glyph</code> 仍预置
-        <code>machineGlyphUse:1000</code>、<code>infrastructure</code> 仍预置 <code>ambiguity:100</code>（M2 的同帧解锁）；
-        六个可无限重复的动作原样保留（M7）；<code>add()</code> 仍是「揭示即启用」（M11）。</p></div>
-  </div>
-</section>
+  <h3>与并行分支的对账（历史）</h3>
+  <p class="muted">审计当时仓库里另有一条在飞的分支 <code>fix/aha-legibility</code>，两条分支各修了一部分，
+    所以本文逐条读过那条分支的源码、标出「已处理／仍存在」。<b>那段对账已经过期了</b>：两条分支都已并入
+    <code>main</code>，当年标成「仍存在」的条目（<code>currentAha()</code> 取目录序最大、机器面板只在第一幕渲染、
+    <code>map-city</code> 一次给 2 个街区……）现在一条都不成立——M1–M11 的状态见上面那张表。
+    保留这一节只是为了让「为什么会有这些改动」有出处；<b>不要拿它当现状读</b>。</p>
+  <p class="muted">同一条纪律适用于本文其余章节：读数（屏幕、流程表、实测秒数）由
+    <code>scripts/flows/</code> 那条链路生成，<code>tests/flows-sync.test.mjs</code> 守着它与引擎同步；
+    叙述文字是当时写的，判断留在原处，事实以生成的那部分为准。</p>
+  </section>
 
 <!-- 6 -->
 <section id="repro">
   <div class="sec-head"><span class="num">06</span><h2>复现</h2>
-    <span class="note">候选 <code>7ebd57b</code> · 工作树干净</span></div>
-  <pre>node --test tests/*.test.mjs                                     # 82 pass / 0 fail
-node engine-probe.mjs                                            # M1、M4、M6 的状态机证据
-node flow-probe.mjs                                              # M2 每幕点击与秒数
-node focus-card-probe.mjs                                        # M3 拍级揭示面板可见性
-node contract-crosscheck.mjs                                     # 28/28 契约与引擎阈值临界比对
-node act1-timing.mjs                                             # M11 四十万拍推演
-python3 -m http.server 4399 --bind 127.0.0.1 --directory public   # 静态提供 public/
-GLYPH_BROWSER=chromium python3 scripts/run-browser-contracts.py player   # 22/22 PASS
-python3 .claude/skills/run-glyph-factory/driver.py review --base http://127.0.0.1:4399
-python3 test-results/audit-shots/screens.py                      # 逐屏读 DOM -> screens.json
-python3 test-results/audit-shots/rebuild_svg.py                  # screens.json -> 本文的 17 张矢量屏</pre>
-  <p class="muted" style="margin-top:14px">屏幕状态由 <code>E.fresh()</code> 叠加真实字段后经 <code>localStorage</code> 注入，
-    再用初始化脚本规避控制器的 <code>pagehide</code> 存档覆盖——与仓库自身「种子存档用于状态边界覆盖」的做法一致。
-    导演态（R/D 编号）不属于自然游玩证据，本文只在需要看六幕全貌时使用。
-    重绘脚本遇到没读到的状态会直接报错退出，所以「图上有」等于「那一屏真的有」。</p>
-  <footer>
-    <b>字工厂流程图谱</b> · 依据 Mobbin 的 Flows / Screens 结构整理 ·
-    屏幕 17 · 流程 6 · 热点步骤 29 · 核实结论：契约层 28/28 一致，节奏与可见性 10 处不一致（高 4 / 中 4 / 低 2）
-  </footer>
+    <span class="note">三份读数，三条命令；成品页面本身不进任何构建</span></div>
+  <pre>node scripts/build-static.mjs &amp;&amp; node scripts/build-aha-review.mjs   # 两份产物：玩家面 dist/ + 评审面 review-dist/
+node scripts/flows/snapshots.mjs &gt; scripts/flows/snapshots.json      # 要拍哪 15 个状态（玩家面来自一次真实对局）
+python3 scripts/flows/capture.py                                     # 逐屏读真实 DOM -&gt; scripts/flows/screens.json
+node scripts/flows/flows.mjs &gt; scripts/flows/flows.json              # 六条流程的步骤表，从引擎现算
+python3 scripts/flows/build.py                                       # screens.json + flows.json -&gt; 本页 23 张矢量屏</pre>
+  <p class="muted" style="margin-top:14px">玩家面的九个状态由<b>那一次参考对局</b>在对应时刻的真实存档注入
+    （<code>add_init_script</code>，规避控制器 <code>pagehide</code> 存档覆盖，并把 <code>updatedAt</code>
+    顶到当下，否则离线结算会把状态改掉）；导演态（R/D 编号）是 <code>directorState()</code> 的快照，
+    只在需要看六幕全貌时使用，不算自然游玩证据。</p>
+  <p class="muted">重绘脚本遇到没读到的状态会直接报错退出，所以「图上有」等于「那一屏真的有」。
+    栅格列数按首行子元素的 <code>offsetTop</code> 数，不读 <code>grid-template-columns</code>——
+    元素隐藏时它只回报声明值还会留空轨道。生成器只输出 <code>var(--…)</code>，裸色值一个都不留。</p>
+  <p class="muted">整条链路的验收跑 <code>npm run intent-audit</code>：七步全过才算出货，
+    其中 <code>tests/flows-sync.test.mjs</code> 守着「流程表与引擎同步」，
+    <code>tests/intent-audit.test.mjs</code> 守着「生成页与生成器同步」。</p>
 </section>
 
 </main>

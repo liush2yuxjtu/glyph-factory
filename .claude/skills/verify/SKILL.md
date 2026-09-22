@@ -1,6 +1,6 @@
 ---
 name: verify
-description: Verify Glyph Factory changes against the exact candidate SHA — launch the dev server, drive the real browser surfaces with the committed driver, run the 28-case Aha invariant/transition suite on chromium and webkit, check the action disclosure contract (affordability disables, never hides; a surface that does not exist yet renders nothing at all), the cost-gate contract (one engine table decides what an action costs, and a button must never be lit while the engine refuses it), the rhythm contract (the seconds, decision-click and raw-click gaps between consecutive Aha moments: firing order, no same-click pairs, passive play time ≥ 2 hours, the three shape bounds — time CV, longest ÷ shortest, and no gap under 60s — the per-act shape itself, the four source-patching negative controls behind the act verbs / micro-events / fuel feed, and — per section, never as one figure — the mean/std of the decision and click gaps, with Act I read separately as the tutorial), the progression contract (an active rule must run, and its gating resource must be on screen) and the Aha legibility contract (every one of A01–A28 must announce itself in the player's log), and capture visual and interaction evidence. Use for general verification, proving an Aha change is safe, checking the 28/28 claim, verifying an action reveal/enable change, verifying an action cost, act-gate or threshold change, verifying an advance() cadence / Act II progression change, verifying game pacing / rhythm (two-hour play-time rebuild: tests/pacing-baseline.json), verifying that an Aha is perceivable on the player surface, and verifying user intent itself — the intent document is an argument ({{INTENT}}, default intent.md), never hard-coded here.
+description: Verify Glyph Factory changes against the exact candidate SHA — launch the dev server, drive the real browser surfaces with the committed driver, run the 28-case Aha invariant/transition suite on chromium and webkit, check the action disclosure contract (affordability disables, never hides; a surface that does not exist yet renders nothing at all), the cost-gate contract (one engine table decides what an action costs, and a button must never be lit while the engine refuses it), the rhythm contract (the seconds, decision-click and raw-click gaps between consecutive Aha moments: firing order, no same-click pairs, passive play time ≥ 2 hours, the three shape bounds — time CV, longest ÷ shortest, and no gap under 60s — the per-act shape itself, the four source-patching negative controls behind the act verbs / micro-events / fuel feed, and — per section, never as one figure — the mean/std of the decision and click gaps, with Act I read separately as the tutorial), the flows-page contract (a redraw of real DOM readings must not draw what the reading does not have: an element covering a value, a canvas outgrowing its frame, or a token that was never declared), the progression contract (an active rule must run, and its gating resource must be on screen) and the Aha legibility contract (every one of A01–A28 must announce itself in the player's log), and capture visual and interaction evidence. Use for general verification, proving an Aha change is safe, checking the 28/28 claim, verifying an action reveal/enable change, verifying an action cost, act-gate or threshold change, verifying an advance() cadence / Act II progression change, verifying game pacing / rhythm (two-hour play-time rebuild: tests/pacing-baseline.json), visually auditing the design-system flows/screens page, verifying that an Aha is perceivable on the player surface, and verifying user intent itself — the intent document is an argument ({{INTENT}}, default intent.md), never hard-coded here.
 ---
 
 # Verify Glyph Factory
@@ -14,6 +14,16 @@ general "drive the real surface" contract, and the one deep question it also ans
 **does each of A01–A28 actually hold, against this exact SHA?**
 
 All paths are relative to the repo root.
+
+## Which mode am I in
+
+| 调用 | 做什么 |
+|---|---|
+| `/verify`，或 `/verify <需求文档>` | **验产品**：跑门禁、驱动真实 surface、按下面的契约逐条取证。参数是需求文档（默认 `intent.md`） |
+| `/verify update` | **维护这份技能本身**：它的每句话都是一个关于当前代码的断言，去逐条对真源。见文末「Maintain this verifier」 |
+
+分不清的时候只看**唯一一个**触发维护的字面：`update`。没有参数、或者参数是任何一条路径，都是验产品
+（没有参数时取 `intent.md`）。
 
 ## Candidate
 
@@ -126,10 +136,12 @@ they diverge by two orders of magnitude: the tutorial's policy is "every 500 ms 
 can, otherwise sell, otherwise print", so its click count is ≈ **2 × its seconds** — a 250-second
 tutorial costs ~500 clicks no matter how the act is designed. Consequences:
 
-- **Report the click mean/std per section, not as one number.** All 27 gaps currently read
-  mean 40.48 / std 131.60; the 25 gaps after Act I read **mean 3.28 / std 2.68**. The first pair
-  is a statement about the tutorial's length, the second is a statement about the game's rhythm.
-  Quoting only the first pair says the rhythm got worse when it got better.
+- **Report the click mean/std per section, not as one number.** Read both off the current run
+  rather than from here — the two pairs sit side by side in 原始读数 below, and the gap between
+  them is the point: the all-27 pair is a statement about the tutorial's length, the 25-gap pair
+  is a statement about the game's rhythm. Quoting only the first pair says the rhythm got worse
+  when it got better. Expect the all-27 pair to move every time the tutorial gets longer; the
+  other pair is the one the band above actually bounds.
 - **Never "fix" the all-sections click std by making the reference player idle during Act I.**
   That lowers the number by changing the measuring instrument, not the game: a player with a
   working print button and nothing else to do *will* press it. The first version of this harness
@@ -186,7 +198,7 @@ moments holds"), so a threshold change that wrecks the rhythm fails the fast gat
 | Each of the four 2026-09-21 mechanisms carries its own negative control | `tests/rhythm-structure.test.mjs` patches the engine source and re-runs: flatten ⇒ shape fails while the band passes; remove the compounding multiplier ⇒ the active path returns to the passive length; freeze the event scheduler ⇒ the wait has nothing clickable again; cut the fuel feed ⇒ act V stops tracking the old layer's output. It is not "behaviour changes if I change the code" — it is "the number moves in the direction the design claims". |
 
 **Reference numbers, current (`feat/aha-rhythm`, 2026-09-21 节奏结构版):** 27 gaps, passive path
-**全程 121.7 分钟 / 7302s**, time mean 270.0s / std 108.9s / **CV 0.403**, range 90–490s,
+**全程 121.7 分钟 / 7300s**, time mean 270.0s / std 108.9s / **CV 0.403**, range 90–490s,
 longest ÷ shortest 5.43; decisions mean 5.89 / std 6.58 overall and **4.60 / 3.59 over acts II–VI**;
 clicks mean 41.78 / std 152.91 overall and **4.68 / 3.60 over acts II–VI**; 0 inversions;
 0 same-click pairs; **1 silent beat** (288s). Active path (push + micro events):
@@ -196,6 +208,8 @@ The click vector, all 27 gaps in A01…A28 order:
 `217 794 4 7 0 3 7 7 1 1 3 5 5 10 6 16 1 1 1 8 4 3 9 2 2 7 4`.
 The decision vector for the same run:
 `10 34 3 7 0 3 6 7 1 1 3 5 5 10 6 16 1 1 1 8 4 3 9 2 2 7 4`.
+**The click vector sums to less than the run's `总点击`** (1128 vs 1149 here): clicks before A01
+and after A28 belong to no gap. Neither number is wrong — they count different spans.
 
 Two earlier revisions, for reading a diff against an old baseline. **Before the 2026-09-21 shape
 change**: 全程 122.9 分钟, time mean 272.8s / std 18.7s / **CV 0.069**, range 227–321s; decisions
@@ -670,7 +684,7 @@ Two boundaries this must not cross, both pinned by existing tests:
   Act II" switch. A fresh save must still render exactly one metric: `test_fresh_game_is_small_and_survives_timer_renders`
   now lists `readers` beside `credits`/`meaning`/`noise` in its hidden-on-fresh loop.
 
-The engine exports `RULE_PERIOD` (4) and `RULE_READERS` (0.015) so the renderer reports the
+The engine exports `ruleReadersPerSecond(g)` so the renderer reports the
 real coefficient instead of a second copy; if you change the cadence, change it there.
 
 ### The cost-gate contract: one table decides what an action costs
@@ -821,6 +835,56 @@ outgoing page's `pagehide` save — stage the fixture in `sessionStorage` and le
 script apply it on the next document; and the log renders a leading `›` / `·` marker, so
 compare against `line.lstrip("›·").strip()`, not the raw line.
 
+### The flows page contract: a redraw must not draw what the reading doesn't have
+
+`public/design-system/flows.html` is not a screenshot gallery — it is a **vector redraw of real DOM
+readings** (`scripts/flows/`), and the whole reason it exists is that a designer can trust it as the
+current flow truth. So the question is never "does it render" but **"does what it draws match what
+was read"**. Three failure classes, in the order they actually bite:
+
+| Class | How it fails silently | How to check |
+|---|---|---|
+| **A drawing that contradicts its own reading** | The redraw lays a block out differently from the real UI, so a value the reading *has* ends up covered by an element the reading *also* has. The page still renders. | Overlap probe: any two `<text>` boxes overlapping by more than a few px — then **zoom in and look** before believing the number. |
+| **A canvas that outgrows its frame** | A wide screen (620-unit canvas) inside a rail sized for the 300-unit narrow ones: the SVG overflows its `figure` and paints over the next one. | Compare each `figure` box against its `svg` box; the SVG must sit inside. |
+| **A token that was never declared** | `var(--typo)` resolves to nothing and the whole declaration is dropped — no error, and the only cue is a missing shadow or colour. | Diff every `var(--…)` the page uses against the names declared in `tokens.css`. |
+
+Run all three at 1180 / 760 / 390 px. **A clean probe run is not a PASS**: the probes measure
+geometry, not fidelity, and the machine-card defect above passed every count check and was visible
+only by eye.
+
+**The caption is part of the drawing.** A screen's `<h4>` and its one-line `why` are hand-written
+interpretation, and they make *measured* claims too — "机器面板消失", "仅 1 个动作" — which is how two
+of them came to contradict the reading directly above them (the machine panel came back in the
+2026-09-21 fix; the push-clock verb joined ACT V the same day, and neither caption moved). The
+durable rule, and the one the generator now enforces: **anything a reading can measure must not be
+hand-written.** The facts strip is generated by `facts_of()` in `build.py`, `why` keeps only
+interpretation, and the build fails if a screen has no `<!-- FACTS:xx -->` marker. So when you add a
+screen, you do not get to write its facts — you get to write its sentence.
+
+**Three probe traps that produce confident wrong answers:**
+
+- **`getBBox()` ignores transforms.** It returns coordinates in the element's own user space. The
+  two-column 1280 screens shift a column with `<g transform="translate(dx,0)">`, so comparing raw
+  bboxes across columns compares two coordinate systems and reports *every* label as colliding with
+  the other column's. Use `getBoundingClientRect()` — page space, transforms applied.
+- **`scrollWidth` means nothing on a scaled SVG**, and `fill` on an HTML element is `rgb(0,0,0)`
+  whether or not it was set. Both look like findings; both are noise.
+- **A page may declare its own token aliases.** This page's `:root` maps `--mono/--sans/--serif`
+  onto `tokens.css`'s `--font-*`. Diffing every `var(--…)` against `tokens.css` alone reports those
+  three as undeclared; they are declared two lines above. Fold the page's own `:root` into the
+  declared set before believing a missing token.
+
+**One class is known-benign, and it stays in the report.** Stacked label/value text — `AUTO / 自动`
+above `0.5/s` — overlaps by **3–4 px vertically** at every canvas size, because a CJK glyph box is
+taller than the line pitch. Zoomed to 3×, the glyphs do not touch. Do not raise the threshold to
+make the count zero; raise it only after looking, and say that you looked.
+
+**Fidelity is not the only thing that rots — so does the reading.** The capture chain is committed
+(`snapshots.mjs` → `capture.py` → `flows.mjs` → `build.py`, four artifacts in `scripts/flows/`, four
+in `scripts/flows/*.json`), and `tests/flows-sync.test.mjs` fails when `flows.json` drifts from what
+the engine generates now. Nothing asserts that `screens.json` still matches today's DOM, so
+**re-run `capture.py` after any renderer change** and rebuild before citing the page.
+
 ## The 28 Aha moments (A01–A28)
 
 ### What "verifying one Aha" means here
@@ -953,15 +1017,23 @@ and build success will not tell you. `public/design-system/flows.html` is a *rea
 DOM (`scripts/flows/screens.json`), so it silently keeps describing the previous UI:
 
 ```bash
-python3 test-results/audit-shots/screens.py   # re-capture from a running static server on :4399
-cp test-results/audit-shots/screens.json scripts/flows/screens.json
-python3 scripts/flows/build.py                # writes public/design-system/flows.html
+node scripts/build-static.mjs && node scripts/build-aha-review.mjs   # dist/ + review-dist/
+node scripts/flows/snapshots.mjs > scripts/flows/snapshots.json      # 要拍哪些状态
+python3 scripts/flows/capture.py                                     # 逐屏读真实 DOM
+node scripts/flows/flows.mjs > scripts/flows/flows.json              # 六条流程的步骤表
+python3 scripts/flows/build.py                                       # 重绘成页面
 ```
+
+采集那两步需要 Playwright 和两份构建产物；另外三步只读入库的 JSON，所以改一版文案不必重采。
+**别用 `test-results/audit-shots/` 里的任何东西**——那个目录是 gitignore 的，被清掉之后读数
+就再也采不出来，而页面还能从旧读数照常重建。这正是它曾经落后两轮改动的原因，整条链现在
+住在 `scripts/flows/`（见上方的 flows 页契约）。
 
 Then look at it. The failure mode has no error message: SVG `var(--token)` referencing a token
 that does not exist resolves to **black**, not to a warning, so a page can load cleanly with
 every screen painted wrong. Confirm `getComputedStyle(document.querySelector('svg.sch rect')).fill`
-equals the paper token, not `rgb(0, 0, 0)`.
+equals the paper token, not `rgb(0, 0, 0)` — and run the three structural probes, not just this
+one, because a clean probe run is still not a PASS.
 
 ## Probe
 
@@ -1066,15 +1138,16 @@ overclaimed verdict.
   It still says nothing about a deployment, and the Replit localization adapter now has no
   coverage anywhere. With `#19` deleting CI, this is also the *only* gate: there is no remote
   job that will run these stages for you, and no PR check that can stand in for them.
-- **`public/design-system/flows.html` is now two rebalances older than the engine.** It is
-  redrawn from `scripts/flows/screens.json`, which was captured from a build before the
-  2026-09-21 rebalance, so its gate tables and readings describe the previous flow (notably
-  `map-city` as an Act II exit). The same rebalance added two player-facing action surfaces —
-  each act's compounding verb and the micro-event — so the captured `#primary-actions` grid is
-  now short by one or two buttons per act as well. Rebuilding it needs a fresh browser capture
-  from a running build, which
-  is not part of any committed script. Until that capture is redone, cite the engine and
-  `node scripts/pacing.mjs` — not the flows page — as the current flow truth.
+- **`public/design-system/flows.html` is current as of 2026-09-22, and the chain that keeps it
+  current is committed.** It used to be two rebalances stale, for a specific reason worth
+  remembering: the capture script lived in gitignored `test-results/audit-shots/`, so once that
+  directory was cleaned the readings could no longer be reproduced — the page rebuilt fine from
+  the old readings, and the old readings were the problem. The whole chain now lives in
+  `scripts/flows/` (`snapshots.mjs` → `capture.py` → `flows.mjs` → `build.py`, four committed
+  artifacts) and `tests/flows-sync.test.mjs` fails when `flows.json` drifts from what the engine
+  generates right now. Still cite the engine and `node scripts/pacing.mjs` for *numbers* — the
+  flows page is a rendering of them, not a second source — and re-run the capture after any
+  renderer change, because nothing asserts that `screens.json` matches today's DOM.
 - **The four mechanism controls prove coupling, not tuning.** `tests/rhythm-structure.test.mjs`
   patches source and asserts the number moves in the direction the design claims — cut the fuel
   feed and Act V stops tracking the old layer, remove the multiplier and the active path returns
@@ -1137,6 +1210,8 @@ overclaimed verdict.
 
 ## Maintain this verifier
 
+This is the section `/verify update` means (见开头的「Which mode am I in」).
+
 Re-run every command above before changing this file. Update only when actual launch
 commands, routes, browser harness, or proof requirements change, and keep the "does not
 prove" section current — new F-tests or an ordering assertion would retire a bullet there.
@@ -1152,7 +1227,8 @@ prove" section current — new F-tests or an ordering assertion would retire a b
    漂得最快，而读者会照着它去找：
    ```bash
    # 跳过 frontmatter 那一行（它的 description 里有几十个数字，全是噪声）；
-   # 下面这条在本文件上现在剩下 16 行，一眼扫得完。
+   # 这条列出来的应该是十几行，一眼扫得完。数一数——要是它涨到几十行，
+   # 说明这份文档正在往变更日志的方向长（见第 7 条）。
    sed -n '/^# Verify Glyph Factory/,$p' .claude/skills/verify/SKILL.md \
      | grep -nE "currently [0-9]+|floor [0-9]+|[0-9]+ tests|tests, [0-9]+|[0-9]+ (minutes|clicks|gaps|passes)|\.(py|js|mjs|md|json|css|html):[0-9]+|line [0-9]+"
    ```
@@ -1172,6 +1248,11 @@ prove" section current — new F-tests or an ordering assertion would retire a b
    `rules` 从第 4 行搬到第 10 行，`transitions` 从 28 搬到 52。行号是最像「精确」的模糊信息，
    读者会照着它去找，然后在错误的行上读到正确的东西。写**符号名**：函数名、表名、那句
    源码本身。符号被改名时 grep 会失败，那是好事——它会响。
+
+   **同一类病还有一个变种：自我指涉的计数。** 「上面这条 grep 在本文件上剩 16 行」这种句子
+   每编辑一次本文件就烂一次——本轮写下去之后不到十分钟就变成了 14。要么写成量级（「十几行」），
+   要么就把它变成一个动作（「数一数，涨到几十行就说明文档在往变更日志长」）。**凡是「关于本文件
+   自身」的精确数字，都当成行号对待。**
 
 5. **每一条分三类，别都按同一类改。**
 
