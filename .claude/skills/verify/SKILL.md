@@ -617,8 +617,8 @@ proving the gate is completable.
 Two boundaries this must not cross, both pinned by existing tests:
 
 - **`#world-card` stays hidden until Act III.** `test_layout_expands_only_when_world_is_discovered`
-  (`test_player.py:156`) and `test_F02_city_and_world_require_real_actions`
-  (`test_aha.py:124`) assert it hidden at Act II *even with `paperCrisis` and `meaning: 75`
+  (`test_player.py::test_layout_expands_only_when_world_is_discovered`) and
+  `test_F02_city_and_world_require_real_actions` (`test_aha.py`) assert it hidden at Act II *even with `paperCrisis` and `meaning: 75`
   already true*. Putting readership on the metric row instead of unhiding the world card is
   what keeps `aha.md`'s S10/S11 intact.
 - **Reveal is still behavioral.** The 读者 metric appears when readership first exists
@@ -710,17 +710,18 @@ An Aha is not a string in a list. Each one is a *reachable state* plus the *real
 that leaves it. Verification therefore asserts three separate things per ID:
 
 1. **Boundary invariant** — the preview state satisfies that ID's gate. The gate table is
-   `public/aha-review-contract.js:4-14` (`rules`) and the act table is line 15 (`acts`).
+   `public/aha-review-contract.js` 的 `rules`（每条的 `[id, 状态字段, 门槛]`）和
+   `acts`（每条属于第几幕）两张表。
 2. **Event recorded** — `state.ahaSeen` actually contains the ID. This is deliberately not
    "the number happens to be large enough": the moment must have fired.
 3. **Real transition** — a visible, enabled button in `#primary-actions` is clicked and the
    resulting state must match that command's entry in the `transitions` table
-   (`aha-review-contract.js:28-39`). A click that changes nothing fails.
+   (`aha-review-contract.js` 的 `transitions` 表). A click that changes nothing fails.
 
 Plus, for every ID: **A28** additionally requires `#rate === '0'`, `#ending` visible, and
 zero enabled actions; and **every** case runs `assert_player()`, which asserts the player
 iframe's `inner_text` *and* `aria_snapshot` contain no match for
-`META` (`tests/intent-browser/test_aha.py:19`) — `A01..A28`, `AHA`, `ACT <n>`,
+`META` (`tests/intent-browser/test_aha.py` 顶部) — `A01..A28`, `AHA`, `ACT <n>`,
 `Director Mode`, `导演模式`.
 
 **What is independent here, and what is not.** `rules`/`acts` are a hand-written mapping of
@@ -755,14 +756,15 @@ GLYPH_BROWSER=chromium python3 scripts/run-browser-contracts.py aha
 GLYPH_BROWSER=webkit   python3 scripts/run-browser-contracts.py aha
 ```
 
-The runner is fail-closed (`scripts/run-browser-contracts.py:16-23`): PASS requires
+The runner is fail-closed (`scripts/run-browser-contracts.py`，`passed=` 那一行): PASS requires
 `discovered >= 37`, `run == discovered`, `wasSuccessful()`, and **zero** skipped, expected
 failures, or unexpected successes. Exit code is 0/1. It writes
 `test-results/intent-audit/aha-<browser>.json`.
 
-37 = 28 generated `test_state_AXX_real_invariant_and_action` cases (`test_aha.py:214-227`)
-+ 9 hand-written contract tests. Run both engines: they are separate CI matrix rows and
-WebKit is where `getClientRects()`/`:has()` visibility differences would show up.
+37 = 28 generated `test_state_AXX_real_invariant_and_action` cases (`test_aha.py` 末尾那个
+`for number in range(1,29)` 循环）+ 9 hand-written contract tests. Run both engines: they are
+separate CI matrix rows and WebKit is where `getClientRects()`/`:has()` visibility differences
+would show up.
 
 The player suite is the other half of the leak boundary — run it too when the diff touches
 `build-static.mjs`, the privacy layer, or `play.html`:
@@ -773,7 +775,7 @@ GLYPH_BROWSER=chromium python3 scripts/run-browser-contracts.py player   # floor
 
 ### Run — in-app 28/28
 
-The review page carries its own verifier (`public/aha-review-ui.js:54-63`, `#verify-all`),
+The review page carries its own verifier (`public/aha-review-ui.js` 里 `run.addEventListener('click', …)` 那一段, `#verify-all`),
 which loops `GlyphAhaAudit.ids` calling `exercise` in the review iframe. Drive it through
 the committed driver rather than hand-rolling Playwright:
 
@@ -874,8 +876,8 @@ overclaimed verdict.
 - **The shape assertion is positional, and only that.** "First gap shortest, last gap longest,
   tail ≥ 2 × head" says the fast/slow structure sits where the design put it. It does not say
   the magnitudes are *good*, that the pattern reads as intended to a player, or that a
-  differently-routed playthrough shares it. Magnitudes are judgements about `{{INTENT}}`'s
-  stated shape (currently `head ×0.45 / tail ×1.7`), and the only thing separating "designed"
+  differently-routed playthrough shares it. Magnitudes are judgements against the shape
+  `{{INTENT}}` states — read the weights there, not here; the only thing separating "designed"
   from "measured" is the flattening control.
 - **The cadence test proves tick-equivalence, not balance.** `live ticks == one jump` says the
   rule's output is no longer lost to tick granularity. It says nothing about whether the
@@ -937,6 +939,11 @@ overclaimed verdict.
   `build-static.mjs`, so editing the canonical file without copying it fails the gate on a test
   that looks unrelated to whatever you changed — and the audit reports it as a `fast`-stage
   failure, which reads like a product regression. `cp aha.md public/aha.md` and commit both.
+- **一次只跑一个浏览器套件，跑到一半别改测试文件。** `intent-audit`、`run-browser-contracts.py`
+  和 `npm run verify` 会写同一份 `test-results/`，而 `fast` 阶段还会重建 `dist/`。并行跑（或者
+  在跑的时候编辑 `tests/browser/*.py`）会让后启动的那一行加载到半改完的文件——本轮真实发生
+  过一次：WebKit 那一步报 `AttributeError: 'PlayerContract' object has no attribute 'save'`，
+  读起来像产品缺陷，其实是时间线打架。要并行就另开一个 worktree。
 - **`review-dist/` is required and is not built by `npm run dev`.** A fresh clone fails the
   suite with a build error, not a test failure. Same for `dist/` — see "Build before any
   browser suite" above; the failure reads as `setUpClass ERROR`, not as a test failure, so
@@ -969,6 +976,60 @@ overclaimed verdict.
 Re-run every command above before changing this file. Update only when actual launch
 commands, routes, browser harness, or proof requirements change, and keep the "does not
 prove" section current — new F-tests or an ordering assertion would retire a bullet there.
+
+### 怎么审这份文档本身
+
+这份技能里几乎每一句话都是一个**关于当前代码的断言**，而代码会动。审它的动作不是通读，
+是**逐条找出它背后的真源，然后去问真源**。顺序如下：
+
+1. **先跑门禁，再动文件。** `npm run intent-audit` 验的是*产品*，不是这份文档。文档改了、
+   产品没验，你写下来的每句话都还没有依据——而这份文件的作用正是「你说验过了，凭什么」。
+2. **把会腐烂的东西 grep 出来，别靠读。** 数字、行号、路径、函数名都会漂，行号随任何编辑
+   漂得最快，而读者会照着它去找：
+   ```bash
+   # 跳过 frontmatter 那一行（它的 description 里有几十个数字，全是噪声）；
+   # 下面这条在本文件上现在剩下 16 行，一眼扫得完。
+   sed -n '/^# Verify Glyph Factory/,$p' .claude/skills/verify/SKILL.md \
+     | grep -nE "currently [0-9]+|floor [0-9]+|[0-9]+ tests|tests, [0-9]+|[0-9]+ (minutes|clicks|gaps|passes)|\.(py|js|mjs|md|json|css|html):[0-9]+|line [0-9]+"
+   ```
+3. **按这句话的类型去找它的真源。** 「去问真源」对不同句子是不同动作：
+
+   | 这句话在说什么 | 真源 | 怎么问 |
+   |---|---|---|
+   | 命令跑不跑得通、几项测试 | `test-results/intent-audit/report.json` | 跑一遍门禁，读 `stages` |
+   | 门槛 / 代价 / 速率 / 增产公式 | 引擎的导出表 | `E.READERS_LADDER` 这类，或 `node -e` 直接问 |
+   | 玩家面上看得见什么、点得到什么 | 真实浏览器 | `run-browser-contracts.py`，或 driver 的 `shot` |
+   | 节奏读数 | 参考对局 | `node scripts/pacing.mjs`（`--trace` 看动词） |
+   | 「某文件里有某符号」 | 那个文件 | `grep -n "<符号>" <文件>`——**这一类最容易腐烂**，见下 |
+   | 需求本身 | `{{INTENT}}` | 读文档，并检查它自带的负对照 |
+
+4. **行号比数字烂得快，所以别写行号。** 这条规则是踩出来的：本轮一次 grep 查出技能里 7 处
+   `file.py:156` 形式的引用，**7 处全漂了**——`aha-review-contract.js` 因为头部加了几行注释，
+   `rules` 从第 4 行搬到第 10 行，`transitions` 从 28 搬到 52。行号是最像「精确」的模糊信息，
+   读者会照着它去找，然后在错误的行上读到正确的东西。写**符号名**：函数名、表名、那句
+   源码本身。符号被改名时 grep 会失败，那是好事——它会响。
+
+5. **每一条分三类，别都按同一类改。**
+
+   | 情况 | 例子 | 怎么改 |
+   |---|---|---|
+   | 实现动了 | 测试数 217 → 229；玩家套件 26 → 29 | 更新数字，并说明新数字从哪来 |
+   | 这句**从来就不是真的** | 「`rules` 是手抄的第二份门槛」——它确实是抄的，而且已经漂了 | 改描述，写清现在真源在哪、为什么改 |
+   | **故意变成假的** | 「四个等待态没有可点的东西」——节奏改动故意让它们有了可点的东西 | 改描述 **+ 写明为什么**。不写原因，下一个人会把它「修」回原样 |
+6. **判据、阈值、已决方案一律不写进这份文件。** 真源在 `{{INTENT}}`（见「用户意图」一节）。
+   看到技能里出现具体门槛数字，先问一句：这个数应该从引擎或需求文档读吗？
+7. **加新条目之前先问「这一条错了会不会有人因此做错事」。** 不会——那就别加。技能不是
+   变更日志；它每长一页，读的人就少一成。
+
+**这份文档不在门禁的 `sourceSha256` 覆盖范围内。** 那个哈希盖的是 `public/ src/ scripts/
+tests/ .github/ aha.md intent.md package*.json vercel.json`，`.claude/` 不在其中。两个推论：
+
+- 改这份文档**不会**让一次已经跑过的门禁读数失效——读的是同一批产品字节。
+- 但 `report.json` 里的 `dirty` 是**开跑那一刻**的快照。改完要提交掉，否则「这份读数是
+  从一棵干净的树跑出来的」就成了半真的话。
+
+这个区分值得记住，因为它反过来也成立：**动了 `public/`、`scripts/`、`tests/` 里的任何东西，
+上一次的读数就作废了**，哪怕只改了一个字符。
 
 **门槛数字不要在这一节里手抄。** 这一节原来抄过一份，`A02` 那行写着打字员 5 而引擎要的是 8，
 抄的那份还正是「独立验证」的那份（见 `public/aha-review-contract.js` 的头部注释）。现在凡是
