@@ -18,7 +18,7 @@
 
 ## 唯一的例外
 
-`public/glyph-factory-v3-preview.webm`（v3 玩法录制，非本包资产）在 `public/` 而非本目录，因为它由 `tests/preview-v3.test.mjs` 与 CI 直接引用，移动它会破坏现有契约。
+`public/glyph-factory-v3-preview.webm`（v3 玩法录制，非本包资产）在 `public/` 而非本目录，因为它由 `tests/preview-v3.test.mjs` 直接引用（含 EBML 时长断言），移动它会破坏现有契约。
 
 ## 如果将来要加资产
 

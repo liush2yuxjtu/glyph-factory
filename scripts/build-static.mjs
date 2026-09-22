@@ -80,7 +80,7 @@ const playerController = controller
     "localStorage.getItem(LOCALE_KEY) || 'zh-CN'",
   );
 
-// Reused local/CI output must not retain files from an older review build.
+// A reused output directory must not retain files from an older review build.
 await rm(out, { recursive: true, force: true });
 await mkdir(out, { recursive: true });
 await writeFile(new URL('index.html', out), playerHtml);
