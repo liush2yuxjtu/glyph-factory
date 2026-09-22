@@ -49,7 +49,7 @@ p{margin:0 0 12px;max-width:70ch}
 
 /* definition cards */
 .defs{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))}
-.def{border:1.5px solid var(--ink);background:var(--panel);padding:16px 16px 14px;box-shadow:var(--shadow-3-1)}
+.def{border:1.5px solid var(--ink);background:var(--panel);padding:16px 16px 14px;box-shadow:var(--shadow-3)}
 .def h3{margin:0 0 6px;font-size:15px}
 .def dl{margin:10px 0 0;display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:13px}
 .def dt{font-family:var(--mono);font-size:10.5px;color:var(--rust);letter-spacing:.06em;padding-top:3px}
@@ -66,7 +66,7 @@ p{margin:0 0 12px;max-width:70ch}
 /* 宽画布（1280 的桌面构图）svg 是 640 单位，但 figure 被上面那条钉死在 376，
    于是它右溢 261px、直接画到轨道里下一张屏上面。让"装着宽画布的那张 figure"跟着变宽。 */
 .screens .screen:has(.wideframe),.strip figure:has(.wideframe){width:clamp(320px,92vw,640px)}
-.screen{border:1.5px solid var(--ink);background:var(--panel);box-shadow:var(--shadow-3-1);display:flex;flex-direction:column}
+.screen{border:1.5px solid var(--ink);background:var(--panel);box-shadow:var(--shadow-3);display:flex;flex-direction:column}
 .screen svg.sch,.strip svg.sch{display:block;width:100%;height:auto}
 .screen svg.sch{border-bottom:1.5px solid var(--ink)}
 .wideframe{display:block;width:clamp(320px,92vw,640px)}
