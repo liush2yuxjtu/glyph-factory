@@ -1,5 +1,5 @@
 import {spawnSync} from 'node:child_process';
-import {mkdirSync,readFileSync,writeFileSync,readdirSync} from 'node:fs';
+import {existsSync,mkdirSync,readFileSync,writeFileSync,readdirSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 const root=fileURLToPath(new URL('../',import.meta.url));
@@ -16,7 +16,10 @@ function visit(path) {
     else inputs.push(file);
   }
 }
-for(const path of ['public','src','scripts','tests','.github']) visit(path);
+// `.github` no longer holds workflows; only the PR template remains, and it is a live part of
+// the review contract. It stays an input while it exists, but a missing directory is not an
+// error — the hash covers the verification inputs, and an absent one is not one.
+for(const path of ['public','src','scripts','tests','.github']) if(existsSync(new URL('../'+path,import.meta.url))) visit(path);
 inputs.push('aha.md','intent.md','package.json','package-lock.json','vercel.json');
 for(const path of inputs.sort()) hash.update(path+'\0').update(readFileSync(new URL('../'+path,import.meta.url)));
 const report={status:'FAIL',scope:'local production artifact + local review artifact; not a live deployment acceptance',

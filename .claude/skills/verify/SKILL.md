@@ -104,6 +104,27 @@ Every browser suite serves a built artifact, so `dist/` must exist first or the 
 additionally writes `review-dist/` and is the one to use when you need the Aha suite. A
 cold `run-browser-contracts.py player` on a fresh clone fails for this reason alone.
 
+## There is no CI — every gate in this file runs here
+
+This repository has no GitHub Actions. Two workflows used to exist —
+`.github/workflows/game.yml` (fast contracts → player/aha browser matrix → `Player merge gate`
+→ Vercel deploy) and `.github/workflows/replit-localization.yml`. Their coverage moved into
+this skill; for each check, the command below is now the **only** place it runs.
+
+| What used to be a workflow job | Run this instead |
+|---|---|
+| `Fast engine and player-build contracts` | `npm run verify:fast` |
+| `Build the separate internal review artifact` | `npm run build:review` |
+| `Player regression (chromium / webkit)` | `GLYPH_BROWSER=chromium python3 scripts/run-browser-contracts.py player`, then `webkit` |
+| Aha suite, both engines | `... run-browser-contracts.py aha` under each `GLYPH_BROWSER` |
+| `Validate internal review video` (ffprobe ≥ 20 s) | `npm test` — `tests/preview-v3.test.mjs` reads the EBML `Duration` element directly, so this now works on macOS, which has no ffprobe |
+| Replit verifier fixtures + public Replit acceptance | **removed 2026-09-22, not replaced.** `test_verifier.py` and `verify_live.py` were deleted with the workflow, so `deploy/replit-localization/glyph-language.js` now ships with no coverage at all. Do not re-add the live check as a substitute here — the decision was to stop checking that adapter |
+| `Player merge gate` | the rows above, all green, **on the same commit**. There is no summary job to read any more, so an unrun or skipped stage is a FAIL — never a pass by omission |
+| Vercel deploy | not this skill's job. `vercel.json` sets `outputDirectory: dist`, so Vercel's Git integration deploys the push on its own. A READY badge was never a verification result and still is not |
+
+Nothing runs these on your behalf. Report each stage that you actually ran, name the ones you
+did not, and do not describe an unrun stage as passing.
+
 ## Drive
 
 Use the committed driver rather than hand-rolling Playwright —
@@ -501,8 +522,9 @@ failures, or unexpected successes. Exit code is 0/1. It writes
 `test-results/intent-audit/aha-<browser>.json`.
 
 37 = 28 generated `test_state_AXX_real_invariant_and_action` cases (`test_aha.py:214-227`)
-+ 9 hand-written contract tests. Run both engines: they are separate CI matrix rows and
-WebKit is where `getClientRects()`/`:has()` visibility differences would show up.
++ 9 hand-written contract tests. Run both engines separately and report each: WebKit is where
+`getClientRects()`/`:has()` visibility differences would show up, and one engine standing in
+for the other is not a PASS.
 
 The player suite is the other half of the leak boundary — run it too when the diff touches
 `build-static.mjs`, the privacy layer, or `play.html`:
@@ -674,8 +696,10 @@ overclaimed verdict.
   `act === 3`, even at `cityReady`. Legibility for Act II belongs on the metric row and in
   `#primary-actions`, which is where `renderActions()` already carries the shortfall idiom.
 - **Playwright version drift.** `tests/browser/requirements.txt` pins `1.57.0`; a machine
-  may have a newer one. CI installs the pin. Only the sync API is used, so either works,
-  but a version-only difference is not a candidate regression.
+  may have a newer one. Nothing installs the pin for you any more — this repository has no
+  CI runner, so `python -m playwright install` on the machine you are on is now the only
+  source of the browsers. Only the sync API is used, so either version works, but a
+  version-only difference is not a candidate regression.
 - **The suite installs its own clock.** `page.clock.install(FIXED)` + `pause_at` +
   `run_for(1500)` in teardown make the run deterministic; do not add wall-clock `sleep`s.
 - **Teardown fails the test on any console error, page error, or failed request.** A test
