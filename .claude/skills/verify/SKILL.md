@@ -1066,15 +1066,16 @@ overclaimed verdict.
   It still says nothing about a deployment, and the Replit localization adapter now has no
   coverage anywhere. With `#19` deleting CI, this is also the *only* gate: there is no remote
   job that will run these stages for you, and no PR check that can stand in for them.
-- **`public/design-system/flows.html` is now two rebalances older than the engine.** It is
-  redrawn from `scripts/flows/screens.json`, which was captured from a build before the
-  2026-09-21 rebalance, so its gate tables and readings describe the previous flow (notably
-  `map-city` as an Act II exit). The same rebalance added two player-facing action surfaces —
-  each act's compounding verb and the micro-event — so the captured `#primary-actions` grid is
-  now short by one or two buttons per act as well. Rebuilding it needs a fresh browser capture
-  from a running build, which
-  is not part of any committed script. Until that capture is redone, cite the engine and
-  `node scripts/pacing.mjs` — not the flows page — as the current flow truth.
+- **`public/design-system/flows.html` is current as of 2026-09-22, and the chain that keeps it
+  current is committed.** It used to be two rebalances stale, for a specific reason worth
+  remembering: the capture script lived in gitignored `test-results/audit-shots/`, so once that
+  directory was cleaned the readings could no longer be reproduced — the page rebuilt fine from
+  the old readings, and the old readings were the problem. The whole chain now lives in
+  `scripts/flows/` (`snapshots.mjs` → `capture.py` → `flows.mjs` → `build.py`, four committed
+  artifacts) and `tests/flows-sync.test.mjs` fails when `flows.json` drifts from what the engine
+  generates right now. Still cite the engine and `node scripts/pacing.mjs` for *numbers* — the
+  flows page is a rendering of them, not a second source — and re-run the capture after any
+  renderer change, because nothing asserts that `screens.json` matches today's DOM.
 - **The four mechanism controls prove coupling, not tuning.** `tests/rhythm-structure.test.mjs`
   patches source and asserts the number moves in the direction the design claims — cut the fuel
   feed and Act V stops tracking the old layer, remove the multiplier and the active path returns

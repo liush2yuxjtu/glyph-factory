@@ -11,12 +11,14 @@ Two canvases: a 300-unit column for the 390x844 player surface and a 620-unit on
 """
 import json
 import re
+import subprocess
 from html import escape
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
 SCREENS = json.loads((HERE / "screens.json").read_text())
+FLOWS = json.loads((HERE / "flows.json").read_text())
 TEMPLATE = HERE / "template.html"
 # The page is a member of the design system, not a loose artifact: it ships inside
 # public/design-system/ and links tokens.css like every other page in that package.
@@ -446,6 +448,44 @@ def build_wide(s, w, pad):
     return sh, y + pad
 
 
+def flow_article(f):
+    """一条流程 = 读数 + 生成出来的步骤表。
+
+    步骤表不再手写：手写过一次，重排之后里面还留着「viral-word 送 750 读者」，
+    而页面照旧印着。现在它来自 `node scripts/flows/flows.mjs`，那份从引擎现算，
+    所以要改的是引擎或那个脚本，不是这里的 HTML。
+    """
+    shots = "".join(
+        f'<figure><img src="shots/{sid.lower()}.png" alt="{sid}" loading="lazy" '
+        f'width="780" height="1688"><figcaption><b>{sid}</b>{name}</figcaption></figure>'
+        for sid, name in ((s, next(x["name"] for x in SCREENS if x["id"] == s)) for s in f["screens"]))
+    rows = "".join(
+        "<tr><td class=\"n\">{i}</td><td class=\"cmd\">{label} · {cmd}</td>"
+        "<td class=\"n\">{cost}</td><td class=\"gate\">{gives}</td></tr>".format(
+            i=i, label=esc(step["label"]), cmd=esc(step["cmd"]),
+            cost=esc(step["cost"]) or "—", gives=esc(step["gives"]) or "—")
+        for i, step in enumerate(f["steps"], 1))
+    exit_note = " · ".join(esc(x) for x in f["exit"]) or "—"
+    return f"""  <article class="flow">
+    <div class="flow-head"><span class="fid">{f['fid']}</span><h3>ACT {ROMAN[f['act']]} · {esc(f['title'])}</h3>
+      <span class="stat"><span class="chip">屏幕 <b>{'→'.join(f['screens'])}</b></span><span class="chip">{esc(f['range'])}</span><span class="chip">{f['ahas']} 个 Aha</span><span class="chip">实测 <b>{f['decisions']} 次决策 / {f['seconds']} 秒</b></span></span></div>
+    <div class="strip">
+{shots}
+    </div>
+    <div class="tw"><table>
+      <thead><tr><th>步</th><th>热点</th><th>代价</th><th>这一步之后</th></tr></thead>
+      <tbody>
+{rows}
+      </tbody>
+    </table></div>
+    <p class="cap">离开这一幕需要：<b>{exit_note}</b>。代价一列取的是<b>第一次按</b>那一刻的价钱——
+    推钟动词的代价随按次递增，写平均数等于写一个没人见过的数。</p>
+  </article>"""
+
+
+ROMAN = {1: "I", 2: "II", 3: "III", 4: "IV", 5: "V", 6: "VI"}
+
+
 def shift(parts, dx):
     """Move a panel's blocks sideways. A group transform, not attribute rewriting: a
     polygon's `points` is a coordinate list no per-attribute regex can offset safely."""
@@ -474,14 +514,29 @@ def main():
         svg, wide = build(by_id[sid])
         return ('<span class="wideframe">' + svg + "</span>") if wide else svg
 
-    out = re.sub(r"<img src=\"shots/(\w+)\.png\"[^>]*>", replace, html)
+    by_flow = {f["fid"]: f for f in FLOWS}
+    def fill_flow(match):
+        fid = match.group(1)
+        if fid not in by_flow:
+            raise SystemExit(f"flows.json 里没有 {fid}")
+        used.add("flow:" + fid)
+        return flow_article(by_flow[fid])
+    # 候选哈希由生成时现取。写死过一次（审计当时的提交），页面顶上挂着一个早就不是当前树的
+    # 哈希，比不写更糟。
+    head = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT,
+                          capture_output=True, text=True).stdout.strip() or "unknown"
+    out = re.sub(r"<!-- FLOW:(F\d\d) -->", fill_flow, html)
+    out = out.replace("<!-- SHA -->", f"<b>{head}</b>")
+    if "<!-- FLOW:" in out:
+        raise SystemExit("还有没被填上的流程标记")
+    out = re.sub(r"<img src=\"shots/(\w+)\.png\"[^>]*>", replace, out)
     if 'src="shots/' in out:
         raise SystemExit("an <img> pointing at a snapshot survived the rebuild")
-    missing = set(by_id) - used
+    missing = set(by_id) - {u for u in used if not u.startswith("flow:")}
     if missing:
         raise SystemExit(f"captured but unused: {sorted(missing)}")
     OUTPUT.write_text(out)
-    print(f"wrote {OUTPUT.name}: {len(out) // 1024} KB, {len(used)} SVG rebuilds, 0 snapshots")
+    print(f"wrote {OUTPUT.name}: {len(out) // 1024} KB, {len(used)} SVG rebuilds, {len(FLOWS)} generated flows, 0 snapshots")
 
 
 if __name__ == "__main__":
