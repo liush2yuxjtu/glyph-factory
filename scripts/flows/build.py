@@ -274,18 +274,22 @@ def e_systems(sh, x, y, w, s):
         cols = max(1, min(s["layout"]["machines"], len(s["machines"])))
         gap = 6
         cw = (w - (cols - 1) * gap) / cols
+        # 卡片排法照真机：名称一行、详情一行、按钮**整宽独占一行**。
+        # 原来按钮压在详情那一行上（详情基线 cy+25、按钮 cy+18..32）。窄画布下详情会被 clip
+        # 到 20 个字符、省略号看得见；宽画布下 `cw/4.4` 放得下整行，于是价格被按钮直接盖掉——
+        # 一张声称「照着真实读数重绘」的图，画出了读数里没有的东西。真机上是换行 + 按钮在下。
+        card_h, pitch = 46, 50
         for i, m in enumerate(s["machines"]):
             col, row = i % cols, i // cols
-            cx, cy = x + col * (cw + gap), y + row * 40
-            sh.box(cx, cy, cw, 36, fill="var(--surface-4)", stroke="var(--line)", sw=1)
-            sh.text(cx + 7, cy + 13, clip(m["name"], int(cw / 8)), 10, "var(--ink)", 700)
-            sh.text(cx + 7, cy + 25, clip(m["detail"], int(cw / 4.4)), 7, "var(--muted)", 500, mono=True)
-            bw = min(44, cw - 12)
-            sh.box(cx + cw - bw - 6, cy + 18, bw, 14, fill="var(--panel)", stroke="var(--line)", sw=1,
+            cx, cy = x + col * (cw + gap), y + row * pitch
+            sh.box(cx, cy, cw, card_h - 6, fill="var(--surface-4)", stroke="var(--line)", sw=1)
+            sh.text(cx + 7, cy + 12, clip(m["name"], int(cw / 8)), 10, "var(--ink)", 700)
+            sh.text(cx + 7, cy + 23, clip(m["detail"], int(cw / 4.4)), 7, "var(--muted)", 500, mono=True)
+            sh.box(cx + 6, cy + 27, cw - 12, 13, fill="var(--panel)", stroke="var(--line)", sw=1,
                    dash="3 2" if m["disabled"] else None)
-            sh.text(cx + cw - bw / 2 - 6, cy + 28, m["label"], 7.5,
+            sh.text(cx + cw / 2, cy + 36.5, m["label"], 7.5,
                     "var(--muted)" if m["disabled"] else "var(--ink)", 700, anchor="middle")
-        y += ((len(s["machines"]) + cols - 1) // cols) * 40
+        y += ((len(s["machines"]) + cols - 1) // cols) * pitch - (pitch - card_h)
     if s["blocks"]["ahaHead"]:
         if y > started:
             sh.hline(x, y + 6, w, "var(--line)")

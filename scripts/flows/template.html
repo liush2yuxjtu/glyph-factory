@@ -63,6 +63,9 @@ p{margin:0 0 12px;max-width:70ch}
 .screens:active,.strip:active{cursor:grabbing}
 .screens>*,.strip>*{flex:0 0 auto;scroll-snap-align:start}
 .screens .screen,.strip figure{width:clamp(292px,78vw,376px)}
+/* 宽画布（1280 的桌面构图）svg 是 640 单位，但 figure 被上面那条钉死在 376，
+   于是它右溢 261px、直接画到轨道里下一张屏上面。让"装着宽画布的那张 figure"跟着变宽。 */
+.screens .screen:has(.wideframe),.strip figure:has(.wideframe){width:clamp(320px,92vw,640px)}
 .screen{border:1.5px solid var(--ink);background:var(--panel);box-shadow:var(--shadow-3-1);display:flex;flex-direction:column}
 .screen svg.sch,.strip svg.sch{display:block;width:100%;height:auto}
 .screen svg.sch{border-bottom:1.5px solid var(--ink)}
