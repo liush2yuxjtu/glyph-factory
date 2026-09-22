@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
+import {renderIntent} from '../scripts/build-intent.mjs';
 const read=(path)=>readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 const intent=read('aha.md'), html=read('public/aha.html');
 
@@ -17,7 +18,11 @@ test('user intent is its own document, and it is verifiable intent by intent',()
   const intentMd=read('intent.md'), intentHtml=read('public/intent.html');
   assert.notEqual(intentMd,intent,'intent.md must not be a copy of the Aha contract');
   assert.notEqual(intentHtml,html,'public/intent.html must not be a copy of the Aha page');
-  for(const id of ['U1','U2','U3','U4','U5','U6'])
+  // 意图编号从文档里**取**，不写死。写死的那份是 `['U1'…'U6']`，而 U7 加进来的时候
+  // 它一声不响地少守了一条——「清单漏了一项」正是这类断言最容易的坏法。
+  const ids=[...intentMd.matchAll(/^## (U\d+) · /gm)].map((m)=>m[1]);
+  assert.ok(ids.length>=6,`只解析出 ${ids.length} 条意图，解析器本身可能坏了`);
+  for(const id of ids)
     for(const [name,source] of [['intent.md',intentMd],['public/intent.html',intentHtml]])
       assert.match(source,new RegExp(`\\b${id}\\b`),`${id} is missing from ${name}`);
   // 每条意图都要能被验：原话（用户怎么说）+ 怎么验（证据在哪）+ 状态（做没做）
@@ -26,6 +31,15 @@ test('user intent is its own document, and it is verifiable intent by intent',()
   assert.match(intentMd,/> .+\n/,'原话要留引用块，不许改写成转述');
   // HTML 是生成物，别手改
   assert.match(intentHtml,/build-intent\.mjs/,'生成的 HTML 要写明它是从哪来的');
+});
+
+// 生成物会漂：改完 intent.md 忘了重新生成，上面每一条断言**照样全绿**，而过期的正是
+// 读者看到的那一份。所以这里把渲染器当场重算一遍，逐字节比。这是唯一能守住「生成物
+// 与真源同步」的形状——存在性断言守不住同步，只守得住「没被删掉」。
+test('the published intent page is the generator’s current output, byte for byte',()=>{
+  const rendered=renderIntent(read('intent.md'));
+  assert.equal(read('public/intent.html'),rendered,
+    'public/intent.html 与生成器输出不一致：跑 node scripts/build-intent.mjs 重新生成');
 });
 
 test('both documents specify the same disclosure rule, every flow and every screen',()=>{

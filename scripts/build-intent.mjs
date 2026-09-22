@@ -8,63 +8,68 @@
 // （HTML 那边有 iframe 评审台，本来就不是 Markdown 能表达的），intent 这一对是
 // 同一份内容的两副面孔，所以必须机器同步。
 //
+// 渲染函数是导出的，所以 `tests/intent-audit.test.mjs` 能拿它当场重算一遍、和入库的
+// HTML 逐字节比。**「生成物会不会漂」只能这样守**：只断言「HTML 里有 U7」是守不住的——
+// 改完 intent.md 忘了重新生成，那条断言照样绿，而过期的正是读者看到的那一份。
+// 同一个道理让 fit-rhythm.mjs 也把函数导出去：能重算的东西就别只做存在性检查。
+//
 // 支持的 Markdown 子集就是这份文档用到的那几种：标题、引用、粗体、行内码、
 // 有序/无序列表、表格、分隔线、链接。不做通用渲染器。
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = fileURLToPath(new URL('../', import.meta.url)).replace(/\/$/, '');
-const md = readFileSync(`${ROOT}/intent.md`, 'utf8');
 
-const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-const inline = (s) => esc(s)
-  .replace(/`([^`]+)`/g, '<code>$1</code>')
-  .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-  .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
-  .replace(/(^|[\s(])(https?:\/\/[^\s<)]+)/g, '$1<a href="$2">$2</a>');
+export function renderIntent(md) {
+  const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const inline = (s) => esc(s)
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+    .replace(/(^|[\s(])(https?:\/\/[^\s<)]+)/g, '$1<a href="$2">$2</a>');
 
-const out = [];
-let para = [], list = null, quote = [];
-const flushPara = () => { if (para.length) { out.push(`<p>${inline(para.join(' '))}</p>`); para = []; } };
-const flushList = () => { if (list) { out.push(`<${list.tag}>${list.items.map((i) => `<li>${inline(i)}</li>`).join('')}</${list.tag}>`); list = null; } };
-const flushQuote = () => { if (quote.length) { out.push(`<blockquote>${quote.map((q) => `<p>${inline(q)}</p>`).join('')}</blockquote>`); quote = []; } };
-const flushAll = () => { flushPara(); flushList(); flushQuote(); };
+  const out = [];
+  let para = [], list = null, quote = [];
+  const flushPara = () => { if (para.length) { out.push(`<p>${inline(para.join(' '))}</p>`); para = []; } };
+  const flushList = () => { if (list) { out.push(`<${list.tag}>${list.items.map((i) => `<li>${inline(i)}</li>`).join('')}</${list.tag}>`); list = null; } };
+  const flushQuote = () => { if (quote.length) { out.push(`<blockquote>${quote.map((q) => `<p>${inline(q)}</p>`).join('')}</blockquote>`); quote = []; } };
+  const flushAll = () => { flushPara(); flushList(); flushQuote(); };
 
-const lines = md.split('\n');
-for (let i = 0; i < lines.length; i++) {
-  const line = lines[i];
-  if (/^\s*$/.test(line)) { flushAll(); continue; }
-  if (/^---+$/.test(line)) { flushAll(); out.push('<hr>'); continue; }
-  const h = line.match(/^(#{1,3})\s+(.*)$/);
-  if (h) { flushAll(); out.push(`<h${h[1].length}>${inline(h[2])}</h${h[1].length}>`); continue; }
-  if (/^>\s?/.test(line)) { flushPara(); flushList(); quote.push(line.replace(/^>\s?/, '')); continue; }
-  // 表格：连续以 | 开头的行整块处理
-  if (/^\|/.test(line)) {
-    flushAll();
-    const rows = [];
-    while (i < lines.length && /^\|/.test(lines[i])) { rows.push(lines[i]); i += 1; }
-    i -= 1;
-    const cells = (r) => r.replace(/^\||\|$/g, '').split('|').map((c) => c.trim());
-    const head = cells(rows[0]);
-    const body = rows.slice(2).map(cells);
-    out.push(`<table><thead><tr>${head.map((c) => `<th>${inline(c)}</th>`).join('')}</tr></thead>`
-      + `<tbody>${body.map((r) => `<tr>${r.map((c) => `<td>${inline(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`);
-    continue;
+  const lines = md.split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (/^\s*$/.test(line)) { flushAll(); continue; }
+    if (/^---+$/.test(line)) { flushAll(); out.push('<hr>'); continue; }
+    const h = line.match(/^(#{1,3})\s+(.*)$/);
+    if (h) { flushAll(); out.push(`<h${h[1].length}>${inline(h[2])}</h${h[1].length}>`); continue; }
+    if (/^>\s?/.test(line)) { flushPara(); flushList(); quote.push(line.replace(/^>\s?/, '')); continue; }
+    // 表格：连续以 | 开头的行整块处理
+    if (/^\|/.test(line)) {
+      flushAll();
+      const rows = [];
+      while (i < lines.length && /^\|/.test(lines[i])) { rows.push(lines[i]); i += 1; }
+      i -= 1;
+      const cells = (r) => r.replace(/^\||\|$/g, '').split('|').map((c) => c.trim());
+      const head = cells(rows[0]);
+      const body = rows.slice(2).map(cells);
+      out.push(`<table><thead><tr>${head.map((c) => `<th>${inline(c)}</th>`).join('')}</tr></thead>`
+        + `<tbody>${body.map((r) => `<tr>${r.map((c) => `<td>${inline(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`);
+      continue;
+    }
+    const ul = line.match(/^[-*]\s+(.*)$/), ol = line.match(/^\d+\.\s+(.*)$/);
+    if (ul || ol) {
+      flushPara(); flushQuote();
+      const tag = ul ? 'ul' : 'ol';
+      if (!list || list.tag !== tag) { flushList(); list = { tag, items: [] }; }
+      list.items.push((ul || ol)[1]);
+      continue;
+    }
+    flushQuote(); flushList();
+    para.push(line.trim());
   }
-  const ul = line.match(/^[-*]\s+(.*)$/), ol = line.match(/^\d+\.\s+(.*)$/);
-  if (ul || ol) {
-    flushPara(); flushQuote();
-    const tag = ul ? 'ul' : 'ol';
-    if (!list || list.tag !== tag) { flushList(); list = { tag, items: [] }; }
-    list.items.push((ul || ol)[1]);
-    continue;
-  }
-  flushQuote(); flushList();
-  para.push(line.trim());
-}
-flushAll();
+  flushAll();
 
-const html = `<!doctype html>
+  return `<!doctype html>
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
@@ -100,6 +105,10 @@ ${out.join('\n')}
 <p class="foot">用户意图真源：<code>intent.md</code> · 实现契约真源：<code>aha.md</code> · 两者不再互为副本</p>
 </main></body></html>
 `;
+}
 
-writeFileSync(`${ROOT}/public/intent.html`, html);
-console.log(`written public/intent.html · ${html.length} chars · ${out.length} blocks`);
+if (process.argv[1] && import.meta.url.endsWith(process.argv[1].split('/').pop())) {
+  const html = renderIntent(readFileSync(`${ROOT}/intent.md`, 'utf8'));
+  writeFileSync(`${ROOT}/public/intent.html`, html);
+  console.log(`written public/intent.html · ${html.length} chars`);
+}
