@@ -30,7 +30,11 @@ save();
 function run(name,command,args,extra={}) {
   console.log(`RUN ${name}`);
   const r=spawnSync(command,args,{cwd:root,encoding:'utf8',env:{...process.env,...extra},maxBuffer:20*1024*1024,timeout:15*60*1000});
-  const text=(r.stdout||'')+(r.stderr||'')+(r.error?'\n'+r.error.message:'');
+  // 先剥掉 ANSI 颜色再读。Node 的 reporter 在多数终端里会给 `ℹ tests 97` 加一层转义，
+  // 行首于是不是 `#` 也不是 `ℹ`，下面那些 `^` 锚定的读数全部落空——门禁会在自己刚刚通过
+  // 的那一步里中止，报的还是「没有证明成功」。剥颜色只是把看不见的字符去掉，判定不放宽。
+  const stripAnsi=(s)=>s.replace(/\u001B\[[0-9;]*m/g,'');
+  const text=stripAnsi((r.stdout||'')+(r.stderr||'')+(r.error?'\n'+r.error.message:''));
   writeFileSync(new URL(name+'.log',output),text);
   const stage={name,status:r.status===0?'PASS':'FAIL',exitCode:r.status};
   report.stages.push(stage); save();
@@ -44,6 +48,9 @@ try {
   // Reading only the older shape made a reporter change look like a failed run: the stage
   // passed, this parser threw, and the audit aborted on stage one while blaming nothing real.
   // Read both shapes, and treat a missing tally as a failure rather than as zero.
+  // 这两种形状都要求行首就是 `#`/`ℹ`，所以 `run()` 里那一层 ANSI 剥离不是装饰：Node 的
+  // reporter 在多数终端里会给整行套转义，锚点落空之后**两个形状一起读不到**，症状和当初
+  // 只认 `#` 时一模一样——门禁在自己刚通过的那一步中止。两个洞是一起堵上的。
   const tally=(name)=>fast.text.match(new RegExp('^(?:#|ℹ) '+name+' (\\d+)$','m'))?.[1];
   const count=Number(tally('tests'));
   if(!(count>0)||tally('fail')!=='0'||tally('skipped')!=='0'||tally('todo')!=='0')

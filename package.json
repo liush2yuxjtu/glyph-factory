@@ -12,7 +12,8 @@
     "verify": "node scripts/verify-player.mjs",
     "intent-audit": "node .claude/skills/verify/audit.mjs",
     "build:review": "node scripts/build-static.mjs && node scripts/build-aha-review.mjs",
-    "sync:aha": "node scripts/sync-aha-docs.mjs"
+    "sync:aha": "node scripts/sync-aha-docs.mjs",
+    "build:intent": "node scripts/build-intent.mjs"
   },
   "dependencies": {
     "next": "16.3.5",

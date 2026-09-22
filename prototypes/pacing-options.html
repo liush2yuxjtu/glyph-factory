@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>原型 · 27 段等待该长什么样</title>
+<style>
+:root{--ink:#17201a;--paper:#efe9d8;--panel:#fffaf0;--muted:#657064;--line:#bcc4ae;--green:#c8ef70;--rust:#a34e34;--surface:#f4f1e4}
+*{box-sizing:border-box}
+body{margin:0;background:#cfd4c2;color:var(--ink);font:14px/1.6 system-ui,-apple-system,"PingFang SC",sans-serif}
+.page{max-width:1000px;margin:auto;min-height:100vh;background:var(--paper);padding:26px clamp(14px,3vw,34px) 80px}
+.proto{margin:0 0 18px;padding:10px 14px;border:2px dashed var(--rust);background:#f7e7df;font-weight:700;font-size:13px}
+h1{font-size:clamp(22px,3.6vw,32px);line-height:1.25;margin:0 0 8px}
+h2{font-size:15px;margin:0 0 10px;letter-spacing:.02em}
+.lead{font-size:15px;max-width:760px;margin:0 0 18px}
+.card{background:var(--panel);border:1.5px solid var(--ink);padding:16px 18px;margin:0 0 16px}
+.row{display:flex;gap:22px;flex-wrap:wrap;align-items:baseline}
+.num{font:700 26px/1.1 ui-monospace,monospace;min-width:120px}
+.num small{white-space:nowrap}
+.num small{display:block;font:600 10px/1.4 system-ui;color:var(--muted);letter-spacing:.06em;margin-top:3px}
+.pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border:1px solid var(--line);background:var(--surface);border-radius:99px;color:var(--muted)}
+.pill.on{background:var(--green);border-color:var(--ink);color:var(--ink)}
+.timeline{margin:6px 0 2px}
+.tl-track{display:flex;gap:2px;height:64px;align-items:flex-end}
+.tl-seg{flex:1 1 0;min-width:0;position:relative;height:100%;display:flex;align-items:flex-end;background:var(--surface)}
+.tl-seg i{display:block;width:100%;background:#8a9a76}
+.tl-seg.done i{background:var(--ink)}
+.tl-seg.current i{background:var(--rust)}
+.tl-seg.future i{background:#8a9a76}
+.tl-seg.lo i,.tl-seg.hi i{outline:2px solid var(--rust);outline-offset:-2px}
+.tl-seg b{position:absolute;top:-16px;left:0;right:0;text-align:center;font:600 9px/1 system-ui;color:var(--muted);white-space:nowrap;overflow:hidden}
+.tl-axis{display:flex;gap:2px;margin-top:4px}
+.tl-axis span{flex:1 1 0;text-align:center;font:600 9px/1.3 system-ui;color:var(--muted);overflow:hidden}
+.tl-legend{font-size:11px;color:var(--muted);margin-top:8px}
+button{font:inherit;font-weight:700;min-height:38px;border:1.5px solid var(--ink);background:var(--panel);padding:8px 12px;cursor:pointer;box-shadow:2px 2px 0 var(--ink)}
+button:hover:not(:disabled){background:var(--green)}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.on{background:var(--green)}
+button.push{background:var(--green)}
+button.push:disabled{background:var(--panel)}
+.controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 10px}
+.group{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:8px 10px;border:1px solid var(--line);background:var(--surface)}
+.group>span{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.05em;margin-right:2px}
+.note{font-size:12px;color:var(--muted);margin:8px 0 0}
+.verdict{font-size:13px;margin:10px 0 0;padding:9px 12px;background:var(--surface);border-left:3px solid var(--ink)}
+.verdict.warn{border-left-color:var(--rust);background:#f7e7df}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;margin:0 0 10px}
+.tabs button{min-height:32px;padding:5px 10px;font-size:12.5px}
+.scenario{font-size:13.5px;margin:0 0 10px;max-width:760px}
+.steps{display:flex;gap:6px;flex-wrap:wrap}
+table{width:100%;border-collapse:collapse;font-size:12.5px;font-variant-numeric:tabular-nums}
+th,td{border-bottom:1px solid var(--line);padding:5px 7px;text-align:right}
+th:first-child,td:first-child{text-align:left}
+.mono{font-family:ui-monospace,monospace}
+</style>
+</head>
+<body><main class="page">
+<p class="proto">原型 · 一次性代码 · 用来回答一个问题，不是产品。做完决定就丢。</p>
+<h1>27 段等待，该长什么样？</h1>
+<p class="lead">
+现在每一段都是 <b>273±19 秒</b>——非常匀。文献（Alharthi CHI'18；Pecorella《The Math of Idle Games》）说这个类型里
+「等待是用来做计划的」，而<b>又长又平的等待是节奏漏洞</b>；同时点击必须能<b>永久</b>留下点什么，否则按了等于没按。
+这个原型让你亲手把 27 段推一遍，看各种组合的形状、读数和手感，再决定要哪一种。
+左边按时间轴播放，随时可以按「推钟」。
+</p>
+
+<div class="card">
+  <h2>当前状态</h2>
+  <div class="row">
+    <div class="num" id="s-total">—<small>全程（分钟）</small></div>
+    <div class="num" id="s-mean">—<small>每段均值 s</small></div>
+    <div class="num" id="s-std">—<small>标准差 s</small></div>
+    <div class="num" id="s-min">—<small>最短 s</small></div>
+    <div class="num" id="s-max">—<small>最长 s</small></div>
+    <div class="num" id="s-speed">—<small>本幕时钟加成</small></div>
+    <div class="num" id="s-elapsed">—<small>已过（分钟）</small></div>
+  </div>
+  <div class="timeline">
+    <div class="tl-track" id="tl-track"></div>
+    <div class="tl-axis" id="tl-axis"></div>
+  </div>
+  <p class="tl-legend">每一根 = 相邻两条 Aha 之间的等待。深色=已过，红=正在进行，绿=还没到；描红框的那两根是最短与最长。鼠标悬停看某一段的确切秒数。</p>
+  <p class="verdict" id="verdict">—</p>
+</div>
+
+<div class="card">
+  <h2>自由玩</h2>
+  <div class="controls">
+    <div class="group"><span>节奏结构</span>
+      <button data-struct="flat">平（现在这样）</button>
+      <button data-struct="shaped">快慢有设计</button>
+    </div>
+    <div class="group"><span>推钟</span>
+      <button data-push="off">关</button>
+      <button data-push="compound">复利（每次永久 +5%，上限 +50%）</button>
+      <button data-push="topup">一次性充值（每次买 60 个，不累积）</button>
+    </div>
+    <div class="group"><span>进度条</span>
+      <button data-flag="landmarks">标出下一个倍率地标</button>
+    </div>
+  </div>
+  <div class="controls">
+    <button id="play">▶ 播放</button>
+    <button id="speed">速度 ×400</button>
+    <button id="reset">重来</button>
+    <button class="push" id="do-push">按一下「推钟」</button>
+    <button id="next-act">跳到下一章 →</button>
+    <span class="pill" id="push-pill">未按过</span>
+  </div>
+  <p class="note" id="push-note">每一章有自己的推钟动词：第二章「发行新一期」· 第三章「张贴告示」· 第四章「让 Agent 加班」· 第五章「喂机器一批文本」· 第六章「投产一条新语法」。</p>
+</div>
+
+<div class="card">
+  <h2>跟着走的五个场景</h2>
+  <div class="tabs" id="tabs"></div>
+  <p class="scenario" id="scenario-copy"></p>
+  <div class="steps" id="scenario-steps"></div>
+  <p class="note" id="scenario-log"></p>
+</div>
+
+<div class="card">
+  <h2>六种组合并排看（全部被动玩，不按推钟）</h2>
+  <table id="compare"><thead><tr><th>结构</th><th>全程</th><th>均值</th><th>标准差</th><th>最短</th><th>最长</th><th>最长 ÷ 最短</th></tr></thead><tbody></tbody></table>
+  <p class="note">四种结构的<b>总时长完全一样</b>——差别只在怎么分配，所以选它是选形状，不是选长短。</p>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// 纯模块：节奏模型。无 DOM、无 document、无事件。
+// 这个块是原型里唯一值得留下的东西——决定之后它整块搬进引擎。
+// ─────────────────────────────────────────────────────────────────────────────
+const Model = (() => {
+  // 27 段，按幕分组。秒数取自参考对局（commit cbcd4de）的实测值。
+  const ACTS = [
+    {act:1, verb:null,           gaps:[246.5,260]},
+    {act:2, verb:'发行新一期',    gaps:[287,283.5,320.5,284.5,282,283,283,283.5]},
+    {act:3, verb:'张贴告示',      gaps:[284,282,282.5,254.5]},
+    {act:4, verb:'让 Agent 加班', gaps:[259.5,280.5,280,270.5,245.5,278]},
+    {act:5, verb:'喂机器一批文本', gaps:[262,280,283.5]},
+    {act:6, verb:'投产一条新语法', gaps:[282,238,262.5,227]},
+  ];
+  // 幕内形状权重：开局一段短（喘口气），收尾一段长（攒劲），中间平。
+  // 归一化到「这一幕总秒数不变」——所以换形状不换总时长。
+  const shape = (n) => Array.from({length:n}, (_, i) => i === 0 ? 0.45 : (i === n - 1 ? 1.7 : 1));
+  const normalise = (w, total) => { const s = w.reduce((a,b)=>a+b,0); return w.map((x) => x / s * total); };
+
+  const ids = (() => { const out = []; let n = 1; for (const a of ACTS) for (let i = 0; i < a.gaps.length; i++) out.push({act:a.act, from:'A'+String(n++).padStart(2,'0'), to:'A'+String(n).padStart(2,'0')}); return out; })();
+
+  const COMPOUND_STEP = 0.05, COMPOUND_CAP = 0.5, TOPUP_SECONDS = 60;
+
+  function initial(structure = 'flat', push = 'off', landmarks = false) {
+    const gaps = [];
+    let k = 0;
+    for (const a of ACTS) {
+      const w = structure === 'shaped' ? normalise(shape(a.gaps.length), a.gaps.reduce((x,y)=>x+y,0)) : a.gaps;
+      for (const sec of w) gaps.push({...ids[k++], act:a.act, base:sec, seconds:sec, topup:0});
+    }
+    return {structure, push, landmarks, pushes:{}, elapsed:0, gaps, log:['准备好了。按播放看时间走，或者直接按推钟。']};
+  }
+
+  const speedOf = (s, act) => s.push !== 'compound' ? 0 : Math.min(COMPOUND_STEP * (s.pushes[act] || 0), COMPOUND_CAP);
+  // 每一段当前该花多久：复利把「本幕从按下那一刻起」的剩余段按加成缩短；一次性充值只把当前这段缩短。
+  const effective = (s, i) => {
+    const g = s.gaps[i];
+    if (s.push === 'compound') return g.base / (1 + speedOf(s, g.act));
+    if (s.push === 'topup') return Math.max(20, g.base - g.topup);
+    return g.base;
+  };
+  const project = (s) => {
+    const gaps = s.gaps.map((g, i) => ({...g, seconds: effective(s, i)}));
+    let cursor = 0;
+    const out = gaps.map((g) => { const rec = {...g, start:cursor, end:cursor + g.seconds}; cursor += g.seconds; return rec; });
+    const where = out.find((g) => s.elapsed >= g.start && s.elapsed < g.end);
+    return {gaps: out.map((g) => ({...g, phase: s.elapsed >= g.end ? 'done' : (where === g ? 'current' : 'future')})), total: cursor, at: where || out[out.length-1]};
+  };
+  const stats = (s) => {
+    const secs = project(s).gaps.map((g) => g.seconds);
+    const m = secs.reduce((a,b)=>a+b,0) / secs.length;
+    return {n:secs.length, total:secs.reduce((a,b)=>a+b,0), mean:m,
+      std:Math.sqrt(secs.reduce((a,b)=>a+(b-m)**2,0)/secs.length),
+      min:Math.min(...secs), max:Math.max(...secs)};
+  };
+  // 把播放头挪到第 act 章的第一段开头。原型需要它：第一章没有推钟动词，
+  // 站在第一章按下去只会被拒绝——那是对的模型行为，但演示不了任何东西。
+  function jump(s, act) {
+    const g = project(s).gaps.find((x) => x.act === act);
+    return {...s, elapsed: g ? g.start : s.elapsed, log:[...s.log, `跳到第 ${act} 章开头。`]};
+  }
+  // 推钟。返回新状态；拒绝时把原因写进 log，不改任何数——「点了没反应」在原型里也不允许。
+  // act 默认取播放头所在的那一章，也可以显式指定（自由玩与场景都用到）。
+  function push(s, act = project(s).at.act) {
+    if (act === 1) return {...s, log:[...s.log, '第一章没有推钟动词：它的手速本身就是动词。']};
+    if (s.push === 'off') return {...s, log:[...s.log, '推钟现在是关的——切到「复利」或「一次性充值」再按。']};
+    const n = (s.pushes[act] || 0) + 1;
+    if (s.push === 'topup') {
+      // 当前播放头所在的那一段。两个坑：`at` 在这个作用域里根本不存在（点了会抛
+      // ReferenceError，而原型自己的规矩是「点了没反应」也不允许）；就算把它取出来，
+      // `project()` 返回的是拷贝，`indexOf` 比不出身份——只能按 id 找。
+      const current = project(s).at;
+      const gaps = s.gaps.map((g) => (g.from === current.from && g.to === current.to ? {...g, topup: g.topup + TOPUP_SECONDS} : g));
+      return {...s, gaps, pushes:{...s.pushes, [act]: n}, log:[...s.log, `${act===1?'':''}第 ${act} 章「${ACTS[act-1].verb}」：这一段缩短 ${TOPUP_SECONDS} 秒。下一段回到原速。`]};
+    }
+    const capped = (n - 1) * COMPOUND_STEP >= COMPOUND_CAP;
+    return {...s, pushes:{...s.pushes, [act]: n},
+      log:[...s.log, capped
+        ? `第 ${act} 章已经到顶（+${(COMPOUND_CAP*100)|0}%），再按不再加速。`
+        : `第 ${act} 章「${ACTS[act-1].verb}」：这一章<b>以后每一段</b>都永久快 ${(COMPOUND_STEP*100)|0}%（现在 +${(((n)*COMPOUND_STEP*100)|0)}%）。`]};
+  }
+  const tick = (s, dt) => ({...s, elapsed: Math.min(s.elapsed + dt, stats(s).total)});
+  const landmarkFor = (s) => {
+    if (!s.landmarks || s.push !== 'compound') return null;
+    const act = project(s).at.act;
+    if (act === 1) return null;
+    const need = Math.ceil(COMPOUND_CAP / COMPOUND_STEP);
+    const have = s.pushes[act] || 0;
+    return {act, need, have, text:`再按 ${Math.max(0, need - have)} 下，第 ${act} 章到顶（+50%）；按满就是全程最快的版本。`};
+  };
+  const verdict = (s) => {
+    const st = stats(s), ratio = st.max / st.min;
+    if (s.structure === 'flat' && s.push === 'off') return {tone:'warn', text:`平：${Math.round(st.min)}–${Math.round(st.max)} 秒，最长只有最短的 ${ratio.toFixed(2)} 倍。文献把「又长又平」直接记成节奏漏洞——玩家在这段里没有可计划的东西，也没有可期待的地标。`, };
+    if (s.structure === 'shaped' && s.push === 'off') return {tone:'', text:`快慢有设计：总时长和「平」一模一样，但长度差到 ${ratio.toFixed(2)} 倍——每一幕开头一段短（喘口气），收尾一段长（攒劲）。形状是设计出来的，不是塌缩出来的。`};
+    if (s.push === 'compound') { const at = project(s).at; const sp = speedOf(s, at.act);
+      return {tone:'', text:`复利：第 ${at.act} 章现在永久快 ${(sp*100).toFixed(0)}%。你按的每一下都留在这一章里——这就是 Pecorella 说的「手动购买永远有效」。全程因此可以短于两小时，那是设计意图，不是漏洞。`}; }
+    if (s.push === 'topup') return {tone:'warn', text:`一次性充值：只有当前这一段被缩短，下一段回到原速。按完就没了——玩家很快会算出来「按它不如等」，于是回到干等。`};
+    return {tone:'', text:'—'};
+  };
+  return {ACTS, ids, initial, project, stats, push, jump, tick, landmarkFor, verdict, speedOf, COMPOUND_CAP, COMPOUND_STEP};
+})();
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 页面：只是纯模块上面的一层壳。
+// ─────────────────────────────────────────────────────────────────────────────
+const $ = (id) => document.getElementById(id);
+let S = Model.initial(), running = false, speedMul = 400, timer = null, step = null;
+const fmt1 = (x) => (Math.round(x * 10) / 10).toFixed(0);
+
+function render() {
+  const p = Model.project(S), st = Model.stats(S);
+  const at = p.at;
+  $('s-total').innerHTML = (st.total / 60).toFixed(1) + '<small>全程（分钟）</small>';
+  $('s-mean').innerHTML = st.mean.toFixed(0) + '<small>每段均值 s</small>';
+  $('s-std').innerHTML = st.std.toFixed(1) + '<small>标准差 s</small>';
+  $('s-min').innerHTML = st.min.toFixed(0) + '<small>最短 s</small>';
+  $('s-max').innerHTML = st.max.toFixed(0) + '<small>最长 s</small>';
+  $('s-speed').innerHTML = (Model.speedOf(S, at.act) * 100).toFixed(0) + '%<small>本幕时钟加成</small>';
+  $('s-elapsed').innerHTML = (S.elapsed / 60).toFixed(1) + '<small>已过（分钟）</small>';
+
+  // 27 根柱子各标一个数字会糊成一片。只标最短、最长、和「你正在等的这一段」——
+  // 形状才是这张图要说的事，确切秒数在下面那张表里。
+  const secs = p.gaps.map((g) => g.seconds);
+  const lo = secs.indexOf(Math.min(...secs)), hi = secs.indexOf(Math.max(...secs));
+  $('tl-track').innerHTML = p.gaps.map((g, i) => {
+    const h = Math.max(6, (g.seconds / st.max) * 100);
+    const mark = g.phase === 'current' ? '现在' : '';
+    const edge = i === lo ? ' lo' : (i === hi ? ' hi' : '');
+    return `<div class="tl-seg ${g.phase}${edge}" title="${g.from}→${g.to}　${g.seconds.toFixed(0)} 秒">`
+      + `<b>${mark ? mark + ' ' + g.seconds.toFixed(0) : ''}</b><i style="height:${h}%"></i></div>`;
+  }).join('');
+  $('tl-axis').innerHTML = p.gaps.map((g, i) => `<span>${i % 4 === 0 ? 'ACT ' + g.act : ''}</span>`).join('');
+
+  const v = Model.verdict(S);
+  $('verdict').className = 'verdict' + (v.tone ? ' ' + v.tone : '');
+  $('verdict').innerHTML = v.text;
+
+  const pushes = Object.values(S.pushes).reduce((a, b) => a + b, 0);
+  $('push-pill').textContent = pushes ? `按过 ${pushes} 次` : '未按过';
+  $('push-pill').className = 'pill' + (pushes ? ' on' : '');
+  const lm = Model.landmarkFor(S);
+  $('push-note').innerHTML = (lm ? `<b>地标：</b>${lm.text}<br>` : '')
+    + `每一章有自己的推钟动词：第二章「发行新一期」· 第三章「张贴告示」· 第四章「让 Agent 加班」· 第五章「喂机器一批文本」· 第六章「投产一条新语法」。`
+    + `<br>现在在第 ${at.act} 章，那一段还剩 ${Math.max(0, at.end - S.elapsed).toFixed(0)} 秒。`;
+  $('do-push').disabled = S.elapsed >= st.total;
+
+  for (const b of document.querySelectorAll('[data-struct]')) b.className = S.structure === b.dataset.struct ? 'on' : '';
+  for (const b of document.querySelectorAll('[data-push]')) b.className = S.push === b.dataset.push ? 'on' : '';
+  for (const b of document.querySelectorAll('[data-flag]')) b.className = S.landmarks ? 'on' : '';
+  $('speed').textContent = `速度 ×${speedMul}`;
+
+  const rows = ['flat', 'shaped'].flatMap((structure) => ['off', 'compound', 'topup'].map((push) => {
+    const s = Model.initial(structure, push), x = Model.stats(s);
+    const name = (structure === 'flat' ? '平' : '快慢') + ' + ' + ({off:'不推钟', compound:'复利', topup:'一次性'}[push]);
+    return `<tr><td>${name}</td><td>${(x.total/60).toFixed(1)} 分</td><td>${x.mean.toFixed(0)}s</td><td>${x.std.toFixed(1)}s</td>`
+      + `<td>${x.min.toFixed(0)}s</td><td>${x.max.toFixed(0)}s</td><td>${(x.max/x.min).toFixed(2)}×</td></tr>`;
+  })).join('')
+    + `<tr><td>平 + 复利按满 10 下（每章）</td><td colspan="6">见「推到极限」那个场景——全程会短于两小时，这是设计意图</td></tr>`;
+  $('compare').querySelector('tbody').innerHTML = rows;
+}
+
+function play() { running = !running; $('play').textContent = running ? '⏸ 暂停' : '▶ 播放'; }
+function loop() {
+  clearInterval(timer); if (!running) return;
+  timer = setInterval(() => {
+    const before = Model.project(S).at;
+    S = Model.tick(S, 0.1 * speedMul);
+    const after = Model.project(S).at;
+    if (after !== before) S = {...S, log:[...S.log, `进入 ${after.from}→${after.to}（第 ${after.act} 章，预计 ${after.seconds.toFixed(0)} 秒）`]};
+    if (S.elapsed >= Model.stats(S).total) { running = false; $('play').textContent = '▶ 播放'; }
+    render();
+  }, 100);
+}
+
+// ── 引导场景 ────────────────────────────────────────────────────────────────
+const SCENARIOS = [
+  {name:'① 现在这一版', setup:{structure:'flat', push:'off'},
+   copy:'先看你现在有的东西。27 段全在 230–320 秒之间，标准差 18.7 秒——非常匀。按播放让时间走一遍，注意那排柱子几乎一样高：没有任何一段让人觉得「快了」或「要来了」。',
+   steps:[{label:'设成「平 + 不推钟」', run:() => {S = Model.initial('flat','off'); S.log=[...S.log,'场景开始：平 + 不推钟。']}},
+          {label:'播放', run:()=>{ if(!running) play(); loop(); }},
+          {label:'暂停', run:()=>{ if(running) play(); loop(); }}]},
+  {name:'② 快慢有设计', setup:{structure:'shaped', push:'off'},
+   copy:'同样两小时，只换分配方式：每一幕开头一段短（约 120 秒，喘口气），收尾一段长（约 460 秒，攒劲），中间平。总时长一秒没变——所以这不是「变长变短」，是「有没有形状」。看柱子：高低出来了，而且高低是设计出来的。',
+   steps:[{label:'设成「快慢 + 不推钟」', run:()=>{S = Model.initial('shaped','off'); S.log=[...S.log,'场景开始：快慢有设计。']}},
+          {label:'播放整轮', run:()=>{ if(!running) play(); loop(); }}]},
+  {name:'③ 按一下，整章变快（复利）', setup:{structure:'shaped', push:'compound'},
+   copy:'这是核心那条：推钟不是买一次读数，是<b>永久</b>把这一章的钟调快。按 6 下，本章以后每一段都快 30%——注意别的章一动不动。这就是 Pecorella 说的「让手动购买永远有效」：你按下的每一下，在这一章剩下的全部时间里都还在起作用。',
+   steps:[{label:'设成「快慢 + 复利」', run:()=>{S = Model.initial('shaped','compound'); S.log=[...S.log,'场景开始：复利。']}},
+          {label:'跳到第二章', run:()=>{ S = Model.jump(S, 2); }},
+          {label:'按 6 下推钟', run:()=>{ for(let i=0;i<6;i++) S = Model.push(S, 2); }},
+          {label:'看「本幕时钟加成」', run:()=>{ S = {...S, log:[...S.log,'读一下「本幕时钟加成」和下面那一排剩余段的秒数。']}; }},
+          {label:'播放', run:()=>{ if(!running) play(); loop(); }}]},
+  {name:'④ 对照：一次性充值', setup:{structure:'shaped', push:'topup'},
+   copy:'同一个动词，换成「按一次只把当前这一段缩短 60 秒」。按 6 下——只有当前那一段短了，下一段立刻回到原速。玩家会很快算出「按它不如等」，于是这个按钮变成装饰。没有这一栏的对照，第 ③ 条看起来就像随便加的。',
+   steps:[{label:'设成「快慢 + 一次性」', run:()=>{S = Model.initial('shaped','topup'); S.log=[...S.log,'场景开始：一次性充值。']}},
+          {label:'跳到第二章', run:()=>{ S = Model.jump(S, 2); }},
+          {label:'按 6 下推钟', run:()=>{ for(let i=0;i<6;i++) S = Model.push(S, 2); }},
+          {label:'看剩余段有没有变快', run:()=>{ S = {...S, log:[...S.log,'看：只有当前这一段短了 360 秒，后面的段落一秒没动。']}; }}]},
+  {name:'⑤ 推到极限会怎样（边界）', setup:{structure:'flat', push:'compound'},
+   copy:'一个会被问的问题：那玩家狂按不就把两小时按没了？复利有上限 +50%（每章 10 下到顶）。按满，看全程掉到多少——那是「主动玩最快能多快」，是设计意图；真正要守的是<b>被动玩仍 ≥2 小时</b>，而被动那一档一秒都没动。',
+   steps:[{label:'设成「平 + 复利」', run:()=>{S = Model.initial('flat','compound'); S.log=[...S.log,'场景开始：推到极限。']}},
+          {label:'跳到第二章', run:()=>{ S = Model.jump(S, 2); }},
+          {label:'狂按 12 下', run:()=>{ for(let i=0;i<12;i++) S = Model.push(S, 2); }},
+          {label:'看全程', run:()=>{ S = {...S, log:[...S.log,'到顶之后不再加速——「再按也没用」也是一条要说出来的规则。']}; }}]},
+];
+let active = 0;
+function renderScenario() {
+  $('tabs').innerHTML = SCENARIOS.map((s, i) => `<button class="${i === active ? 'on' : ''}" data-tab="${i}">${s.name}</button>`).join('');
+  const sc = SCENARIOS[active];
+  $('scenario-copy').innerHTML = sc.copy;
+  $('scenario-steps').innerHTML = sc.steps.map((st, i) => `<button data-step="${i}" class="${i === step ? 'on' : ''}">${i + 1}. ${st.label}</button>`).join('');
+  $('scenario-log').innerHTML = S.log.slice(-4).map((l) => '· ' + l).join('<br>');
+  for (const b of $('tabs').querySelectorAll('[data-tab]')) b.onclick = () => { active = +b.dataset.tab; step = null; renderScenario(); };
+  for (const b of $('scenario-steps').querySelectorAll('[data-step]')) b.onclick = () => {
+    step = +b.dataset.step; SCENARIOS[active].steps[step].run(); render(); renderScenario();
+  };
+}
+
+document.querySelectorAll('[data-struct]').forEach((b) => b.onclick = () => { S = Model.initial(b.dataset.struct, S.push, S.landmarks); render(); renderScenario(); });
+document.querySelectorAll('[data-push]').forEach((b) => b.onclick = () => { S = Model.initial(S.structure, b.dataset.push, S.landmarks); render(); renderScenario(); });
+document.querySelectorAll('[data-flag]').forEach((b) => b.onclick = () => { S = {...S, landmarks: !S.landmarks}; render(); });
+$('do-push').onclick = () => { S = Model.push(S); render(); renderScenario(); };
+$('next-act').onclick = () => { const a = Model.project(S).at.act; if (a < 6) S = Model.jump(S, a + 1); render(); renderScenario(); };
+$('reset').onclick = () => { S = Model.initial(S.structure, S.push, S.landmarks); running = false; $('play').textContent = '▶ 播放'; clearInterval(timer); render(); renderScenario(); };
+$('play').onclick = () => { play(); loop(); };
+$('speed').onclick = () => { speedMul = speedMul >= 3200 ? 100 : speedMul * 2; render(); };
+
+render(); renderScenario();
+</script>
+</main></body></html>

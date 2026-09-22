@@ -73,6 +73,9 @@
     const add = (key, revealWhen, enabled, text, sub, type, props = {}, className = '') => {
       if (!rememberReveal(`action:${key}`, revealWhen)) return;
       const gate = E.commandReady(s, type);
+      // `available === false` 不是「买不起」而是「这一幕还没有」：第一章没有推钟动词，
+      // 微事件在两次之间本来就不该在屏幕上。这种要**不渲染**，灰着写「还差」是另一种谎。
+      if (gate.available === false) return;
       const ready = gate.ready && enabled;
       // A spent one-shot keeps its own「已完成」copy; only an unaffordable one gets the shortfall.
       const short = gate.binding && !gate.spent
@@ -103,13 +106,13 @@
           buttons.push(actionButton(label(ACTIONS.contract), sub, 'contract', s.glyphs>=c.glyphs));
         } else buttons.push(actionButton(label(ACTIONS.contract), tr('done'), 'contract', false));
       }
-      add('publish', s.lifetimeGlyphs>=5000, E.canPublish(s), label(ACTIONS.publish), E.canPublish(s)?(en?'Not an ending. What you print starts growing on its own.':'这不是结局。你印出来的东西，会开始自己生长。'):lack(en?'200 stock + 300 credits':'库存 200 字 + 300 资金', `${fmt(s.glyphs,1)} / ${fmt(s.credits,1)}`), 'publish', {}, 'major');
+      add('publish', s.lifetimeGlyphs>=E.ACT_GATES[1][0].need, E.canPublish(s), label(ACTIONS.publish), E.canPublish(s)?(en?'Not an ending. What you print starts growing on its own.':'这不是结局。你印出来的东西，会开始自己生长。'):lack(en?'200 stock + 300 credits':'库存 200 字 + 300 资金', `${fmt(s.glyphs,1)} / ${fmt(s.credits,1)}`), 'publish', {}, 'major');
     }
     else if (s.act === 2) {
       buttons.push(actionButton(label(ACTIONS.print), en?'Old verbs still work, for now.':'旧玩法还在，但意义开始改变。', 'print', true, {}, 'major'));
       // Once the rule is running, the button must report what it is producing. Repeating the
       // discovery copy forever is how a working button reads as broken.
-      const ruleReaders = (s.composed * E.RULE_READERS).toFixed(2);
+      const ruleReaders = E.ruleReadersPerSecond(s).toFixed(2);
       const composeSub = s.glyphs < 2 ? lack(en?'2 stock':'2 库存字', fmt(s.glyphs,1))
         : s.ruleActive ? (en?`Carved ${fmt(s.composed)} · readers +${ruleReaders}/s`:`已刻 ${fmt(s.composed)} 条 · 读者 +${ruleReaders}/秒`)
         : (en?'2 glyphs → one repeatable relationship':'2 字 → 一条可重复规则');
@@ -117,11 +120,10 @@
       add('condense', s.meaning>0||seen.has('A05')||s.composed>0, s.glyphs>=20, label(ACTIONS.condense), s.glyphs>=20?(en?'Volume becomes meaning.':'字数开始变成意义。'):lack(en?'20 stock':'20 库存字', fmt(s.glyphs,1)), 'condense');
       add('letter', s.letters>0||seen.has('A07')||s.readers>=250, s.readers>=250, label(ACTIONS.letter), `${en?'readers':'读者'} ${fmt(s.readers)}`, 'read-letter');
       add('organic', s.organicWords>0||seen.has('A08')||s.letters>=1, s.letters>=1, label(ACTIONS.organic), en?'The audience writes back.':'让读者也成为作者。', 'organic-word');
-      add('viral', s.viralWords>0||seen.has('A09')||s.organicWords>=1, s.organicWords>=1, label(ACTIONS.viral), en?'Propagation > production':'传播速度 > 生产速度', 'viral-word');
+      // 一次性动作用完之后换成「已完成」，不再挂着那句宣传语——这是本仓库已有的规矩
+      // （复写纸、自动出售台都这么写）。一个灰着却仍在推销自己的按钮，读起来像还能再按一次。
+      add('viral', s.viralWords>0||seen.has('A09')||s.organicWords>=1, s.organicWords>=1, label(ACTIONS.viral), s.viralWords>0?tr('done'):(en?'Propagation > production':'传播速度 > 生产速度'), 'viral-word');
       add('delete2', s.deletedNoise>0||seen.has('A11')||s.noise>=1, s.noise>=1, label(ACTIONS.delete), en?'Deletion is now productive.':'删除第一次成为生产行为。', 'delete-noise');
-      // 门槛数字的唯一真源在引擎（E.ACT_GATES）；渲染层不再抄一份。
-      const cityReady=E.gateProgress(s).done;
-      add('city', s.worldScale>=1||seen.has('A14')||cityReady, cityReady, label(ACTIONS.city), en?'The workshop is no longer the whole world.':'工坊不再是全部世界。', 'map-city', {}, 'major');
     }
     else if (s.act === 3) {
       // Through `add`, not pushed directly: this one now costs readers, meaning and credits, and
@@ -129,7 +131,13 @@
       // Reveal latches on the act (monotonic), never on affordability — an action you have
       // discovered stays on screen, greyed, with the shortfall written on it.
       add('dialect', s.act >= 3, true, label(ACTIONS.dialect), en?'Another district diverges.':'再观察一个街区。', 'discover-dialect');
-      add('concept', s.concepts>0||seen.has('A13')||s.meaning>=25, s.meaning>=25, label(ACTIONS.concept), en?'Spend 25 meaning to change society.':'花25意义，让一个概念进入社会。', 'make-concept');
+      // 代价从引擎读。写死过一次「花25意义」，而引擎扣的是 50——一个点下去比按钮上写的贵一倍
+      // 的动作，是披露契约最不能有的那种谎：不是「点了没反应」，是「反应比说好的大」。
+      const conceptCost = E.COMMAND_COSTS['make-concept'](s).find(([key]) => key === 'meaning')[1];
+      add('concept', s.concepts>0||seen.has('A13')||s.meaning>=25, s.meaning>=25, label(ACTIONS.concept), en?`Spend ${conceptCost} meaning to change society.`:`花${conceptCost}意义，让一个概念进入社会。`, 'make-concept');
+      // 地图是这一章画出来的，不是上一章的出口。要有两种以上街区，地图上才有东西可看——
+      // 门槛数字来自引擎（E.COMMAND_COSTS），按钮自己会写「还差 街区 1/2」。
+      add('city', s.worldScale>=1||seen.has('A14')||s.districts>=2, true, label(ACTIONS.city), en?'The workshop is no longer the whole world.':'工坊不再是全部世界。', 'map-city', {}, 'major');
       // 门槛数字的唯一真源在引擎（E.WORLD_GATE）；渲染层不再抄一份。
       const worldReady=s.concepts>=E.WORLD_GATE.concepts&&s.districts>=E.WORLD_GATE.districts;
       add('world', s.worldScale>=2||seen.has('A15')||worldReady, worldReady, label(ACTIONS.world), en?'The city is only one node.':'城市只是网络中的一个节点。', 'map-world');
@@ -148,13 +156,39 @@
       add('infra', s.infrastructure||seen.has('A25')||s.compressedMeaning>=10000, s.compressedMeaning>=10000, label(ACTIONS.infra), en?'Language is ready to become infrastructure.':'语言已经可以接管基础设施。', 'infrastructure');
     }
     else if (s.act === 6) {
-      add('delete6', s.deletedNoise>0||seen.has('A27')||s.noise>=1, s.noise>=1, label(ACTIONS.delete), en?'Remove 500 noise.':'一次删除500噪音。', 'delete-noise', {amount:500}, 'major');
+      add('delete6', s.deletedNoise>0||seen.has('A27')||s.noise>=1, s.noise>=1, label(ACTIONS.delete), en?'Remove 250 noise.':'一次删除250噪音。', 'delete-noise', {amount:250}, 'major');
       // Same threshold as the engine's gate (E.AHA_GOALS.A26.need): the button appears as soon as
       // ambiguity exists, but only becomes usable once there is enough of it to be worth clearing.
       const ambiguityReady=s.ambiguity>=E.AHA_GOALS.A26.need;
       add('ambiguity', seen.has('A26')||s.ambiguity>0, ambiguityReady, label(ACTIONS.ambiguity), ambiguityReady?(en?'Clarity becomes a resource.':'清晰度变成一种资源。'):lack(en?'100 ambiguity':'100 歧义', fmt(s.ambiguity,1)), 'resolve-ambiguity');
       const stopReady=E.gateProgress(s).done;
       add('stop', s.stopped||stopReady, !s.stopped&&stopReady, label(ACTIONS.stop), s.stopped?tr('done'):(en?'The final action is now possible.':'最后一个动作现在才出现。'), 'stop-printing', {}, 'danger');
+    }
+    // 这一幕的复利推钟动词：第二章起每一幕一个，第一章没有（它的手速本身就是动词）。
+    // 它排在主行动位：这一段等待里玩家唯一能主动做的事就是它，藏在边角等于没有。
+    // 「买不起」写成还差什么，「这一幕没有」直接不渲染——两种都由引擎的 commandReady 说。
+    const verb = E.ACT_VERBS[s.act];
+    if (verb) {
+      const used = E.boostCount(s, s.act);
+      const step = Math.round(E.BOOST_STEP * 100), cap = Math.round(E.BOOST_CAP * 100);
+      const now = Math.round(used * E.BOOST_STEP * 100);
+      const sub = used >= E.BOOST_MAX
+        ? (en ? `Maxed: this act runs ${cap}% faster` : `已到顶：这一幕快 ${cap}%`)
+        : (en ? `+${step}% for the rest of this act (now +${now}%)` : `这一幕以后每一段都快 ${step}%（现在 +${now}%）`);
+      const before = buttons.length;
+      add('push', Boolean(E.ACT_VERBS[s.act]), true, en ? verb.nameEn : verb.name, sub, 'push-clock', {}, 'major');
+      if (buttons.length > before) buttons.unshift(buttons.pop());
+    }
+    // 微事件：等待里偶尔出现的一个世界内的东西。它平时不在屏幕上——到点了才在，
+    // 点掉就轮到下一个。这正是它和主循环的区别：主循环一直在，它不。
+    const ev = E.EVENTS[s.act];
+    if (ev) {
+      const cost = ev.cost.map(([key, amount]) => `${E.fieldLabel(key, en)} ${fmt(amount)}`).join(' + ');
+      // 「发现」这个事件的条件就是它到点了——没到点不是「藏起来了」，是还没发生。
+      // 到点之后就一直看得见，买不起也只是灰着写还差什么（契约要的是这个，不是藏）。
+      const before = buttons.length;
+      add('event', E.eventDue(s), true, en ? ev.nameEn : ev.name, en ? `Costs ${cost}` : `花掉 ${cost}`, 'take-event', {}, 'event');
+      if (buttons.length > before) buttons.splice(1, 0, buttons.pop());
     }
     // The ACT I economy does not retire at publication. Credits fund every downstream action —
     // condense, dialects, concepts, agent factories, archive training — and the engine never

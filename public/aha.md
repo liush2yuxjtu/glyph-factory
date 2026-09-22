@@ -15,6 +15,12 @@ Glyph Factory 的 Aha 不是玩家要阅读的“惊喜说明”，而是玩家�
 3. **Persistent means persistent.** 一旦发现，即使暂时缺钱/缺字/缺资源，界面仍保留，只改为 disabled 或显示需求。
 4. **Replacement must be intentional.** 只有产品范式明确替代旧系统时，旧表面才能退出。
 
+**规则 3 管的是「买不起」，不是「这一幕还没有」。** 有些动作的存在本身依赖当前状态，而不是
+玩家付不付得起——第一章没有推钟动词（它的手速本身就是动词，第二章起才有）；微事件在两次
+之间本来就不存在。这两种是规则 1「Hidden means absent」，不是规则 3，界面上直接不渲染。
+判据写在引擎里（`COMMAND_AVAILABLE`）：`available === false` 不渲染，`available` 但买不起
+才灰着写「还差 …」。加新动作时先问自己属于哪一类，不要默认「所有按钮都常驻」。
+
 ## Player-facing announcement
 
 Aha 的标题与 reveal 是设计语言，玩家永远看不到：日志里的 `A## ·` 行会被隐私层剥掉。
@@ -59,9 +65,16 @@ Aha 的标题与 reveal 是设计语言，玩家永远看不到：日志里的 `
 
 ## File identity and reproducibility
 
-`aha.md` 是唯一文字契约，`public/aha.html` 是唯一交互评审源。
-`intent.md` 与 `public/intent.html` 是兼容副本，必须逐字节一致；运行
-`node scripts/sync-aha-docs.mjs` 同步。不得分别维护两个方向。
+`aha.md` 是 Aha / 披露契约的唯一文字源，`public/aha.html` 是它唯一的交互评审源；
+两者各自维护（HTML 那边有 iframe 评审台，不是 Markdown 能表达的），由
+`node scripts/sync-aha-docs.mjs` 把 Markdown 发到 `public/` 供评审页读取。
+
+**用户意图不在本文件。** 它记在 `intent.md`，由 `node scripts/build-intent.mjs` 生成
+`public/intent.html`。这份文件回答「怎么实现」，那份回答「要实现成什么样」。
+
+2026-09-21 之前 `intent.md` / `public/intent.html` 是本文件的逐字节副本，那是历史遗留；
+用户明确要求两者各自独立，所以那几个「必须逐字节一致」的断言已随之删除（见
+`tests/intent-audit.test.mjs`）。改这个方向之前先读 `intent.md` 的非目标一节。
 
 ## Executable acceptance matrix
 
@@ -78,6 +91,7 @@ Aha 的标题与 reveal 是设计语言，玩家永远看不到：日志里的 `
 | I09 | 内部评审不写入玩家存档；播放器不暴露内部术语 | 两个 iframe、存档隔离、DOM 与可访问性树 |
 | I10 | 生产产物不包含 Aha/Intent/Lab/Director 评审入口 | 真实构建白名单与 HTTP 404 |
 | I11 | A01–A28 每个触发时玩家日志出现对应世界线，且它是玩家读到的最新一行 | 真实玩家构建逐条驱动 28 个动作并断言日志首行；负对照抽掉世界线后同一断言必须失败 |
+| I12 | 相邻两条 Aha 之间的等待时长与判断次数都稳定，顺序不乱、不挤在同一拍，全程不少于两小时 | `node scripts/pacing.mjs`（参考对局读数）与 `tests/game-v3.test.mjs` 的节奏断言；改过门槛之后必须 `node scripts/pacing.mjs --diff tests/pacing-baseline.json` 对照基线。读法与判据见 `.claude/skills/verify/SKILL.md` 的「rhythm contract」一节 |
 
 ## Review boundary
 

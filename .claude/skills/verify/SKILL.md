@@ -1,6 +1,6 @@
 ---
 name: verify
-description: Verify Glyph Factory changes against the exact candidate SHA — launch the dev server, drive the real browser surfaces with the committed driver, run the 28-case Aha invariant/transition suite on chromium and webkit, check the action disclosure contract (affordability disables, never hides), the cost-gate contract (one engine table decides what an action costs, and a button must never be lit while the engine refuses it), the pacing contract (no act may collapse to a handful of decisions), the progression contract (an active rule must run, and its gating resource must be on screen) and the Aha legibility contract (every one of A01–A28 must announce itself in the player's log), and capture visual and interaction evidence. Use for general verification, proving an Aha change is safe, checking the 28/28 claim, verifying an action reveal/enable change, verifying an action cost or act-gate change, verifying an advance() cadence / Act II progression change, verifying the game is still completable at a sane pace, or verifying that an Aha is perceivable on the player surface.
+description: Verify Glyph Factory changes against the exact candidate SHA — launch the dev server, drive the real browser surfaces with the committed driver, run the 28-case Aha invariant/transition suite on chromium and webkit, check the action disclosure contract (affordability disables, never hides; a surface that does not exist yet renders nothing at all), the cost-gate contract (one engine table decides what an action costs, and a button must never be lit while the engine refuses it), the rhythm contract (the seconds, decision-click and raw-click gaps between consecutive Aha moments: firing order, no same-click pairs, passive play time ≥ 2 hours, the three shape bounds — time CV, longest ÷ shortest, and no gap under 60s — the per-act shape itself, the four source-patching negative controls behind the act verbs / micro-events / fuel feed, and — per section, never as one figure — the mean/std of the decision and click gaps, with Act I read separately as the tutorial), the progression contract (an active rule must run, and its gating resource must be on screen) and the Aha legibility contract (every one of A01–A28 must announce itself in the player's log), and capture visual and interaction evidence. Use for general verification, proving an Aha change is safe, checking the 28/28 claim, verifying an action reveal/enable change, verifying an action cost, act-gate or threshold change, verifying an advance() cadence / Act II progression change, verifying game pacing / rhythm (two-hour play-time rebuild: tests/pacing-baseline.json), verifying that an Aha is perceivable on the player surface, and verifying user intent itself — the intent document is an argument ({{INTENT}}, default intent.md), never hard-coded here.
 ---
 
 # Verify Glyph Factory
@@ -66,17 +66,363 @@ stays the entry point, which keeps the references in `public/aha.html`, `public/
 `tests/intent-audit.test.mjs` and `aha.md` true. The script is deliberately outside
 `sourceSha256`: a changed tool is not a changed candidate.
 
-**It aborted on stage one from 2026-09-20 until 2026-09-22.** `verify-player.mjs` shells out
-to `node --test`, and Node ≥ 20 prints `ℹ tests 92` where the parser required
-`# tests (\d+)`. The fast stage *passed* and the audit then rejected it, so a reporter-format
-drift read as a product failure. The parser now accepts both shapes and treats a missing
-tally as a failure rather than as zero. Verified after the fix: all seven stages PASS, 218
-tests across them, `commit 161a589`, `status: PASS`.
+**It aborted on stage one for two distinct reasons, both of them in how it reads `node --test`
+output and neither of them a product defect.** Read them together — they are the same failure
+wearing two hats, and the second one is not fixed by fixing the first:
+
+1. **Wrong field prefix** (2026-09-20 → 09-22). `verify-player.mjs` shells out to `node --test`;
+   Node ≥ 20 prints `ℹ tests 92` where the parser required `# tests (\d+)`. The fast stage
+   *passed* and the audit then rejected it.
+2. **ANSI colour** (fixed 2026-09-22). The reporter wraps those lines in escape sequences, so
+   the line no longer *starts* with `#` or `ℹ` — and the anchor misses **both** shapes at once.
+   Same symptom: "fast gate did not prove nonempty, unskipped success" on a run whose own log
+   ends in `ℹ fail 0`. Fixed by stripping ANSI in `run()` before anything parses the text.
+
+Neither fix loosened the floor: the parser now accepts either prefix and treats a **missing**
+tally as a failure rather than as zero (`tally('fail') !== '0'`), so an unrun or unparsed stage
+is still not a pass. Verified after both fixes: all seven stages PASS,
+`test-results/intent-audit/report.json` with `status: "PASS"`.
 
 When it fails, read `report.json` — `status`, the per-stage `status` / `exitCode` / `tests`,
-and `error`, which names the stage that died. A stage missing from `stages` did not run.
-**Do not hand-run the stages and present them as an audit**; that is a weaker claim and must
-be labelled as one.
+and `error`, which names the stage that died. A stage missing from `stages` did not run. And
+**when it dies on `fast`, read `test-results/intent-audit/fast.log` before believing it**: a
+reporter formatting change looks exactly like a product failure, and twice now it has cost a
+full re-run to tell the two apart.
+
+**Do not hand-run the stages and present them as an audit** — that is a weaker claim and must
+be labelled as one. If the gate itself is broken, the honest form is:
+
+```bash
+npm run verify:fast
+npm run build:review
+GLYPH_BROWSER=chromium python3 scripts/run-browser-contracts.py player
+GLYPH_BROWSER=webkit   python3 scripts/run-browser-contracts.py player
+GLYPH_BROWSER=chromium python3 scripts/run-browser-contracts.py aha
+GLYPH_BROWSER=webkit   python3 scripts/run-browser-contracts.py aha
+git diff --check
+```
+
+…then say in so many words that this was the hand-run equivalent, not `intent-audit` itself.
+
+### The rhythm contract: the gaps between Aha moments
+
+**The question this section answers is "the clicks between two Aha moments"** — how many clicks
+land between discovery N and discovery N+1. There are three readouts of that gap, and the whole
+skill of reading them is knowing which one answers what:
+
+| Readout | What it answers | Where it goes wrong |
+|---|---|---|
+| **seconds** | How long the player waits. This is what decides whether the game is two hours long. | Nothing — it is the primary unit. |
+| **decision clicks** (`decisions`) | How many real choices fit inside that wait. | Under-counts a tutorial; that is the point. |
+| **clicks** (everything) | How much raw pressing the stretch costs. | **Act I makes this number meaningless on its own — read it per-section, never as one figure.** |
+
+A per-act count answers none of them: an act can hold 40 decisions and still hand the player
+five insights in five clicks and then 35 clicks of nothing.
+
+**How to read the click unit honestly.** `clicks` counts everything including `print`, `sell`
+and `toggle-auto`; `decisions` excludes those three because there is no choice in them. In
+acts II–VI the two are nearly the same (the player is making decisions, not mashing). In Act I
+they diverge by two orders of magnitude: the tutorial's policy is "every 500 ms tick, buy if you
+can, otherwise sell, otherwise print", so its click count is ≈ **2 × its seconds** — a 250-second
+tutorial costs ~500 clicks no matter how the act is designed. Consequences:
+
+- **Report the click mean/std per section, not as one number.** All 27 gaps currently read
+  mean 40.48 / std 131.60; the 25 gaps after Act I read **mean 3.28 / std 2.68**. The first pair
+  is a statement about the tutorial's length, the second is a statement about the game's rhythm.
+  Quoting only the first pair says the rhythm got worse when it got better.
+- **Never "fix" the all-sections click std by making the reference player idle during Act I.**
+  That lowers the number by changing the measuring instrument, not the game: a player with a
+  working print button and nothing else to do *will* press it. The first version of this harness
+  invented its own budget and reported 770 clicks in one act that a player following the
+  on-screen text spends 5 on — same mistake, opposite direction.
+- If the all-sections click number must come down, the lever is Act I's **mechanics** (make the
+  tutorial's time pass without requiring presses — auto-sell on by default, a print cooldown),
+  never its measurement. Shortening the tutorial also works and is the cheaper change; it costs
+  one 2σ time outlier, since Act I's two gaps are the only ones the two-hour budget does not pin.
+
+Two things make that measurable instead of a matter of taste:
+
+- The engine is deterministic, so with a fixed start and a fixed policy the whole playthrough
+  — and therefore all three gap vectors — is reproducible to the click.
+- The policy is the game's own guidance, not a walkthrough. `tests/pacing.mjs` presses what the
+  chapter calls for and, when it cannot, satisfies exactly the shortfall the engine reports in
+  `commandReady().binding` — the same string a player reads on a greyed button (`还差 …`) — or
+  the act-progress line (`gateProgress().binding`).
+
+```bash
+node scripts/pacing.mjs                 # 三个单位各自的 mean/std/CV，逐段表，全程时长
+node scripts/pacing.mjs --unit clicks    # 逐段表只看点击那一列（默认 decisions）
+node scripts/pacing.mjs --diff <json>   # compare against a saved baseline (see below)
+node scripts/pacing.mjs --trace         # which verbs each gap was spent on
+node scripts/pacing.mjs --json          # machine-readable, for comparing two revisions
+```
+
+**The baseline to compare against is `tests/pacing-baseline.json`** (committed; regenerate with
+`node scripts/pacing.mjs --json > tests/pacing-baseline.json` only when a rebalance is the intended
+change, and say so in the commit message).
+
+`npm run verify:fast` runs the same playthrough inside the suite
+(`tests/game-v3.test.mjs`, "a plain playthrough reaches the ending, and the rhythm between Aha
+moments holds"), so a threshold change that wrecks the rhythm fails the fast gate as well.
+
+下表里的**阈值**对应 `{{INTENT}}` 里那几条带数字的需求——真源在那份文档，这里只是当前读数。
+改判据先改那份文档（见「用户意图」一节的唯一硬规则），再改这里的表和 `tests/` 里的断言。
+
+| Assertion | Why it is a contract and not taste |
+|---|---|
+| Firing order equals A01…A28 | The list, and the narrative behind it, are ordered. Readers, articles, machine use and noise all grow on their own, so any trigger written as "an absolute value was reached" eventually overtakes the click that was supposed to cause it. |
+| No two moments on one click | The focus card shows one moment. Two on one click means one of them is announced to nobody. |
+| A 0-click gap must be ≥ 60s wide, and there are at most 3 | A designed breath (the night shift writing articles, the machines adopting a glyph) is legitimate; a collision is not. |
+| **Total play time ≥ 7200s** | "A good mean" is defined by the user as *at least two hours of play*. Read on the **passive** path (see below). |
+| **Time CV ≤ 0.45, longest ÷ shortest ≤ 6, and no gap < 60s** | Three bounds, not one. CV alone accepts 27 identical rooms, which is itself a pacing defect; CV alone also accepts a collapse (a collapse is a *larger* CV with the shortest gap heading to zero). The ratio catches "one stretch is ten times another"; the floor catches "this discovery was not really waited for". Together they say **有形状、但形状有界**. |
+| mean gap ∈ [3, 7] decisions, over acts II–VI | Under 3 the chapter is one press per insight; over 7 the player is grinding, not discovering. |
+| std ≤ 4 decisions, over acts II–VI | The number this metric exists for. |
+| max gap ≤ 20 decisions, and no ACT I gap is 0 | One stretch may not carry a whole act. |
+| **ACT I is the only click-heavy stretch** — exactly two gaps ≥ 100 clicks, and they are A01→A02 and A02→A03 | The tutorial is allowed to be mashing. Nothing later may be; if a third gap crosses 100 clicks, a wait has turned back into hand speed. |
+| click mean ≤ 8, std ≤ 5, max ≤ 20 per gap, over acts II–VI | Where the click unit is actually meaningful. The all-sections click figure is a statement about how long the tutorial is, not about rhythm. |
+| Every act ≥ 5 decisions, and all 28 fire | The 2026-09 collapse got back in through this door once already. |
+| **Within every act of ≥ 3 gaps: the first gap is the act's shortest and the last is its longest, and tail ≥ 2 × head** | The shape is a *position* claim, not a variance claim — variance alone is satisfied by noise. Asserted separately in `tests/rhythm-structure.test.mjs` because the CV/ratio band above must **also pass when the curve is flattened**; conflating the two would make "shaped" and "bounded" the same test. |
+| **Passive floor, active ceiling** | The two-hour floor is read on the **passive** run (`playthrough(E)` — presses only what the screen asks for). `node scripts/pacing.mjs` also prints the active run (`push + microEvents`), which is *shorter by design*. Reporting the active number against the two-hour floor is a false failure; reporting the passive number as "what a player experiences" is a false pass. |
+| Each of the four 2026-09-21 mechanisms carries its own negative control | `tests/rhythm-structure.test.mjs` patches the engine source and re-runs: flatten ⇒ shape fails while the band passes; remove the compounding multiplier ⇒ the active path returns to the passive length; freeze the event scheduler ⇒ the wait has nothing clickable again; cut the fuel feed ⇒ act V stops tracking the old layer's output. It is not "behaviour changes if I change the code" — it is "the number moves in the direction the design claims". |
+
+**Reference numbers, current (`feat/aha-rhythm`, 2026-09-21 节奏结构版):** 27 gaps, passive path
+**全程 121.7 分钟 / 7302s**, time mean 270.0s / std 108.9s / **CV 0.403**, range 90–490s,
+longest ÷ shortest 5.43; decisions mean 5.89 / std 6.58 overall and **4.60 / 3.59 over acts II–VI**;
+clicks mean 41.78 / std 152.91 overall and **4.68 / 3.60 over acts II–VI**; 0 inversions;
+0 same-click pairs; **1 silent beat** (288s). Active path (push + micro events):
+**97.6 分钟**, 30 presses of the act verb, 22 micro-events.
+
+The click vector, all 27 gaps in A01…A28 order:
+`217 794 4 7 0 3 7 7 1 1 3 5 5 10 6 16 1 1 1 8 4 3 9 2 2 7 4`.
+The decision vector for the same run:
+`10 34 3 7 0 3 6 7 1 1 3 5 5 10 6 16 1 1 1 8 4 3 9 2 2 7 4`.
+
+Two earlier revisions, for reading a diff against an old baseline. **Before the 2026-09-21 shape
+change**: 全程 122.9 分钟, time mean 272.8s / std 18.7s / **CV 0.069**, range 227–321s; decisions
+3.20 / 2.62 and clicks 3.28 / 2.68 over acts II–VI; 3 silent beats. **Before the whole rebalance**:
+全程 23 分钟, time mean 51.3s with a CV of ~2, 15 of the 27 gaps under 6 seconds.
+
+**A rising time CV is not automatically a regression.** 0.069 → 0.403 across the shape change was
+the design: the earlier number was the high-water mark of a metric pushed to its limit, and 27
+identical rooms is the defect it was hiding. Read the three bounds together and read the per-act
+shape assertion, never the CV alone. The all-sections *click* figure, by contrast, is still the
+one that moves for measurement reasons (see the Act I bullets above) — expect it to get worse
+every time the tutorial gets longer, and say which number you are quoting.
+
+Three things the numbers do **not** mean. ACT I is excluded from both the decision and the click
+bands on purpose — it is the manual tutorial, its "decisions" are machine purchases, and a longer
+tutorial inflates both spreads for reasons that have nothing to do with the later acts. The
+remaining silent beat is not an empty screen: the player can always print, sell and buy during
+it; what they cannot do is *decide*, which is why the metric reads zero. And a large all-sections
+click std is not by itself a defect — see the three-bullet list above for what it is and what the
+legitimate levers are.
+
+**A shape assertion is not a variance assertion, and both are needed.** The per-act row in the
+table above is positional — *which* gap is short and *which* is long — and it lives in a
+different file from the CV band on purpose. Variance alone is satisfied by noise, and the band
+alone is satisfied by 27 identical rooms; a suite with only one of them cannot tell "designed
+fast-and-slow" from either failure. Their separation is also what makes the flattening control
+meaningful: flatten the curve and the band must still pass while the shape must fail.
+
+### 原始读数：一张表，六个口径
+
+`node scripts/pacing.mjs` 默认就打全表，不需要另写脚本；`--trace` 补上「这一段花在哪些
+动词上」。合起来是这样（当前 `feat/aha-rhythm` 的实测值）：
+
+```
+段        ACT   秒    决策  点击  | 这一段花在哪些动词上
+A01→A02    1    109    10   217  | sell×107 print×100 buy×10
+A02→A03    2    398    34   794  | sell×397 print×363 buy×31 boost×1 research-auto×1 publish×1
+A03→A04    2    130     3     4  | compose-rule×3 print×1
+A04→A05    2    288     7     7  | compose-rule×6 condense×1
+A05→A06    2    288     0     0  | （等读者自己涨上来）
+…（27 行，A01→A02 到 A27→A28）…
+A16→A17    4    263    16    16  | buy×12 condense×3 editor-autonomy×1
+A22→A23    5    196     3     3  | buy×3（第五章开始，产能重新有用）
+A23→A24    5    334     9     9  | compress-language×5 buy×4
+A27→A28    6    442     4     4  | buy×3 stop-printing×1
+
+口径                     n     均值     标准差     CV     最小   最大
+秒   · 全部 27 段        27   269.98   108.88  0.403     90    490
+秒   · 去掉第一章 25 段   25   271.32   105.37  0.388     90    490
+决策 · 全部 27 段        27     5.89     6.58  1.118      0     34
+决策 · 去掉第一章 25 段   25     4.60     3.59  0.780      0     16
+点击 · 全部 27 段        27    41.78   152.91  3.660      0    794
+点击 · 去掉第一章 25 段   25     4.68     3.60  0.769      0     16
+
+被动 121.7 分钟 → 主动 97.6 分钟（−24.1 分钟；推钟 30 下 · 微事件 22 个）
+```
+
+`--trace` 这一列现在还会告诉你在哪几段里玩家动手了。**`buy` 出现在第四章以后**是
+2026-09-21 之后才有的形状：第五章的钟被旧层产能喂着，所以「回去把旧摊子做大」重新变回一个
+决定。如果某次改动之后 `buy` 在 A16 之后消失了，先查那条燃料链路，别急着调节奏——那是
+「旧动词死掉」这个类型病又回来了，而它在时长那一列上看不出来。
+
+六个口径不是六份读数，是同一份读数的六个面：三种单位 × 两种范围。**报数时必须说清是哪
+一格**——「点击 std 131.60」和「点击 std 2.68」说的是同一局，前者是教程长度，后者是节奏。
+
+### Act I 是唯一的旋钮
+
+要压「点击」这一列，只有第一章能动。**第二章以后那两个旋钮**：`ACT_GATES[1]` 里那条
+`lifetimeGlyphs`（发行门槛，当前 32000）决定第一章有多长；`AHA_GOALS.A02.need`（打字员几个，
+当前 3）决定第一章的**形状**（首段多短、末段多长），它是 `scripts/fit-rhythm.mjs` 搜出来的，
+不是手写的。下面是发行门槛五个值各实跑一遍的结果：
+
+| 发行门槛 | A01→A02 | A02→A03 | 全程 | 时长标准差 | 时长 CV | 点击（全部） | 点击（去第一章） |
+|---|---|---|---|---|---|---|---|
+| 14000 | 109s | 259s | 119.5 分 | 105.7s | 0.399 | 31.74 / 102.95 | 4.84 / 4.21 |
+| 18000 | 109s | 291s | 120.0 分 | 105.8s | 0.397 | 34.00 / 114.01 | 4.76 / 3.87 |
+| 22000 | 109s | 326s | 120.6 分 | 106.3s | 0.397 | 36.52 / 126.48 | 4.68 / 3.59 |
+| 26000 | 109s | 355s | 121.0 分 | 107.3s | 0.400 | 38.56 / 136.94 | 4.68 / 3.79 |
+| **32000（当前）** | 109s | 398s | 121.7 分 | **108.9s** | 0.403 | 41.78 / 152.91 | 4.60 / 3.59 |
+
+三件事从这张表里直接读得出来，改这个旋钮之前先读一遍：
+
+1. **五档全程都 ≥ 2 小时**（119.5–121.7 分），**时长 CV 也几乎不动**（0.397–0.403）。
+   两小时和形状这两条线都不靠这个旋钮守，靠的是后面 25 段的阶梯。
+2. **「去第一章」那一列会动，而且方向和 2026-09-21 之前相反**：现在门槛越低，后面几章
+   的点击**越难看**（4.84 → 4.60）。原因在第五章——它的钟被旧层产能喂着，第一章短了，
+   玩家买到的机器就少，第五章就得花更多动作去补。所以「压总点击」不再是免费的：
+   它现在会真的动到后面的节奏。
+3. **全部段点击那一列仍然只反映教程长度**（31.74 → 41.78），这一半结论没变。
+
+当前选择是 32000（后 25 段最干净），代价是全部段点击 41.78 / 152.91 一直难看；这是有意选的，
+理由写在上面的断言表里。要换成别的档，改完必须重跑 `npm run verify:fast`（点击断言的
+`heavy` 列表会跟着变）和 `--diff`。
+
+**怎么自己量一档而不动工作区**：门槛是写死的常量，别为了测一档去改文件再改回来——
+在内存里替换源码再 eval 就行：
+
+```js
+import { readFileSync } from 'node:fs';
+import { playthrough, pacingReport } from './tests/pacing.mjs';
+const src = readFileSync('public/glyph-engine-v3.js', 'utf8')
+  .replace('need:32000,', 'need:22000,');          // 锚点：ACT_GATES[1] 的 lifetimeGlyphs
+const E = new Function(`${src}\nreturn GlyphEngineV3;`)();
+const run = playthrough(E);
+const d = pacingReport(E, run, 'decisions'), c = pacingReport(E, run, 'clicks');
+console.log(d.secondsStd.toFixed(1), d.totalSeconds, c.mean.toFixed(2), c.std.toFixed(2));
+```
+
+换成别的旋钮（任何 `need:` / 成本 / 速率）同理：改锚点字符串，别的都不变。同一个手法
+也是量「如果改成 X 会怎样」的标准做法——**先量，再决定，别先改**。
+
+**给非工程读者看的图**：`node scripts/eli5-pacing.mjs` 生成 `public/eli5-pacing.html`
+（自包含单文件，直接开）。数字全部从参考对局现算——包括上面那张五档对照表，它每次都
+重跑一遍，锚点从 `ACT_GATES[1]` 自己取，所以改了门槛这张图不会静默画成「所有档都一样」。
+它画的正是这条契约的核心对照：同样的 27 段，秒数图是一排平齐的柱子，点击图是两根尖峰。
+
+**How to use it on a change.** Any edit to a threshold, cost, rate or gate moves these vectors.
+Run `node scripts/pacing.mjs` and `node scripts/pacing.mjs --unit clicks` before and after, plus
+`node scripts/pacing.mjs --diff tests/pacing-baseline.json` (add `--unit clicks` for the click
+column — the diff's per-gap "changed" threshold is unit-aware, 4 decisions vs 50 clicks).
+Five failure shapes to look for — the first four are about the numbers, the fifth is about the
+machinery behind them. A *reordering*, where a discovery that used to follow another
+now precedes it (a copy change the diff will not show you); a *clumping*, where several gaps go
+to 1–2 and one goes to 15+ (the 2026-09 collapse in miniature); a *shortening*, where the total
+drops below two hours while every other number stays healthy — that is what happened before this
+round, and no assertion in the suite caught it; and a *third heavy gap*, where a gap past Act I
+crosses 100 clicks, which means a wait has become hand speed again.
+
+The fifth: **the rhythm numbers all hold while the machinery behind them has gone inert.** Since
+2026-09-21 four pieces of machinery produce the shape, the floor and the texture — the act verbs
+(one per act from Act II, compounding, escalating cost), the micro-event scheduler (deterministic,
+keyed to `actSeconds`), the fuel feed (Act V's clock reads the old layer's `rate`), and the
+ladders themselves. Each of them can be disconnected without moving a single number in the
+paragraph above, because the reference player is *passive*: it never presses a verb and never
+picks up an event, so a dead verb and a live one look identical in the passive report. That is
+exactly why each one carries a source-patching negative control in
+`tests/rhythm-structure.test.mjs`, and why the report prints the active line next to the passive
+one. **If you are reviewing a diff that touches any of the four, the passive numbers are not
+evidence.** Run the control suite; that is the only thing that distinguishes "the mechanism is
+there" from "the mechanism is still on screen".
+
+Two structural lessons, both worth more than any single number:
+
+1. **Every discovery needs its own clock, and that clock must be unlocked by the discovery
+   before it.** A resource that is already growing when an act starts has been silently paying
+   for that act's later insights during the earlier wait, so they arrive in a burst. This is why
+   `AHA_CLOCK` exists (engine, next to `AHA_GOALS`): one entry per discovery, naming the resource
+   and the reading at which it fires, read by *both* `clockMet()`, which decides when the
+   discovery happens, and `COMMAND_COSTS`, which decides when the button lights up. The button's
+   `还差 读者 700/740` and the engine's own gate are then the same number by construction.
+   Act IV's clock is literally the newsroom: `overnightArticles`, at `agents × 0.5` per second.
+2. **A gate must not ask for a resource the chapter's own discoveries spend.** While Act II's
+   gate demanded `meaning` on top of the meaning each discovery costs, the reference player
+   accumulated the whole chapter's meaning during one passive wait and paid for the next three
+   discoveries out of stock — three gaps of 1 in a row. Dropping `meaning` from that gate and
+   pricing it into the discoveries themselves (reading a letter 35, coining a word 55, spreading
+   one 70) took the act from `1 8 1 1 6 5 1` to `1 5 3 6 7 1 1`.
+
+Corollary to (1): a clock that is fed by an *unbounded* quantity is not a clock. `composed`
+grows forever once the rule runs, and it used to feed readership directly
+(`0.35 + composed × 0.015`), so Act III's reader rate ran away to 4/s and its clock stopped
+meaning anything. It is capped at twelve compositions now, and A09's "传播速度登场" is a real
+multiplier on the natural rate (`× 3`) rather than a one-shot `+750` readers that skipped 750
+worth of scale in a single click.
+
+### Wait states are part of the contract, not a gap in it
+
+Four review states (A16, A17, A22, A25) have **no action that advances the act on purpose**: the
+player is waiting for a clock. They are declared explicitly in `public/aha-review-contract.js`
+under `clocks`, each with the condition that says what is being waited for, and `stateErrors`
+fails if a state is supposed to be a wait and is not. The reason is the disclosure contract's
+mirror image: "there is nothing to click here" must never be an all-purpose excuse, so every wait
+has to name its clock.
+
+Note the wording: since 2026-09-21 these states are no longer *empty screens*. Each act from II
+on renders its compounding verb, so a wait state now has something enabled on it — a thing that
+shortens the wait rather than ending it. `exercise()` keys off `clocks[id]` and therefore still
+skips the click, which is correct: the assertion is "this state is a wait", not "this state is
+blank". Do not tighten it into "zero enabled buttons" — that is exactly the state the rhythm
+work removed.
+
+
+### 用户意图：这一节验的是 `{{INTENT}}`，不是这份技能里写死的需求
+
+前几节验的是**实现**（披露契约、推进契约、Aha 可感知、节奏）。这一节验的是**需求本身**：
+那个需求文档里的每一条，是真做到了，还是只是写在纸上。
+
+**需求文档是这一节的参数，不是常量。** 调用时把它作为参数传进来：
+
+```
+/verify intent.md              # 默认
+/verify INTENT=docs/roadmap.md # 换一份需求文档
+{{INTENT}}                     # 参数占位符；不传就取仓库根的 intent.md
+```
+
+技能里**不许写死任何具体需求、数字或已决方案**。原因很实在：需求会变，而写进技能的那份
+不会跟着变，于是验证器会继续守护一个已经被否掉的方向——比没有验证器更糟，因为它看起来
+一切正常。所有「当前要验什么」的内容住在需求文档里，这一节只写**怎么验**。
+
+#### 四层证据，缺一层就不算
+
+| 层 | 验什么 | 证据长什么样 |
+|---|---|---|
+| 文档 | 需求单独存档、不与其他契约互为副本；每条都有「原话 / 怎么验 / 状态」 | `tests/intent-audit.test.mjs`（非同一性 + 完整性断言） |
+| 数值 | 需求里带数字的那几条 | `node scripts/pacing.mjs` 等读数 + `tests/*.test.mjs` 里对应的断言 |
+| 表面 | 需求里要求玩家能看见/能按到的东西 | 真实浏览器契约（`run-browser-contracts.py`）或 driver |
+| 负对照 | 把该机制拿掉，对应断言必须变红 | 需求文档里每条自带的「负对照」栏 |
+
+**每一条需求都要自带负对照**，否则它是不可证伪的。写法：说出「关掉什么，什么必须坏」。
+说不出来的那条，要么在文档里补，要么就别声称它被验证了。
+
+#### 竞品批评怎么查（方法，不是结论）
+
+给一个类型做验证时，先查这个类型的公开批评，别闭门造车。做法：
+
+1. 只收**能追溯到具体游戏和具体毛病**的批评。泛泛的「放置游戏很无聊」不进表。
+   优先设计师自述、开发者复盘、同行评审论文；纯聚合站只当线索不当依据。
+2. 每条批评写成一行，四列：**通病 · 谁被点名 · 反例/解法 · 我们在不在其中**。
+3. 「我们在其中」的每一条，都必须对应需求文档里的一个决定（做或不做，都要写下来）。
+4. **「我们不在其中」和「我们在其中」一样重要**——它同样是一条被守住的性质，也得有负对照。
+
+查出来的表、以及由它产生的决定，**写进需求文档**（`{{INTENT}}`），不写在这里。
+
+#### 唯一的硬规则
+
+**改判定口径之前先改需求文档。** 反过来（先改断言让数字好看）是这套契约唯一能腐烂的方式。
+代码评审里看到断言松动、而需求文档没动，就该问一句。
 
 ### Build before any browser suite
 
@@ -186,6 +532,15 @@ rewarded them for** — `publish` needs 200 stock, `compose-rule` needs 2, `cond
 in-game explanation. That was the state before 2026-09-20, when `publish` used
 `E.canPublish(s)` for reveal *and* enable.
 
+**The mirror case, added 2026-09-21: "this act does not have it" is not "you cannot afford
+it".** Two commands exist only in some states — each act's compounding verb (Act I has none,
+its hand speed *is* the verb) and the micro-event (nothing exists between two of them). Those
+render nothing at all, and that is rule 1 of `aha.md` (*hidden means absent*), not rule 3.
+The engine decides which case applies, in `COMMAND_AVAILABLE`: `commandReady()` returns
+`{ available, ready, … }`, `available === false` means do not render, and `available` but not
+`ready` means grey with the shortfall. Do not "fix" a missing button by making it permanent —
+ask which of the two it is. `aha.md`'s disclosure contract carries the same paragraph.
+
 Verify a disclosure change at both layers:
 
 **Node (always).** `tests/progressive-disclosure.test.mjs` →
@@ -293,19 +648,21 @@ state, then `clock.run_for`, click by `data-command`, and read back `localStorag
 ```
 
 Must reach, in order: `readers` visible on the metric row; `read-letter` appears once
-`readers >= 250`; A07 → A08 → A09 → A11 fire on real clicks; A10 fires from readership
-alone; `map-city` appears; clicking it gives `act === 3, worldScale === 1, districts === 1`
-and fires **A14 only** — A12 needs the first 观察一个新方言, because `map-city` no longer
-grants the second district (see the legibility contract below); **and only then** does
-`#world-card` become visible. Fifteen assertions, all passing at `7ebd57b+` — the run is
-reproducible but the script lives in `/tmp`, so treat it as a recipe to re-drive, not a
-committed suite. Say that when you report it.
+`readers >= 250` **and** `meaning >= 20`; A05 (压缩) → A07 → A08 → A09 fire on real clicks;
+A11 needs the paper crisis first; the city opens on its own once the Act II gates are met
+(`meaning >= 80, composed >= 10, paperCrisis, deletedNoise >= 1`) — **entering Act III and
+finding the map are two different beats since 2026-09-21**, and `#world-card` becomes visible
+on the transition; 观察一个新方言 raises districts to 2 (A12), 创造一个概念 fires A13, and
+**then** 展开城市地图 fires A14 (`districts >= 2`, `meaning >= 40`, `credits >= 150`). Walking
+a dead state to the ending is a committed suite now — the reference playthrough in
+`tests/game-v3.test.mjs` — so this recipe is for watching it on the real surface, not for
+proving the gate is completable.
 
 Two boundaries this must not cross, both pinned by existing tests:
 
 - **`#world-card` stays hidden until Act III.** `test_layout_expands_only_when_world_is_discovered`
-  (`test_player.py:156`) and `test_F02_city_and_world_require_real_actions`
-  (`test_aha.py:124`) assert it hidden at Act II *even with `paperCrisis` and `meaning: 75`
+  (`test_player.py::test_layout_expands_only_when_world_is_discovered`) and
+  `test_F02_city_and_world_require_real_actions` (`test_aha.py`) assert it hidden at Act II *even with `paperCrisis` and `meaning: 75`
   already true*. Putting readership on the metric row instead of unhiding the world card is
   what keeps `aha.md`'s S10/S11 intact.
 - **Reveal is still behavioral.** The 读者 metric appears when readership first exists
@@ -355,15 +712,18 @@ its own 1000) made each later act one click per insight.
 Two invariants now hold, both under test:
 
 1. **Accumulation, not adjacency.** A gate must depend on a resource that accrues on its own
-   clock. `discover-dialect` needs `readers >= 600 × (districts + 1)`; `make-concept` needs
-   `concepts < districts`. Every later action also costs something.
+   clock, and every later action must cost something. What each gate actually reads is
+   `COMMAND_COSTS` and `AHA_CLOCK` — **read it there, not from this paragraph**; the dialect and
+   concept thresholds come out of `READERS_LADDER` now, and a formula copied into prose here is
+   the drift this file keeps warning about. The one structural guard worth knowing by name is
+   `make-concept`'s `concepts < districts`: a concept needs a district to live in.
 2. **No act is trivial.** `a plain playthrough with legal actions reaches the ending…` drives a
    full game and asserts it reaches `stopped`, sees all 28 milestones, and that **no act takes
    fewer than 5 decisions**.
 
-Reference numbers from the probe at the time of writing (decisions per act I–VI): 28 / 272 / 10 /
-13 / 452 / 59; wall clock 347 / 629 / 158 / 521 / 389 / 30 seconds. Treat a large shift in either
-column as a regression signal, not as noise.
+Per-act numbers are not written here — `node scripts/pacing.mjs` prints them live (it also prints
+the per-*gap* readout the rhythm contract above is built on, which is the finer-grained view of
+the same run). Treat a large shift in either column as a regression signal, not as noise.
 
 **Two gates that are easy to break by accident.** `stop-printing` requires
 `ambiguityResolved`, and `resolve-ambiguity` requires `ambiguity >= AHA_GOALS.A26.need` — that
@@ -469,22 +829,31 @@ An Aha is not a string in a list. Each one is a *reachable state* plus the *real
 that leaves it. Verification therefore asserts three separate things per ID:
 
 1. **Boundary invariant** — the preview state satisfies that ID's gate. The gate table is
-   `public/aha-review-contract.js:4-14` (`rules`) and the act table is line 15 (`acts`).
+   `public/aha-review-contract.js` 的 `rules`（每条的 `[id, 状态字段, 门槛]`）和
+   `acts`（每条属于第几幕）两张表。
 2. **Event recorded** — `state.ahaSeen` actually contains the ID. This is deliberately not
    "the number happens to be large enough": the moment must have fired.
 3. **Real transition** — a visible, enabled button in `#primary-actions` is clicked and the
    resulting state must match that command's entry in the `transitions` table
-   (`aha-review-contract.js:28-39`). A click that changes nothing fails.
+   (`aha-review-contract.js` 的 `transitions` 表). A click that changes nothing fails.
 
 Plus, for every ID: **A28** additionally requires `#rate === '0'`, `#ending` visible, and
 zero enabled actions; and **every** case runs `assert_player()`, which asserts the player
 iframe's `inner_text` *and* `aria_snapshot` contain no match for
-`META` (`tests/intent-browser/test_aha.py:19`) — `A01..A28`, `AHA`, `ACT <n>`,
+`META` (`tests/intent-browser/test_aha.py` 顶部) — `A01..A28`, `AHA`, `ACT <n>`,
 `Director Mode`, `导演模式`.
 
-`rules`/`acts` are a hand-rewritten second copy of the engine's thresholds, not an import
-of `GlyphEngineV3.AHAS`. Loosening a gate in the engine therefore breaks this check rather
-than silently passing it. The only intentional coupling is catalogue identity and order.
+**What is independent here, and what is not.** `rules`/`acts` are a hand-written mapping of
+*which state field each Aha is gated on* and *which act it belongs to* — not an import of
+`GlyphEngineV3.AHAS` — and `stateErrors` never calls `trigger()` or `clockMet()`, so an engine
+whose gating logic is wrong still fails this check.
+
+The **threshold values**, however, are read from the engine's ladder tables
+(`GlyphEngineV3.READERS_LADDER` etc., 2026-09-21). They used to be a second hand copy, and that
+copy had already drifted: its `A02` row said `typists 5` where the engine required 8. A second
+copy of a *tuned number* is a copy that will drift; a second implementation of the *checking
+logic* is the thing worth having. If you want the numbers pinned independently, pin them
+against `intent.md` and `node scripts/pacing.mjs`, not against a third transcription.
 
 ### Build
 
@@ -506,26 +875,27 @@ GLYPH_BROWSER=chromium python3 scripts/run-browser-contracts.py aha
 GLYPH_BROWSER=webkit   python3 scripts/run-browser-contracts.py aha
 ```
 
-The runner is fail-closed (`scripts/run-browser-contracts.py:16-23`): PASS requires
+The runner is fail-closed (`scripts/run-browser-contracts.py`，`passed=` 那一行): PASS requires
 `discovered >= 37`, `run == discovered`, `wasSuccessful()`, and **zero** skipped, expected
 failures, or unexpected successes. Exit code is 0/1. It writes
 `test-results/intent-audit/aha-<browser>.json`.
 
-37 = 28 generated `test_state_AXX_real_invariant_and_action` cases (`test_aha.py:214-227`)
-+ 9 hand-written contract tests. Run both engines separately and report each: WebKit is where
-`getClientRects()`/`:has()` visibility differences would show up, and one engine standing in
-for the other is not a PASS.
+37 = 28 generated `test_state_AXX_real_invariant_and_action` cases (`test_aha.py` 末尾那个
+`for number in range(1,29)` 循环）+ 9 hand-written contract tests. Run both engines separately
+and report each: WebKit is where `getClientRects()`/`:has()` visibility differences would show
+up, and one engine standing in for the other is not a PASS. There is no CI lane left to catch
+the second engine (`#19` deleted the workflows), so this is the only place it gets run.
 
 The player suite is the other half of the leak boundary — run it too when the diff touches
 `build-static.mjs`, the privacy layer, or `play.html`:
 
 ```bash
-GLYPH_BROWSER=chromium python3 scripts/run-browser-contracts.py player   # floor 19, currently 26
+GLYPH_BROWSER=chromium python3 scripts/run-browser-contracts.py player   # floor 19, currently 29
 ```
 
 ### Run — in-app 28/28
 
-The review page carries its own verifier (`public/aha-review-ui.js:54-63`, `#verify-all`),
+The review page carries its own verifier (`public/aha-review-ui.js` 里 `run.addEventListener('click', …)` 那一段, `#verify-all`),
 which loops `GlyphAhaAudit.ids` calling `exercise` in the review iframe. Drive it through
 the committed driver rather than hand-rolling Playwright:
 
@@ -551,7 +921,16 @@ meaningful if these are green in the same run:
 
 `test_all_28_verification_is_repeatable_and_preserves_real_save` runs the whole audit twice
 and asserts the real player save and `glyph-factory-ui-reveals-v3` are byte-identical
-before and after (ignoring `updatedAt`/`startedAt`).
+before and after (ignoring `updatedAt`, `startedAt` and `actSeconds`).
+
+That ignore-list is the whole subtlety. The player iframe stays **live** for the entire sweep —
+its own 500 ms timer keeps running and keeps autosaving — so any field the passage of time
+moves will differ across the comparison. `actSeconds` (the micro-event scheduler's counter)
+joined the list on 2026-09-21 for exactly that reason: without it the test fails on "the review
+changed the player's save" when all that happened is the player's own clock ticking. The same
+three fields are excluded inside the review page's own isolation check
+(`public/aha-review-ui.js`). **When you add a save field that grows with time, add it to both
+lists** — otherwise you get a red that reads like a security failure and is actually a clock.
 
 ## Evidence
 
@@ -600,42 +979,65 @@ overclaimed verdict.
 - **Only 3 of 28 have a real-play path.** `test_F01/F02/F03` operate the production UI;
   the other 25 arrive by director fixture. The suite proves "this state satisfies its gate
   and this action moves it", not "a player playing normally reaches it".
-- **Ordering and mutual exclusion are untested.** Nothing asserts A03 cannot fire before
-  A02, or that reaching A17 leaves A22's gate alone.
+- **Ordering is asserted for one path, and only one.** The reference playthrough asserts the
+  firing order equals A01…A28 and that no two fire on one click, from a dead state to the
+  ending. It does not enumerate the state machine: a player who takes a different route can
+  still reach a later gate before an earlier one, and `directorState` fixtures bypass the
+  question entirely by pre-recording `ahaSeen`.
 - **No pixel assertions.** Visibility is asserted as `hidden` / `getClientRects()`;
   the stored PNGs are evidence for a human, not compared by any assertion.
 - **`28 / 28 PASS` is scoped to `review-dist`** — engine plus review runtime. The *player*
   guarantee comes from `build-static.mjs` baking `data-audience="player"` and the
   `!important` hide rules into `dist/`, which `test_player.py` then asserts on the real
   artifact. Do not quote the 28/28 as a player-package claim.
-- **The disclosure contract test is static.** `affordability never hides a discovered
-  action` reads source text. It proves reveal ≠ enable and that no reveal in either parsed
-  form reads `s.glyphs`/`s.credits`; a reveal registered by some third form is still
+- **The disclosure contract test is static, and it says nothing about the third state.**
+  `affordability never hides a discovered action` reads source text. It proves reveal ≠ enable
+  and that no reveal in either parsed form reads `s.glyphs`/`s.credits`; a reveal registered by
+  some third form is still
   invisible to it. It does **not** prove the button actually renders visible, that
   `rememberReveal` latches it, that `enabled` is correct, or that the shortfall copy says
   the right thing. Only the seeded browser recipe above covers that, and only for the
   actions you actually seed.
-- **The pacing test measures one policy, not the game.** `a plain playthrough…` finishes the
-  game and counts decisions, but the counts depend on the strategy hard-coded in the test. A
-  human who plays differently gets different numbers; the assertion (`no act below 5`) is a
-  floor, not a curve. Treat the per-act columns as a regression signal — when they move a lot,
-  re-run `node /tmp/glyph-audit/reconcile.mjs` (a second, independent policy) before believing
-  either number. And its guard against "one click satisfies the next gate" is structural only
-  for the one pair it names (`concepts < districts`); a new adjacency of that shape would not
-  be caught.
+- **The rhythm metric is one reference player, on the passive path.** It is a deterministic
+  playthrough with a stated policy, not a distribution over players, and the policy it uses is
+  the one that *never presses* an act verb or a micro-event — so the numbers above describe a
+  player who ignores half of what is on screen. That is deliberate (it is what the two-hour
+  floor means), but it also means the passive report is **blind to whether those mechanisms
+  still work**: a dead verb and a live one produce identical passive numbers. Read the active
+  line, and run `tests/rhythm-structure.test.mjs`, whenever the diff touches them. Separately:
+  a 0-click beat is scored as a gap of 0 even when it lasts 200 seconds, and two revisions with
+  identical gap vectors can differ in total play time — read it next to the per-act seconds
+  column.
+- **One policy, not two.** Every number above comes from a single reference player; its `push` /
+  `microEvents` switches change what it presses, not how it decides. There is no independently
+  written second strategy to cross-check against, so a large move in one column has only one
+  witness. The honest response to a surprising move is to write that second policy, not to
+  re-read the same one harder.
+- **The anti-adjacency guard is structural only where it is named.** The playthrough asserts a
+  floor (no act below 5 decisions) and the gap bands; the one *explicit* guard against "this
+  click grants the next gate's threshold outright" is `concepts < districts`. A new pair shaped
+  that way would not be caught by any count — when you add an action that grants a resource
+  another gate reads, assert the pair by hand.
 - **A cost-gate PASS says nothing about copy.** `commandReady` decides whether a button is
   enabled and which field is named as the shortfall, but nothing asserts the label a player
   reads is the right noun for that field. `E.fieldLabel` maps the key; a wrong entry there
   produces a grammatically fine, semantically wrong sentence that every suite accepts.
-- **The Act II progression recipe is not a committed suite.** The fifteen-assertion
-  end-to-end run (dead state → `map-city` → Act III) lives in `/tmp`, not in `tests/`. The
-  committed coverage is narrower: the Node cadence identity, and one browser test asserting
-  readership is visible and `composed` grows. Nothing committed proves the *whole* gate is
-  completable, so a green suite does not by itself license "Act II is unstuck".
-- **The cadence test proves tick-equivalence, not pacing.** `live ticks == one jump` says
-  the rule's output is no longer lost to tick granularity. It says nothing about whether
-  the resulting curves are balanced — readership is quadratic in time once `composed`
-  grows, and no test bounds that.
+- **Act II's browser path is watched, not asserted.** The committed reference playthrough covers
+  "dead state → ending" in Node, so "is the game completable" is no longer an open question.
+  What is still only watched is the *real surface*: one browser test asserts readership is
+  visible and `composed` grows under a live clock, and nothing walks the whole Act II gate on
+  `/` and asserts the transition. The end-to-end recipe above is for a human, not a CI row.
+- **The shape assertion is positional, and only that.** "First gap shortest, last gap longest,
+  tail ≥ 2 × head" says the fast/slow structure sits where the design put it. It does not say
+  the magnitudes are *good*, that the pattern reads as intended to a player, or that a
+  differently-routed playthrough shares it. Magnitudes are judgements against the shape
+  `{{INTENT}}` states — read the weights there, not here; the only thing separating "designed"
+  from "measured" is the flattening control.
+- **The cadence test proves tick-equivalence, not balance.** `live ticks == one jump` says the
+  rule's output is no longer lost to tick granularity. It says nothing about whether the
+  resulting curves are balanced — readership is quadratic in time once `composed` grows, and
+  no test bounds that. It is also why gap 1 of the playthrough opens at 217 clicks: the
+  tutorial act is hand-printing, and that is a design choice, not a regression.
 - **The Aha legibility sweep proves transport, not quality.** It asserts the authored
   sentence reaches the newest line of the player's log with no meta leak. It does not judge
   whether the sentence is *good*, and nothing asserts the announcement is still on screen
@@ -662,13 +1064,46 @@ overclaimed verdict.
   seven stages passed on the recorded `commit` and `sourceSha256` — check that the sha
   matches your candidate, because a run against a different tree is evidence for that tree.
   It still says nothing about a deployment, and the Replit localization adapter now has no
-  coverage anywhere.
+  coverage anywhere. With `#19` deleting CI, this is also the *only* gate: there is no remote
+  job that will run these stages for you, and no PR check that can stand in for them.
+- **`public/design-system/flows.html` is now two rebalances older than the engine.** It is
+  redrawn from `scripts/flows/screens.json`, which was captured from a build before the
+  2026-09-21 rebalance, so its gate tables and readings describe the previous flow (notably
+  `map-city` as an Act II exit). The same rebalance added two player-facing action surfaces —
+  each act's compounding verb and the micro-event — so the captured `#primary-actions` grid is
+  now short by one or two buttons per act as well. Rebuilding it needs a fresh browser capture
+  from a running build, which
+  is not part of any committed script. Until that capture is redone, cite the engine and
+  `node scripts/pacing.mjs` — not the flows page — as the current flow truth.
+- **The four mechanism controls prove coupling, not tuning.** `tests/rhythm-structure.test.mjs`
+  patches source and asserts the number moves in the direction the design claims — cut the fuel
+  feed and Act V stops tracking the old layer, remove the multiplier and the active path returns
+  to the passive length. What that establishes is *"this mechanism is load-bearing"*. It does not
+  establish that the magnitudes are right, that a player perceives them, or that the verbs are
+  affordable at the moments they appear. Those are `{{INTENT}}` judgements, read off
+  `node scripts/pacing.mjs` and the browser suites.
+- **A negative control that silently does not apply is worse than none.** `loadEngine` takes
+  either a `[from, to]` pair or a transform function. The pair form checks itself — it throws if
+  the anchor string is absent — which is why the multiplier control uses it. The function form
+  cannot, so every transform-based control (flattening, fuel feed) begins by asserting its own
+  anchor is present. **Keep that when you add one**: a control that quietly patches nothing
+  leaves the suite green while proving an empty sentence.
 - **No run in this session executed the Aha suite against a deployment.** Every result here
   is a local artifact built from the working tree; `report.json` says so in its own `scope`
   field. A local green is not a Preview or production claim.
 
 ## Gotchas
 
+- **`aha.md` has a committed byte-for-byte copy at `public/aha.md`.** `tests/intent-audit.test.mjs`
+  asserts the two are identical, but `verify:fast` runs the Node suite *before*
+  `build-static.mjs`, so editing the canonical file without copying it fails the gate on a test
+  that looks unrelated to whatever you changed — and the audit reports it as a `fast`-stage
+  failure, which reads like a product regression. `cp aha.md public/aha.md` and commit both.
+- **一次只跑一个浏览器套件，跑到一半别改测试文件。** `intent-audit`、`run-browser-contracts.py`
+  和 `npm run verify` 会写同一份 `test-results/`，而 `fast` 阶段还会重建 `dist/`。并行跑（或者
+  在跑的时候编辑 `tests/browser/*.py`）会让后启动的那一行加载到半改完的文件——本轮真实发生
+  过一次：WebKit 那一步报 `AttributeError: 'PlayerContract' object has no attribute 'save'`，
+  读起来像产品缺陷，其实是时间线打架。要并行就另开一个 worktree。
 - **`review-dist/` is required and is not built by `npm run dev`.** A fresh clone fails the
   suite with a build error, not a test failure. Same for `dist/` — see "Build before any
   browser suite" above; the failure reads as `setUpClass ERROR`, not as a test failure, so
@@ -705,3 +1140,68 @@ overclaimed verdict.
 Re-run every command above before changing this file. Update only when actual launch
 commands, routes, browser harness, or proof requirements change, and keep the "does not
 prove" section current — new F-tests or an ordering assertion would retire a bullet there.
+
+### 怎么审这份文档本身
+
+这份技能里几乎每一句话都是一个**关于当前代码的断言**，而代码会动。审它的动作不是通读，
+是**逐条找出它背后的真源，然后去问真源**。顺序如下：
+
+1. **先跑门禁，再动文件。** `npm run intent-audit` 验的是*产品*，不是这份文档。文档改了、
+   产品没验，你写下来的每句话都还没有依据——而这份文件的作用正是「你说验过了，凭什么」。
+2. **把会腐烂的东西 grep 出来，别靠读。** 数字、行号、路径、函数名都会漂，行号随任何编辑
+   漂得最快，而读者会照着它去找：
+   ```bash
+   # 跳过 frontmatter 那一行（它的 description 里有几十个数字，全是噪声）；
+   # 下面这条在本文件上现在剩下 16 行，一眼扫得完。
+   sed -n '/^# Verify Glyph Factory/,$p' .claude/skills/verify/SKILL.md \
+     | grep -nE "currently [0-9]+|floor [0-9]+|[0-9]+ tests|tests, [0-9]+|[0-9]+ (minutes|clicks|gaps|passes)|\.(py|js|mjs|md|json|css|html):[0-9]+|line [0-9]+"
+   ```
+3. **按这句话的类型去找它的真源。** 「去问真源」对不同句子是不同动作：
+
+   | 这句话在说什么 | 真源 | 怎么问 |
+   |---|---|---|
+   | 命令跑不跑得通、几项测试 | `test-results/intent-audit/report.json` | 跑一遍门禁，读 `stages` |
+   | 门槛 / 代价 / 速率 / 增产公式 | 引擎的导出表 | `E.READERS_LADDER` 这类，或 `node -e` 直接问 |
+   | 玩家面上看得见什么、点得到什么 | 真实浏览器 | `run-browser-contracts.py`，或 driver 的 `shot` |
+   | 节奏读数 | 参考对局 | `node scripts/pacing.mjs`（`--trace` 看动词） |
+   | 「某文件里有某符号」 | 那个文件 | `grep -n "<符号>" <文件>`——**这一类最容易腐烂**，见下 |
+   | 需求本身 | `{{INTENT}}` | 读文档，并检查它自带的负对照 |
+
+4. **行号比数字烂得快，所以别写行号。** 这条规则是踩出来的：本轮一次 grep 查出技能里 7 处
+   `file.py:156` 形式的引用，**7 处全漂了**——`aha-review-contract.js` 因为头部加了几行注释，
+   `rules` 从第 4 行搬到第 10 行，`transitions` 从 28 搬到 52。行号是最像「精确」的模糊信息，
+   读者会照着它去找，然后在错误的行上读到正确的东西。写**符号名**：函数名、表名、那句
+   源码本身。符号被改名时 grep 会失败，那是好事——它会响。
+
+5. **每一条分三类，别都按同一类改。**
+
+   | 情况 | 例子 | 怎么改 |
+   |---|---|---|
+   | 实现动了 | 测试数 217 → 229；玩家套件 26 → 29 | 更新数字，并说明新数字从哪来 |
+   | 这句**从来就不是真的** | 「`rules` 是手抄的第二份门槛」——它确实是抄的，而且已经漂了 | 改描述，写清现在真源在哪、为什么改 |
+   | **故意变成假的** | 「四个等待态没有可点的东西」——节奏改动故意让它们有了可点的东西 | 改描述 **+ 写明为什么**。不写原因，下一个人会把它「修」回原样 |
+6. **判据、阈值、已决方案一律不写进这份文件。** 真源在 `{{INTENT}}`（见「用户意图」一节）。
+   看到技能里出现具体门槛数字，先问一句：这个数应该从引擎或需求文档读吗？
+7. **加新条目之前先问「这一条错了会不会有人因此做错事」。** 不会——那就别加。技能不是
+   变更日志；它每长一页，读的人就少一成。
+
+**这份文档不在门禁的 `sourceSha256` 覆盖范围内。** 那个哈希盖的是 `public/ src/ scripts/
+tests/ .github/ aha.md intent.md package*.json vercel.json`，`.claude/` 不在其中。两个推论：
+
+- 改这份文档**不会**让一次已经跑过的门禁读数失效——读的是同一批产品字节。
+- 但 `report.json` 里的 `dirty` 是**开跑那一刻**的快照。改完要提交掉，否则「这份读数是
+  从一棵干净的树跑出来的」就成了半真的话。
+
+这个区分值得记住，因为它反过来也成立：**动了 `public/`、`scripts/`、`tests/` 里的任何东西，
+上一次的读数就作废了**，哪怕只改了一个字符。
+
+**门槛数字不要在这一节里手抄。** 这一节原来抄过一份，`A02` 那行写着打字员 5 而引擎要的是 8，
+抄的那份还正是「独立验证」的那份（见 `public/aha-review-contract.js` 的头部注释）。现在凡是
+要引用门槛的地方都从引擎读：Python 侧用 `_ladder()` / `_goal()`（`tests/browser/test_player.py`），
+JS 侧直接读 `E.READERS_LADDER` 这类导出。要写进说明文字的，写**读法**，不写数字。
+
+**阶梯是拟合出来的，不是手写的。** 改任何增速、代价、门槛之后，四条阶梯会失配——
+重新拟合用 `node scripts/fit-rhythm.mjs`（先 `--dry` 看读数再写回）。拟合脚本和判据是分开的
+两份东西：脚本负责「怎么分」，`tests/game-v3.test.mjs`（有界）与
+`tests/rhythm-structure.test.mjs`（有形状 + 四条负对照）负责「分了之后算不算数」。改脚本
+不要顺手改断言，改断言之前先改 `{{INTENT}}`。
