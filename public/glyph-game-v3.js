@@ -120,7 +120,9 @@
       add('condense', s.meaning>0||seen.has('A05')||s.composed>0, s.glyphs>=20, label(ACTIONS.condense), s.glyphs>=20?(en?'Volume becomes meaning.':'字数开始变成意义。'):lack(en?'20 stock':'20 库存字', fmt(s.glyphs,1)), 'condense');
       add('letter', s.letters>0||seen.has('A07')||s.readers>=250, s.readers>=250, label(ACTIONS.letter), `${en?'readers':'读者'} ${fmt(s.readers)}`, 'read-letter');
       add('organic', s.organicWords>0||seen.has('A08')||s.letters>=1, s.letters>=1, label(ACTIONS.organic), en?'The audience writes back.':'让读者也成为作者。', 'organic-word');
-      add('viral', s.viralWords>0||seen.has('A09')||s.organicWords>=1, s.organicWords>=1, label(ACTIONS.viral), en?'Propagation > production':'传播速度 > 生产速度', 'viral-word');
+      // 一次性动作用完之后换成「已完成」，不再挂着那句宣传语——这是本仓库已有的规矩
+      // （复写纸、自动出售台都这么写）。一个灰着却仍在推销自己的按钮，读起来像还能再按一次。
+      add('viral', s.viralWords>0||seen.has('A09')||s.organicWords>=1, s.organicWords>=1, label(ACTIONS.viral), s.viralWords>0?tr('done'):(en?'Propagation > production':'传播速度 > 生产速度'), 'viral-word');
       add('delete2', s.deletedNoise>0||seen.has('A11')||s.noise>=1, s.noise>=1, label(ACTIONS.delete), en?'Deletion is now productive.':'删除第一次成为生产行为。', 'delete-noise');
     }
     else if (s.act === 3) {
