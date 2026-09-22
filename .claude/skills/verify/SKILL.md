@@ -1,6 +1,6 @@
 ---
 name: verify
-description: Verify Glyph Factory changes against the exact candidate SHA — launch the dev server, drive the real browser surfaces with the committed driver, run the 28-case Aha invariant/transition suite on chromium and webkit, check the action disclosure contract (affordability disables, never hides; a surface that does not exist yet renders nothing at all), the cost-gate contract (one engine table decides what an action costs, and a button must never be lit while the engine refuses it), the rhythm contract (the seconds, decision-click and raw-click gaps between consecutive Aha moments: firing order, no same-click pairs, passive play time ≥ 2 hours, the three shape bounds — time CV, longest ÷ shortest, and no gap under 60s — the per-act shape itself, the four source-patching negative controls behind the act verbs / micro-events / fuel feed, and — per section, never as one figure — the mean/std of the decision and click gaps, with Act I read separately as the tutorial), the progression contract (an active rule must run, and its gating resource must be on screen) and the Aha legibility contract (every one of A01–A28 must announce itself in the player's log), and capture visual and interaction evidence. Use for general verification, proving an Aha change is safe, checking the 28/28 claim, verifying an action reveal/enable change, verifying an action cost, act-gate or threshold change, verifying an advance() cadence / Act II progression change, verifying game pacing / rhythm (two-hour play-time rebuild: tests/pacing-baseline.json), verifying that an Aha is perceivable on the player surface, and verifying user intent itself — the intent document is an argument ({{INTENT}}, default intent.md), never hard-coded here.
+description: Verify Glyph Factory changes against the exact candidate SHA — launch the dev server, drive the real browser surfaces with the committed driver, run the 28-case Aha invariant/transition suite on chromium and webkit, check the action disclosure contract (affordability disables, never hides; a surface that does not exist yet renders nothing at all), the cost-gate contract (one engine table decides what an action costs, and a button must never be lit while the engine refuses it), the rhythm contract (the seconds, decision-click and raw-click gaps between consecutive Aha moments: firing order, no same-click pairs, passive play time ≥ 2 hours, the three shape bounds — time CV, longest ÷ shortest, and no gap under 60s — the per-act shape itself, the four source-patching negative controls behind the act verbs / micro-events / fuel feed, and — per section, never as one figure — the mean/std of the decision and click gaps, with Act I read separately as the tutorial), the flows-page contract (a redraw of real DOM readings must not draw what the reading does not have: an element covering a value, a canvas outgrowing its frame, or a token that was never declared), the progression contract (an active rule must run, and its gating resource must be on screen) and the Aha legibility contract (every one of A01–A28 must announce itself in the player's log), and capture visual and interaction evidence. Use for general verification, proving an Aha change is safe, checking the 28/28 claim, verifying an action reveal/enable change, verifying an action cost, act-gate or threshold change, verifying an advance() cadence / Act II progression change, verifying game pacing / rhythm (two-hour play-time rebuild: tests/pacing-baseline.json), visually auditing the design-system flows/screens page, verifying that an Aha is perceivable on the player surface, and verifying user intent itself — the intent document is an argument ({{INTENT}}, default intent.md), never hard-coded here.
 ---
 
 # Verify Glyph Factory
@@ -820,6 +820,43 @@ rather than an error: writing `localStorage` and then reloading loses the race a
 outgoing page's `pagehide` save — stage the fixture in `sessionStorage` and let an init
 script apply it on the next document; and the log renders a leading `›` / `·` marker, so
 compare against `line.lstrip("›·").strip()`, not the raw line.
+
+### The flows page contract: a redraw must not draw what the reading doesn't have
+
+`public/design-system/flows.html` is not a screenshot gallery — it is a **vector redraw of real DOM
+readings** (`scripts/flows/`), and the whole reason it exists is that a designer can trust it as the
+current flow truth. So the question is never "does it render" but **"does what it draws match what
+was read"**. Three failure classes, in the order they actually bite:
+
+| Class | How it fails silently | How to check |
+|---|---|---|
+| **A drawing that contradicts its own reading** | The redraw lays a block out differently from the real UI, so a value the reading *has* ends up covered by an element the reading *also* has. The page still renders. | Overlap probe: any two `<text>` boxes overlapping by more than a few px — then **zoom in and look** before believing the number. |
+| **A canvas that outgrows its frame** | A wide screen (620-unit canvas) inside a rail sized for the 300-unit narrow ones: the SVG overflows its `figure` and paints over the next one. | Compare each `figure` box against its `svg` box; the SVG must sit inside. |
+| **A token that was never declared** | `var(--typo)` resolves to nothing and the whole declaration is dropped — no error, and the only cue is a missing shadow or colour. | Diff every `var(--…)` the page uses against the names declared in `tokens.css`. |
+
+Run all three at 1180 / 760 / 390 px. **A clean probe run is not a PASS**: the probes measure
+geometry, not fidelity, and the machine-card defect above passed every count check and was visible
+only by eye.
+
+**Two probe traps that produce confident wrong answers:**
+
+- **`getBBox()` ignores transforms.** It returns coordinates in the element's own user space. The
+  two-column 1280 screens shift a column with `<g transform="translate(dx,0)">`, so comparing raw
+  bboxes across columns compares two coordinate systems and reports *every* label as colliding with
+  the other column's. Use `getBoundingClientRect()` — page space, transforms applied.
+- **`scrollWidth` means nothing on a scaled SVG**, and `fill` on an HTML element is `rgb(0,0,0)`
+  whether or not it was set. Both look like findings; both are noise.
+
+**One class is known-benign, and it stays in the report.** Stacked label/value text — `AUTO / 自动`
+above `0.5/s` — overlaps by **3–4 px vertically** at every canvas size, because a CJK glyph box is
+taller than the line pitch. Zoomed to 3×, the glyphs do not touch. Do not raise the threshold to
+make the count zero; raise it only after looking, and say that you looked.
+
+**Fidelity is not the only thing that rots — so does the reading.** The capture chain is committed
+(`snapshots.mjs` → `capture.py` → `flows.mjs` → `build.py`, four artifacts in `scripts/flows/`, four
+in `scripts/flows/*.json`), and `tests/flows-sync.test.mjs` fails when `flows.json` drifts from what
+the engine generates now. Nothing asserts that `screens.json` still matches today's DOM, so
+**re-run `capture.py` after any renderer change** and rebuild before citing the page.
 
 ## The 28 Aha moments (A01–A28)
 
