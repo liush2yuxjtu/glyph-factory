@@ -472,7 +472,7 @@ def flow_article(f):
     exit_note = " · ".join(esc(x) for x in f["exit"]) or "—"
     return f"""  <article class="flow">
     <div class="flow-head"><span class="fid">{f['fid']}</span><h3>ACT {ROMAN[f['act']]} · {esc(f['title'])}</h3>
-      <span class="stat"><span class="chip">屏幕 <b>{'→'.join(f['screens'])}</b></span><span class="chip">{esc(f['range'])}</span><span class="chip">{f['ahas']} 个 Aha</span><span class="chip">实测 <b>{f['decisions']} 次决策 / {f['seconds']} 秒</b></span></span></div>
+      <span class="stat"><span class="chip">屏幕 <b>{'→'.join(f['screens'])}</b></span><span class="chip">{esc(f['range'])}</span><span class="chip">{f['ahas']} 个 Aha</span><span class="chip">实测 <b>首末 Aha 之间 {f['decisions']} 次决策 / {f['seconds']} 秒</b></span></span></div>
     <div class="strip">
 {shots}
     </div>
@@ -494,6 +494,35 @@ def shift(parts, dx):
     """Move a panel's blocks sideways. A group transform, not attribute rewriting: a
     polygon's `points` is a coordinate list no per-attribute regex can offset safely."""
     return f'<g transform="translate({dx:.1f},0)">' + "".join(parts) + "</g>"
+
+
+def facts_of(s):
+    """每一屏说明里那排标签，从 `screens.json` 的读数生成，不手写。
+
+    手写过一轮，已经烂过两处：P04 的标签还写着「机器面板消失」，而这一屏的读数里
+    机器卡是**在**的（机器面板在 2026-09-21 修好了，标签没跟着改）；P07 写着「仅 1 个动作」，
+    而读数里是 4 个（推钟动词和微事件都是那之后加的）。两处都是「一张图在说自己读数里没有的事」，
+    也就是这份图谱存在的唯一理由的反面。所以判据很简单：**凡是从读数上量得出来的，就不许手写。**
+    手写的那部分只剩 `<h4>` 和 `why` 里那句解读。
+    """
+    layout = s["layout"]
+    labels = [m["label"] for m in s["metrics"] if not m["hidden"]]
+    live = sum(1 for a in s["actions"] if not a["disabled"])
+    stock = "库存文字" in labels
+    machines = s["machines"]
+    return [
+        ("on" if layout["hero"] >= 2 else "off", "hero 双栏" if layout["hero"] >= 2 else "hero 单栏"),
+        ("on", f"地图 {s['worldScale']}"),
+        ("on" if stock else "off",
+         f"库存文字 在（{len(labels)} 项指标）" if stock else f"库存文字 已退场（余 {len(labels)} 项）"),
+        ("on" if machines else "off", f"机器 {len(machines)} 台 · 面板在" if machines else "无机器面板"),
+        ("on" if live else "off", f"动作 {len(s['actions'])} 个 · 可点 {live} 个"),
+    ]
+
+
+def facts_markup(s):
+    cells = "".join(f'<li class="{cls}">{esc(text)}</li>' for cls, text in facts_of(s))
+    return f'<ul class="facts">{cells}</ul>'
 
 
 def build(s):
@@ -525,18 +554,36 @@ def main():
             raise SystemExit(f"flows.json 里没有 {fid}")
         used.add("flow:" + fid)
         return flow_article(by_flow[fid])
+
+    def fill_facts(match):
+        sid = match.group(1).lower()
+        if sid not in by_id:
+            raise SystemExit(f"no captured state for {sid}（说明里那排标签没有读数可生成）")
+        used.add("facts:" + sid)
+        return facts_markup(by_id[sid])
     # 候选哈希由生成时现取。写死过一次（审计当时的提交），页面顶上挂着一个早就不是当前树的
     # 哈希，比不写更糟。
+    #
+    # 它是**构建基准**，不是本页所在的那次提交：本页和它的构建脚本住在同一个提交里，
+    # 所以那次提交的哈希不可能在按下「生成」之前就知道。不注明的话，读者会拿它去对
+    # 当前 HEAD，然后发现对不上——模板里现在写着「构建基准」三个字，就是为了这个。
     head = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT,
                           capture_output=True, text=True).stdout.strip() or "unknown"
     out = re.sub(r"<!-- FLOW:(F\d\d) -->", fill_flow, html)
+    out = re.sub(r"<!-- FACTS:(\w+) -->", fill_facts, out)
     out = out.replace("<!-- SHA -->", f"<b>{head}</b>")
-    if "<!-- FLOW:" in out:
-        raise SystemExit("还有没被填上的流程标记")
+    for marker in ("<!-- FLOW:", "<!-- FACTS:", "<!-- SHA"):
+        if marker in out:
+            raise SystemExit(f"还有没被填上的标记：{marker}")
+    # 每一屏都必须有生成的那排标签。少了就是新加了一屏却没挂标记，那一屏会退回手写——
+    # 而手写正是这次要根除的东西。
+    no_facts = set(by_id) - {u.split(":", 1)[1] for u in used if u.startswith("facts:")}
+    if no_facts:
+        raise SystemExit(f"这几屏的说明标签没有挂 <!-- FACTS:xx --> 标记：{sorted(no_facts)}")
     out = re.sub(r"<img src=\"shots/(\w+)\.png\"[^>]*>", replace, out)
     if 'src="shots/' in out:
         raise SystemExit("an <img> pointing at a snapshot survived the rebuild")
-    missing = set(by_id) - {u for u in used if not u.startswith("flow:")}
+    missing = set(by_id) - {u for u in used if u in by_id}
     if missing:
         raise SystemExit(f"captured but unused: {sorted(missing)}")
     OUTPUT.write_text(out)

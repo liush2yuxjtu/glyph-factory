@@ -10,14 +10,26 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
+const path = (p) => fileURLToPath(new URL(`../${p}`, import.meta.url));
 
 test('the committed flow tables are exactly what the engine generates right now', () => {
-  const generated = execFileSync(process.execPath, [new URL('../scripts/flows/flows.mjs', import.meta.url).pathname],
-    { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, cwd: new URL('../', import.meta.url).pathname });
+  const generated = execFileSync(process.execPath, [path('scripts/flows/flows.mjs')],
+    { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, cwd: path('.') });
   assert.equal(read('scripts/flows/flows.json'), generated,
     'flows.json 与生成器输出不一致：跑 node scripts/flows/flows.mjs > scripts/flows/flows.json');
+});
+
+test('the committed snapshots are exactly what the engine produces right now', () => {
+  // `capture.py` 是**现跑** `snapshots.mjs` 的，不读入库的那份。所以入库的那份可以任意腐烂，
+  // 而整条链路照常工作——直到有人想「不重采、直接用入库快照重建」的那一刻，才发现手上那份
+  // 是几个月前的存档。和 flows.json 同一个形状，所以要同一条断言。
+  const generated = execFileSync(process.execPath, [path('scripts/flows/snapshots.mjs')],
+    { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, cwd: path('.') });
+  assert.equal(read('scripts/flows/snapshots.json'), generated,
+    'snapshots.json 与生成器输出不一致：跑 node scripts/flows/snapshots.mjs > scripts/flows/snapshots.json');
 });
 
 test('every flow shows the two new action surfaces the engine says that act has', () => {

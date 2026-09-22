@@ -5,7 +5,7 @@
   "title": "手工与自动化",
   "range": "A01–A02",
   "ahas": 2,
-  "decisions": 45,
+  "decisions": 10,
   "seconds": 109,
   "screens": [
    "P01",
@@ -143,7 +143,7 @@
   "title": "文字改变城市",
   "range": "A12–A15",
   "ahas": 4,
-  "decisions": 62,
+  "decisions": 43,
   "seconds": 748,
   "screens": [
    "P05",
@@ -209,7 +209,7 @@
   "title": "机器开始写",
   "range": "A16–A21",
   "ahas": 6,
-  "decisions": 75,
+  "decisions": 71,
   "seconds": 1116,
   "screens": [
    "P06",
@@ -282,7 +282,7 @@
   "title": "机器语言",
   "range": "A22–A24",
   "ahas": 3,
-  "decisions": 21,
+  "decisions": 19,
   "seconds": 421,
   "screens": [
    "P07",

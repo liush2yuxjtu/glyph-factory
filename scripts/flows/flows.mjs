@@ -111,7 +111,10 @@ const out = [1, 2, 3, 4, 5, 6].map((act) => {
     title: E.ACTS[act - 1].name,
     range: E.ACTS[act - 1].range,
     ahas: ids.length,
-    decisions: run.decisionsByAct[act] || 0,
+    // 这一对必须同窗口。曾经是「整幕的决策数」配「首条到末条 Aha 的秒数」——两个窗口，
+    // 印成一对实测值。F01 因此写着 45 次决策 / 109 秒，而 109 秒里只走得下十几次决策，
+    // 剩下的是幕末那段没有 Aha 的尾巴。读者会拿它去估「一幕要按多少下」，估出来的数不存在。
+    decisions: first && last ? last.decisions - first.decisions : 0,
     seconds: first && last ? Math.round((last.t - first.t) / 1000) : Math.round((run.end - run.start) / 1000),
     screens: SCREENS[act],
     steps,
