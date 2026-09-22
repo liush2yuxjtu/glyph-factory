@@ -15,6 +15,15 @@ general "drive the real surface" contract, and the one deep question it also ans
 
 All paths are relative to the repo root.
 
+## Which mode am I in
+
+| 调用 | 做什么 |
+|---|---|
+| `/verify`，或 `/verify <需求文档>` | **验产品**：跑门禁、驱动真实 surface、按下面的契约逐条取证。参数是需求文档（默认 `intent.md`） |
+| `/verify update` | **维护这份技能本身**：它的每句话都是一个关于当前代码的断言，去逐条对真源。见文末「Maintain this verifier」 |
+
+分不清的时候看参数：是一条路径，就是验产品；是 `update` 或没有参数，先问自己上一次门禁读数还成不成立。
+
 ## Candidate
 
 Verify the exact commit/PR candidate. For deployed behavior, use the exact Preview/Pages URL for that SHA.
@@ -126,10 +135,12 @@ they diverge by two orders of magnitude: the tutorial's policy is "every 500 ms 
 can, otherwise sell, otherwise print", so its click count is ≈ **2 × its seconds** — a 250-second
 tutorial costs ~500 clicks no matter how the act is designed. Consequences:
 
-- **Report the click mean/std per section, not as one number.** All 27 gaps currently read
-  mean 40.48 / std 131.60; the 25 gaps after Act I read **mean 3.28 / std 2.68**. The first pair
-  is a statement about the tutorial's length, the second is a statement about the game's rhythm.
-  Quoting only the first pair says the rhythm got worse when it got better.
+- **Report the click mean/std per section, not as one number.** Read both off the current run
+  rather than from here — the two pairs sit side by side in 原始读数 below, and the gap between
+  them is the point: the all-27 pair is a statement about the tutorial's length, the 25-gap pair
+  is a statement about the game's rhythm. Quoting only the first pair says the rhythm got worse
+  when it got better. Expect the all-27 pair to move every time the tutorial gets longer; the
+  other pair is the one the band above actually bounds.
 - **Never "fix" the all-sections click std by making the reference player idle during Act I.**
   That lowers the number by changing the measuring instrument, not the game: a player with a
   working print button and nothing else to do *will* press it. The first version of this harness
@@ -186,7 +197,7 @@ moments holds"), so a threshold change that wrecks the rhythm fails the fast gat
 | Each of the four 2026-09-21 mechanisms carries its own negative control | `tests/rhythm-structure.test.mjs` patches the engine source and re-runs: flatten ⇒ shape fails while the band passes; remove the compounding multiplier ⇒ the active path returns to the passive length; freeze the event scheduler ⇒ the wait has nothing clickable again; cut the fuel feed ⇒ act V stops tracking the old layer's output. It is not "behaviour changes if I change the code" — it is "the number moves in the direction the design claims". |
 
 **Reference numbers, current (`feat/aha-rhythm`, 2026-09-21 节奏结构版):** 27 gaps, passive path
-**全程 121.7 分钟 / 7302s**, time mean 270.0s / std 108.9s / **CV 0.403**, range 90–490s,
+**全程 121.7 分钟 / 7300s**, time mean 270.0s / std 108.9s / **CV 0.403**, range 90–490s,
 longest ÷ shortest 5.43; decisions mean 5.89 / std 6.58 overall and **4.60 / 3.59 over acts II–VI**;
 clicks mean 41.78 / std 152.91 overall and **4.68 / 3.60 over acts II–VI**; 0 inversions;
 0 same-click pairs; **1 silent beat** (288s). Active path (push + micro events):
@@ -196,6 +207,8 @@ The click vector, all 27 gaps in A01…A28 order:
 `217 794 4 7 0 3 7 7 1 1 3 5 5 10 6 16 1 1 1 8 4 3 9 2 2 7 4`.
 The decision vector for the same run:
 `10 34 3 7 0 3 6 7 1 1 3 5 5 10 6 16 1 1 1 8 4 3 9 2 2 7 4`.
+**The click vector sums to less than the run's `总点击`** (1128 vs 1149 here): clicks before A01
+and after A28 belong to no gap. Neither number is wrong — they count different spans.
 
 Two earlier revisions, for reading a diff against an old baseline. **Before the 2026-09-21 shape
 change**: 全程 122.9 分钟, time mean 272.8s / std 18.7s / **CV 0.069**, range 227–321s; decisions
@@ -670,7 +683,7 @@ Two boundaries this must not cross, both pinned by existing tests:
   Act II" switch. A fresh save must still render exactly one metric: `test_fresh_game_is_small_and_survives_timer_renders`
   now lists `readers` beside `credits`/`meaning`/`noise` in its hidden-on-fresh loop.
 
-The engine exports `RULE_PERIOD` (4) and `RULE_READERS` (0.015) so the renderer reports the
+The engine exports `ruleReadersPerSecond(g)` so the renderer reports the
 real coefficient instead of a second copy; if you change the cadence, change it there.
 
 ### The cost-gate contract: one table decides what an action costs
@@ -990,15 +1003,23 @@ and build success will not tell you. `public/design-system/flows.html` is a *rea
 DOM (`scripts/flows/screens.json`), so it silently keeps describing the previous UI:
 
 ```bash
-python3 test-results/audit-shots/screens.py   # re-capture from a running static server on :4399
-cp test-results/audit-shots/screens.json scripts/flows/screens.json
-python3 scripts/flows/build.py                # writes public/design-system/flows.html
+node scripts/build-static.mjs && node scripts/build-aha-review.mjs   # dist/ + review-dist/
+node scripts/flows/snapshots.mjs > scripts/flows/snapshots.json      # 要拍哪些状态
+python3 scripts/flows/capture.py                                     # 逐屏读真实 DOM
+node scripts/flows/flows.mjs > scripts/flows/flows.json              # 六条流程的步骤表
+python3 scripts/flows/build.py                                       # 重绘成页面
 ```
+
+采集那两步需要 Playwright 和两份构建产物；另外三步只读入库的 JSON，所以改一版文案不必重采。
+**别用 `test-results/audit-shots/` 里的任何东西**——那个目录是 gitignore 的，被清掉之后读数
+就再也采不出来，而页面还能从旧读数照常重建。这正是它曾经落后两轮改动的原因，整条链现在
+住在 `scripts/flows/`（见上方的 flows 页契约）。
 
 Then look at it. The failure mode has no error message: SVG `var(--token)` referencing a token
 that does not exist resolves to **black**, not to a warning, so a page can load cleanly with
 every screen painted wrong. Confirm `getComputedStyle(document.querySelector('svg.sch rect')).fill`
-equals the paper token, not `rgb(0, 0, 0)`.
+equals the paper token, not `rgb(0, 0, 0)` — and run the three structural probes, not just this
+one, because a clean probe run is still not a PASS.
 
 ## Probe
 
@@ -1175,6 +1196,8 @@ overclaimed verdict.
 
 ## Maintain this verifier
 
+This is the section `/verify update` means (见开头的「Which mode am I in」).
+
 Re-run every command above before changing this file. Update only when actual launch
 commands, routes, browser harness, or proof requirements change, and keep the "does not
 prove" section current — new F-tests or an ordering assertion would retire a bullet there.
@@ -1190,7 +1213,8 @@ prove" section current — new F-tests or an ordering assertion would retire a b
    漂得最快，而读者会照着它去找：
    ```bash
    # 跳过 frontmatter 那一行（它的 description 里有几十个数字，全是噪声）；
-   # 下面这条在本文件上现在剩下 16 行，一眼扫得完。
+   # 这条列出来的应该是十几行，一眼扫得完。数一数——要是它涨到几十行，
+   # 说明这份文档正在往变更日志的方向长（见第 7 条）。
    sed -n '/^# Verify Glyph Factory/,$p' .claude/skills/verify/SKILL.md \
      | grep -nE "currently [0-9]+|floor [0-9]+|[0-9]+ tests|tests, [0-9]+|[0-9]+ (minutes|clicks|gaps|passes)|\.(py|js|mjs|md|json|css|html):[0-9]+|line [0-9]+"
    ```
@@ -1210,6 +1234,11 @@ prove" section current — new F-tests or an ordering assertion would retire a b
    `rules` 从第 4 行搬到第 10 行，`transitions` 从 28 搬到 52。行号是最像「精确」的模糊信息，
    读者会照着它去找，然后在错误的行上读到正确的东西。写**符号名**：函数名、表名、那句
    源码本身。符号被改名时 grep 会失败，那是好事——它会响。
+
+   **同一类病还有一个变种：自我指涉的计数。** 「上面这条 grep 在本文件上剩 16 行」这种句子
+   每编辑一次本文件就烂一次——本轮写下去之后不到十分钟就变成了 14。要么写成量级（「十几行」），
+   要么就把它变成一个动作（「数一数，涨到几十行就说明文档在往变更日志长」）。**凡是「关于本文件
+   自身」的精确数字，都当成行号对待。**
 
 5. **每一条分三类，别都按同一类改。**
 
