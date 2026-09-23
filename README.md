@@ -58,4 +58,4 @@ npm test                  # Node contract suite (engine, privacy boundary, produ
 node scripts/pacing.mjs   # rhythm between Aha moments, total play time
 ```
 
-There is no CI. Every gate — including the chromium/webkit browser suites in `tests/browser/` and `tests/intent-browser/` — runs locally through the `/verify` skill (`.claude/skills/verify/`). A PR is opened only after `/verify` passes. See [`AGENTS.md`](AGENTS.md) for the rules, including the Vercel deploy budget: every push to `main` is a billed production build, so batch changes on a branch.
+There is no CI. Every gate — including the chromium/webkit browser suites in `tests/browser/` and `tests/intent-browser/` — runs locally through the `/verify` skill (`.claude/skills/verify/`). A PR is opened only after `/verify` passes. See [`AGENTS.md`](AGENTS.md) for the rules, including the Vercel deploy budget: Git auto-deploy is off (`git.deploymentEnabled: false`), so production only changes through an explicit, billed deploy.
