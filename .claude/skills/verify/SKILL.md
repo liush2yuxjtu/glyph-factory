@@ -470,7 +470,7 @@ this skill; for each check, the command below is now the **only** place it runs.
 | `Validate internal review video` (ffprobe ≥ 20 s) | `npm test` — `tests/preview-v3.test.mjs` reads the EBML `Duration` element directly, so this now works on macOS, which has no ffprobe |
 | Replit verifier fixtures + public Replit acceptance | **removed 2026-09-22, not replaced.** `test_verifier.py` and `verify_live.py` were deleted with the workflow, so `deploy/replit-localization/glyph-language.js` now ships with no coverage at all. Do not re-add the live check as a substitute here — the decision was to stop checking that adapter |
 | `Player merge gate` | `npm run intent-audit` — one command, the same seven stages, fail-closed, reporting to `test-results/intent-audit/report.json`. No summary job to read any more, so an unrun or skipped stage is a FAIL — never a pass by omission |
-| Vercel deploy | not this skill's job. `vercel.json` sets `outputDirectory: dist`, so Vercel's Git integration deploys the push on its own. A READY badge was never a verification result and still is not |
+| Vercel deploy | not this skill's job. `vercel.json` sets `outputDirectory: dist` and `git.deploymentEnabled: false`, so pushes do not deploy; production changes only through an explicit deploy the user asks for. A READY badge was never a verification result and still is not |
 
 Nothing runs these on your behalf. Report each stage that you actually ran, name the ones you
 did not, and do not describe an unrun stage as passing.

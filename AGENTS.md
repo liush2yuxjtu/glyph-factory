@@ -25,10 +25,10 @@ Use /verify skill every time BEFORE we make a PR
 <!-- vercel-deploy-budget:start -->
 ## Vercel deploy budget
 
-Every push to `main` triggers a billed Vercel production build. Preview deployments are disabled for this project, so branch pushes (including `gh-pages`) do not build on Vercel.
+Git-triggered deployments are off: `vercel.json` sets `git.deploymentEnabled: false`, so no push — to `main` or any branch — builds on Vercel. Production changes only through an explicit deploy, and every production build is billed.
 
-- Batch work: do not push to `main` after every small change. Collect related commits on a branch and land them in one squash merge.
-- Do not push doc-only or agent-config-only changes (`*.md`, `.agents/`, `.claude/`) to `main` on their own; let them ride with the next real code change.
 - Do not run `vercel deploy` or `vercel --prod` unless the user explicitly asks for a deploy.
-- If a production build fails, reproduce and fix it locally with `/verify` before pushing again. Never push repeatedly just to see whether the Vercel build passes.
+- Do not re-enable `git.deploymentEnabled` without the user asking; that turns every push to `main` back into a billed build.
+- Batch work anyway: collect related commits on a branch and land them in one squash merge, so one deploy covers them.
+- Before a requested deploy, run `/verify` on the exact commit. If a production build fails, reproduce and fix it locally before deploying again; never redeploy just to see whether the build passes.
 <!-- vercel-deploy-budget:end -->
