@@ -26,9 +26,8 @@ The game is plain browser JavaScript in `public/`; Next.js is only a thin shell.
 | Path | Role |
 |---|---|
 | `public/glyph-engine-v3.js` | `GlyphEngineV3`: deterministic state machine, no DOM. Rules, costs, Aha triggers. |
-| `public/glyph-game-v3.js` | UI controller: rendering, progressive disclosure, `localStorage` save/export/reset |
+| `public/glyph-game-v3.js` | UI controller: rendering, progressive disclosure, zh-CN / en locale, `localStorage` save/export/reset |
 | `public/player-privacy-v3.js` | Strips design language (Aha IDs, reveal copy) from the player surface |
-| `public/game-accessibility-i18n.js` | Accessibility and zh-CN / en |
 | `public/play.html` | The game page |
 | `src/app/` | Next.js App Router: `/` iframes `play.html`; `/aha-lab` and `/product-demo` are dev surfaces |
 | `public/design-system/` | Design tokens, components, screen flows |
