@@ -122,7 +122,7 @@
       g += spriteRects(SPRITES.lamp, { k: 'var(--world-block)', y: 'var(--world-block-2)', w: 'var(--world-block)' }, 12, 16);
       g += rect(40, 26, 12, 2, 'var(--world-light)');
     }
-    return '<svg class="gp-scene" viewBox="0 0 96 40" preserveAspectRatio="xMidYMid slice" shape-rendering="crispEdges" role="img" aria-label="' + esc(scale || '') + '">' + g + '</svg>';
+    return '<svg class="gp-scene" viewBox="0 0 96 40" preserveAspectRatio="xMidYMid meet" shape-rendering="crispEdges" role="img" aria-label="' + esc(scale || '') + '">' + g + '</svg>';
   }
 
   /* ── Small components ── */
@@ -157,7 +157,9 @@
     for (var i = 0; i < 6; i++) {
       var st = states[i];
       if (!st && surface === 'player') continue; // undiscovered acts render nothing at all
-      out += '<span class="gp-seg is-' + (st || 'future') + '" title="ACT ' + names[i] + '">' + names[i] + '</span>';
+      var state = st || 'future';
+      out += '<span class="gp-seg is-' + state + '" role="listitem" aria-label="ACT ' + names[i] + ' · ' + state + '"' +
+        (state === 'current' ? ' aria-current="step"' : '') + '>' + names[i] + '</span>';
     }
     return '<div class="gp-track" role="list">' + out + '</div>';
   }

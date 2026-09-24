@@ -28,10 +28,10 @@ colors=[
  c("world-light","#eef0d8","#d9dcc0","Lit windows, paper sheets, stars in the scene."),
 ]
 tokens={
- "name":"Glyph Factory Pixel","version":1,
+ "name":"字工厂 像素","version":1,
  "color":{"themes":[{"id":"day","name":"日班 Day"},{"id":"night","name":"夜班 Night"}],"tokens":colors},
  "type":{
-  "fonts":[{"family":"Fusion Pixel SC","file":"fonts/FusionPixel-12px-SC.woff2","weight":"400","style":"normal"}],
+  "fonts":[{"family":"Fusion Pixel SC","file":"fonts/FusionPixel-12px-SC.woff2","weight":"400","style":"normal"},{"family":"Silkscreen","file":"fonts/Silkscreen-400.woff2","weight":"400","style":"normal"}],
   "families":{"pixel":"\"Fusion Pixel SC\", \"PingFang SC\", \"Microsoft YaHei\", monospace","display":"Silkscreen, \"Fusion Pixel SC\", monospace"},
   "groups":[
    {"name":"Display","family":"display","styles":[
@@ -63,4 +63,7 @@ tokens={
  "meta":{"source":"github","repo":"liush2yuxjtu/glyph-factory","ref":"main@b1330e6","paths":{"tokens":["public/design-system/tokens.css","public/play.html"],"screens":["scripts/flows/screens.json","scripts/flows/flows.json"]},"synced":"2026-09-24","note":"Pixel refactor of the v3 paper-and-ink system. Hues carried over (ink, paper, green, rust, blue, gold); values re-cut for a 2-theme pixel palette."}
 }
 del tokens["motion"]
-json.dump(tokens,open("project/tokens.json","w"),ensure_ascii=False,indent=1)
+import os
+D=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+with open(f"{D}/project/tokens.json","w",encoding="utf-8") as fh:
+    json.dump(tokens,fh,ensure_ascii=False,indent=1)
