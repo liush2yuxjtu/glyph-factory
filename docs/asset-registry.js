@@ -254,7 +254,7 @@
       userGoal: "让玩家第一次感觉自己不是在点数值，而是在指挥一个活着的工坊。",
       interaction: "点击世界里的 Builder / Lever。工人跑过去操作机器，而不是 UI 按钮直接生效。",
       shift: "我的工作不是点，是设计增长。",
-      assets: ["builder", "lever", "conveyor"]
+      assets: ["builder", "lever"]
     },
     {
       id: "S02",
