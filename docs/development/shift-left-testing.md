@@ -77,8 +77,9 @@ Replit 适配器的那两项检查（离线夹具与公开站验收）随工作�
 截图、Playwright trace 和测试日志写入 `/tmp/glyph-factory-verify/<sha>/` 与 `test-results/`，
 仍然不进入 Vercel 的玩家包。
 
-部署来自 Vercel 的 Git 集成（`vercel.json` 的 `outputDirectory: dist`），与本地验证是两条独立路径；
-预览 READY 不代表浏览器验证通过。只有同一提交的完整门禁成功，才可标记「已验证」，
+部署只通过显式的 Vercel 部署发生（`vercel.json` 的 `outputDirectory: dist`，
+`git.deploymentEnabled: false`，推送不会触发构建），与本地验证是两条独立路径；
+READY 不代表浏览器验证通过。只有同一提交的完整门禁成功，才可标记「已验证」，
 不能沿用旧提交的绿色状态。
 
 ## 发现回归时

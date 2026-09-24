@@ -66,8 +66,9 @@ dependency, or stage that did not execute counting as not-ALL-PASS. It records `
 `dirty`, and a `sourceSha256` over `public/ src/ scripts/ tests/ .github/ aha.md intent.md
 package.json package-lock.json vercel.json` into
 `test-results/intent-audit/report.json`, and its stages are, in order:
-`fast` → `review-build` → `player-chromium` → `player-webkit` → `aha-chromium` →
-`aha-webkit` → `diff-check`.
+`fast` → `review-build` → `player-chromium` → `aha-chromium` → `player-webkit` →
+`aha-webkit` → `diff-check` (`audit.mjs` loops browser-outer, suite-inner, so a missing
+WebKit shows up only after both Chromium suites have passed).
 
 **The script is `.claude/skills/verify/audit.mjs`, not a file in `scripts/`.** It is
 verification orchestration — the job the deleted `Player merge gate` used to do — so it
@@ -1195,11 +1196,18 @@ overclaimed verdict.
   `test_F02_city_and_world_require_real_actions` pins the stricter behavior: hidden until
   `act === 3`, even at `cityReady`. Legibility for Act II belongs on the metric row and in
   `#primary-actions`, which is where `renderActions()` already carries the shortfall idiom.
-- **Playwright version drift.** `tests/browser/requirements.txt` pins `1.57.0`; a machine
-  may have a newer one. Nothing installs the pin for you any more — this repository has no
-  CI runner, so `python -m playwright install` on the machine you are on is now the only
-  source of the browsers. Only the sync API is used, so either version works, but a
-  version-only difference is not a candidate regression.
+- **Playwright version drift — the Python package and the browser cache must match.**
+  `tests/browser/requirements.txt` pins `1.57.0`. Nothing installs the pin for you any more —
+  this repository has no CI runner — so on a fresh machine run
+  `python3 -m pip install -r tests/browser/requirements.txt` and then
+  `python3 -m playwright install --with-deps chromium webkit` with *that* package. The API is
+  the same across versions, but each package release looks for its own browser build: a
+  package whose build is absent from the cache (e.g. a container pre-seeded with
+  `chromium-1194` and no WebKit, with a newer `pip install playwright` on top) fails every
+  stage in `setUpClass` with `BrowserType.launch: Executable doesn't exist at …`, followed by
+  a misleading `Sync API inside the asyncio loop` error. The audit reports that as a browser
+  stage FAIL (`discovered 29, run 0, errors 2`) — an environment defect, not a candidate
+  regression; fix the install and re-run rather than reading it as a product failure.
 - **The suite installs its own clock.** `page.clock.install(FIXED)` + `pause_at` +
   `run_for(1500)` in teardown make the run deterministic; do not add wall-clock `sleep`s.
 - **Teardown fails the test on any console error, page error, or failed request.** A test
