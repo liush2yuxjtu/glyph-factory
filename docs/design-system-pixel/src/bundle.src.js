@@ -74,8 +74,7 @@
   function rect(x, y, w, h, fill) { return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" fill="' + fill + '"/>'; }
   function rnd(seed) { var s = seed; return function () { s = (s * 9301 + 49297) % 233280; return s / 233280; }; }
 
-  function scene(scale, opts) {
-    opts = opts || {};
+  function scene(scale) {
     var kind = SCALE[scale] || scale || 'desk', r = rnd(7), g = '';
     var dark = kind === 'silence' || kind === 'machine' || kind === 'network';
     g += rect(0, 0, 96, 30, 'var(--world-sky)');
@@ -173,34 +172,30 @@
       '<button class="gp-btn gp-btn-sm" type="button"' + (m.d ? ' disabled' : '') + '>购买</button></div>';
   }
 
-  /* ── Screen: the pixel refactor ── */
+  /* ── Screen: the pixel refactor, as shipped in public/play.html ──
+     Same DOM order as the game (focus order = visual order). The player surface never shows act
+     names or the act strip (player-privacy-v3), and the world stage only exists from ACT III. */
   function pixelScreen(s) {
     var desktop = /^1280/.test(s.viewport), review = s.surface === 'review';
-    var acts = s.actions.slice(), primary = null;
-    for (var i = 0; i < acts.length; i++) if (acts[i].m && !acts[i].d && !acts[i].x) { primary = acts.splice(i, 1)[0]; break; }
-    var events = acts.filter(function (a) { return a.e; });
-    var rest = acts.filter(function (a) { return !a.e; });
     var kick = s.actKicker.split('·')[0].trim();
     var hud = '<header class="gp-hud"><span class="gp-stamp">字</span><span class="gp-brand">字工厂</span>' +
       '<span class="gp-status"><i></i>' + esc(s.status.split('·')[0].trim()) + '</span>' +
       '<span class="gp-rate">' + esc(s.rate) + '<small>/s</small></span></header>';
     var director = review ? '<div class="gp-director"><b>导演预览</b><span>' + esc(s.ahaId) + '</span><span>' + esc(s.ahaTitle || '—') +
-      '</span><span class="gp-director-n">' + esc(s.ahaCount) + '</span></div>' : '';
-    var stage = '<section class="gp-stage">' + scene(s.worldScale) +
-      '<div class="gp-stage-t"><span class="gp-kick">' + esc(kick) + '</span><h2>' + esc(s.actTitle) + '</h2></div>' +
-      actTrack(s.acts, s.surface) + '</section><p class="gp-copy">' + esc(s.actCopy) + '</p>';
+      '</span><span class="gp-director-n">' + esc(s.ahaCount) + '</span></div>' + '<div class="gp-strip">' + actTrack(s.acts, 'review') + '</div>' : '';
+    var head = review ? '<div class="gp-head"><span class="gp-kick">' + esc(kick) + '</span><h2>' + esc(s.actTitle) + '</h2><p class="gp-copy">' + esc(s.actCopy) + '</p></div>' : '';
     var res = '<div class="gp-res">' + s.metrics.map(function (m) { return chip(m.l, m.v); }).join('') + '</div>';
-    var dock = '<div class="gp-dock">' + (primary ? button(primary, 'is-primary') : '') +
-      (events.length ? '<div class="gp-events">' + events.map(function (a) { return button(a); }).join('') + '</div>' : '') +
-      '<div class="gp-grid">' + rest.map(function (a) { return button(a); }).join('') + '</div></div>';
-    var mach = s.machines_on && s.machines.length ? '<div class="gp-panel"><div class="gp-panel-h">机器</div>' + s.machines.map(machine).join('') + '</div>' : '';
-    var world = s.world_on ? '<div class="gp-world">' + s.world.map(function (w) { return '<div><span>' + esc(w[0]) + '</span><b>' + esc(w[1]) + '</b></div>'; }).join('') + '</div>' : '';
-    var ending = s.ending ? '<div class="gp-ending"><h3>' + esc(s.endingTitle) + '</h3><p>车间安静下来。去读它。</p></div>' : '';
+    var dock = '<div class="gp-dock">' + s.actions.map(function (a) { return button(a); }).join('') + '</div>';
+    var card = '<div class="gp-panel gp-card">' + head + res + dock + '</div>';
+    var stage = s.world_on ? '<section class="gp-stage"><div class="gp-stage-h"><span>世界模型</span><span class="gp-kick">' + esc(s.worldScale) + '</span></div>' + scene(s.worldScale) +
+      '<div class="gp-world">' + s.world.map(function (w) { return '<div><span>' + esc(w[0]) + '</span><b>' + esc(w[1]) + '</b></div>'; }).join('') + '</div></section>' : '';
+    var mach = s.machines_on && s.machines.length ? '<div class="gp-panel"><div class="gp-panel-h">系统</div>' + s.machines.map(machine).join('') + '</div>' : '';
+    var ending = s.ending ? '<div class="gp-ending"><h3>' + esc(s.endingTitle) + '</h3><p>现在，去读它。</p></div>' : '';
     var foot = '<footer class="gp-foot">' + esc(s.saveStatus) + '</footer>';
     if (desktop) {
-      return '<div class="gp-screen gp-pixel is-desktop">' + hud + director + '<div class="gp-cols"><div>' + stage + res + world + logTerm(s.log) + '</div><div>' + dock + mach + ending + '</div></div>' + foot + '</div>';
+      return '<div class="gp-screen gp-pixel is-desktop">' + hud + director + '<div class="gp-cols"><div>' + card + '</div><div>' + stage + '</div></div><div class="gp-cols">' + '<div>' + mach + '</div><div>' + logTerm(s.log) + '</div></div>' + ending + foot + '</div>';
     }
-    return '<div class="gp-screen gp-pixel">' + hud + director + stage + res + dock + world + mach + logTerm(s.log) + ending + foot + '</div>';
+    return '<div class="gp-screen gp-pixel">' + hud + director + card + stage + mach + logTerm(s.log) + ending + foot + '</div>';
   }
 
   /* ── Screen: v3 as shipped (comparison skin; mirrors public/play.html structure) ── */

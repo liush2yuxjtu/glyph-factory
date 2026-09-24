@@ -134,7 +134,7 @@
  {
   "viewport": "390x844",
   "layout": {
-   "metrics": 2,
+   "metrics": 1,
    "actions": 1,
    "machines": 0,
    "world": 0,
@@ -275,9 +275,9 @@
  {
   "viewport": "390x844",
   "layout": {
-   "metrics": 2,
+   "metrics": 1,
    "actions": 1,
-   "machines": 2,
+   "machines": 1,
    "world": 0,
    "acts": 0,
    "aha": 0,
@@ -329,7 +329,7 @@
   "metrics": [
    {
     "label": "库存文字",
-    "value": "13.6",
+    "value": "13.9",
     "primary": true,
     "hidden": false
    },
@@ -398,7 +398,7 @@
    {
     "cmd": "contract",
     "label": "交付街角委托",
-    "sub": "还差 20 库存字（13.6）",
+    "sub": "还差 20 库存字（13.9）",
     "disabled": true,
     "major": false,
     "danger": false,
@@ -470,9 +470,9 @@
  {
   "viewport": "390x844",
   "layout": {
-   "metrics": 2,
+   "metrics": 1,
    "actions": 1,
-   "machines": 2,
+   "machines": 1,
    "world": 0,
    "acts": 0,
    "aha": 0,
@@ -715,9 +715,9 @@
  {
   "viewport": "390x844",
   "layout": {
-   "metrics": 2,
+   "metrics": 1,
    "actions": 1,
-   "machines": 2,
+   "machines": 1,
    "world": 2,
    "acts": 0,
    "aha": 0,
@@ -947,7 +947,7 @@
   "layout": {
    "metrics": 2,
    "actions": 1,
-   "machines": 2,
+   "machines": 1,
    "world": 2,
    "acts": 0,
    "aha": 0,
@@ -1023,7 +1023,7 @@
    },
    {
     "label": "噪音",
-    "value": "932.8",
+    "value": "933.1",
     "primary": false,
     "hidden": false
    }
@@ -1208,7 +1208,7 @@
   "layout": {
    "metrics": 2,
    "actions": 1,
-   "machines": 2,
+   "machines": 1,
    "world": 2,
    "acts": 0,
    "aha": 0,
@@ -1441,7 +1441,7 @@
   "layout": {
    "metrics": 2,
    "actions": 1,
-   "machines": 2,
+   "machines": 1,
    "world": 2,
    "acts": 0,
    "aha": 0,
@@ -1710,7 +1710,7 @@
   "layout": {
    "metrics": 2,
    "actions": 1,
-   "machines": 2,
+   "machines": 1,
    "world": 2,
    "acts": 0,
    "aha": 0,
@@ -1951,9 +1951,9 @@
  {
   "viewport": "390x844",
   "layout": {
-   "metrics": 2,
+   "metrics": 1,
    "actions": 1,
-   "machines": 2,
+   "machines": 1,
    "world": 2,
    "acts": 2,
    "aha": 2,
@@ -2005,7 +2005,7 @@
   "metrics": [
    {
     "label": "库存文字",
-    "value": "0",
+    "value": "0.2",
     "primary": true,
     "hidden": false
    },
@@ -2074,7 +2074,7 @@
    {
     "cmd": "contract",
     "label": "交付街角委托",
-    "sub": "还差 20 库存字（0）",
+    "sub": "还差 20 库存字（0.2）",
     "disabled": true,
     "major": false,
     "danger": false,
@@ -2083,7 +2083,7 @@
    {
     "cmd": "publish",
     "label": "发行《明日》",
-    "sub": "还差 库存 200 字 + 300 资金（0 / 0）",
+    "sub": "还差 库存 200 字 + 300 资金（0.2 / 0）",
     "disabled": true,
     "major": true,
     "danger": false,
@@ -2201,9 +2201,9 @@
  {
   "viewport": "390x844",
   "layout": {
-   "metrics": 2,
+   "metrics": 1,
    "actions": 1,
-   "machines": 2,
+   "machines": 1,
    "world": 2,
    "acts": 2,
    "aha": 2,
@@ -2315,7 +2315,7 @@
    {
     "cmd": "compose-rule",
     "label": "刻模：木 + 木 → 林",
-    "sub": "还差 读者（20 / 65）",
+    "sub": "还差 读者（20.1 / 65）",
     "disabled": true,
     "major": false,
     "danger": false,
@@ -2324,7 +2324,7 @@
    {
     "cmd": "condense",
     "label": "压缩 20 字 → 12 意义",
-    "sub": "还差 读者（20 / 217）",
+    "sub": "还差 读者（20.1 / 217）",
     "disabled": true,
     "major": false,
     "danger": false,
@@ -2333,7 +2333,7 @@
    {
     "cmd": "read-letter",
     "label": "打开一封读者来信",
-    "sub": "还差 读者（20 / 521）",
+    "sub": "还差 读者（20.1 / 521）",
     "disabled": true,
     "major": false,
     "danger": false,
@@ -2429,7 +2429,7 @@
    "A03 · 木 + 木 → 林ACT 21/1",
    "A04 · 规则开始自动运行ACT 20/3",
    "A05 · 意义比字数值钱ACT 23.0K/10",
-   "A06 · 报纸制造需求ACT 220/370",
+   "A06 · 报纸制造需求ACT 220.1/370",
    "A07 · 读者开始回信ACT 20/1",
    "A08 · 读者自己造新词ACT 20/1",
    "A09 · 一个词突然传播ACT 20/1",
@@ -2496,9 +2496,9 @@
  {
   "viewport": "390x844",
   "layout": {
-   "metrics": 2,
+   "metrics": 1,
    "actions": 1,
-   "machines": 2,
+   "machines": 1,
    "world": 2,
    "acts": 2,
    "aha": 2,
@@ -2775,9 +2775,9 @@
  {
   "viewport": "390x844",
   "layout": {
-   "metrics": 2,
+   "metrics": 1,
    "actions": 1,
-   "machines": 2,
+   "machines": 1,
    "world": 2,
    "acts": 2,
    "aha": 2,
@@ -2880,7 +2880,7 @@
    {
     "cmd": "editor-autonomy",
     "label": "给编辑 Agent 否决权",
-    "sub": "还差 夜间文章（0 / 131）",
+    "sub": "还差 夜间文章（0.2 / 131）",
     "disabled": true,
     "major": false,
     "danger": false,
@@ -2889,7 +2889,7 @@
    {
     "cmd": "spawn-agents",
     "label": "允许 Agent 创建 Agent",
-    "sub": "还差 夜间文章（0 / 263）",
+    "sub": "还差 夜间文章（0.2 / 263）",
     "disabled": true,
     "major": true,
     "danger": false,
@@ -2898,7 +2898,7 @@
    {
     "cmd": "digitize",
     "label": "切换数字出版",
-    "sub": "还差 夜间文章（0 / 3.8K）",
+    "sub": "还差 夜间文章（0.2 / 3.8K）",
     "disabled": true,
     "major": false,
     "danger": false,
@@ -2907,7 +2907,7 @@
    {
     "cmd": "train-memory",
     "label": "用档案训练机器",
-    "sub": "还差 夜间文章（0 / 8.6K）",
+    "sub": "还差 夜间文章（0.2 / 8.6K）",
     "disabled": true,
     "major": false,
     "danger": false,
@@ -2998,7 +2998,7 @@
    "A16 · 记者 Agent 自己选题ACT 41/1",
    "A17 · 编辑第一次说“不”ACT 40/1",
    "A18 · Agent 创造 AgentACT 40/1",
-   "A19 · 醒来时文章堆满了桌子ACT 40/1.7K",
+   "A19 · 醒来时文章堆满了桌子ACT 40.2/1.7K",
    "A20 · 数字出版：库存消失ACT 40/1",
    "A21 · 档案变成机器记忆ACT 40/1",
    "A22 · 出现一个你没造过的字ACT 50/1",
@@ -3054,7 +3054,7 @@
   "layout": {
    "metrics": 2,
    "actions": 1,
-   "machines": 2,
+   "machines": 1,
    "world": 2,
    "acts": 2,
    "aha": 2,
@@ -3124,13 +3124,13 @@
    },
    {
     "label": "意义",
-    "value": "100",
+    "value": "100.7",
     "primary": false,
     "hidden": false
    },
    {
     "label": "噪音",
-    "value": "10",
+    "value": "11.7",
     "primary": false,
     "hidden": false
    }
@@ -3157,7 +3157,7 @@
    {
     "cmd": "compress-language",
     "label": "语义压缩",
-    "sub": "还差 机器用量（0 / 12.3K）",
+    "sub": "还差 机器用量（13.2 / 12.3K）",
     "disabled": true,
     "major": true,
     "danger": false,
@@ -3166,7 +3166,7 @@
    {
     "cmd": "infrastructure",
     "label": "让语言接管基础设施",
-    "sub": "还差 意义（100 / 400）",
+    "sub": "还差 意义（100.7 / 400）",
     "disabled": true,
     "major": false,
     "danger": false,
@@ -3189,7 +3189,7 @@
    },
    {
     "label": "MACHINE USE",
-    "value": "0"
+    "value": "13"
    },
    {
     "label": "COMPRESSED",
@@ -3197,7 +3197,7 @@
    },
    {
     "label": "HUMAN MEANING",
-    "value": "100"
+    "value": "101"
    }
   ],
   "machines": [
@@ -3225,7 +3225,7 @@
    "A02 · 员工组成编辑部ACT 13/3",
    "A03 · 木 + 木 → 林ACT 21/1",
    "A04 · 规则开始自动运行ACT 23/3",
-   "A05 · 意义比字数值钱ACT 2100/10",
+   "A05 · 意义比字数值钱ACT 2100.7/10",
    "A06 · 报纸制造需求ACT 2200.0K/370",
    "A07 · 读者开始回信ACT 21/1",
    "A08 · 读者自己造新词ACT 21/1",
@@ -3243,7 +3243,7 @@
    "A20 · 数字出版：库存消失ACT 41/1",
    "A21 · 档案变成机器记忆ACT 41/1",
    "A22 · 出现一个你没造过的字ACT 51/1",
-   "A23 · 机器之间有自己的语言ACT 50/12.3K",
+   "A23 · 机器之间有自己的语言ACT 513.2/12.3K",
    "A24 · 意义被压成一个符号ACT 50/50.0K",
    "A25 · 语言成为社会操作系统ACT 60/1",
    "A26 · 新资源：歧义ACT 60/1.0K",
@@ -3295,7 +3295,7 @@
   "layout": {
    "metrics": 2,
    "actions": 1,
-   "machines": 2,
+   "machines": 1,
    "world": 2,
    "acts": 2,
    "aha": 2,
@@ -3525,7 +3525,7 @@
  {
   "viewport": "1280x900",
   "layout": {
-   "metrics": 3,
+   "metrics": 1,
    "actions": 2,
    "machines": 3,
    "world": 2,
@@ -3630,7 +3630,7 @@
    {
     "cmd": "editor-autonomy",
     "label": "给编辑 Agent 否决权",
-    "sub": "还差 夜间文章（0 / 131）",
+    "sub": "还差 夜间文章（0.2 / 131）",
     "disabled": true,
     "major": false,
     "danger": false,
@@ -3639,7 +3639,7 @@
    {
     "cmd": "spawn-agents",
     "label": "允许 Agent 创建 Agent",
-    "sub": "还差 夜间文章（0 / 263）",
+    "sub": "还差 夜间文章（0.2 / 263）",
     "disabled": true,
     "major": true,
     "danger": false,
@@ -3648,7 +3648,7 @@
    {
     "cmd": "digitize",
     "label": "切换数字出版",
-    "sub": "还差 夜间文章（0 / 3.8K）",
+    "sub": "还差 夜间文章（0.2 / 3.8K）",
     "disabled": true,
     "major": false,
     "danger": false,
@@ -3657,7 +3657,7 @@
    {
     "cmd": "train-memory",
     "label": "用档案训练机器",
-    "sub": "还差 夜间文章（0 / 8.6K）",
+    "sub": "还差 夜间文章（0.2 / 8.6K）",
     "disabled": true,
     "major": false,
     "danger": false,
@@ -3748,7 +3748,7 @@
    "A16 · 记者 Agent 自己选题ACT 41/1",
    "A17 · 编辑第一次说“不”ACT 40/1",
    "A18 · Agent 创造 AgentACT 40/1",
-   "A19 · 醒来时文章堆满了桌子ACT 40/1.7K",
+   "A19 · 醒来时文章堆满了桌子ACT 40.2/1.7K",
    "A20 · 数字出版：库存消失ACT 40/1",
    "A21 · 档案变成机器记忆ACT 40/1",
    "A22 · 出现一个你没造过的字ACT 50/1",
@@ -3802,7 +3802,7 @@
  {
   "viewport": "1280x900",
   "layout": {
-   "metrics": 3,
+   "metrics": 1,
    "actions": 2,
    "machines": 3,
    "world": 2,
@@ -3856,7 +3856,7 @@
   "metrics": [
    {
     "label": "库存文字",
-    "value": "0",
+    "value": "0.2",
     "primary": true,
     "hidden": false
    },
@@ -3925,7 +3925,7 @@
    {
     "cmd": "contract",
     "label": "交付街角委托",
-    "sub": "还差 20 库存字（0）",
+    "sub": "还差 20 库存字（0.2）",
     "disabled": true,
     "major": false,
     "danger": false,
@@ -3934,7 +3934,7 @@
    {
     "cmd": "publish",
     "label": "发行《明日》",
-    "sub": "还差 库存 200 字 + 300 资金（0 / 0）",
+    "sub": "还差 库存 200 字 + 300 资金（0.2 / 0）",
     "disabled": true,
     "major": true,
     "danger": false,
