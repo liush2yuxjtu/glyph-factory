@@ -69,7 +69,7 @@
       family: "worker",
       act: 5,
       firstAha: "A24",
-      firstAhaTitle: "万亿文字压成一个符号",
+      firstAhaTitle: "意义被压成一个符号",
       appears: "ACT V · 机器语言开始压缩巨大意义时",
       purpose: "把不可见的压缩、模式和机器语言变成可看见的顿悟。",
       action: "举起 Insight Crystal，让隐藏在海量文本里的核心结构发光。",
