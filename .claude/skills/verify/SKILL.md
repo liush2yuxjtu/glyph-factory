@@ -69,7 +69,8 @@ package.json package-lock.json vercel.json` into
 `fast` → `review-build` → `player-chromium` → `aha-chromium` → `player-webkit` →
 `aha-webkit` → `diff-check`. That is the order they are *recorded* in; since 2026-09-24 the
 Chromium and WebKit lanes (player then aha inside each) run **in parallel**, which takes a run
-from ~5 minutes to roughly the WebKit lane alone. They share no writable state — each suite
+from ~5 minutes to roughly the WebKit lane alone (measured 2026-09-24 on `718a176`: 192s wall
+versus ~307s serial; each suite runs ~10–15% slower under the contention, the total still drops). They share no writable state — each suite
 serves the prebuilt `dist/` / `review-dist/` read-only on its own ephemeral port and writes
 screenshots to a per-browser `test-results/` directory — so this is not the "two suites at once"
 the Gotchas warn about. Any FAIL still aborts, after both lanes finish.
@@ -121,12 +122,12 @@ git diff --check
 
 ### 两档：改代码时跑什么，提 PR 前跑什么
 
-完整 audit 一次约 3 分钟（WebKit 那条线最慢），每个新提交都要重跑。迭代时不必每次都跑它：
+完整 audit 一次约 3 分钟（实测 192 秒，WebKit 那条线最慢），每个新提交都要重跑。迭代时不必每次都跑它：
 
 | 什么时候 | 跑什么 | 大约多久 |
 |---|---|---|
-| 改代码、来回试 | `npm run verify:fast && npm run build:review && GLYPH_BROWSER=chromium python3 scripts/run-browser-contracts.py player && GLYPH_BROWSER=chromium python3 scripts/run-browser-contracts.py aha` | 2 分钟 |
-| 提 PR 前 / 推送要被评审的提交前 / 用户要部署前 | `npm run intent-audit`，在**确切的那个提交**上、干净的树 | 3 分钟 |
+| 改代码、来回试 | `npm run verify:fast && npm run build:review && GLYPH_BROWSER=chromium python3 scripts/run-browser-contracts.py player && GLYPH_BROWSER=chromium python3 scripts/run-browser-contracts.py aha` | 约 2 分钟（两组各约 64 秒） |
+| 提 PR 前 / 推送要被评审的提交前 / 用户要部署前 | `npm run intent-audit`，在**确切的那个提交**上、干净的树 | 约 3 分钟 |
 
 迭代档**不是**验证结论：它不跑 WebKit、不写 `report.json`，报告时只能说「迭代检查通过」，不能说
 `/verify` PASS。PR 描述里引用的必须是完整 audit 的结果（或下一节的复用）。
