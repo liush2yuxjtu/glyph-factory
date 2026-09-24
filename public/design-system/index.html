@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>字工厂 · 设计系统 / Design System</title>
+<link rel="stylesheet" href="./tokens.css">
+<style>
+*{box-sizing:border-box}
+html{background:var(--stage);color:var(--ink);color-scheme:light}
+body{margin:0;font:var(--text-body)/var(--leading-body) var(--font-ui);
+     background:radial-gradient(#76816d1f 1px,transparent 1px);background-size:6px 6px}
+.page{max-width:880px;margin:0 auto;background:var(--paper);
+      border-inline:var(--bw-hair) solid var(--shell-edge);padding:var(--pad-shell)}
+.masthead{display:flex;gap:var(--space-6);align-items:center;
+          border-bottom:var(--bw-bold) solid var(--ink);padding-bottom:var(--space-6);margin-bottom:var(--space-8)}
+.stamp{display:grid;place-items:center;width:56px;height:60px;background:var(--ink);color:var(--green);
+       font:var(--weight-black) var(--text-stamp)/1 var(--font-mark);box-shadow:var(--shadow-stamp);flex:0 0 auto}
+.eyebrow{margin:0 0 2px;color:var(--rust);font-size:var(--text-mini);
+         font-weight:var(--weight-heavy);letter-spacing:var(--tracking-eyebrow)}
+h1{margin:0;font-size:var(--text-title);line-height:1}
+h1 span{color:var(--rust)}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:var(--space-3)}
+.card{display:block;text-decoration:none;color:inherit;border:var(--bw-bold) solid var(--ink);
+      background:var(--panel);padding:var(--space-6);box-shadow:var(--shadow-2)}
+.card:hover{background:var(--green)}
+.card:active{transform:translate(var(--press-shift),var(--press-shift));box-shadow:none}
+.card:focus-visible{outline:var(--focus-ring) solid var(--rust);outline-offset:var(--focus-offset)}
+.card b{display:block;font-size:15px;margin-bottom:var(--space-2)}
+.card span{display:block;font-size:var(--text-meta);color:var(--muted)}
+.card:hover span{color:var(--ink)}
+.card code{font:var(--text-micro)/1.5 var(--font-num)}
+
+h2{font-size:var(--text-body);margin:var(--space-9) 0 var(--space-4);
+   border-bottom:var(--bw-bold) solid var(--ink);padding-bottom:var(--space-2)}
+table{width:100%;border-collapse:collapse;font-size:var(--text-meta)}
+th,td{text-align:left;padding:var(--space-3) var(--space-4);border-bottom:var(--bw-hair) solid var(--line);vertical-align:top}
+th{font-size:var(--text-micro);letter-spacing:var(--tracking-wide);color:var(--muted);text-transform:uppercase}
+td code{font-family:var(--font-num);font-size:var(--text-mini)}
+.bad{color:var(--rust);font-weight:var(--weight-heavy)}
+.good{color:#2f6b2f;font-weight:var(--weight-heavy)}
+.drop{color:var(--muted);font-weight:var(--weight-heavy)}
+.score{display:flex;gap:var(--space-8);flex-wrap:wrap;margin:0 0 var(--space-5)}
+.score div{border:var(--bw-hair) solid var(--ink);background:var(--surface);padding:var(--space-4) var(--space-5);min-width:120px}
+.score span{display:block;font-size:var(--text-micro);color:var(--muted);letter-spacing:var(--tracking-wide)}
+.score strong{display:block;font:var(--weight-strong) var(--text-metric)/1.2 var(--font-num);margin-top:var(--space-1)}
+.warn{border-left:5px solid var(--rust);background:var(--surface-focus);padding:var(--space-5);
+      font-size:var(--text-meta);color:var(--focus-body);margin:var(--space-7) 0 0}
+.warn b{color:var(--ink)}
+.footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--space-4);
+        border-top:var(--bw-hair) solid var(--line);margin-top:var(--space-9);padding-top:var(--space-5);
+        font-size:var(--text-micro);color:var(--muted)}
+@media(max-width:560px){.page{padding:var(--space-6) var(--space-5) var(--space-9)}.stamp{width:44px;height:48px;font-size:28px}}
+</style>
+</head>
+<body>
+<main class="page">
+
+  <header class="masthead">
+    <div class="stamp" aria-hidden="true">字</div>
+    <div>
+      <p class="eyebrow">GLYPH FACTORY · DESIGN SYSTEM v3</p>
+      <h1>设计<span>//</span>系统</h1>
+    </div>
+  </header>
+
+  <div class="cards">
+    <a class="card" href="./components.html">
+      <b>组件陈列 →</b>
+      <span>组件设计真源：15 组（12 已上线 + 3 提案），全部变体与状态、intent 契约。</span>
+      <code>components.html</code>
+    </a>
+    <a class="card" href="./flows.html">
+      <b>流程与屏幕 →</b>
+      <span>17 屏矢量重绘、6 条流程、29 个热点步骤。每屏按真实 DOM 读数画，全部消费 <code>tokens.css</code>。</span>
+      <code>flows.html</code>
+    </a>
+    <a class="card" href="./preview/index.html">
+      <b>令牌预览 →</b>
+      <span>色板、字阶、间距、描边阴影、动效、对比度自检。运行时读取真源。</span>
+      <code>preview/index.html</code>
+    </a>
+    <a class="card" href="./DESIGN.md">
+      <b>说明文档 →</b>
+      <span>设计原则、组件清单、跨页面漂移审计、待办。</span>
+      <code>DESIGN.md</code>
+    </a>
+    <a class="card" href="./references/mobbin-2026-09.md">
+      <b>参考记录 →</b>
+      <span>Mobbin 实测覆盖结论，和支撑三个提案组件的逐屏记录。</span>
+      <code>references/</code>
+    </a>
+  </div>
+
+  <h2>本包是什么</h2>
+  <table>
+    <tr><th>层</th><th>文件</th><th>地位</th></tr>
+    <tr><td>设计数值</td><td><code>tokens.css</code></td><td>唯一真源。改数值只改这里。</td></tr>
+    <tr><td>组件设计</td><td><code>components.html</code></td><td>唯一真源。改版式只改这里。</td></tr>
+    <tr><td>屏幕与流程</td><td><code>flows.html</code></td><td>屏幕级真源。每个状态一屏，按真实 DOM 读数重绘，不含截图。</td></tr>
+    <tr><td>令牌预览</td><td><code>preview/index.html</code></td><td>派生层，运行时读 <code>tokens.css</code>。</td></tr>
+    <tr><td>参考依据</td><td><code>references/</code></td><td>看过的参考屏与它支撑的判断；没看过的不写。</td></tr>
+    <tr><td>说明</td><td><code>DESIGN.md</code></td><td>只做说明，不含数值。</td></tr>
+    <tr><td>清单</td><td><code>manifest.json</code></td><td>包索引与校验和。</td></tr>
+    <tr><td>资产</td><td><code>assets/</code></td><td>无二进制资产；说明见 README。</td></tr>
+  </table>
+
+  <h2>审计摘要</h2>
+  <div class="score">
+    <div><span>令牌总数</span><strong>112</strong></div>
+    <div><span>其中色值</span><strong>40</strong></div>
+    <div><span>参考驱动组件</span><strong>2 上 / 1 撤</strong></div>
+    <div><span>各带 :root 的页面</span><strong>7</strong></div>
+  </div>
+  <table>
+    <tr><th>发现</th><th>影响</th><th>状态</th></tr>
+    <tr><td><code>--gold</code> 已声明但零引用</td><td>误导性令牌</td><td class="bad">待删</td></tr>
+    <tr><td><code>.aha-item.locked</code> 从未被赋值</td><td>死变体</td><td class="bad">待删</td></tr>
+    <tr><td><code>src/app/globals.css</code> 组件类全部失效</td><td>第二套僵尸配色</td><td class="bad">待清</td></tr>
+    <tr><td><code>src/app/page.module.css</code> 无任何 import</td><td>死文件</td><td class="bad">待清</td></tr>
+    <tr><td>7 个 public 页面各自复制 <code>:root</code></td><td>4 处色值已漂移</td><td class="bad">待并</td></tr>
+    <tr><td><code>--muted</code> 在纸面上 4.27:1</td><td>低于 AA 正文线</td><td class="bad">待调</td></tr>
+    <tr><td>正文 / 面板 / 按钮文字对比度</td><td>13.77–16.05:1</td><td class="good">达标</td></tr>
+    <tr><td>唯一圆角、唯一动画</td><td>系统收敛</td><td class="good">达标</td></tr>
+    <tr><td>幕内进度不可见</td><td>玩家不知道离下一阶段还差多少</td><td class="good">已修 · 组件 13</td></tr>
+    <tr><td>Aha 行无达成条件与进度</td><td>评审面看不出每条还差什么</td><td class="good">已修 · 组件 14</td></tr>
+    <tr><td>发行副标题含「ACT II」</td><td>玩家达标即命中隐私边界</td><td class="good">已修 · 顺带</td></tr>
+    <tr><td>Aha 触发无视觉时刻</td><td>PR #14 用日志世界线解决</td><td class="good">已由上游覆盖</td></tr>
+    <tr><td>组件 15 全屏时刻</td><td>与 #14 方案重复且会惩罚玩家</td><td class="drop">已撤回</td></tr>
+  </table>
+
+  <h2>参考来源</h2>
+  <p class="hint" style="font-size:var(--text-meta);color:var(--muted);margin:0 0 var(--space-5)">
+    用户要求找 Mobbin 上同类游戏的参考。<strong>实测结论：Mobbin 不覆盖增量/放置游戏品类。</strong>
+    <code>Game UI</code> 分类 59 张截图去重 27 个 app，全是 Duolingo / KakaoBank / Khan Academy 这类游戏化产品；
+    站内检索 AdVenture Capitalist、Cookie Clicker、Melvor Idle、Egg, Inc. 均为 0 条。
+    所以这里没有「同类游戏参考」——那只能编。可用的部分是它的模式分类与本系统组件一一对应，
+    由此得到上面 13–15 三个提案。逐屏记录见
+    <a href="./references/mobbin-2026-09.md">references/mobbin-2026-09.md</a>。
+  </p>
+
+  <p class="warn">
+    <b>重要：本包尚未接管运行时。</b>
+    <code>public/play.html</code> 目前仍自带一份 <code>:root</code>，值与本包一致但物理上是两份。
+    合并需要同时改 <code>scripts/build-static.mjs</code>（它只把白名单文件拷进 <code>dist/</code>，
+    直接 link 外部 CSS 会让发布产物掉色）。这一步是独立变更，本包不做自动迁移。
+  </p>
+
+  <footer class="footer">
+    <span>取值口径：<code>public/play.html</code> · 2026-09-20</span>
+    <span>本页不是玩家面，也不会进入 <code>dist/</code> 发布产物</span>
+  </footer>
+
+</main>
+</body>
+</html>

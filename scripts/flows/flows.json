@@ -1,0 +1,383 @@
+[
+ {
+  "fid": "F01",
+  "act": 1,
+  "title": "手工与自动化",
+  "range": "A01–A02",
+  "ahas": 2,
+  "decisions": 10,
+  "seconds": 109,
+  "screens": [
+   "P01",
+   "P02",
+   "P03"
+  ],
+  "steps": [
+   {
+    "cmd": "print",
+    "label": "印字",
+    "cost": "—",
+    "gives": "A01 机器替我按按钮"
+   },
+   {
+    "cmd": "sell",
+    "label": "出售全部库存",
+    "cost": "—",
+    "gives": "A01 机器替我按按钮"
+   },
+   {
+    "cmd": "buy",
+    "label": "购买机器",
+    "cost": "—",
+    "gives": "A01 机器替我按按钮"
+   },
+   {
+    "cmd": "boost",
+    "label": "研发复写纸",
+    "cost": "—",
+    "gives": "A03 木 + 木 → 林"
+   },
+   {
+    "cmd": "research-auto",
+    "label": "研发自动出售",
+    "cost": "—",
+    "gives": "A03 木 + 木 → 林"
+   },
+   {
+    "cmd": "publish",
+    "label": "发行《明日》",
+    "cost": "—",
+    "gives": "A03 木 + 木 → 林"
+   }
+  ],
+  "exit": [
+   "累计印字 32000",
+   "小型印刷机 1",
+   "库存字 200",
+   "工坊资金 300"
+  ]
+ },
+ {
+  "fid": "F02",
+  "act": 2,
+  "title": "字开始生长",
+  "range": "A03–A11",
+  "ahas": 9,
+  "decisions": 51,
+  "seconds": 1854,
+  "screens": [
+   "P04",
+   "P05"
+  ],
+  "steps": [
+   {
+    "cmd": "print",
+    "label": "印字",
+    "cost": "—",
+    "gives": "A04 规则开始自动运行"
+   },
+   {
+    "cmd": "compose-rule",
+    "label": "刻模：木 + 木 → 林",
+    "cost": "库存字 2 · 工坊资金 40 · 读者 65",
+    "gives": "A04 规则开始自动运行"
+   },
+   {
+    "cmd": "take-event",
+    "label": "一封没署名的信 · 微事件",
+    "cost": "库存字 30",
+    "gives": "A05 意义比字数值钱"
+   },
+   {
+    "cmd": "condense",
+    "label": "压缩 20 字 → 12 意义",
+    "cost": "库存字 20 · 工坊资金 60 · 读者 217",
+    "gives": "A05 意义比字数值钱"
+   },
+   {
+    "cmd": "push-clock",
+    "label": "发行新一期 · 推钟",
+    "cost": "意义 30 · 工坊资金 150",
+    "gives": "A07 读者开始回信"
+   },
+   {
+    "cmd": "sell",
+    "label": "出售全部库存",
+    "cost": "—",
+    "gives": "A07 读者开始回信"
+   },
+   {
+    "cmd": "read-letter",
+    "label": "打开一封读者来信",
+    "cost": "读者 521 · 意义 35",
+    "gives": "A07 读者开始回信"
+   },
+   {
+    "cmd": "organic-word",
+    "label": "允许读者造一个新词",
+    "cost": "读者来信 1 · 意义 55 · 工坊资金 120 · 读者 674",
+    "gives": "A08 读者自己造新词"
+   },
+   {
+    "cmd": "viral-word",
+    "label": "让这个词传播",
+    "cost": "自造词 1 · 意义 70 · 读者 827",
+    "gives": "A09 一个词突然传播"
+   },
+   {
+    "cmd": "delete-noise",
+    "label": "删除噪音",
+    "cost": "noise 1 · 纸张危机 1 · 读者 2061",
+    "gives": "A11 删字第一次更值钱"
+   }
+  ],
+  "exit": [
+   "组合字 10",
+   "纸张危机 1",
+   "已删除噪音 1"
+  ]
+ },
+ {
+  "fid": "F03",
+  "act": 3,
+  "title": "文字改变城市",
+  "range": "A12–A15",
+  "ahas": 4,
+  "decisions": 43,
+  "seconds": 748,
+  "screens": [
+   "P05",
+   "P06"
+  ],
+  "steps": [
+   {
+    "cmd": "condense",
+    "label": "压缩 20 字 → 12 意义",
+    "cost": "库存字 20 · 工坊资金 60 · 读者 217",
+    "gives": "A12 街区长出方言"
+   },
+   {
+    "cmd": "push-clock",
+    "label": "张贴告示 · 推钟",
+    "cost": "意义 30 · 工坊资金 150",
+    "gives": "A12 街区长出方言"
+   },
+   {
+    "cmd": "discover-dialect",
+    "label": "观察一个新方言",
+    "cost": "意义 40 · 读者 2435 · 工坊资金 240",
+    "gives": "A12 街区长出方言"
+   },
+   {
+    "cmd": "take-event",
+    "label": "墙上被人抄走的一句话 · 微事件",
+    "cost": "意义 40",
+    "gives": "A13 概念改变城市"
+   },
+   {
+    "cmd": "make-concept",
+    "label": "创造一个概念",
+    "cost": "意义 50 · 街区 2 · 工坊资金 200 · 读者 3679",
+    "gives": "A13 概念改变城市"
+   },
+   {
+    "cmd": "map-city",
+    "label": "展开城市地图",
+    "cost": "街区 2 · 意义 40 · 工坊资金 150 · 读者 5596",
+    "gives": "A14 城市地图出现"
+   },
+   {
+    "cmd": "map-world",
+    "label": "把地图缩到世界",
+    "cost": "概念 2 · 街区 3 · 读者 9420",
+    "gives": "A15 地图缩到世界"
+   },
+   {
+    "cmd": "launch-agents",
+    "label": "上线记者 Agent",
+    "cost": "地图范围 2 · 意义 60 · 工坊资金 600 · 读者 10736",
+    "gives": "A16 记者 Agent 自己选题"
+   }
+  ],
+  "exit": [
+   "地图范围 2"
+  ]
+ },
+ {
+  "fid": "F04",
+  "act": 4,
+  "title": "机器开始写",
+  "range": "A16–A21",
+  "ahas": 6,
+  "decisions": 71,
+  "seconds": 1116,
+  "screens": [
+   "P06",
+   "P07"
+  ],
+  "steps": [
+   {
+    "cmd": "buy",
+    "label": "购买机器",
+    "cost": "—",
+    "gives": "A17 编辑第一次说“不”"
+   },
+   {
+    "cmd": "condense",
+    "label": "压缩 20 字 → 12 意义",
+    "cost": "库存字 20 · 工坊资金 60 · 读者 217",
+    "gives": "A17 编辑第一次说“不”"
+   },
+   {
+    "cmd": "push-clock",
+    "label": "让 Agent 加班 · 推钟",
+    "cost": "意义 50 · 工坊资金 300",
+    "gives": "A17 编辑第一次说“不”"
+   },
+   {
+    "cmd": "take-event",
+    "label": "一份没人署名的退稿 · 微事件",
+    "cost": "意义 60",
+    "gives": "A17 编辑第一次说“不”"
+   },
+   {
+    "cmd": "editor-autonomy",
+    "label": "给编辑 Agent 否决权",
+    "cost": "意义 40 · 工坊资金 300 · 夜间文章 131",
+    "gives": "A17 编辑第一次说“不”"
+   },
+   {
+    "cmd": "spawn-agents",
+    "label": "允许 Agent 创建 Agent",
+    "cost": "意义 80 · 工坊资金 500 · 夜间文章 263",
+    "gives": "A18 Agent 创造 Agent"
+   },
+   {
+    "cmd": "digitize",
+    "label": "切换数字出版",
+    "cost": "夜间文章 3766 · 意义 120 · 智能体工厂 1",
+    "gives": "A20 数字出版：库存消失"
+   },
+   {
+    "cmd": "train-memory",
+    "label": "用档案训练机器",
+    "cost": "意义 80 · 工坊资金 500 · 夜间文章 8553",
+    "gives": "A21 档案变成机器记忆"
+   },
+   {
+    "cmd": "discover-machine-glyph",
+    "label": "检查未知字形 ◫",
+    "cost": "档案记忆 4 · 智能体工厂 2 · 夜间文章 9721",
+    "gives": "A22 出现一个你没造过的字"
+   }
+  ],
+  "exit": [
+   "档案记忆 4",
+   "智能体工厂 2"
+  ]
+ },
+ {
+  "fid": "F05",
+  "act": 5,
+  "title": "机器语言",
+  "range": "A22–A24",
+  "ahas": 3,
+  "decisions": 19,
+  "seconds": 421,
+  "screens": [
+   "P07",
+   "P08"
+  ],
+  "steps": [
+   {
+    "cmd": "push-clock",
+    "label": "喂机器一批文本 · 推钟",
+    "cost": "库存字 40000 · 工坊资金 400",
+    "gives": "A23 机器之间有自己的语言"
+   },
+   {
+    "cmd": "buy",
+    "label": "购买机器",
+    "cost": "—",
+    "gives": "A23 机器之间有自己的语言"
+   },
+   {
+    "cmd": "compress-language",
+    "label": "语义压缩",
+    "cost": "机器用量 12295 · 意义 100 · 工坊资金 300",
+    "gives": "A24 意义被压成一个符号"
+   },
+   {
+    "cmd": "take-event",
+    "label": "一段对不上的话 · 微事件",
+    "cost": "库存字 500",
+    "gives": "A24 意义被压成一个符号"
+   },
+   {
+    "cmd": "infrastructure",
+    "label": "让语言接管基础设施",
+    "cost": "意义 400 · 工坊资金 2000 · 机器用量 41258",
+    "gives": "A25 语言成为社会操作系统"
+   }
+  ],
+  "exit": [
+   "已压缩意义 50000"
+  ]
+ },
+ {
+  "fid": "F06",
+  "act": 6,
+  "title": "从增长到沉默",
+  "range": "A25–A28",
+  "ahas": 4,
+  "decisions": 26,
+  "seconds": 837,
+  "screens": [
+   "P08",
+   "P09"
+  ],
+  "steps": [
+   {
+    "cmd": "push-clock",
+    "label": "投产一条新语法 · 推钟",
+    "cost": "意义 80 · 工坊资金 600",
+    "gives": "A26 新资源：歧义"
+   },
+   {
+    "cmd": "take-event",
+    "label": "一句没有人认领的句子 · 微事件",
+    "cost": "意义 120",
+    "gives": "A26 新资源：歧义"
+   },
+   {
+    "cmd": "resolve-ambiguity",
+    "label": "消解 25 歧义",
+    "cost": "歧义 1034",
+    "gives": "A27 目标从生产变成删除"
+   },
+   {
+    "cmd": "buy",
+    "label": "购买机器",
+    "cost": "—",
+    "gives": "A27 目标从生产变成删除"
+   },
+   {
+    "cmd": "delete-noise",
+    "label": "删除噪音",
+    "cost": "noise 1 · 已消解歧义 1 · 歧义 2203",
+    "gives": "A27 目标从生产变成删除"
+   },
+   {
+    "cmd": "stop-printing",
+    "label": "停止印刷",
+    "cost": "已删除噪音 1000 · 已压缩意义 50000 · 已消解歧义 1 · 歧义 4803",
+    "gives": "A28 最后一个按钮：停止印刷"
+   }
+  ],
+  "exit": [
+   "已删除噪音 1000",
+   "已压缩意义 50000",
+   "已消解歧义 1"
+  ]
+ }
+]

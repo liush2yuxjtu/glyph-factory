@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>字工厂流程体检与修复</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Noto+Serif+SC:wght@700;900&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+  :root{
+    --ground:#efe9d8; --panel:#fffaf0; --ink:#17201a; --muted:#657064;
+    --line:#bcc4ae; --green:#c8ef70; --rust:#a34e34;
+    --bad-bg:#f1d9ce; --bad-ink:#752f20;
+    --sans:"Noto Sans SC",system-ui,"PingFang SC",sans-serif;
+    --serif:"Noto Serif SC","Songti SC",serif;
+    --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+    --shadow:4px 4px 0 var(--ink);
+    --max:900px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font:16px/1.7 var(--sans);
+       -webkit-font-smoothing:antialiased}
+  .wrap{max-width:var(--max);margin:0 auto;padding:0 22px 96px}
+  .eyebrow{font:700 11px/1.6 var(--mono);letter-spacing:.16em;text-transform:uppercase;
+           color:var(--rust);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .eyebrow i{width:3px;height:3px;background:var(--line);border-radius:50%}
+  header{padding:72px 0 8px}
+  h1{margin:18px 0 20px;font:900 clamp(34px,7.4vw,64px)/1.07 var(--serif);letter-spacing:-.015em;
+     text-wrap:balance}
+  h1 em{font-style:normal;color:var(--rust)}
+  .lede{font-size:clamp(19px,3.2vw,25px);line-height:1.5;font-weight:500;max-width:36ch;
+        text-wrap:balance}
+  .lede b{color:var(--rust);font-weight:900}
+  hr{border:0;border-top:2px solid var(--ink);margin:56px 0 0}
+  section{padding:56px 0 0}
+  h2{margin:12px 0 14px;font:900 clamp(24px,4.4vw,34px)/1.25 var(--serif);letter-spacing:-.01em;
+     text-wrap:balance}
+  h2 em{font-style:normal;color:var(--rust)}
+  p{margin:0}
+  .body{color:var(--muted);max-width:60ch}
+  .body+.body{margin-top:10px}
+  .body b{color:var(--ink);font-weight:700}
+  .card{background:var(--panel);border:2px solid var(--ink);box-shadow:var(--shadow)}
+  .panel{padding:26px 24px;margin-top:26px}
+  .ba{display:grid;grid-template-columns:1fr;gap:0;margin-top:26px;border:2px solid var(--ink);
+      background:var(--panel);box-shadow:var(--shadow)}
+  @media(min-width:640px){.ba{grid-template-columns:1fr 1fr}}
+  .ba>div{padding:22px 22px 24px}
+  .ba>div+div{border-top:2px solid var(--ink)}
+  @media(min-width:640px){.ba>div+div{border-top:0;border-left:2px solid var(--ink)}}
+  .ba h3{margin:0 0 12px;font:700 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;
+         color:var(--muted)}
+  .ba .was{background:var(--bad-bg)}
+  .ba .now{background:var(--green)}
+  .ba .big{font:700 clamp(30px,7vw,44px)/1 var(--mono);letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+  .ba .cap{margin-top:8px;font-size:14px;line-height:1.55;color:var(--ink)}
+  .row{display:grid;grid-template-columns:64px 1fr 54px;align-items:center;gap:12px;margin-bottom:8px}
+  .row .lab{font:500 12.5px var(--sans);color:var(--muted)}
+  .row .track{height:22px}
+  .row .bar{height:100%;background:var(--ink)}
+  .row .val{font:700 13px var(--mono);text-align:right;font-variant-numeric:tabular-nums}
+  .legend{margin-top:14px;padding-top:14px;border-top:1px solid var(--line);font-size:13.5px;
+          color:var(--muted)}
+  ul.fixed{margin:26px 0 0;padding:0;list-style:none;border-top:2px solid var(--ink)}
+  ul.fixed li{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:baseline;
+              padding:14px 0;border-bottom:1px solid var(--line)}
+  ul.fixed b{font:700 11px var(--mono);color:var(--green);background:var(--ink);padding:3px 7px;
+             letter-spacing:.08em}
+  .close{margin-top:52px;padding:30px 28px;border:2px solid var(--ink);background:var(--panel);
+         box-shadow:var(--shadow)}
+  .close h2{margin-top:0}
+  .stamp{margin-top:20px;padding-top:16px;border-top:1px solid var(--line);
+         font:500 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  code{font-family:var(--mono);font-size:.92em}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow"><span>流程体检 · 修复报告</span><i></i><span>2026-09-21</span><i></i><span>分支 feat/progress-and-design-system</span></div>
+  <h1>字工厂，<br>四个毛病<em>都修好了</em></h1>
+  <p class="lede">这是 9 月 20 日那份体检报告的续集：<b>同样是四个毛病，记的是修之前什么样、修之后什么样。</b></p>
+</header>
+
+<hr>
+
+<section>
+  <div class="eyebrow"><span>先说清楚</span></div>
+  <h2>两个毛病不是我修的</h2>
+  <p class="body">合并进来的 <code>PR #14</code> 已经修掉了两个，只是当时没并到我在看的那条线上：<b>实时「规则自动运行」恒为 0</b>（跨拍累加器 <code>ruleCredit</code>），以及<b>发行按钮对卖货玩家不出现</b>（改成置灰 + 写明缺什么）。</p>
+  <p class="body">我修的是剩下的：节奏塌缩、Aha 被盖住、以及六个零碎问题。下面按毛病逐条对照。</p>
+</section>
+
+<hr>
+
+<section>
+  <div class="eyebrow"><span>毛病一</span><i></i><span>节奏</span></div>
+  <h2>后面五章的戏，原来全挤在最后 <em>35 下</em> 里演完</h2>
+  <p class="body">原来第一章要按 651 次按钮，二到六章加起来只要 35 次。现在每一幕都有自己的一段：</p>
+
+  <div class="panel card">
+    <div class="row"><span class="lab">第一章</span><span class="track"><span class="bar" style="width:12%"></span></span><span class="val">347s</span></div>
+    <div class="row"><span class="lab">第二章</span><span class="track"><span class="bar" style="width:22%"></span></span><span class="val">629s</span></div>
+    <div class="row"><span class="lab">第三章</span><span class="track"><span class="bar" style="width:5.5%"></span></span><span class="val">158s</span></div>
+    <div class="row"><span class="lab">第四章</span><span class="track"><span class="bar" style="width:18%"></span></span><span class="val">521s</span></div>
+    <div class="row"><span class="lab">第五章</span><span class="track"><span class="bar" style="width:14%"></span></span><span class="val">389s</span></div>
+    <div class="row"><span class="lab">第六章</span><span class="track"><span class="bar" style="width:1.5%"></span></span><span class="val">30s</span></div>
+    <div class="legend">
+      条长按比例，单位秒。同一局的决策点击：<b>28 / 272 / 10 / 13 / 452 / 59</b>。<br>
+      第六章从 3 秒变成 30 秒、从 4 次点击变成 59 次——因为它现在真的要求你处理完歧义才能停机。
+    </div>
+  </div>
+
+  <p class="body" style="margin-top:22px"><b>怎么修的?</b> 每一幕的门槛改成<b>随时间累积的资源</b>，而不是「上一步刚好喂饱下一步」。方言要有人口才长得出——观察一个新方言需要读者达到 <code>600×(街区数+1)</code>；概念要有街区才活得下去——<code>概念数 &lt; 街区数</code>。然后每个动作都加了成本与上限。</p>
+</section>
+
+<hr>
+
+<section>
+  <div class="eyebrow"><span>毛病二</span><i></i><span>自动机器</span></div>
+  <h2>「你看着它就不干活」<em>已经不会了</em></h2>
+  <div class="ba">
+    <div class="was"><h3>修之前</h3><div class="big">0<span style="font-size:.45em"> 字/60秒</span></div><div class="cap">你盯着屏幕看，机器一动不动。</div></div>
+    <div class="now"><h3>修之后</h3><div class="big">15<span style="font-size:.45em"> 字/60秒</span></div><div class="cap">盯着看和关掉 60 秒，产出完全一致。<br><span style="color:var(--muted);font-size:13px">（离线结算仍按 8 小时封顶，这是原有设定）</span></div></div>
+  </div>
+  <p class="body" style="margin-top:22px"><b>根因</b>是每拍算一次 <code>floor(过去时长 / 4秒)</code>，半秒一次地问，永远得 0。修法是跨拍累加余数（<code>ruleCredit</code>）：攒够 4 秒就结算一次，不管你人在不在。这是 <code>PR #14</code> 修的。</p>
+</section>
+
+<hr>
+
+<section>
+  <div class="eyebrow"><span>毛病三</span><i></i><span>看不见的惊喜</span></div>
+  <h2>原来 11 个惊喜从没露过面，现在剩 <em>1 个</em></h2>
+  <p class="body">屏幕只有一个位置报「你学会新东西了」。原来的取法是「已见里编号最大的那个」——于是编号大的会永久盖住刚刚发生的小号。</p>
+  <div class="ba">
+    <div class="was"><h3>修之前</h3><div class="big">11</div><div class="cap">个里程碑，玩家一次都没被通知过。</div></div>
+    <div class="now"><h3>修之后</h3><div class="big">1</div><div class="cap">只剩一个边角情况（A05 与 A06 同帧），其余都按「刚刚发生」显示。</div></div>
+  </div>
+  <p class="body" style="margin-top:22px"><b>怎么修的?</b> 焦点卡改成读 <code>ahaSeen</code> 的<b>末位</b>——那份数组是按触发顺序追加的，末位就是刚发生的那条。<code>PR #14</code> 另外给每条 Aha 加了一句世界语言的日志公告，所以即使焦点卡被抢，玩家也一定在日志里看得见。</p>
+</section>
+
+<hr>
+
+<section>
+  <div class="eyebrow"><span>毛病四</span><i></i><span>一条死路</span></div>
+  <h2>习惯卖字的玩家，原来<em>永远看不到出口</em></h2>
+  <p class="body">出口按钮要求「手里至少攒着 200 个字」，而「出售全部库存」每按一次就把手里的字清零。原来按钮是<b>不渲染</b>——屏幕上连个灰按钮都没有，玩家不知道自己差在哪。</p>
+  <div class="ba">
+    <div class="was"><h3>修之前</h3><div class="big">不出现</div><div class="cap">机器人按了 40 万次、攒了 1220 万资金，出口还是不出现。</div></div>
+    <div class="now"><h3>修之后</h3><div class="big">置灰 + 说明</div><div class="cap">按钮一直在，写着「还差 库存字（0 / 200）· 自动出售正在清空库存」，并给出切换开关。</div></div>
+  </div>
+</section>
+
+<hr>
+
+<section>
+  <div class="eyebrow"><span>还有六个零碎的</span></div>
+  <h2>全都收了</h2>
+  <ul class="fixed">
+    <li><b>已修</b><span><b>钱只有第一章有用。</b> 后四幕的动作现在都要花资金：刻模、压缩、方言、概念、训练档案、语义压缩、智能体工厂——一共 9 个出口。</span></li>
+    <li><b>已修</b><span><b>出版后第一章的动词消失。</b> 出售、交付委托、买机器现在全幕常驻。引擎从来没禁止过，是界面不给入口。</span></li>
+    <li><b>已修</b><span><b>6 个动作可以无限白嫖。</b> 全都加了上限或成本：读者来信按读者数递增放行、传播按在传词数递增、给编辑否决权改成一次性、消解歧义必须等歧义真的成了问题。</span></li>
+    <li><b>已修</b><span><b>文案数字和实际触发对不上。</b> A19「八万篇文章」改成「文章堆满桌子」，A24「一万亿文字」改成「意义」——都是对着 100 和 10000 的真实阈值改的。</span></li>
+    <li><b>已修</b><span><b>换章节写成「必须正好等于」。</b> 6 处全部改成状态判断，另外把幕转换条件统一收进 <code>ACT_GATES</code>——原来动作里各写一份，进度条说「还差一步」而按钮已经能按。</span></li>
+    <li><b>已修</b><span><b>没有测试守着「正常玩能不能通关」。</b> 补上了，见下。</span></li>
+  </ul>
+</section>
+
+<hr>
+
+<section>
+  <div class="eyebrow"><span>怎么保证不再坏</span></div>
+  <h2>补了三个断言，都是原来照不出问题的那类</h2>
+  <p class="body">原来 82 个测试全绿也照不出这四个毛病，因为它们守的都是「值对不对」，没有一条守「正常玩下来是什么体验」。现在加了：</p>
+  <ul class="fixed">
+    <li><b>通关</b><span>一条完整的合法对局必须走到停机、必须看见全部 28 个里程碑、且<b>任何一幕都不许塌缩到 5 次决策以下</b>。</span></li>
+    <li><b>成本一致</b><span>渲染层把按钮置灰用的门槛表，和引擎真正接受命令的条件，逐条交叉比对——不允许「按钮亮着但点了没反应」。</span></li>
+    <li><b>概念不许多于街区</b><span>这条直接钉死了「一个动作刚好喂饱下一个动作」那个循环。</span></li>
+  </ul>
+  <p class="body" style="margin-top:20px">加上既有的：Node 测试 <b>91/91</b>、玩家面浏览器契约 <b>26/26</b>、Aha 全量审计 <b>37 项</b>。</p>
+</section>
+
+<div class="close">
+  <h2>一句话</h2>
+  <p class="body">四个毛病里两个是已有 PR 修的、两个是这一轮修的。<b>节奏、反馈、动词寿命</b>这三类问题原来没有任何断言在守，现在各有一条。</p>
+  <div class="stamp">屏幕与流程的图谱已并入设计系统：public/design-system/flows.html</div>
+</div>
+
+</div>
+</body>
+</html>

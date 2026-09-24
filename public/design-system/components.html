@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>字工厂 · 组件陈列 / Components</title>
+<!-- 数值全部来自 tokens.css；本页不新增任何硬编码设计数值。 -->
+<link rel="stylesheet" href="./tokens.css">
+<style>
+/* ─────────────────────────────────────────────────────────────────────────
+   本节是**组件设计真源**：从 public/play.html 抄出的组件规则，
+   唯一的改写是把原来的硬编码色值/尺寸换成 tokens.css 的变量。
+   改版式请改这里；改数值请改 tokens.css。
+   ───────────────────────────────────────────────────────────────────────── */
+
+*{box-sizing:border-box}
+html{background:var(--stage);color:var(--ink);color-scheme:light}
+body{margin:0;font:var(--text-body)/var(--leading-body) var(--font-ui);
+     background:radial-gradient(#76816d1f 1px,transparent 1px);background-size:6px 6px}
+
+/* ── 文档外壳（本页专属，不属于产品组件） ── */
+.ds-page{max-width:1180px;margin:0 auto;background:var(--paper);
+         border-inline:var(--bw-hair) solid var(--shell-edge);padding:var(--pad-shell)}
+.ds-bar{display:flex;flex-wrap:wrap;gap:var(--space-3);align-items:center;margin-bottom:var(--space-8)}
+.ds-bar a{color:var(--ink);font-size:var(--text-meta);font-weight:var(--weight-label)}
+.ds-block{margin:0 0 var(--space-9)}
+.ds-block>h2{font-size:var(--text-body);margin:0 0 var(--space-2);
+             border-bottom:var(--bw-bold) solid var(--ink);padding-bottom:var(--space-2)}
+.ds-note{margin:0 0 var(--space-5);font-size:var(--text-meta);color:var(--muted)}
+.ds-note code{font-family:var(--font-num);font-size:var(--text-mini)}
+.ds-stage{border:var(--bw-hair) dashed var(--line);padding:var(--space-6);background:#ffffff5c}
+.ds-stack{display:grid;gap:var(--space-5)}
+.ds-row{display:flex;flex-wrap:wrap;gap:var(--space-3);align-items:center}
+.ds-label{font-size:var(--text-micro);letter-spacing:var(--tracking-wide);
+          color:var(--muted);text-transform:uppercase;margin:0 0 var(--space-1)}
+/* 「提案」标记：区分已上线组件与尚未进入运行时的设计 */
+.ds-flag{display:inline-block;margin-left:var(--space-3);padding:1px var(--space-3);
+         background:var(--rust);color:var(--panel);font-size:var(--text-micro);
+         font-weight:var(--weight-heavy);letter-spacing:var(--tracking-wide);vertical-align:2px}
+.ds-flag.live{background:var(--green);color:var(--ink)}
+.ds-flag.drop{background:var(--muted);color:var(--panel)}
+
+/* 仅供本页强制展示状态；产品代码不要复制这几个类 */
+.ds-force-hover{background:var(--green)!important}
+.ds-force-active{transform:translate(var(--press-shift),var(--press-shift))!important;box-shadow:none!important}
+.ds-force-focus{outline:var(--focus-ring) solid var(--rust)!important;outline-offset:var(--focus-offset)!important}
+
+@media(max-width:820px){.ds-page{padding:var(--space-6) var(--space-5) var(--space-9)}}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   以下为产品组件规则，与 public/play.html 等价
+   ───────────────────────────────────────────────────────────────────────── */
+
+button,select{font:inherit;color:inherit}
+button{min-height:var(--touch);border:var(--bw-line) solid var(--ink);background:var(--panel);
+       font-weight:var(--weight-label);cursor:pointer;box-shadow:var(--shadow-1)}
+button:hover:not(:disabled){background:var(--green)}
+button:active:not(:disabled){transform:translate(var(--press-shift),var(--press-shift));box-shadow:none}
+button:disabled{opacity:var(--disabled-opacity);cursor:not-allowed}
+button:focus-visible,select:focus-visible,a:focus-visible{outline:var(--focus-ring) solid var(--rust);outline-offset:var(--focus-offset)}
+
+.shell{max-width:1180px;margin:0 auto;background:var(--paper);
+       border-inline:var(--bw-hair) solid var(--shell-edge);padding:var(--pad-shell)}
+.masthead{display:flex;gap:var(--space-8);justify-content:space-between;align-items:flex-start;
+          border-bottom:var(--bw-bold) solid var(--ink);padding-bottom:var(--space-6)}
+.brand{display:flex;gap:var(--space-6);align-items:center}
+.stamp{display:grid;place-items:center;width:56px;height:60px;background:var(--ink);color:var(--green);
+       font:var(--weight-black) var(--text-stamp)/1 var(--font-mark);box-shadow:var(--shadow-stamp)}
+.eyebrow{margin:0 0 2px;color:var(--rust);font-size:var(--text-mini);
+         font-weight:var(--weight-heavy);letter-spacing:var(--tracking-eyebrow)}
+.brand h1{margin:0;font-size:var(--text-title);line-height:1}
+.brand h1 span{color:var(--rust)}
+.head-actions{display:flex;gap:var(--space-3);flex-wrap:wrap;justify-content:flex-end}
+.head-actions button,.head-actions a{min-height:40px;padding:var(--space-3) var(--space-4);background:transparent;
+  border:var(--bw-hair) solid var(--ink);font-size:var(--text-meta);font-weight:var(--weight-label);
+  color:var(--ink);text-decoration:none;display:inline-flex;align-items:center}
+.statusline{display:flex;gap:var(--space-5);justify-content:space-between;align-items:center;
+            padding:var(--space-4) 0;font-size:var(--text-meta);color:var(--muted);
+            font-variant-numeric:tabular-nums}
+.statusline strong{color:var(--rust)}
+
+.director{border:var(--bw-bold) solid var(--blue);background:var(--review-bg);padding:var(--space-5);
+          margin:var(--space-1) 0 var(--space-7);box-shadow:var(--shadow-review)}
+.director-row{display:flex;gap:var(--space-3);align-items:center;flex-wrap:wrap}
+.director label{font-size:var(--text-meta);font-weight:var(--weight-heavy);letter-spacing:var(--tracking-wide)}
+.director select{min-height:42px;flex:1;min-width:240px;background:white;
+                 border:var(--bw-line) solid var(--ink);padding:var(--space-2) var(--space-3)}
+.director-note{margin:var(--space-3) 0 0;font-size:var(--text-mini);color:var(--review-note)}
+
+.act-strip{display:grid;grid-template-columns:repeat(6,1fr);gap:var(--space-2);margin:var(--space-5) 0 var(--space-8)}
+.act-chip{border:var(--bw-hair) solid var(--line);padding:var(--space-3) var(--space-2);
+          background:var(--surface-4);min-height:62px}
+.act-chip b{display:block;font-size:var(--text-mini)}
+.act-chip span{display:block;font-size:var(--text-micro);color:var(--muted);margin-top:2px}
+.act-chip.current{border:var(--bw-bold) solid var(--ink);background:var(--green);box-shadow:var(--shadow-1)}
+.act-chip.done{background:var(--surface-done)}
+
+.hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(340px,.95fr);gap:var(--gap-grid)}
+.hero.single{grid-template-columns:1fr}
+.game-card,.world-card{border:var(--bw-bold) solid var(--ink);background:var(--panel);box-shadow:var(--shadow)}
+.game-card{padding:var(--space-7)}
+.act-kicker{font-size:var(--text-mini);color:var(--rust);font-weight:var(--weight-black);letter-spacing:var(--tracking-wide)}
+.act-title{font-size:var(--text-act);margin:2px 0 var(--space-2);line-height:1.05}
+.act-copy{margin:0;color:var(--muted);max-width:700px}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,140px),1fr));
+         gap:var(--gap-cell);margin:var(--space-7) 0}
+.metric{border:var(--bw-hair) solid var(--ink);padding:var(--space-4);background:var(--surface)}
+.metric.primary{background:var(--green)}
+.metric span{display:block;font-size:var(--text-micro);color:var(--muted);
+             text-transform:uppercase;letter-spacing:var(--tracking-wide)}
+.metric strong{display:block;font:var(--weight-strong) var(--text-metric)/1.2 var(--font-num);
+               margin-top:var(--space-1);overflow-wrap:anywhere}
+.aha-focus{border-left:5px solid var(--rust);background:var(--surface-focus);padding:var(--space-6)}
+.aha-focus small{font-weight:var(--weight-black);color:var(--rust);letter-spacing:var(--tracking-wide)}
+.aha-focus h2{margin:3px 0;font-size:20px}
+.aha-focus p{margin:0;color:var(--focus-body)}
+.primary-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));
+                 gap:var(--gap-cell);margin-top:var(--space-5)}
+.primary-actions button{padding:var(--space-4) var(--space-5);text-align:left;min-height:58px}
+.primary-actions button.major{background:var(--ink);color:var(--green);font-size:16px}
+.primary-actions button.danger{background:var(--danger-bg);color:var(--danger-ink)}
+.action-sub{display:block;font-size:var(--text-sub);font-weight:var(--weight-body);opacity:.75;margin-top:2px}
+.notice{min-height:20px;color:var(--rust);font-size:var(--text-meta);margin:var(--space-3) 0 0}
+
+.world-card{position:relative;overflow:hidden;min-height:430px;background:var(--world-bg);color:var(--world-ink)}
+.world-head{display:flex;justify-content:space-between;align-items:center;padding:var(--space-5) var(--space-6);
+            border-bottom:var(--bw-hair) solid var(--world-line);font-size:var(--text-mini);letter-spacing:var(--tracking-wide)}
+.world-visual{min-height:220px;position:relative;
+  background:radial-gradient(circle at 30% 35%,#d7d08f22 0 7%,transparent 7%),
+             linear-gradient(var(--world-sky) 0 48%,var(--world-ground) 48% 72%,var(--world-soil) 72%)}
+.world-visual::before{content:"";position:absolute;inset:auto 7% 20% 7%;height:45%;
+  background:repeating-linear-gradient(90deg,var(--world-block) 0 14%,var(--world-block-2) 14% 28%);
+  clip-path:polygon(0 100%,0 55%,10% 55%,10% 20%,20% 20%,20% 65%,32% 65%,32% 35%,43% 35%,43% 68%,58% 68%,58% 10%,67% 10%,67% 58%,80% 58%,80% 30%,91% 30%,91% 100%)}
+.world-visual::after{content:"字\A →\A 林\A →\A ◫";white-space:pre;position:absolute;right:8%;top:12%;
+  font:var(--weight-black) 26px/1.25 var(--font-mark);color:var(--green);text-align:center;
+  text-shadow:2px 2px var(--ink)}
+.pulse{position:absolute;left:16%;top:24%;width:70px;height:70px;border:4px solid var(--green);
+       border-radius:var(--radius-round);box-shadow:0 0 0 12px #c8ef7020,0 0 0 24px #c8ef7010}
+.stopped .pulse{border-color:var(--world-stopped);box-shadow:none}
+.stopped .world-visual::after{content:"……";font-size:48px;color:var(--world-stopped)}
+.world-metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--bw-hair);background:var(--world-grid);
+               border-top:var(--bw-hair) solid var(--world-grid)}
+.world-metrics div{background:var(--world-cell);padding:var(--space-4) var(--space-5)}
+.world-metrics span{display:block;color:var(--world-label);font-size:var(--text-micro)}
+.world-metrics strong{font:var(--weight-strong) 18px/1.3 var(--font-num);color:var(--green)}
+
+.below{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr);gap:var(--gap-grid);margin-top:var(--space-8)}
+.below.single{grid-template-columns:1fr}
+.panel{border:var(--bw-line) solid var(--ink);background:var(--panel);padding:var(--space-6)}
+.panel-head{display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);margin-bottom:var(--space-4)}
+.panel-head h2{font-size:13px;margin:0}
+.panel-head span{font-size:var(--text-micro);color:var(--muted)}
+.machines{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,160px),1fr));gap:var(--space-3)}
+.machine{border:var(--bw-hair) solid var(--line);padding:var(--space-4);background:var(--surface-2)}
+.machine b{display:block;font-size:12px}
+.machine small{display:block;color:var(--muted);font-size:var(--text-micro);margin:var(--space-1) 0 var(--space-3)}
+.machine button{width:100%;font-size:var(--text-mini);min-height:38px}
+.aha-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,120px),1fr));gap:5px;padding:2px}
+.aha-item{border:var(--bw-hair) solid var(--line);padding:var(--space-2);background:var(--surface-3);
+          font-size:var(--text-micro);min-height:54px}
+.aha-item b{display:block}
+.aha-item.seen{background:var(--surface-seen);border-color:var(--surface-seen-edge)}
+.aha-item.active{background:var(--green);border:var(--bw-bold) solid var(--ink)}
+.log{background:var(--ink);color:var(--log-ink);min-height:180px;overflow:auto;padding:var(--space-5);margin:0;
+     font:var(--text-meta)/1.6 var(--font-num);white-space:pre-wrap}
+
+.ending{border:var(--bw-block) double var(--ink);padding:var(--space-8);text-align:center;background:var(--ending-bg)}
+.ending h2{font-size:var(--text-ending);margin:0}
+.ending p{font-size:15px;color:var(--muted)}
+
+.footer{display:flex;justify-content:space-between;gap:var(--space-5);align-items:center;
+        border-top:var(--bw-hair) solid var(--line);margin-top:var(--space-8);padding-top:var(--space-5);
+        font-size:var(--text-mini);color:var(--muted)}
+.footer div{display:flex;gap:var(--space-3)}
+.footer button{min-height:38px;font-size:var(--text-mini);box-shadow:none}
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;
+         overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   提案组件 · PROPOSED（尚未进入 public/play.html）
+   依据：references/mobbin-2026-09.md。三者都只消费既有令牌，未引入新颜色。
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* 13 · 分段进度条 —— 依据 Monarch "Getting Started" */
+.act-progress{display:grid;gap:var(--space-3)}
+.act-progress-head{display:flex;justify-content:space-between;align-items:baseline;gap:var(--space-4);
+                   font-size:var(--text-meta);color:var(--progress-label)}
+.act-progress-head b{color:var(--ink);font-weight:var(--weight-heavy)}
+.act-progress-track{display:flex;gap:3px}
+.act-progress-track i{flex:1;height:var(--progress-h);background:var(--progress-todo);
+                      border:var(--bw-hair) solid var(--ink);position:relative}
+.act-progress-track i.done,.act-progress-track i.now{background:var(--progress-done)}
+.act-progress-track i.now::after{content:"✓";position:absolute;right:-4px;top:50%;
+  transform:translateY(-50%);width:calc(var(--progress-h) + 10px);height:calc(var(--progress-h) + 10px);
+  border-radius:var(--radius-round);background:var(--progress-done);border:var(--bw-hair) solid var(--ink);
+  display:grid;place-items:center;font-size:var(--text-micro);font-weight:var(--weight-black)}
+
+/* 14 · 成就行 —— 依据 Duolingo Achievements 的「条件句 + 进度条 + 分母」 */
+.aha-rows{display:grid;border:var(--bw-hair) solid var(--ink);background:var(--panel)}
+.aha-row{display:grid;grid-template-columns:var(--row-anchor) 1fr;gap:var(--space-5);
+         padding:var(--space-5);border-bottom:var(--bw-hair) solid var(--line);align-items:start}
+.aha-row:last-child{border-bottom:0}
+.aha-row .anchor{width:var(--row-anchor);height:var(--row-anchor);display:grid;place-items:center;
+                 border:var(--bw-bold) solid var(--ink);background:var(--row-bg);
+                 font:var(--weight-black) 20px/1 var(--font-mark)}
+.aha-row b{display:block;font-size:12px}
+.aha-row .cond{display:block;font-size:var(--text-mini);color:var(--muted);margin:2px 0 var(--space-3)}
+.aha-row .bar{display:flex;align-items:center;gap:var(--space-4)}
+.aha-row .bar u{flex:1;height:var(--row-bar-h);background:var(--progress-todo);
+                border:var(--bw-hair) solid var(--ink);text-decoration:none;display:block;overflow:hidden}
+.aha-row .bar u i{display:block;height:100%;background:var(--progress-done)}
+.aha-row .bar em{font:var(--weight-label) var(--text-mini)/1 var(--font-num);font-style:normal;
+                 color:var(--muted);min-width:56px;text-align:right}
+.aha-row.earned{background:var(--row-bg-earned)}
+.aha-row.earned .cond{color:var(--ink)}
+.aha-row.earned .anchor{background:var(--green)}
+.aha-row.locked .anchor{background:var(--surface-4);color:var(--muted)}
+.aha-row.locked b{color:var(--muted)}
+
+/* 15 · Aha 全屏时刻 —— 依据 Brightmind "Congrats!" 的单数字单动作范式 */
+.aha-burst{background:var(--burst-bg);color:var(--burst-ink);padding:var(--space-10) var(--space-6);
+           text-align:center;display:grid;gap:var(--space-7);place-items:center}
+.aha-burst .figure{font:var(--weight-black) var(--burst-figure)/1 var(--font-num)}
+.aha-burst .pill{display:inline-block;background:var(--burst-pill);color:var(--burst-ink);
+                 border:var(--bw-hair) solid var(--burst-ink);padding:var(--space-2) var(--space-6);
+                 font-size:var(--text-mini);font-weight:var(--weight-label);letter-spacing:var(--tracking-eyebrow)}
+.aha-burst h2{margin:0;font-size:var(--text-act)}
+.aha-burst p{margin:0;color:var(--burst-muted);font-size:var(--text-meta);max-width:44ch}
+.aha-burst .dots{display:flex;gap:var(--space-3)}
+.aha-burst .dots i{width:var(--burst-dot);height:var(--burst-dot);border-radius:var(--radius-round);
+                   border:var(--bw-bold) solid var(--burst-ink)}
+.aha-burst .dots i.on{background:var(--burst-ink)}
+.aha-burst button{background:transparent;color:var(--burst-ink);border-color:var(--burst-ink);
+                  box-shadow:none;min-width:180px;font-weight:var(--weight-heavy);letter-spacing:var(--tracking-wide)}
+.aha-burst button:hover:not(:disabled){background:var(--burst-ink);color:var(--burst-bg)}
+
+/* 未发现的系统不占版面：这条是 intent 契约，不是可选样式 */
+[hidden]{display:none!important}
+
+@media(max-width:820px){
+  .shell{padding:var(--space-6) var(--space-5) var(--space-9)}
+  .stamp{width:44px;height:48px;font-size:28px}
+  .head-actions a{display:none}
+  .act-strip{grid-template-columns:repeat(3,1fr)}
+  .hero,.below{grid-template-columns:1fr}
+  .world-card{min-height:auto}
+  .world-visual{min-height:190px}
+  .primary-actions{grid-template-columns:1fr}
+  .aha-row{gap:var(--space-4);padding:var(--space-4)}
+  .aha-burst{padding:var(--space-8) var(--space-5)}
+}
+@media(max-width:460px){
+  .brand h1{font-size:25px}
+  .act-strip{grid-template-columns:repeat(2,1fr)}
+  .world-metrics{grid-template-columns:1fr 1fr}
+}
+@media(prefers-reduced-motion:no-preference){
+  .pulse{animation:pulse var(--dur-pulse) ease-in-out infinite}
+  @keyframes pulse{50%{transform:scale(var(--pulse-scale));opacity:var(--pulse-opacity)}}
+}
+</style>
+</head>
+<body>
+<main class="ds-page">
+
+  <nav class="ds-bar" aria-label="设计系统导航">
+    <a href="./index.html">← 设计系统首页</a>
+    <a href="./preview/index.html">令牌预览 / Tokens →</a>
+    <a href="./references/mobbin-2026-09.md">参考记录 / References</a>
+  </nav>
+
+  <p class="ds-note" style="margin-bottom:var(--space-7)">
+    第 1–12 节是原有的 <strong>已上线</strong> 组件，与 <code>public/play.html</code> 等价。
+    第 13–15 节是依据 Mobbin 参考新设计的一组，标 <span class="ds-flag live">已上线</span> 的已经进了运行时的对应面，
+    标 <span class="ds-flag drop">撤回</span> 的做过但没上（理由同样是交付的一部分，不能只留结果）。
+    逐屏依据见 <a href="./references/mobbin-2026-09.md">references/mobbin-2026-09.md</a>，取舍经过见 <a href="./DESIGN.md">DESIGN.md §5.4</a>。
+  </p>
+
+  <header class="masthead" style="margin-bottom:var(--space-9)">
+    <div class="brand">
+      <div class="stamp" aria-hidden="true">字</div>
+      <div>
+        <p class="eyebrow">GLYPH FACTORY · DESIGN SYSTEM v3</p>
+        <h1>组件<span>//</span>陈列</h1>
+      </div>
+    </div>
+    <div class="head-actions">
+      <a href="./preview/index.html">Tok.</a>
+      <button type="button">EN</button>
+      <button type="button">导演模式</button>
+    </div>
+  </header>
+
+  <!-- 1 ─────────────────────────────────────────────────────────────── -->
+  <section class="ds-block">
+    <h2>1 · Masthead 报头</h2>
+    <p class="ds-note">品牌块 + 操作区。印章是唯一的衬线字形；<code>h1 span</code> 用 <code>--rust</code> 做断字。窄屏 ≤820px 时 <code>.head-actions a</code> 隐藏。</p>
+    <div class="ds-stage">
+      <header class="masthead">
+        <div class="brand">
+          <div class="stamp" aria-hidden="true">字</div>
+          <div><p class="eyebrow">GLYPH FACTORY · ACTS ENGINE v3</p><h1>字<span>//</span>工厂</h1></div>
+        </div>
+        <div class="head-actions">
+          <a href="#">预览 / Preview</a>
+          <button type="button">EN</button>
+          <button type="button">导演模式</button>
+        </div>
+      </header>
+    </div>
+  </section>
+
+  <!-- 2 ─────────────────────────────────────────────────────────────── -->
+  <section class="ds-block">
+    <h2>2 · Statusline 状态行</h2>
+    <p class="ds-note">等宽数字（<code>tabular-nums</code>）避免跳动；两个数字用 <code>--rust</code> 标记。</p>
+    <div class="ds-stage">
+      <div class="statusline"><span>营业中 · ACT 2/6</span><span><strong>12.4</strong> 字/秒 · 累计 <strong>38.2K</strong></span></div>
+    </div>
+  </section>
+
+  <!-- 3 ─────────────────────────────────────────────────────────────── -->
+  <section class="ds-block">
+    <h2>3 · Director 评审面板</h2>
+    <p class="ds-note">唯一的 <code>--blue</code> 用途，把「内部评审」与「玩家现场」在视觉上分开。<strong>玩家面永不出现</strong>（<code>player-privacy-v3.js</code> 会摘除）。</p>
+    <div class="ds-stage">
+      <section class="director" style="margin:0">
+        <div class="director-row">
+          <label for="ds-director">DIRECTOR MODE / AHA</label>
+          <select id="ds-director"><option>A01 · 机器替我按按钮</option></select>
+          <button type="button">只预览</button>
+          <button type="button">应用到存档</button>
+          <button type="button">返回真实进度</button>
+        </div>
+        <p class="director-note">只预览不会覆盖真实存档；“应用到存档”才会替换当前进度。</p>
+      </section>
+    </div>
+  </section>
+
+  <!-- 4 ─────────────────────────────────────────────────────────────── -->
+  <section class="ds-block">
+    <h2>4 · Act chip 篇章条</h2>
+    <p class="ds-note">三态：<code>未到达</code> / <code>.current</code> / <code>.done</code>。未到达的篇章整体不渲染，只按进度铺开。</p>
+    <div class="ds-stage">
+      <div class="act-strip" style="margin:0">
+        <div class="act-chip done"><b>ACT I · 手工与自动化</b><span>0–99</span></div>
+        <div class="act-chip current"><b>ACT II · 字开始生长</b><span>100–999</span></div>
+        <div class="act-chip"><b>ACT III · 文字改变城市</b><span>1K–9.9K</span></div>
+        <div class="act-chip"><b>ACT IV · 机器开始写</b><span>10K–99K</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 ─────────────────────────────────────────────────────────────── -->
+  <section class="ds-block">
+    <h2>5 · Metric 指标格</h2>
+    <p class="ds-note">默认 <code>--surface</code>；<code>.primary</code> 用 <code>--green</code> 标出当前章节的主指标。数值用等宽 <code>--font-num</code>。<strong>未解锁的指标整格 <code>hidden</code>，不占位。</strong></p>
+    <div class="ds-stage">
+      <div class="metrics" style="margin:0">
+        <div class="metric primary"><span>库存文字</span><strong>1.2K</strong></div>
+        <div class="metric"><span>工坊资金</span><strong>486</strong></div>
+        <div class="metric"><span>意义</span><strong>312</strong></div>
+        <div class="metric"><span>噪音</span><strong>47</strong></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 ─────────────────────────────────────────────────────────────── -->
+  <section class="ds-block">
+    <h2>6 · Button 按钮</h2>
+    <p class="ds-note">三种层级加一个危险态。反馈是<strong>即时</strong>的：<code>:active</code> 位移 <code>--press-shift</code> 并清零阴影，模拟铅字压下去。系统里没有 transition。</p>
+    <div class="ds-stage ds-stack">
+      <div>
+        <p class="ds-label">层级 / Hierarchy</p>
+        <div class="ds-row">
+          <button type="button">默认 default</button>
+          <button type="button">切换中 toggle</button>
+          <button type="button" class="major" style="background:var(--ink);color:var(--green);font-size:16px">主要 major</button>
+          <button type="button" style="background:var(--danger-bg);color:var(--danger-ink)">危险 danger</button>
+        </div>
+      </div>
+      <div>
+        <p class="ds-label">状态 / States（本页强制展示）</p>
+        <div class="ds-row">
+          <button type="button">default</button>
+          <button type="button" class="ds-force-hover">hover</button>
+          <button type="button" class="ds-force-active">active</button>
+          <button type="button" class="ds-force-focus">focus-visible</button>
+          <button type="button" disabled>disabled</button>
+        </div>
+      </div>
+      <div>
+        <p class="ds-label">主要动作组 / .primary-actions</p>
+        <div class="primary-actions" style="margin:0;max-width:640px">
+          <button type="button" class="major">印字<span class="action-sub">手动生产</span></button>
+          <button type="button">出售全部库存<span class="action-sub">248 资金</span></button>
+          <button type="button" disabled>研发复写纸<span class="action-sub">累计150字 + 45资金</span></button>
+        </div>
+      </div>
+      <p class="notice" role="status">仅预览：真实存档未改变。</p>
+    </div>
+  </section>
+
+  <!-- 7 ─────────────────────────────────────────────────────────────── -->
+  <section class="ds-block">
+    <h2>7 · Aha focus 焦点卡</h2>
+    <p class="ds-note">左侧 <code>--rust</code> 粗边是「设计者旁白」的签名。玩家面在第一次 Aha 之后就不再出现这张卡。</p>
+    <div class="ds-stage">
+      <section class="aha-focus" aria-live="polite" style="max-width:640px">
+        <small>A01 · NEXT</small>
+        <h2>机器替我按按钮</h2>
+        <p>我的工作不是点，是设计增长。</p>
+      </section>
+    </div>
+  </section>
+
+  <!-- 8 ─────────────────────────────────────────────────────────────── -->
+  <section class="ds-block">
+    <h2>8 · World card 世界模型卡</h2>
+    <p class="ds-note">全系统唯一的深色面。ACT I–II 不出现；<code>.stopped</code> 把 pulse 换成省略号，表示世界停机。</p>
+    <div class="ds-stage ds-stack" style="background:var(--stage)">
+      <div style="max-width:420px">
+        <p class="ds-label">运行中</p>
+        <aside class="world-card" style="min-height:0">
+          <div class="world-head"><span>WORLD MODEL / 世界模型</span><span>CITY</span></div>
+          <div class="world-visual"><div class="pulse" aria-hidden="true"></div></div>
+          <div class="world-metrics">
+            <div><span>DISTRICTS / 街区</span><strong>4</strong></div>
+            <div><span>CONCEPTS / 概念</span><strong>2</strong></div>
+          </div>
+        </aside>
+      </div>
+      <div style="max-width:420px">
+        <p class="ds-label">.stopped</p>
+        <aside class="world-card stopped" style="min-height:0">
+          <div class="world-head"><span>WORLD MODEL / 世界模型</span><span>SILENCE</span></div>
+          <div class="world-visual"><div class="pulse" aria-hidden="true"></div></div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 ─────────────────────────────────────────────────────────────── -->
+  <section class="ds-block">
+    <h2>9 · Panel / Machine 面板与机器卡</h2>
+    <p class="ds-note">面板是内容容器；机器卡是 ACT I 唯一的购买单元，<code>&lt;small&gt;</code> 恒定输出「已拥有 × 速率 · 价格」。</p>
+    <div class="ds-stage">
+      <div class="below" style="margin:0">
+        <div class="panel">
+          <div class="panel-head"><h2>系统 / SYSTEMS</h2><span>买机器只是第一层。</span></div>
+          <div class="machines">
+            <div class="machine"><b>打字员</b><small>2 × +1/s · 45 credits</small><button type="button">购买</button></div>
+            <div class="machine"><b>印刷机</b><small>0 × +8/s · 620 credits</small><button type="button" disabled>购买</button></div>
+          </div>
+        </div>
+        <aside class="panel">
+          <div class="panel-head"><h2>工坊日志</h2><span>latest 40</span></div>
+          <pre class="log">› 印出第一个「木」。
+· 街角委托已交付：12 → 30。
+· 自动售货台研发完成。</pre>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 ────────────────────────────────────────────────────────────── -->
+  <section class="ds-block">
+    <h2>10 · Aha item 历史格</h2>
+    <p class="ds-note">只渲染已发生的条目。三态里 <code>.active</code> 是当前焦点；<code>locked</code> 在运行时代码中<strong>从未被赋值</strong>（见 DESIGN.md 审计）。</p>
+    <div class="ds-stage">
+      <div class="aha-list" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr));max-width:640px">
+        <div class="aha-item seen"><b>A03 · 木 + 木 → 林</b><span>ACT 2</span></div>
+        <div class="aha-item seen active"><b>A04 · 规则自己跑</b><span>ACT 2</span></div>
+        <div class="aha-item seen"><b>A05 · 意义打败数量</b><span>ACT 2</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 ────────────────────────────────────────────────────────────── -->
+  <section class="ds-block">
+    <h2>11 · Ending &amp; Footer 结局与页脚</h2>
+    <p class="ds-note">结局用双线框 <code>double</code>，是全系统唯一的例外描边，用来标记「世界写完」。</p>
+    <div class="ds-stage">
+      <section class="ending">
+        <p class="eyebrow">A28 · THE LAST BUTTON</p>
+        <h2>世界已经写完了。</h2>
+        <p>现在，去读它。</p>
+      </section>
+      <footer class="footer" style="margin-top:var(--space-5)">
+        <span>已自动保存 · 当前浏览器 · 最多结算离线 8 小时</span>
+        <div><button type="button">导出存档</button><button type="button">重新开始</button></div>
+      </footer>
+    </div>
+  </section>
+
+  <!-- 12 ────────────────────────────────────────────────────────────── -->
+  <section class="ds-block">
+    <h2>12 · Intent 契约：hidden 即不占位</h2>
+    <p class="ds-note">全局 <code>[hidden]{display:none!important}</code> 覆盖 <code>display:grid/flex</code>。未发现的系统必须完全退出版面，而不是留一个空壳。这是「纸夹原则」在样式层的落地。</p>
+    <div class="ds-stage">
+      <div class="metrics" style="margin:0">
+        <div class="metric primary"><span>库存文字</span><strong>1.2K</strong></div>
+        <div class="metric" hidden><span>不该占位</span><strong>—</strong></div>
+        <div class="metric"><span>工坊资金</span><strong>486</strong></div>
+      </div>
+      <p class="ds-note" style="margin:var(--space-4) 0 0">上面中间那格带 <code>hidden</code>：栅格只剩两列，没有空洞。</p>
+    </div>
+  </section>
+
+  <!-- 13 ────────────────────────────────────────────────────────────── -->
+  <section class="ds-block">
+    <h2>13 · Act progress 分段进度条 <span class="ds-flag live">已上线 · 玩家面</span></h2>
+    <p class="ds-note">
+      依据 Mobbin <code>/screens/progress</code> 的 Monarch「Getting Started」：把「总共几步、走到第几步」压进一根
+      <code>--progress-h</code> 高的条里，当前段用 ✓ 圆点收尾。
+      改前 <code>.act-chip</code> 只给篇章名和数值区间，<strong>幕内进度不可见</strong>。
+    </p>
+    <div class="ds-stage">
+      <div style="max-width:560px" class="act-progress">
+        <div class="act-progress-head"><b>ACT II · 字开始生长</b><span>距 ACT III 还差 读者 430</span></div>
+        <div class="act-progress-track" role="img" aria-label="第 2 步，共 4 步">
+          <i class="done"></i><i class="now"></i><i></i><i></i>
+        </div>
+      </div>
+      <p class="ds-note" style="margin:var(--space-6) 0 0">
+        段数 = 当前阶段的 <strong>门槛条数</strong>，不是写死的 4。ACT I 是 4 段（累计印字 / 小型印刷机 / 库存字 / 工坊资金），
+        ACT III 只有 1 段。数字全部来自 <code>glyph-engine-v3.js</code> 的 <code>gateProgress()</code>——门槛的唯一真源，
+        渲染层不再自己抄一份。
+      </p>
+      <p class="ds-note" style="margin:var(--space-4) 0 0">
+        <strong>玩家面文案纪律：</strong>只写「下一个阶段 / 还差 累计印字（6 / 5.0K）」，
+        不含 A## / AHA / ACT / 机制解释——这条被 <code>tests/browser/test_player_source_privacy.py</code> 的边界正则逐帧扫描。
+        门槛全达成时整块 <code>hidden</code>，让位给主行动按钮。
+      </p>
+    </div>
+  </section>
+
+  <!-- 14 ────────────────────────────────────────────────────────────── -->
+  <section class="ds-block">
+    <h2>14 · Aha row 成就行 <span class="ds-flag live">已上线 · 评审面</span></h2>
+    <p class="ds-note">
+      依据 Mobbin <code>/screens/achievements-awards</code> 的 Duolingo Achievements：每行给<strong>达成条件句 + 进度条 + 分子分母</strong>。
+      改前 <code>.aha-item</code> 只有 ID + 标题 + ACT，评审者看不出每条还差什么。
+    </p>
+    <div class="ds-stage">
+      <div class="aha-rows" style="max-width:640px">
+        <div class="aha-row earned">
+          <span class="anchor" aria-hidden="true">林</span>
+          <div>
+            <b>A03 · 木 + 木 → 林</b>
+            <span class="cond">刻一条可重复的组合规则</span>
+            <div class="bar"><u><i style="width:100%"></i></u><em>1/1</em></div>
+          </div>
+        </div>
+        <div class="aha-row">
+          <span class="anchor" aria-hidden="true">读</span>
+          <div>
+            <b>A06 · 报纸制造需求</b>
+            <span class="cond">让读者数达到 100</span>
+            <div class="bar"><u><i style="width:56%"></i></u><em>56/100</em></div>
+          </div>
+        </div>
+        <div class="aha-row locked">
+          <span class="anchor" aria-hidden="true">？</span>
+          <div>
+            <b>未知</b>
+            <span class="cond">尚未出现</span>
+            <div class="bar"><u><i style="width:0"></i></u><em>0/1</em></div>
+          </div>
+        </div>
+      </div>
+      <p class="ds-note" style="margin:var(--space-6) 0 0">
+        <strong>为什么只进评审面，不进玩家面。</strong><code>#aha-list</code> 对玩家整块被隐私层摘掉（它是设计语言）。
+        更关键的是：给玩家一张 28 条「还差 N」的待办表，等于把这个游戏唯一的核心——逐步发现——剧透干净。
+        玩家面只给<strong>当前阶段</strong>的进度（第 13 节），不给 28 条清单。
+      </p>
+      <p class="ds-note" style="margin:var(--space-4) 0 0">
+        第三行仍是 <code>.locked</code> 的归宿：类名有样式却从没被赋值过的死变体，在这里第一次有了正式用途——
+        但仅限评审面。玩家面走的是 intent 契约的整行 <code>hidden</code>。
+      </p>
+    </div>
+  </section>
+
+  <!-- 15 ────────────────────────────────────────────────────────────── -->
+  <section class="ds-block">
+    <h2>15 · Aha burst 全屏时刻 <span class="ds-flag drop">撤回</span></h2>
+    <p class="ds-note">
+      依据 Mobbin <code>/screens/achievements-awards</code> 的 Brightmind「Congrats!」：全屏单色底 + 一个大数字 + 一个单位胶囊 +
+      进度点 + 唯一 CTA。设计它的理由是当时 Aha 触发时玩家面上没有任何视觉事件。
+    </p>
+    <p class="ds-note" style="color:var(--rust);font-weight:var(--weight-label)">
+      <strong>已撤回，未上线。</strong>动工前同步到 <code>origin/main</code> 时发现 PR #14
+      <code>74bebd6</code> 已经合并，它用一条更轻的路径解决了同一个问题：Aha 触发时往日志写一句世界语言的公告
+      （<code>AHA_WORLD</code>）。再叠加全屏打断，同一次 Aha 就有两套互相竞争的反馈；
+      而且 28 次全屏在增量游戏里会变成惩罚。下面这块保留为设计记录，不是待办。
+    </p>
+    <div class="ds-stage" style="background:var(--stage)">
+      <div class="aha-burst">
+        <span class="pill">A11 · ACT II</span>
+        <span class="figure">1,204</span>
+        <h2>删除第一次成为生产行为</h2>
+        <p>你刚刚删掉的噪音，比新印出来的字更值钱。</p>
+        <div class="dots" aria-label="第 11 个，共 28 个"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></div>
+        <button type="button">继续</button>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <span>数值真源 <code>tokens.css</code> · 取自 <code>public/play.html</code></span>
+    <div><a href="./index.html" style="color:inherit">首页</a><a href="./preview/index.html" style="color:inherit">令牌预览</a></div>
+  </footer>
+
+</main>
+</body>
+</html>

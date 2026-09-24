@@ -9,7 +9,7 @@ import { createHash } from 'node:crypto';
 import vm from 'node:vm';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
-const allowed = ['build.json', 'glyph-engine-v3.js', 'glyph-game-v3.js', 'index.html', 'play.html', 'player-privacy-v3.js'].sort();
+const allowed = ['404.html', '500.html', 'build.json', 'glyph-engine-v3.js', 'glyph-game-v3.js', 'index.html', 'play.html', 'player-privacy-v3.js'].sort();
 const engine = (source) => vm.runInNewContext(`${source}\nGlyphEngineV3;`, {}, { timeout: 2000 });
 const plainState = (state) => { const copy = JSON.parse(JSON.stringify(state)); delete copy.log; return copy; };
 
@@ -62,6 +62,17 @@ test('production build contracts', async (t) => {
     }
     for (const item of source.AHAS) {
       assert.ok(item.reveal.length > 0);
+      // The design copy must not survive anywhere in the payload, not just in the AHAS entries.
+      assert.ok(!playerEngine.includes(item.reveal), `${item.id}: reveal copy shipped to players`);
+    }
+    // The inverse contract: the world lines ARE player copy and must survive the same strip.
+    // Without them an Aha fires and the player surface shows nothing at all, which is exactly
+    // the defect this pins — the `A## ·` line that used to carry the moment is scrubbed.
+    for (const item of player.AHAS) {
+      const line = player.AHA_WORLD[item.id];
+      assert.equal(typeof line, 'string', `${item.id}: no world line in the player build`);
+      assert.ok(line.length >= 12, `${item.id}: world line is too short to say anything`);
+      assert.doesNotMatch(line, /\bA\d{2}\b|\bAHA\b|\bACT\b|Director|导演/i, item.id);
     }
   });
 
@@ -109,4 +120,53 @@ test('production build contracts', async (t) => {
     const after = await Promise.all(allowed.map((name) => readFile(join(dist, name))));
     assert.deepEqual(after, before);
   });
+});
+
+// The renderer's own disclosure rule: affordability may disable a discovered action,
+// never hide it. Auto-sell floors stock below 1 every tick, so any reveal condition
+// reading stock or credits is unreachable for exactly the players who automated first.
+test('affordability never hides a discovered action', async () => {
+  const source = await readFile(join(root, 'public/glyph-game-v3.js'), 'utf8');
+
+  // Pull every add('key', revealWhen, enabled, ...) call's two leading arguments.
+  const calls = [];
+  for (let at = source.indexOf('add('); at >= 0; at = source.indexOf('add(', at + 1)) {
+    if (/[\w.$]/.test(source[at - 1] || '')) continue; // skip `revealed.add(key)` and friends
+
+    let depth = 0, end = at + 3;
+    for (; end < source.length; end += 1) {
+      if (source[end] === '(') depth += 1;
+      else if (source[end] === ')') { depth -= 1; if (depth === 0) break; }
+    }
+    const args = [];
+    let current = '', nested = 0;
+    for (const character of source.slice(at + 4, end)) {
+      if ('([{'.includes(character)) nested += 1;
+      if (')]}'.includes(character)) nested -= 1;
+      if (character === ',' && nested === 0) { args.push(current.trim()); current = ''; } else current += character;
+    }
+    args.push(current.trim());
+    calls.push({ key: args[0], reveal: args[1], enabled: args[2] });
+  }
+
+  assert.ok(calls.length >= 20, `expected the full action grid, parsed ${calls.length}`);
+  for (const call of calls) {
+    assert.notEqual(call.reveal, call.enabled, `${call.key}: reveal and enable are the same expression`);
+    assert.doesNotMatch(call.reveal, /\bs\.(?:glyphs|credits)\b/, `${call.key}: reveal reads spendable stock or credits`);
+  }
+
+  // The same invariant for reveals registered directly, outside the add() helper. `contract` used
+  // `rememberReveal('action:contract', c && s.glyphs>=c.glyphs)`, which the loop above never saw
+  // because it never matched `add(` — auto-sell kept stock under 1 and the button stayed hidden.
+  const direct = [...source.matchAll(/rememberReveal\('action:([^']+)',\s*([^;]+?)\)\)/g)];
+  assert.ok(direct.length >= 1, 'expected at least one directly registered action reveal');
+  for (const [, key, reveal] of direct) {
+    assert.doesNotMatch(reveal, /\bs\.(?:glyphs|credits)\b/, `${key}: reveal reads spendable stock or credits`);
+  }
+  // Negative control: the detector has to reject the exact shape this replaced, or a green run here
+  // would only mean the pattern stopped matching anything.
+  assert.match('s.contracts>0 || Boolean(c && s.glyphs>=c.glyphs)', /\bs\.(?:glyphs|credits)\b/);
+
+  // One toggle for every act: publishing with auto-sell on must not strand the player.
+  assert.equal(source.match(/'toggle-auto'/g).length, 1);
 });
