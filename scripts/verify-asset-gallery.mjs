@@ -41,6 +41,11 @@ for (const flow of flows) {
   assert(/^S0[1-6]$/.test(flow.id), "invalid flow id: " + flow.id);
   assert(flow.assets.length > 0, flow.id + " must reference assets");
   flow.assets.forEach((assetId) => assert(ids.has(assetId), flow.id + " references unknown asset " + assetId));
+  // A flow screen shows the product state of its act, so it must not show an asset that arrives later.
+  flow.assets.forEach((assetId) => {
+    const asset = assets.find((entry) => entry.id === assetId);
+    assert(asset.act <= flow.act, flow.id + " (ACT " + flow.act + ") shows " + assetId + " before it appears in ACT " + asset.act);
+  });
   for (const key of ["title", "subtitle", "userGoal", "interaction", "shift", "ahaRange"]) {
     assert(flow[key], flow.id + " missing " + key);
   }

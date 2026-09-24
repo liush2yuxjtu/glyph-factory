@@ -1,4 +1,4 @@
-import {spawnSync} from 'node:child_process';
+import {spawn,spawnSync} from 'node:child_process';
 import {existsSync,mkdirSync,readFileSync,writeFileSync,readdirSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
@@ -22,25 +22,45 @@ function visit(path) {
 for(const path of ['public','src','scripts','tests','.github']) if(existsSync(new URL('../../../'+path,import.meta.url))) visit(path);
 inputs.push('aha.md','intent.md','package.json','package-lock.json','vercel.json');
 for(const path of inputs.sort()) hash.update(path+'\0').update(readFileSync(new URL('../../../'+path,import.meta.url)));
+const sourceSha256=hash.digest('hex');
+// `--hash-only` prints the candidate hash and exits without running anything. It is how a
+// commit that touches no hashed input proves it may reuse an earlier PASS (see SKILL.md,
+// "Reusing a PASS"): same sourceSha256 means the same product bytes were already audited.
+if(process.argv.includes('--hash-only')) { console.log(sourceSha256); process.exit(0); }
 const report={status:'FAIL',scope:'local production artifact + local review artifact; not a live deployment acceptance',
-  commit:git(['rev-parse','HEAD']),dirty:Boolean(git(['status','--porcelain'])),sourceSha256:hash.digest('hex'),
+  commit:git(['rev-parse','HEAD']),dirty:Boolean(git(['status','--porcelain'])),sourceSha256,
   startedAt:new Date().toISOString(),stages:[]};
 const save=()=>writeFileSync(new URL('report.json',output),JSON.stringify(report,null,2)+'\n');
 save();
+// 先剥掉 ANSI 颜色再读。Node 的 reporter 在多数终端里会给 `ℹ tests 97` 加一层转义，
+// 行首于是不是 `#` 也不是 `ℹ`，下面那些 `^` 锚定的读数全部落空——门禁会在自己刚刚通过
+// 的那一步里中止，报的还是「没有证明成功」。剥颜色只是把看不见的字符去掉，判定不放宽。
+const stripAnsi=(s)=>s.replace(/\u001B\[[0-9;]*m/g,'');
+function record(name,status,text) {
+  writeFileSync(new URL(name+'.log',output),text);
+  const stage={name,status:status===0?'PASS':'FAIL',exitCode:status};
+  report.stages.push(stage); save();
+  if(status!==0) { console.error(text); throw new Error(name+' failed'); }
+  console.log(`PASS ${name}`);
+  return {stage,text};
+}
 function run(name,command,args,extra={}) {
   console.log(`RUN ${name}`);
   const r=spawnSync(command,args,{cwd:root,encoding:'utf8',env:{...process.env,...extra},maxBuffer:20*1024*1024,timeout:15*60*1000});
-  // 先剥掉 ANSI 颜色再读。Node 的 reporter 在多数终端里会给 `ℹ tests 97` 加一层转义，
-  // 行首于是不是 `#` 也不是 `ℹ`，下面那些 `^` 锚定的读数全部落空——门禁会在自己刚刚通过
-  // 的那一步里中止，报的还是「没有证明成功」。剥颜色只是把看不见的字符去掉，判定不放宽。
-  const stripAnsi=(s)=>s.replace(/\u001B\[[0-9;]*m/g,'');
-  const text=stripAnsi((r.stdout||'')+(r.stderr||'')+(r.error?'\n'+r.error.message:''));
-  writeFileSync(new URL(name+'.log',output),text);
-  const stage={name,status:r.status===0?'PASS':'FAIL',exitCode:r.status};
-  report.stages.push(stage); save();
-  if(r.status!==0) { console.error(text); throw new Error(name+' failed'); }
-  console.log(`PASS ${name}`);
-  return {stage,text};
+  return record(name,r.status,stripAnsi((r.stdout||'')+(r.stderr||'')+(r.error?'\n'+r.error.message:'')));
+}
+// Same contract as run(), without blocking, so the two browser lanes can overlap.
+function runAsync(name,command,args,extra={}) {
+  console.log(`RUN ${name}`);
+  return new Promise((resolve)=>{
+    let out='';
+    const child=spawn(command,args,{cwd:root,env:{...process.env,...extra}});
+    const timer=setTimeout(()=>{out+='\ntimeout after 15 minutes';child.kill('SIGKILL');},15*60*1000);
+    child.stdout.on('data',(d)=>{out+=d;});
+    child.stderr.on('data',(d)=>{out+=d;});
+    child.on('error',(e)=>{out+='\n'+e.message;});
+    child.on('close',(code)=>{clearTimeout(timer);resolve({name,status:code,text:stripAnsi(out)});});
+  });
 }
 try {
   const fast=run('fast',process.execPath,['scripts/verify-player.mjs','--fast']);
@@ -57,13 +77,33 @@ try {
     throw new Error('Fast gate did not prove nonempty, unskipped success');
   fast.stage.tests=count;
   run('review-build',process.execPath,['scripts/build-aha-review.mjs']);
-  for(const browser of ['chromium','webkit']) for(const suite of ['player','aha']) {
-    const name=suite+'-'+browser;
-    const {stage}=run(name,process.env.PYTHON||'python3',['scripts/run-browser-contracts.py',suite],{GLYPH_BROWSER:browser});
-    const detail=JSON.parse(readFileSync(new URL(name+'.json',output),'utf8'));
-    if(detail.status!=='PASS') throw new Error('Browser report disagrees with process status');
-    stage.tests=detail.run; stage.skipped=detail.skipped;
+  // The two engines run as parallel lanes (player then aha inside each lane). They share no
+  // writable state: every suite serves the prebuilt dist/ or review-dist/ read-only from its
+  // own ephemeral port, screenshots go to per-browser test-results/ directories, and each
+  // stage writes its own <suite>-<browser>.json/.log here. Results are still recorded in the
+  // fixed order below, so report.json reads the same as a serial run and any FAIL still aborts.
+  const lane=async(browser)=>{
+    const results=[];
+    for(const suite of ['player','aha']) {
+      const r=await runAsync(suite+'-'+browser,process.env.PYTHON||'python3',['scripts/run-browser-contracts.py',suite],{GLYPH_BROWSER:browser});
+      results.push(r);
+      if(r.status!==0) break;
+    }
+    return results;
+  };
+  const lanes=await Promise.all(['chromium','webkit'].map(lane));
+  // Record every stage that ran, in both lanes, before failing: a stage absent from report.json
+  // must keep meaning "did not run", so a Chromium FAIL may not hide WebKit stages that finished.
+  let firstError=null;
+  for(const {name,status,text} of lanes.flat()) {
+    try {
+      const {stage}=record(name,status,text);
+      const detail=JSON.parse(readFileSync(new URL(name+'.json',output),'utf8'));
+      if(detail.status!=='PASS') throw new Error('Browser report disagrees with process status');
+      stage.tests=detail.run; stage.skipped=detail.skipped;
+    } catch(error) { firstError??=error; }
   }
+  if(firstError) throw firstError;
   run('diff-check','git',['diff','--check']);
   report.totalTests=report.stages.reduce((n,s)=>n+(s.tests||0),0);
   report.status='PASS';

@@ -19,6 +19,8 @@ Use /verify skill every time BEFORE we make a PR
 - There is no CI. Every check that used to run in GitHub Actions now runs through `/verify` on the machine, except the Replit adapter checks, which were deleted outright rather than moved.
 - Fixing the shift-left boundary belongs to the versioned skill and docs, not to a workflow file; do not reintroduce `.github/workflows/`.
 - Do not open a PR on `FAIL` or `BLOCKED`. `SKIP` is only valid when the skill says no executable runtime behavior applies.
+- While iterating, the Chromium-only tier in the skill is enough; the full `npm run intent-audit` is required on the exact commit before a PR, a review push, or a requested deploy.
+- A commit that changes nothing inside `sourceSha256` may reuse an earlier PASS instead of re-running, but only when `node .claude/skills/verify/audit.mjs --hash-only` prints the same hash and `audit.mjs` itself did not change; say which commit's PASS is reused.
 
 <!-- verify-shift-left:end -->
 
