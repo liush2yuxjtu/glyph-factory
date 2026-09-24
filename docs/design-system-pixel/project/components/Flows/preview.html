@@ -1,0 +1,83 @@
+<!-- @dsCard group="Pages" height=1560 width=1200 page subtitle="6 条流程 · 17 个真实屏幕读数 · 新旧版切换" -->
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><title>Flows — Glyph Factory Pixel</title>
+<style>
+  body { margin: 0; background: var(--bg); color: var(--ink); }
+  .fl { width: 1200px; padding: 24px 32px 40px; box-sizing: border-box; font-family: var(--font-pixel); -webkit-font-smoothing: none; }
+  .fl-top { display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+  .fl-top h1 { margin: 0; font-weight: 400; font-size: 36px; line-height: 40px; flex: 1; }
+  .fl-top h1 small { display: block; font-size: 12px; line-height: 18px; color: var(--ink-muted); }
+  .fl-lbl { font-size: 12px; color: var(--ink-muted); margin-right: 4px; }
+  .map { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; position: relative; margin: 8px 4px 32px; }
+  .map::before { content: ''; position: absolute; left: 40px; right: 40px; top: 60px; border-top: 4px dashed var(--outline); }
+  .node { position: relative; background: var(--panel); color: var(--ink); border: 0; font: inherit; text-align: left; cursor: pointer;
+          box-shadow: var(--frame-drop), var(--bevel); padding: 12px; margin: 4px; }
+  .node:focus-visible { outline: 4px solid var(--ink); outline-offset: 8px; }
+  .node[aria-pressed="true"] { background: var(--lamp); color: var(--on-accent); }
+  .node[aria-pressed="true"] .meta { color: var(--on-accent); }
+  .node .num { font: 48px/48px var(--font-display); display: block; }
+  .node .t { font-size: 24px; line-height: 28px; display: block; margin-top: 8px; }
+  .node .meta { font-size: 12px; line-height: 18px; color: var(--ink-muted); display: block; margin-top: 4px; }
+  .bar { display: block; height: 8px; background: var(--sunk); box-shadow: var(--frame); margin-top: 12px; }
+  .bar i { display: block; height: 100%; background: var(--accent); }
+  .detail { display: grid; grid-template-columns: 380px 1fr; gap: 32px; align-items: start; }
+  .quest { background: var(--panel); box-shadow: var(--frame-drop); padding: 16px; margin: 4px; }
+  .quest h2 { margin: 0 0 4px; font-weight: 400; font-size: 24px; line-height: 28px; }
+  .quest .sub { font-size: 12px; color: var(--ink-muted); margin-bottom: 12px; }
+  .quest ol { list-style: none; margin: 0; padding: 0; counter-reset: q; }
+  .quest li { counter-increment: q; display: grid; grid-template-columns: 32px 1fr; gap: 8px; padding: 8px 0; border-top: 4px dotted var(--sunk); }
+  .quest li::before { content: counter(q, decimal-leading-zero); font: 12px/24px var(--font-display); color: var(--ink-muted); }
+  .quest .l { font-size: 12px; line-height: 18px; }
+  .quest .c { font-size: 12px; line-height: 18px; color: var(--ink-muted); }
+  .quest .g { font-size: 12px; line-height: 18px; color: var(--accent-ink); }
+  .exit { margin-top: 12px; padding: 12px; background: var(--sunk); box-shadow: var(--frame); font-size: 12px; line-height: 18px; }
+  .exit b { font-weight: 400; color: var(--ink-muted); display: block; }
+  .shots { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+  .shot figcaption { font-size: 12px; line-height: 18px; margin-top: 12px; max-width: 300px; }
+  .shot figcaption b { font: 12px/18px var(--font-display); font-weight: 400; background: var(--ink); color: var(--panel); padding: 0 4px; margin-right: 4px; }
+  .shot figcaption span { color: var(--ink-muted); display: block; }
+  .shot { margin: 4px; }
+  .arrow { align-self: center; font: 24px var(--font-display); color: var(--ink-muted); }
+</style></head>
+<body>
+<div class="fl" id="root"></div>
+<script>
+(function () {
+  var G = window.GlyphPixel, D = G.data, st = { skin: 'pixel', surface: 'player', act: 1 };
+  var byId = {}; D.screens.forEach(function (s) { byId[s.id] = s; });
+  var reviewFor = { 1: ['R01', 'D02'], 2: ['R02'], 3: ['R03'], 4: ['R04', 'D01'], 5: ['R05'], 6: ['R06'] };
+  var total = D.flows.reduce(function (a, f) { return a + f.seconds; }, 0);
+  var root = document.getElementById('root'), e = G.esc;
+  function mins(s) { return s < 60 ? s + 's' : Math.round(s / 60) + ' min'; }
+  function draw() {
+    var f = D.flows[st.act - 1];
+    var ids = st.surface === 'player' ? f.screens : reviewFor[st.act];
+    var h = '<div class="fl-top"><h1>流程与屏幕<small>6 幕 · 28 个 Aha · 被动通关约 ' + Math.round(total / 60) + ' 分钟。点一个幕看它的步骤与屏幕。</small></h1>' +
+      '<span class="fl-lbl">设计</span>' + G.toggle('skin', [{ value: 'pixel', label: '像素 新版' }, { value: 'classic', label: 'v3 旧版' }], st.skin) +
+      '<span class="fl-lbl">表面</span>' + G.toggle('surface', [{ value: 'player', label: '玩家面' }, { value: 'review', label: '评审面' }], st.surface) + '</div>';
+    h += '<div class="map">' + D.flows.map(function (x) {
+      return '<button class="node" type="button" data-act="' + x.act + '" aria-pressed="' + (x.act === st.act) + '"><span class="num">' + ['I', 'II', 'III', 'IV', 'V', 'VI'][x.act - 1] + '</span>' +
+        '<span class="t">' + e(x.title) + '</span><span class="meta">' + e(x.range) + ' · ' + x.ahas + ' Aha<br>' + x.decisions + ' 次决策 · ' + mins(x.seconds) + '</span>' +
+        '<span class="bar"><i style="width:' + Math.max(4, Math.round(x.seconds / 1854 * 100)) + '%"></i></span></button>';
+    }).join('') + '</div>';
+    h += '<div class="detail"><div class="quest"><h2>ACT ' + ['I', 'II', 'III', 'IV', 'V', 'VI'][f.act - 1] + ' · ' + e(f.title) + '</h2>' +
+      '<div class="sub">' + f.steps.length + ' 个动词 · 按首次出现排序</div><ol>' + f.steps.map(function (s) {
+        return '<li><div><div class="l">' + e(s.l) + '</div>' + (s.c !== '—' ? '<div class="c">花费 ' + e(s.c) + '</div>' : '') + '<div class="g">→ ' + e(s.g) + '</div></div></li>';
+      }).join('') + '</ol><div class="exit"><b>离开这一幕的条件</b>' + f.exit.map(e).join(' · ') + '</div></div>';
+    h += '<div class="shots">' + ids.map(function (id, i) {
+      var s = byId[id], w = /^1280/.test(s.viewport) ? 640 : 300;
+      return (i ? '<span class="arrow">→</span>' : '') + '<figure class="shot">' + G.thumb(s, st.skin, w) +
+        '<figcaption><b>' + e(s.id) + '</b>' + e(s.name) + '<span>' + e(s.note) + '</span></figcaption></figure>';
+    }).join('') + '</div></div>';
+    root.innerHTML = h;
+    G.fitThumbs(root);
+  }
+  G.bindToggle(root, function (k, v) { st[k] = v; draw(); });
+  root.addEventListener('click', function (ev) { var n = ev.target.closest('.node'); if (n) { st.act = +n.getAttribute('data-act'); draw(); } });
+  draw();
+  if (document.fonts) document.fonts.ready.then(function () { G.fitThumbs(root); });
+})();
+</script>
+</body>
+</html>

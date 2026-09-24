@@ -1,0 +1,7 @@
+<!-- @dsCard group="World" height=420 subtitle="每一幕的世界尺度都有自己的像素场景" -->
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>WorldStage</title>
+<style>body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-pixel);-webkit-font-smoothing:none}.row{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;padding:16px}.cap{font-size:12px;color:var(--ink-muted);display:block;margin-top:8px}.gp-stage .gp-scene{height:140px}</style></head>
+<body><div id="root" class="row"></div>
+<script>var G=window.GlyphPixel,r=document.getElementById('root');var L=[['桌面','ACT I 桌面'],['城市','ACT II–III 城市'],['传播网络','ACT IV 传播网络'],['机器语言','ACT V 机器语言'],['世界','ACT VI 世界'],['静默','终局 静默']];r.innerHTML=L.map(function(x){return '<div style="width:340px"><div class="gp-stage">'+G.scene(x[0])+'</div><span class=cap>'+x[1]+'</span></div>'}).join('');</script>
+</body></html>

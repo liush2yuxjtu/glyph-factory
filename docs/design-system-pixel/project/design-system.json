@@ -1,0 +1,134 @@
+{
+ "v": 3,
+ "layout": "files",
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-09-24T16:22:53Z"
+ },
+ "title": "字工厂 像素",
+ "namespace": "GlyphPixel",
+ "libraries": [],
+ "sections": {},
+ "groups": [
+  "Icons"
+ ],
+ "assetGroups": {
+  "Icons": {
+   "name": "Icons",
+   "tile": "s",
+   "order": [
+    "glyph.svg",
+    "coin.svg",
+    "reader.svg",
+    "meaning.svg",
+    "noise.svg",
+    "lamp.svg",
+    "letter.svg",
+    "press.svg",
+    "keyboard.svg",
+    "agent.svg",
+    "clock.svg",
+    "stop.svg",
+    "city.svg",
+    "trash.svg"
+   ],
+   "files": {
+    "glyph.svg": {
+     "name": "glyph.svg",
+     "blob": "26a804ccf48426bc840ab4ff14fb20bc",
+     "size": 2890,
+     "type": "image/svg+xml"
+    },
+    "coin.svg": {
+     "name": "coin.svg",
+     "blob": "2ece47f5bba83e8a55783631830ac1a9",
+     "size": 2437,
+     "type": "image/svg+xml"
+    },
+    "reader.svg": {
+     "name": "reader.svg",
+     "blob": "1acbfd4fa9328014fc7de1dc21899d35",
+     "size": 1663,
+     "type": "image/svg+xml"
+    },
+    "meaning.svg": {
+     "name": "meaning.svg",
+     "blob": "d95cbe73f40e2c3924758c349a514b87",
+     "size": 1939,
+     "type": "image/svg+xml"
+    },
+    "noise.svg": {
+     "name": "noise.svg",
+     "blob": "8c7b7745fbbecb7ee410b63de8aef6c8",
+     "size": 1447,
+     "type": "image/svg+xml"
+    },
+    "lamp.svg": {
+     "name": "lamp.svg",
+     "blob": "154e14f676d19ac0617dc41f49fb80ee",
+     "size": 1113,
+     "type": "image/svg+xml"
+    },
+    "letter.svg": {
+     "name": "letter.svg",
+     "blob": "76b479e03b039f724b05d93c29d4011f",
+     "size": 1780,
+     "type": "image/svg+xml"
+    },
+    "press.svg": {
+     "name": "press.svg",
+     "blob": "f26854009057ffadef629754be7c406e",
+     "size": 1891,
+     "type": "image/svg+xml"
+    },
+    "keyboard.svg": {
+     "name": "keyboard.svg",
+     "blob": "58ed5666db07dc1b7db5e35a504ecc0f",
+     "size": 1942,
+     "type": "image/svg+xml"
+    },
+    "agent.svg": {
+     "name": "agent.svg",
+     "blob": "e8f989e482974784e136e446c7ac2a07",
+     "size": 2105,
+     "type": "image/svg+xml"
+    },
+    "clock.svg": {
+     "name": "clock.svg",
+     "blob": "abf568eaa91b897027b7088c002eda65",
+     "size": 2164,
+     "type": "image/svg+xml"
+    },
+    "stop.svg": {
+     "name": "stop.svg",
+     "blob": "f1c69a202024f28e874fe9d40e58204f",
+     "size": 2220,
+     "type": "image/svg+xml"
+    },
+    "city.svg": {
+     "name": "city.svg",
+     "blob": "57878a8b29b69816a02d4feea82dcfab",
+     "size": 2492,
+     "type": "image/svg+xml"
+    },
+    "trash.svg": {
+     "name": "trash.svg",
+     "blob": "73ddc9822de695c36f1abd840c88342b",
+     "size": 3097,
+     "type": "image/svg+xml"
+    }
+   }
+  }
+ },
+ "blobs": {},
+ "docs": {
+  "readme": "project/README.md",
+  "sections": []
+ },
+ "lastChange": {
+  "by": "Claude",
+  "at": "2026-09-24T16:22:53Z",
+  "via": "Claude Code · liush2yuxjtu/glyph-factory@b1330e6",
+  "note": "新建像素版设计系统：2 主题 token、Fusion Pixel 字体、10 个组件、流程页与屏幕页（新旧版切换）、14 个像素图标"
+ }
+}

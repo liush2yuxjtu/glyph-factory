@@ -61,8 +61,60 @@
     const visibleActs = preview ? E.ACTS : E.ACTS.filter((act) => act.id <= s.act);
     $('act-strip').replaceChildren(...visibleActs.map((act) => { const div = document.createElement('div'); div.className = `act-chip ${act.id === s.act ? 'current' : act.id < s.act ? 'done' : ''}`; const name = locale === 'en' ? ACT_EN[act.id][0] : act.name; div.innerHTML = `<b>ACT ${['I','II','III','IV','V','VI'][act.id-1]} · ${name}</b><span>${act.range}</span>`; return div; }));
   }
+  // Pixel world stage: one 96×40 scene per world scale, drawn once per change. Colours are the
+  // design system's world-* tokens (docs/design-system-pixel), so the scene follows the theme.
+  const SPRITE = {
+    lamp: ['...kkkkkk...','..kyyyyyyk..','.kyyyyyyyyk.','kkkkkkkkkkkk','....y..y....','...y....y...','.....kk.....','.....kk.....','.....kk.....','.....kk.....','...kkkkkk...','..kkkkkkkk..'],
+    keyboard: ['............','............','............','kkkkkkkkkkkk','kwkwkwkwkwkk','kkkkkkkkkkkk','kwkwkwkwkwkk','kkkkkkkkkkkk','kwkwwwwwwkwk','kkkkkkkkkkkk','............','............'],
+    press: ['..kkkkkkkk..','..kbbbbbbk..','..kbkkkkbk..','kkkkkkkkkkkk','kwwwwwwwwwwk','kwkkwkkwkkwk','kwwwwwwwwwwk','kkkkkkkkkkkk','.k........k.','.k........k.','kkk......kkk','............'],
+    agent: ['.....kk.....','.....ak.....','..kkkkkkkk..','..kwwwwwwk..','..kwakkawk..','..kwwwwwwk..','..kwkkkkwk..','..kkkkkkkk..','.kkwwwwwwkk.','.k.kwwwwk.k.','...kwwwwk...','...kk..kk...'],
+  };
+  const WORLD_INK = { k:'var(--world-block)', w:'var(--world-light)', b:'var(--world-block-2)', y:'var(--lamp)', a:'var(--accent)' };
+  let sceneKind = '';
+  function pixelRect(x, y, w, h, fill) { return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${fill}"/>`; }
+  function spriteRects(rows, ink, ox, oy) {
+    let out = '';
+    rows.forEach((row, y) => { for (let x = 0; x < row.length;) { const ch = row[x]; if (ch === '.') { x++; continue; } let run = 1; while (x + run < row.length && row[x + run] === ch) run++; out += pixelRect(ox + x, oy + y, run, 1, ink[ch]); x += run; } });
+    return out;
+  }
+  function renderScene(kind) {
+    if (kind === sceneKind || !$('world-visual')) return;
+    sceneKind = kind;
+    let seed = 7; const rnd = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+    let g = pixelRect(0, 0, 96, 30, 'var(--world-sky)') + pixelRect(0, 30, 96, 10, kind === 'MACHINE' ? 'var(--world-block)' : 'var(--world-ground)');
+    if (kind === 'NETWORK' || kind === 'MACHINE' || kind === 'SILENCE') for (let i = 0; i < 18; i++) g += pixelRect(Math.floor(rnd() * 96), Math.floor(rnd() * 26), 1, 1, 'var(--world-light)');
+    const desk = pixelRect(10, 28, 60, 2, 'var(--world-block)') + pixelRect(12, 30, 2, 8, 'var(--world-block)') + pixelRect(66, 30, 2, 8, 'var(--world-block)');
+    if (kind === 'DESK') {
+      g += desk + spriteRects(SPRITE.lamp, WORLD_INK, 12, 16) + spriteRects(SPRITE.keyboard, WORLD_INK, 28, 18) + spriteRects(SPRITE.press, WORLD_INK, 74, 18);
+      g += pixelRect(46, 22, 10, 6, 'var(--world-light)') + pixelRect(47, 20, 10, 2, 'var(--world-light)') + pixelRect(48, 18, 8, 2, 'var(--world-light)');
+    } else if (kind === 'CITY') {
+      for (let x = 0; x < 96;) {
+        const w = 5 + Math.floor(rnd() * 7), h = 8 + Math.floor(rnd() * 18);
+        g += pixelRect(x, 30 - h, w, h, rnd() > 0.5 ? 'var(--world-block-2)' : 'var(--world-block)');
+        for (let wy = 32 - h; wy < 28; wy += 3) for (let wx = x + 1; wx < x + w - 1; wx += 2) if (rnd() > 0.55) g += pixelRect(wx, wy, 1, 1, rnd() > 0.8 ? 'var(--lamp)' : 'var(--world-light)');
+        x += w + 1;
+      }
+      g += pixelRect(44, 24, 6, 6, 'var(--lamp)') + pixelRect(46, 26, 2, 4, 'var(--world-block)');
+    } else if (kind === 'NETWORK') {
+      const pts = [[8,22],[22,10],[36,20],[50,8],[62,18],[76,11],[88,23],[48,26]];
+      for (let i = 0; i < pts.length - 1; i++) { const [ax, ay] = pts[i], [bx, by] = pts[i + 1]; g += pixelRect(Math.min(ax, bx), ay, Math.abs(bx - ax) + 1, 1, 'var(--world-block-2)') + pixelRect(bx, Math.min(ay, by), 1, Math.abs(by - ay) + 1, 'var(--world-block-2)'); }
+      pts.forEach(([x, y], j) => { g += pixelRect(x - 1, y - 1, 3, 3, j % 3 ? 'var(--accent)' : 'var(--lamp)'); });
+      g += spriteRects(SPRITE.agent, WORLD_INK, 42, 16);
+    } else if (kind === 'MACHINE') {
+      for (let gy = 0; gy < 3; gy++) for (let gx = 0; gx < 9; gx++) {
+        const ox = 4 + gx * 10, oy = 4 + gy * 9; g += pixelRect(ox, oy, 8, 7, 'var(--world-block)');
+        for (let p = 0; p < 9; p++) if (rnd() > 0.45) g += pixelRect(ox + 1 + (p % 3) * 2, oy + 1 + Math.floor(p / 3) * 2, 2, 1, (gx + gy) % 4 ? 'var(--accent)' : 'var(--world-light)');
+      }
+    } else if (kind === 'WORLD') {
+      for (let y = -13; y <= 13; y++) { const half = Math.floor(Math.sqrt(169 - y * y)); g += pixelRect(48 - half, 20 + y, half * 2 + 1, 1, 'var(--world-block-2)'); for (let x = -half; x <= half; x += 2) if (Math.sin(x * 0.5 + y * 0.7) > 0.35) g += pixelRect(48 + x, 20 + y, 2, 1, 'var(--accent)'); }
+      for (let q = 0; q < 10; q++) { const t = q / 10 * Math.PI * 2; g += pixelRect(Math.round(48 + Math.cos(t) * 20) - 1, Math.round(20 + Math.sin(t) * 9) - 1, 2, 2, 'var(--lamp)'); }
+    } else {
+      g += desk + spriteRects(SPRITE.lamp, { k:'var(--world-block)', y:'var(--world-block-2)', w:'var(--world-block)' }, 12, 16) + pixelRect(40, 26, 12, 2, 'var(--world-light)');
+    }
+    $('world-visual').innerHTML = `<svg viewBox="0 0 96 40" preserveAspectRatio="xMidYMid meet" shape-rendering="crispEdges" focusable="false">${g}</svg>`;
+  }
   function worldMetric(labelText, value) { const div = document.createElement('div'); const span = document.createElement('span'); const strong = document.createElement('strong'); span.textContent = labelText; strong.textContent = value; div.append(span,strong); return div; }
-  function renderWorld(s) { const sets = { 1:[['AUTO / 自动',`${fmt(E.rate(s),1)}/s`],['CONTRACTS / 委托',`${s.contracts}/3`],['TYPISTS / 打字员',fmt(s.typists)],['PRESSES / 印刷机',fmt(s.presses)]], 2:[['READERS / 读者',fmt(s.readers)],['DEMAND / 需求',fmt(s.demand,1)],['COMPOSED / 组合字',fmt(s.composed)],['DELETED / 已删噪音',fmt(s.deletedNoise)]], 3:[['DISTRICTS / 街区',fmt(s.districts)],['CONCEPTS / 概念',fmt(s.concepts)],['EFFECTS / 社会变化',fmt(s.societyEffects)],['SCALE / 地图',s.worldScale>=2?'WORLD':'CITY']], 4:[['AGENTS',fmt(s.agents,1)],['AGENT FACTORIES',fmt(s.agentFactories)],['AUTO ARTICLES',fmt(s.overnightArticles)],['ARCHIVES / 记忆',fmt(s.archives)]], 5:[['MACHINE GLYPHS',fmt(s.machineGlyphs)],['MACHINE USE',fmt(s.machineGlyphUse)],['COMPRESSED',fmt(s.compressedMeaning)],['HUMAN MEANING',fmt(s.meaning)]], 6:[['INFRA / 基础设施',s.infrastructure?'ON':'OFF'],['AMBIGUITY / 歧义',fmt(s.ambiguity)],['DELETED / 删除',fmt(s.deletedNoise)],['COMPRESSED',fmt(s.compressedMeaning)]] }; $('world-metrics').replaceChildren(...sets[s.act].map(([a,b]) => worldMetric(a,b))); $('world-scale').textContent = s.stopped ? 'SILENCE' : s.act===3 && s.worldScale>=2 ? 'NETWORK' : ['DESK','CITY','CITY','NETWORK','MACHINE','WORLD'][s.act-1]; $('world-card').classList.toggle('stopped', s.stopped); }
+  function renderWorld(s) { const sets = { 1:[['AUTO / 自动',`${fmt(E.rate(s),1)}/s`],['CONTRACTS / 委托',`${s.contracts}/3`],['TYPISTS / 打字员',fmt(s.typists)],['PRESSES / 印刷机',fmt(s.presses)]], 2:[['READERS / 读者',fmt(s.readers)],['DEMAND / 需求',fmt(s.demand,1)],['COMPOSED / 组合字',fmt(s.composed)],['DELETED / 已删噪音',fmt(s.deletedNoise)]], 3:[['DISTRICTS / 街区',fmt(s.districts)],['CONCEPTS / 概念',fmt(s.concepts)],['EFFECTS / 社会变化',fmt(s.societyEffects)],['SCALE / 地图',s.worldScale>=2?'WORLD':'CITY']], 4:[['AGENTS',fmt(s.agents,1)],['AGENT FACTORIES',fmt(s.agentFactories)],['AUTO ARTICLES',fmt(s.overnightArticles)],['ARCHIVES / 记忆',fmt(s.archives)]], 5:[['MACHINE GLYPHS',fmt(s.machineGlyphs)],['MACHINE USE',fmt(s.machineGlyphUse)],['COMPRESSED',fmt(s.compressedMeaning)],['HUMAN MEANING',fmt(s.meaning)]], 6:[['INFRA / 基础设施',s.infrastructure?'ON':'OFF'],['AMBIGUITY / 歧义',fmt(s.ambiguity)],['DELETED / 删除',fmt(s.deletedNoise)],['COMPRESSED',fmt(s.compressedMeaning)]] }; $('world-metrics').replaceChildren(...sets[s.act].map(([a,b]) => worldMetric(a,b))); const scale = s.stopped ? 'SILENCE' : s.act===3 && s.worldScale>=2 ? 'NETWORK' : ['DESK','CITY','CITY','NETWORK','MACHINE','WORLD'][s.act-1]; $('world-scale').textContent = scale; renderScene(scale); $('world-card').classList.toggle('stopped', s.stopped); }
 
   function actionButton(text, sub, type, enabled = true, props = {}, className = '') { const b = document.createElement('button'); b.type='button'; b.dataset.command=type; b.disabled=!enabled; b.className=className; const main = document.createElement('span'); main.textContent=text; b.append(main); if (sub) { const small=document.createElement('span'); small.className='action-sub'; small.textContent=sub; b.append(small); } b.addEventListener('click',()=>perform(type,props)); return b; }
   function renderActions(s) {

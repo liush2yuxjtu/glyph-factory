@@ -1,0 +1,7 @@
+<!-- @dsCard group="Layout" height=220 subtitle="像素框面板与凹槽" -->
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>Panel</title>
+<style>body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-pixel);-webkit-font-smoothing:none}.row{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;padding:16px}.cap{font-size:12px;color:var(--ink-muted);display:block;margin-top:8px}</style></head>
+<body><div id="root" class="row"></div>
+<script>var G=window.GlyphPixel,r=document.getElementById('root');r.innerHTML='<div class="gp-panel" style="width:320px"><div class="gp-panel-h">系统</div><div style="font-size:12px;line-height:18px;color:var(--ink-muted)">系统一旦出现，就留在桌面上。</div><div class="gp-well" style="margin-top:12px;font-size:12px">凹槽 · sunk + frame</div></div><div class="gp-panel" style="width:320px"><div class="gp-panel-h">工坊日志</div>'+G.logTerm(['› 有人愿意用一千个废字的价钱，换一句重要的话。'],'LOG')+'</div>';</script>
+</body></html>

@@ -1,0 +1,42 @@
+<!-- @dsCard group="Pages" height=2400 width=1200 page subtitle="全部 17 个屏幕 · 新旧版切换" -->
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><title>Screens — Glyph Factory Pixel</title>
+<style>
+  body { margin: 0; background: var(--bg); color: var(--ink); }
+  .sc { width: 1200px; padding: 24px 32px 40px; box-sizing: border-box; font-family: var(--font-pixel); -webkit-font-smoothing: none; }
+  .sc-top { display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+  .sc-top h1 { margin: 0; font-weight: 400; font-size: 36px; line-height: 40px; flex: 1; }
+  .sc-top h1 small { display: block; font-size: 12px; line-height: 18px; color: var(--ink-muted); }
+  .grid { display: flex; flex-wrap: wrap; gap: 32px 28px; align-items: flex-start; }
+  figure { margin: 4px; }
+  figcaption { font-size: 12px; line-height: 18px; margin-top: 12px; max-width: 250px; }
+  figcaption b { font: 12px/18px var(--font-display); font-weight: 400; background: var(--ink); color: var(--panel); padding: 0 4px; margin-right: 4px; }
+  figcaption span { color: var(--ink-muted); display: block; }
+  .lbl { font-size: 12px; color: var(--ink-muted); }
+</style></head>
+<body>
+<div class="sc" id="root"></div>
+<script>
+(function () {
+  var G = window.GlyphPixel, D = G.data, st = { skin: 'pixel', filter: 'player' }, root = document.getElementById('root'), e = G.esc;
+  function draw() {
+    var list = D.screens.filter(function (s) {
+      return st.filter === 'all' || (st.filter === 'player' && s.id[0] === 'P') || (st.filter === 'review' && s.id[0] === 'R') || (st.filter === 'desktop' && s.id[0] === 'D');
+    });
+    root.innerHTML = '<div class="sc-top"><h1>屏幕<small>每一屏都是真实浏览器读数（scripts/flows/screens.json）重新排版，不是凭空画的。</small></h1>' +
+      '<span class="lbl">设计</span>' + G.toggle('skin', [{ value: 'pixel', label: '像素 新版' }, { value: 'classic', label: 'v3 旧版' }], st.skin) +
+      '<span class="lbl">筛选</span>' + G.toggle('filter', [{ value: 'player', label: '玩家 390' }, { value: 'review', label: '评审 390' }, { value: 'desktop', label: '桌面 1280' }, { value: 'all', label: '全部' }], st.filter) + '</div>' +
+      '<div class="grid">' + list.map(function (s) {
+        var w = /^1280/.test(s.viewport) ? 540 : 250;
+        return '<figure>' + G.thumb(s, st.skin, w) + '<figcaption><b>' + e(s.id) + '</b>' + e(s.name) + '<span>' + e(s.note) + '</span></figcaption></figure>';
+      }).join('') + '</div>';
+    G.fitThumbs(root);
+  }
+  G.bindToggle(root, function (k, v) { st[k] = v; draw(); });
+  draw();
+  if (document.fonts) document.fonts.ready.then(function () { G.fitThumbs(root); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+<!-- @dsCard group="Controls" height=90 subtitle="分段切换：新旧版、表面、筛选" -->
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>Toggle</title>
+<style>body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-pixel);-webkit-font-smoothing:none}.row{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;padding:16px}.cap{font-size:12px;color:var(--ink-muted);display:block;margin-top:8px}</style></head>
+<body><div id="root" class="row"></div>
+<script>var G=window.GlyphPixel,r=document.getElementById('root');r.innerHTML=G.toggle('skin',[{value:'pixel',label:'像素 新版'},{value:'classic',label:'v3 旧版'}],'pixel')+G.toggle('surface',[{value:'player',label:'玩家面'},{value:'review',label:'评审面'}],'review');G.bindToggle(r,function(){});</script>
+</body></html>
