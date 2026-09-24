@@ -16,6 +16,19 @@ Normal player surfaces must not expose:
 
 The game can still use internal Aha IDs to drive deterministic state and tests.
 
+## Scope: the game, not the repository
+
+The boundary protects **the player surfaces**: the deployed `dist/` and the dev player on
+`/`. It does not make the catalog secret. The repository is public, and so are its design
+materials: `aha.md` on `main`, and the GitHub Pages site built from the `gh-pages` branch
+(`aha.md`, `aha-flow/`, `asset-gallery/`). Someone who goes looking can read every Aha; a
+player who just plays must never be shown one ahead of time.
+
+So design and review surfaces (`docs/`, `aha.md`, the asset gallery, Pages) may name
+A01–A28 freely, and a review that flags one of them as a spoiler leak is out of scope. What
+stays in scope is anything that reaches a player through the game itself, which the build
+and runtime boundaries below enforce.
+
 ## Build boundary
 
 `scripts/build-static.mjs` is the production boundary.

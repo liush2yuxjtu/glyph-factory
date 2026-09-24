@@ -10,6 +10,7 @@
     "test": "node --test tests/*.test.mjs",
     "verify:fast": "node scripts/verify-player.mjs --fast",
     "verify": "node scripts/verify-player.mjs",
+    "verify:asset-gallery": "node scripts/verify-asset-gallery.mjs",
     "intent-audit": "node .claude/skills/verify/audit.mjs",
     "build:review": "node scripts/build-static.mjs && node scripts/build-aha-review.mjs",
     "sync:aha": "node scripts/sync-aha-docs.mjs",
