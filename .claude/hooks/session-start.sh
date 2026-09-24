@@ -11,7 +11,9 @@ fi
 
 cd "${CLAUDE_PROJECT_DIR:-$(dirname "$0")/../..}"
 
-npm install --no-audit --no-fund
+# npm ci, not npm install: install rewrites package-lock.json under a different npm
+# version, which leaves every session dirty and makes intent-audit record dirty=true.
+npm ci --no-audit --no-fund
 
 python3 -m pip install --quiet -r tests/browser/requirements.txt
 python3 -m playwright install --with-deps chromium webkit
