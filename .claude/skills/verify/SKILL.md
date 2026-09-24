@@ -67,8 +67,12 @@ dependency, or stage that did not execute counting as not-ALL-PASS. It records `
 package.json package-lock.json vercel.json` into
 `test-results/intent-audit/report.json`, and its stages are, in order:
 `fast` → `review-build` → `player-chromium` → `aha-chromium` → `player-webkit` →
-`aha-webkit` → `diff-check` (`audit.mjs` loops browser-outer, suite-inner, so a missing
-WebKit shows up only after both Chromium suites have passed).
+`aha-webkit` → `diff-check`. That is the order they are *recorded* in; since 2026-09-24 the
+Chromium and WebKit lanes (player then aha inside each) run **in parallel**, which takes a run
+from ~5 minutes to roughly the WebKit lane alone. They share no writable state — each suite
+serves the prebuilt `dist/` / `review-dist/` read-only on its own ephemeral port and writes
+screenshots to a per-browser `test-results/` directory — so this is not the "two suites at once"
+the Gotchas warn about. Any FAIL still aborts, after both lanes finish.
 
 **The script is `.claude/skills/verify/audit.mjs`, not a file in `scripts/`.** It is
 verification orchestration — the job the deleted `Player merge gate` used to do — so it
@@ -114,6 +118,33 @@ git diff --check
 ```
 
 …then say in so many words that this was the hand-run equivalent, not `intent-audit` itself.
+
+### 两档：改代码时跑什么，提 PR 前跑什么
+
+完整 audit 一次约 3 分钟（WebKit 那条线最慢），每个新提交都要重跑。迭代时不必每次都跑它：
+
+| 什么时候 | 跑什么 | 大约多久 |
+|---|---|---|
+| 改代码、来回试 | `npm run verify:fast && npm run build:review && GLYPH_BROWSER=chromium python3 scripts/run-browser-contracts.py player && GLYPH_BROWSER=chromium python3 scripts/run-browser-contracts.py aha` | 2 分钟 |
+| 提 PR 前 / 推送要被评审的提交前 / 用户要部署前 | `npm run intent-audit`，在**确切的那个提交**上、干净的树 | 3 分钟 |
+
+迭代档**不是**验证结论：它不跑 WebKit、不写 `report.json`，报告时只能说「迭代检查通过」，不能说
+`/verify` PASS。PR 描述里引用的必须是完整 audit 的结果（或下一节的复用）。
+
+### Reusing a PASS：只改了 hash 覆盖范围以外的文件
+
+`sourceSha256` 盖的是产品字节（`public/ src/ scripts/ tests/ .github/ aha.md intent.md
+package.json package-lock.json vercel.json`）。一个提交如果一个字节都没碰这些，它的产品就是
+上一次已审过的那一份，可以**复用**那次 PASS，不必重跑。条件全部满足才算：
+
+1. 有一次 `status: PASS` 的 audit，记下了它的 `commit` 和 `sourceSha256`；
+2. 在当前提交、干净的树上 `node .claude/skills/verify/audit.mjs --hash-only` 打出**同一个**
+   hash——这是判据，不是「看 diff 觉得只改了文档」；
+3. 这之间没有改过验证工具本身：`.claude/skills/verify/audit.mjs` 不在 hash 里，改了它必须重跑
+   （工具变了，旧读数证明不了新工具能跑通）。`scripts/run-browser-contracts.py` 和测试在 hash 里，
+   天然被第 2 条盖住。
+
+报告时写成「复用 `<commit>` 的 PASS，`sourceSha256` 一致：`<hash>`」，不要写成本提交跑过 audit。
 
 ### The rhythm contract: the gaps between Aha moments
 
