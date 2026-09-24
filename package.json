@@ -26,6 +26,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.5",
+    "posthog-js": "1.434.12",
     "typescript": "^5"
   }
 }
