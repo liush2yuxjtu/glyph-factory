@@ -1,0 +1,1 @@
+14 个 12×12 像素精灵，SVG 为日班配色的固定填色（ink `#1a211b`、panel `#f6efd9`、lamp `#f0c23b`、accent `#b8e25a`、danger `#a8361f`），不跟随主题。需要随主题变色时用 `GlyphPixel.sprite(name)` 的内联版本。只按 24 / 36 / 48px 整数倍放大，`image-rendering: pixelated`。

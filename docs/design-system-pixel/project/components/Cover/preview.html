@@ -1,0 +1,46 @@
+<!-- @dsCard height=288 -->
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>字工厂 像素</title>
+<style>
+  html, body { margin:0; height:100%; }
+  body { background:var(--bg); color:var(--ink); font-family:var(--font-pixel); overflow:hidden; -webkit-font-smoothing:none; }
+  .cover { position:relative; width:960px; height:288px; overflow:hidden; }
+  .art { position:absolute; top:0; left:480px; width:480px; height:288px; overflow:hidden; }
+  .art svg { display:block; }
+  .slab { fill:var(--term); }
+  .gl { fill:var(--lamp); }
+  .green { fill:var(--accent); }
+  .tint { fill:var(--sunk); }
+  .stamp { fill:var(--danger); }
+  .words { position:absolute; left:32px; bottom:32px; max-width:440px; }
+  .name { margin:0; font-size:72px; line-height:72px; font-weight:400; color:var(--ink); white-space:nowrap; }
+  .tag { margin:12px 0 0; font-size:12px; line-height:18px; color:var(--ink-muted); }
+</style>
+</head>
+<body>
+<div class="cover">
+<div class="art" aria-hidden="true">
+<svg viewBox="0 0 480 288" width="480" height="288" shape-rendering="crispEdges">
+<!--
+  blocks      term slab 224×224 (the lamp-lit night desk) · accent 176×144 bled off the top-right · sunk 112×112 under it · danger 48×48 once (the stamp; it only means irreversible)
+  arrangement one dark slab with satellites on a flush 16px grid, bottoms on one line space-8 above the edge
+  pattern     "a distinctive display face → one oversized glyph": the 12×12 glyph sprite (字) at 16px per pixel in lamp, cut into the slab — the system is literally a pixel 字
+  scales      sides are multiples of space-4 (16px); gaps space-4; corners radius-0; pixel pitch 16px = 8 × px
+-->
+<rect class="slab" x="80" y="32" width="224" height="224"/>
+<rect class="gl" x="96" y="48" width="192" height="16"/><rect class="gl" x="96" y="64" width="16" height="16"/><rect class="gl" x="272" y="64" width="16" height="16"/><rect class="gl" x="96" y="80" width="16" height="16"/><rect class="gl" x="176" y="80" width="32" height="16"/><rect class="gl" x="272" y="80" width="16" height="16"/><rect class="gl" x="96" y="96" width="16" height="16"/><rect class="gl" x="128" y="96" width="128" height="16"/><rect class="gl" x="272" y="96" width="16" height="16"/><rect class="gl" x="96" y="112" width="16" height="16"/><rect class="gl" x="128" y="112" width="16" height="16"/><rect class="gl" x="240" y="112" width="16" height="16"/><rect class="gl" x="272" y="112" width="16" height="16"/><rect class="gl" x="96" y="128" width="16" height="16"/><rect class="gl" x="160" y="128" width="64" height="16"/><rect class="gl" x="272" y="128" width="16" height="16"/><rect class="gl" x="96" y="144" width="16" height="16"/><rect class="gl" x="192" y="144" width="16" height="16"/><rect class="gl" x="272" y="144" width="16" height="16"/><rect class="gl" x="96" y="160" width="16" height="16"/><rect class="gl" x="128" y="160" width="128" height="16"/><rect class="gl" x="272" y="160" width="16" height="16"/><rect class="gl" x="96" y="176" width="16" height="16"/><rect class="gl" x="192" y="176" width="16" height="16"/><rect class="gl" x="272" y="176" width="16" height="16"/><rect class="gl" x="96" y="192" width="16" height="16"/><rect class="gl" x="176" y="192" width="32" height="16"/><rect class="gl" x="272" y="192" width="16" height="16"/><rect class="gl" x="96" y="208" width="16" height="16"/><rect class="gl" x="272" y="208" width="16" height="16"/><rect class="gl" x="96" y="224" width="192" height="16"/>
+<rect class="green" x="320" y="-16" width="176" height="144"/>
+<rect class="tint" x="320" y="144" width="112" height="112"/>
+<rect class="stamp" x="16" y="208" width="48" height="48"/>
+</svg>
+</div>
+<div class="words">
+<h1 class="name">字工厂 像素</h1>
+<p class="tag">夜里亮着台灯的印刷工坊，用 12px 像素格画出来。</p>
+</div>
+</div>
+</body>
+</html>

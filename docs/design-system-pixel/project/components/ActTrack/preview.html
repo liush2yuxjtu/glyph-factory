@@ -1,0 +1,7 @@
+<!-- @dsCard group="Progress" height=150 subtitle="玩家面只画已到达的幕；评审面画全部 6 幕" -->
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>ActTrack</title>
+<style>body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-pixel);-webkit-font-smoothing:none}.row{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;padding:16px}.cap{font-size:12px;color:var(--ink-muted);display:block;margin-top:8px}</style></head>
+<body><div id="root" class="row"></div>
+<script>var G=window.GlyphPixel,r=document.getElementById('root');r.innerHTML='<div style="width:340px">'+G.actTrack(['done','done','current'],'player')+'<span class=cap>玩家面 · ACT III</span></div><div style="width:340px">'+G.actTrack(['done','done','current'],'review')+'<span class=cap>评审面 · ACT III</span></div>';</script>
+</body></html>
