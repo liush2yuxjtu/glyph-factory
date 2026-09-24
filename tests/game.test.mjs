@@ -23,7 +23,7 @@ test('委托消耗库存且只能按顺序领取', () => { let g={...newGame(),g
 test('复写纸只扣款一次且手动产量变四倍', () => { let g={...newGame(),lifetimeGlyphs:150,credits:90}; g=doIt(g,'boost'); assert.equal(g.credits,45); g=doIt(g,'boost'); assert.equal(g.credits,45); assert.equal(doIt(g,'print').glyphs,4); });
 test('自动出售需要研发，并可暂停积累库存', () => { let g={...newGame(),lifetimeGlyphs:300,credits:60,keyboards:2}; assert.equal(doIt(g,'toggle-auto').autoSell,false); g=doIt(g,'research-auto'); g=doIt(g,'toggle-auto'); g=E.advance(g,t+10000); assert.equal(g.credits,5); assert.equal(g.glyphs,0); g=doIt(g,'toggle-auto'); g=E.advance(g,t+20000); assert.equal(g.glyphs,10); });
 test('小数库存出售不丢失', () => { const g=doIt({...newGame(),glyphs:1.75},'sell'); assert.equal(g.glyphs,0.75); assert.equal(g.credits,0.5); });
-test('发行必须满足条件，发行后进入 Act II 且不可重复收费', () => { let g={...newGame(),lifetimeGlyphs:5000,glyphs:200,credits:300,presses:1}; assert.ok(E.canPublish(g)); g=doIt(g,'publish'); assert.ok(g.published); assert.equal(g.act,2); assert.equal(g.glyphs,0); assert.equal(g.credits,0); const h=doIt(g,'publish'); assert.equal(h.published,true); assert.equal(h.credits,0); });
+test('发行必须满足条件，发行后进入 Act II 且不可重复收费', () => { let g={...newGame(),lifetimeGlyphs:32000,glyphs:200,credits:300,presses:1}; assert.ok(E.canPublish(g)); g=doIt(g,'publish'); assert.ok(g.published); assert.equal(g.act,2); assert.equal(g.glyphs,0); assert.equal(g.credits,0); const h=doIt(g,'publish'); assert.equal(h.published,true); assert.equal(h.credits,0); });
 test('从零按合法动作可以进入 Act II，不注入资源', () => {
   let g=newGame(), completedAt=0;
   for(let seconds=0;seconds<3600;seconds++) {

@@ -1,0 +1,126 @@
+{
+  "name": "glyph-factory-design-system",
+  "displayName": "字工厂 / Glyph Factory 设计系统",
+  "version": "3.0.0",
+  "generatedAt": "2026-09-20",
+  "baselineCommit": "7ebd57bc051ff2a3f64cfec4d339f275940e8507",
+  "scope": {
+    "covers": [
+      "public/play.html",
+      "public/preview.html",
+      "public/aha.html",
+      "public/intent.html",
+      "public/eli5-aha.html",
+      "public/404.html",
+      "public/500.html"
+    ],
+    "excludes": [
+      "src/app/product-demo (React 页，独立硬编码样式，未纳入)",
+      "src/app/globals.css 组件类 (已失效)"
+    ]
+  },
+  "authority": {
+    "tokens": "tokens.css",
+    "components": "components.html",
+    "note": "DESIGN.md 仅说明；preview/ 为派生层，运行时读取 tokens.css。不从派生物反向覆盖真源。"
+  },
+  "entry": "index.html",
+  "deliverables": {
+    "manifest.json": { "role": "包索引与校验和" },
+    "DESIGN.md": { "role": "说明：意图、清单、审计、待办" },
+    "tokens.css": { "role": "设计数值唯一真源" },
+    "components.html": { "role": "组件设计唯一真源与可视化陈列（1–12 已上线，13–15 提案）" },
+    "flows.html": { "role": "屏幕与流程：17 屏矢量重绘 + 6 条流程 + 29 个热点步骤，全部按真实 DOM 读数绘制并消费 tokens.css" },
+    "preview/index.html": { "role": "令牌预览：色板/字阶/间距/描边/动效/对比度自检/提案层自检" },
+    "references/mobbin-2026-09.md": { "role": "参考依据：看过的屏、每屏支撑的判断" },
+    "assets/README.md": { "role": "资产来源说明（本包无二进制资产）" }
+  },
+  "stats": {
+    "tokens": 112,
+    "colorTokens": 40,
+    "mobbinDrivenAliasTokens": 17,
+    "components": 15,
+    "componentsShipped": 14,
+    "componentsWithdrawn": 1,
+    "surfacesWithOwnRoot": 7,
+    "auditScore": 78
+  },
+  "mobbinDriven": {
+    "note": "依据 references/mobbin-2026-09.md 新增的一组。别名层只做既有令牌的别名 + 几何尺寸，零新增色值（preview J 节实算自检）。",
+    "shipped": [
+      {
+        "component": "act-progress",
+        "surface": "player",
+        "home": "public/play.html #act-progress + glyph-game-v3.js renderActProgress()",
+        "dataSource": "glyph-engine-v3.js gateProgress()",
+        "reference": "Monarch · Getting Started 分段进度条"
+      },
+      {
+        "component": "aha-row",
+        "surface": "review-only",
+        "home": "public/play.html #aha-list .aha-item + glyph-game-v3.js renderAhas()",
+        "dataSource": "glyph-engine-v3.js ahaGoal()",
+        "reference": "Duolingo · Achievements 条件句+进度条+分母",
+        "whyReviewOnly": "给玩家一张 28 条『还差 N』的待办表等于剧透整个发现过程；玩家面只给当前阶段进度。"
+      }
+    ],
+    "withdrawn": [
+      {
+        "component": "aha-burst",
+        "reason": "动工前同步 origin/main 发现 PR #14 已用 AHA_WORLD 日志世界线解决同一问题；再叠加全屏会让同一次 Aha 有两套竞争反馈，且 28 次全屏在增量游戏里是惩罚。",
+        "tokensKeptFor": "--burst-* 仅服务 components.html 第 15 节的设计记录，新代码勿引用。"
+      }
+    ],
+    "incidentalFix": "glyph-game-v3.js 发行按钮就绪副标题原为『这不是结局；它会打开 ACT II。』，含 ACT 字样、命中隐私边界正则，玩家达标即泄漏。已改为世界语言。"
+  },
+  "references": [
+    {
+      "source": "Mobbin",
+      "checked": "2026-09-20",
+      "coverageVerdict": "Mobbin 不覆盖增量/放置游戏品类",
+      "evidence": [
+        "Game UI 分类 59 张截图去重 27 个 app，全部为游戏化产品（Duolingo/KakaoBank/Khan Academy/Finch/Grab/Taobao…），无一个增量游戏",
+        "站内检索 AdVenture Capitalist / Cookie Clicker / Melvor Idle / Egg, Inc. / Idle Miner 返回 0 条"
+      ],
+      "citedScreens": [
+        { "app": "Duolingo", "screen": "Achievements", "url": "https://mobbin.com/explore/mobile/screens/achievements-awards", "supports": "aha-row 的条件句+进度条+分母" },
+        { "app": "Monarch", "screen": "Dashboard / Getting Started", "url": "https://mobbin.com/explore/mobile/screens/progress", "supports": "act-progress 的分段进度条" },
+        { "app": "Brightmind", "screen": "Congrats!", "url": "https://mobbin.com/explore/mobile/screens/achievements-awards", "supports": "aha-burst 的全屏单数字范式" }
+      ]
+    }
+  ],
+  "audit": {
+    "drift": [
+      { "token": "--muted", "canonical": "#657064", "drifted": { "public/preview.html": "#637063" } },
+      { "token": "--line", "canonical": "#bcc4ae", "drifted": { "public/preview.html": "#bac3ad", "public/eli5-aha.html": "#bec4b2" } },
+      { "token": "--paper", "canonical": "#efe9d8", "drifted": { "public/eli5-aha.html": "#f1eddf" } },
+      { "token": "--panel", "canonical": "#fffaf0", "drifted": { "public/eli5-aha.html": "#fffdf5" } }
+    ],
+    "deadCode": [
+      "src/app/page.module.css (无 import)",
+      "src/app/globals.css 组件类 (无引用；body/box-sizing 仍生效)",
+      ".aha-item.locked (从未被赋值)",
+      "--gold (零引用)"
+    ],
+    "contrast": {
+      "method": "WCAG 2.1 相对亮度",
+      "failing": [{ "pair": "--muted on --paper", "ratio": 4.27, "required": 4.5 }],
+      "lowestPassing": { "pair": "--muted on --panel", "ratio": 4.98 }
+    }
+  },
+  "runtime": {
+    "connected": false,
+    "reason": "public/play.html 仍自带 :root；并轨需同步修改 scripts/build-static.mjs 的白名单拷贝，否则 dist/ 发布产物掉色。",
+    "consequence": "改 tokens.css 不影响玩家面；改 play.html 的 :root 不影响本包。"
+  },
+  "serve": {
+    "entryUrl": "/design-system/index.html",
+    "componentsUrl": "/design-system/components.html",
+    "flowsUrl": "/design-system/flows.html",
+    "previewUrl": "/design-system/preview/index.html",
+    "directoryFormWorks": false,
+    "directoryFormNote": "/design-system/ 308 到 /design-system 后 404：Next 不为 public/ 子目录提供目录索引，必须写完整文件名。",
+    "fileProtocolSafe": true,
+    "shippedInDist": false
+  }
+}

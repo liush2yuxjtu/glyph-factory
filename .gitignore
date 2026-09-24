@@ -45,3 +45,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Internal review output is not a production source
+/review-dist/
+**/__pycache__/

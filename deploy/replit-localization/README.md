@@ -26,13 +26,23 @@ A visible top-of-page `简体中文` / `English` control defaults to Simplified 
 
 The dictionary covers the observed Forge and System screens and common controls. Unknown strings deliberately remain unchanged. This is not a claim that unseen later-game content has been fully audited. Expand the source dictionary for any newly observed untranslated game copy, then retest and republish.
 
-## Local verification already executed
+## Verification status: this adapter is not checked by this repository
 
-23 isolated checks passed before this commit: 16 offline Chromium UI tests and 7 Node installer tests. The browser fixture mirrored the observed initial and System UI, not the full Replit source. Opaque-origin browser storage was simulated. Therefore these tests establish adapter behavior, not native production storage persistence or whole-game coverage.
+The offline verifier (`test_verifier.py`) and the live acceptance driver (`verify_live.py`)
+were removed on 2026-09-22 with the GitHub workflow that ran them. Nothing here executes
+`glyph-language.js` any more, so the adapter now ships with **zero automated coverage**.
 
-UI checks covered default Chinese, round-trip switching, accessible attributes, dynamic panel/log updates, numeric patterns, unknown/user text preservation, simulated save isolation and reload, storage event response, storage failures, duplicate inclusion, keyboard activation, unsupported locales, and 320/390/768/1280px layouts. Installer checks covered insertion, JavaScript syntax, idempotence, the client entry, ambiguous entries, CSP refusal, incomplete markers, and missing entries.
+What that removes is the record of what used to pass, not a claim that anything still does:
+23 isolated checks (16 offline Chromium UI tests over a fixture that mirrored the observed
+initial and System screens, 7 Node installer tests) plus the live acceptance list below.
+The fixture never was the full Replit source and opaque-origin storage was simulated, so even
+then the coverage was adapter behavior, not native production persistence. Do not read the
+absence of a verifier as a pass. Re-authoring one means restoring both scripts and running
+them on the machine, which is where every other check in this repository now lives.
 
-## Required live acceptance
+## Live acceptance, if this adapter is ever re-accepted
+
+Kept as the human checklist, not as an automated gate:
 
 - The public production URL visibly shows the selector and Chinese main controls.
 - Forge works in both languages; switching does not change resource totals.
@@ -41,4 +51,5 @@ UI checks covered default Chinese, round-trip switching, accessible attributes, 
 - Check mobile controls and newly unlocked content for untranslated strings.
 - Confirm `window.GlyphLanguage.version` is `local-i18n-20260915.1` when this adapter is used.
 
-A deployment status alone does not prove these acceptance checks pass. At the time this document was authored, production verification for this adapter was pending.
+A deployment status alone never proved these checks pass. At the time this document was
+authored, production verification for this adapter was pending — and it still is.
