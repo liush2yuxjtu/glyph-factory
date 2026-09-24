@@ -483,6 +483,9 @@ Every browser suite serves a built artifact, so `dist/` must exist first or the 
   `Build review-dist with node scripts/build-aha-review.mjs first.`
 - `test_player.py` also refuses to run against a review build
   (`playerSpoilers is not False`).
+- `test_telemetry.py` (player suite) needs `node_modules/posthog-js` — a pinned devDependency that
+  supplies PostHog's CDN loader offline — so run `npm ci` first. It builds its own token-bearing
+  bundle in a temp directory; it never touches `dist/`.
 
 `npm run verify:fast` and `npm run build:review` both write `dist/`; `npm run build:review`
 additionally writes `review-dist/` and is the one to use when you need the Aha suite. A
@@ -988,7 +991,7 @@ The player suite is the other half of the leak boundary — run it too when the 
 `build-static.mjs`, the privacy layer, or `play.html`:
 
 ```bash
-GLYPH_BROWSER=chromium python3 scripts/run-browser-contracts.py player   # floor 19, currently 29
+GLYPH_BROWSER=chromium python3 scripts/run-browser-contracts.py player   # floor 19; count it from the run, it grows
 ```
 
 ### Run — in-app 28/28
