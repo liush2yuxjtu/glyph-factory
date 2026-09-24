@@ -34,6 +34,10 @@ The game is plain browser JavaScript in `public/`; Next.js is only a thin shell.
 
 **Deployment does not use `next build`.** `vercel.json` sets `framework: null`; the build runs `npm test` and then `scripts/build-deployment.mjs`, which writes a static `dist/` containing only the player allowlist. Internal review pages (`aha.html`, etc.) are added only when `VERCEL_ENV=preview`.
 
+### Error tracking (PostHog)
+
+Opt-in at build time. When `POSTHOG_PROJECT_TOKEN` (a `phc_…` project key) is set, `scripts/build-static.mjs` inlines PostHog's CDN loader into `dist/index.html` and `dist/play.html`; without it the bundle contains no telemetry at all (`build.json` → `"telemetry": "none"`). `POSTHOG_HOST` defaults to `https://us.i.posthog.com` (use `https://eu.i.posthog.com` for the EU cloud). What is sent: uncaught errors and unhandled rejections (including ones thrown during boot, before the loader arrives) as `$exception`, plus `$pageview`. What is not: no autocapture, no session recording, and in-memory persistence, so nothing is stored next to the save. On Vercel set both variables for the Production environment; they take effect on the next explicit deploy. The Next.js app in `src/` is not deployed, so it carries no tracker.
+
 ## The two source-of-truth documents
 
 - [`intent.md`](intent.md) — **what** the user wants, quoted verbatim, each with how it is measured and its current status.
@@ -48,7 +52,7 @@ npm install
 npm run dev     # http://localhost:3000
 ```
 
-Open `/` to play. `play.html?review=1` shows the full act/Aha surface. Saves live in `localStorage` only; there are no env vars.
+Open `/` to play. `play.html?review=1` shows the full act/Aha surface. Saves live in `localStorage` only. The only env vars are the optional PostHog pair above, read at build time.
 
 ## Test and verify
 

@@ -56,6 +56,42 @@ let playerHtml = html
   .replace('<div class="aha-list" id="aha-list" aria-label="Aha moments"></div>', '<div class="aha-list" id="aha-list" hidden aria-hidden="true"></div>')
 ;
 
+// Error tracking is opt-in at build time: without POSTHOG_PROJECT_TOKEN the player bundle carries
+// no telemetry at all, byte for byte. Production is this static bundle, not the Next.js app in
+// src/ (vercel.json: framework null, no install step), so this is the only place a tracker can
+// live. The loader is PostHog's CDN build (`/static/array.js`), which initialises itself from the
+// `_i` queue on `window.posthog`. Errors are forwarded by our own listeners, which start before the
+// engine scripts run, so a crash during boot is buffered and sent once the library arrives.
+// Deliberately minimal: no autocapture (it would ship DOM text), no session recording, and
+// in-memory persistence so nothing is written next to the player's save in localStorage.
+// No VERCEL_ENV in the payload: the preview player must stay byte-identical to production
+// (tests/aha-deployment.test.mjs); PostHog's own $host tells the two apart.
+const posthogToken = process.env.POSTHOG_PROJECT_TOKEN || '';
+const posthogHost = (process.env.POSTHOG_HOST || 'https://us.i.posthog.com').replace(/\/+$/, '');
+let telemetry = 'none';
+if (posthogToken) {
+  if (!/^phc_[A-Za-z0-9]+$/.test(posthogToken)) throw new Error('POSTHOG_PROJECT_TOKEN 必须是 phc_ 开头的项目 key。');
+  if (!/^https:\/\/[a-z0-9.-]+(?::\d+)?$/i.test(posthogHost)) throw new Error('POSTHOG_HOST 必须是不带路径的 https 源。');
+  const managed = posthogHost.match(/^https:\/\/(us|eu)\.i\.posthog\.com$/);
+  const assets = managed ? `https://${managed[1]}-assets.i.posthog.com` : posthogHost;
+  const config = JSON.stringify({
+    token: posthogToken,
+    src: `${assets}/static/array.js`,
+    options: {
+      api_host: posthogHost,
+      autocapture: false,
+      capture_pageview: true,
+      capture_pageleave: false,
+      capture_exceptions: false,
+      disable_session_recording: true,
+      persistence: 'memory',
+    },
+  }).replace(/</g, '\\u003c');
+  const telemetryBoot = `<script>(function(c){var q=[],w=window;function send(e){var p=w.posthog;if(p&&p.__loaded&&p.captureException){try{p.captureException(e)}catch(_){}}else q.push(e)}w.addEventListener('error',function(e){send(e.error||new Error(e.message||'error'))});w.addEventListener('unhandledrejection',function(e){send(e.reason instanceof Error?e.reason:new Error(String(e.reason)))});w.posthog={_i:[[c.token,c.options]]};var s=document.createElement('script');s.async=true;s.crossOrigin='anonymous';s.src=c.src;s.onload=function(){var p=w.posthog;if(!p||!p.captureException)return;p.register({app:'glyph-factory'});while(q.length)send(q.shift())};document.head.appendChild(s)})(${config})</script>`;
+  playerHtml = playerHtml.replace('</head>', `${telemetryBoot}\n</head>`);
+  telemetry = 'posthog';
+}
+
 // Strip designer reveal copy from the deployed JS payload as a second line of defense.
 const playerEngine = engine.replace(
   /aha\('([^']+)',(\d+),'[^']*','[^']*'(,'[^']*')?\)/g,
@@ -106,6 +142,7 @@ const manifest = {
   progressiveDisclosure: true,
   playerSpoilers: false,
   internalReviewArtifactsDeployed: false,
+  telemetry,
   sha256: digest(playerHtml + playerEngine + playerController + privacy),
   bytes: Buffer.byteLength(playerHtml) + Buffer.byteLength(playerEngine) + Buffer.byteLength(playerController) + Buffer.byteLength(privacy),
 };
