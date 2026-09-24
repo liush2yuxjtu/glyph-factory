@@ -1,0 +1,32 @@
+import fs from 'node:fs';
+import crypto from 'node:crypto';
+import assert from 'node:assert/strict';
+import vm from 'node:vm';
+const root = new URL('../', import.meta.url);
+const folder = new URL('docs/concepts/v1/', root);
+const manifest = JSON.parse(fs.readFileSync(new URL('manifest.json', folder)));
+const prompts = JSON.parse(fs.readFileSync(new URL('prompts.json', folder)));
+const sandbox = {window:{}};
+vm.runInNewContext(fs.readFileSync(new URL('docs/asset-registry.js',root),'utf8'),sandbox);
+const existing = sandbox.window.GLYPH_ASSET_REGISTRY.map(a=>a.id);
+const ids = manifest.assets.map(a=>a.id);
+assert.equal(ids.length,18);
+assert.equal(new Set(ids).size,18);
+assert.equal(prompts.length,18);
+for (const id of existing) assert(ids.includes(id),`Missing existing asset: ${id}`);
+assert.deepEqual(ids.filter(id=>!existing.includes(id)).sort(),['quiet-switch','semantic-compressor']);
+const html = fs.readFileSync(new URL('docs/concepts/ui.html',root),'utf8');
+for(const asset of manifest.assets){
+  assert(/^[a-z0-9-]+\.png$/.test(asset.file));
+  const bytes = fs.readFileSync(new URL(asset.file,folder));
+  assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a',`${asset.id}: PNG signature`);
+  assert.equal(bytes.length,asset.bytes,`${asset.id}: size drift`);
+  assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),asset.sha256,`${asset.id}: hash drift`);
+  assert.equal(bytes.readUInt32BE(16),asset.width);
+  assert.equal(bytes.readUInt32BE(20),asset.height);
+  assert.equal(asset.views.length,3);
+  assert.equal(asset.status,existing.includes(asset.id)?'polished-concept':'new-proposal');
+  assert.equal(prompts.filter(p=>p.id===asset.id).length,1);
+  assert(html.includes(`v1/${asset.file}`),`${asset.id}: missing in visual index`);
+}
+console.log('PASS: 18 original PNGs; all 16 existing assets + 2 proposals; unique prompts; SHA-256, byte counts, dimensions and HTML references verified.');
