@@ -5,13 +5,14 @@ const root = new URL('../', import.meta.url);
 const publicDir = new URL('public/', root);
 const out = new URL('dist/', root);
 
-const [html, engine, controller, privacy, preview, intent] = await Promise.all([
+const [html, engine, controller, privacy, preview, intent, aha] = await Promise.all([
   readFile(new URL('play.html', publicDir), 'utf8'),
   readFile(new URL('glyph-engine-v3.js', publicDir), 'utf8'),
   readFile(new URL('glyph-game-v3.js', publicDir), 'utf8'),
   readFile(new URL('player-privacy-v3.js', publicDir), 'utf8'),
   readFile(new URL('preview.html', publicDir), 'utf8'),
   readFile(new URL('intent.html', publicDir), 'utf8'),
+  readFile(new URL('aha.html', publicDir), 'utf8'),
 ]);
 
 if (!html.includes('lang="zh-CN"') || !html.includes('/glyph-engine-v3.js') || !html.includes('/glyph-game-v3.js')) {
@@ -29,8 +30,14 @@ if (!privacy.includes('Aha IDs, reveal copy') || !privacy.includes('scrubLog')) 
 if (!preview.includes('glyph-factory-v3-preview.webm') || !preview.includes('A28')) {
   throw new Error('设计评审源文件缺失。');
 }
-if (!intent.includes('hidden → revealed → persistent') && !intent.includes('出现 → 永久保留')) {
-  throw new Error('intent.html 设计契约缺失。');
+// 披露契约的真源是 aha.html。2026-09-21 之前 intent.html 是它的逐字节副本，这条检查写在
+// intent 上；用户要求意图文档各自独立之后，两份文件回答的问题不一样了（aha 怎么实现、
+// intent 要实现成什么样），检查也跟着分开：契约查 aha，意图页查它自己那两样东西。
+if (!aha.includes('hidden → discovered → persistent') && !aha.includes('出现 → 永久保留')) {
+  throw new Error('aha.html 披露契约缺失。');
+}
+if (!intent.includes('用户意图') || !intent.includes('build-intent.mjs')) {
+  throw new Error('intent.html 用户意图页缺失：跑 node scripts/build-intent.mjs 生成。');
 }
 
 // Production/player HTML contains no navigation to review materials. Internal review artifacts
@@ -47,13 +54,29 @@ let playerHtml = html
   .replace(/<section class="aha-focus" aria-live="polite">[\s\S]*?<\/section>/, '<section class="aha-focus" hidden aria-hidden="true"><small id="aha-id"></small><h2 id="aha-title"></h2><p id="aha-copy"></p></section>')
   .replace('<div class="panel-head" style="margin-top:16px"><h2>AHA MOMENTS · 28</h2><span id="aha-count">0 / 28</span></div>', '<div class="panel-head" style="margin-top:16px" hidden aria-hidden="true"><h2></h2><span id="aha-count"></span></div>')
   .replace('<div class="aha-list" id="aha-list" aria-label="Aha moments"></div>', '<div class="aha-list" id="aha-list" hidden aria-hidden="true"></div>')
-  .replace('</body>', '<script src="/player-privacy-v3.js"></script>\n</body>');
+;
 
 // Strip designer reveal copy from the deployed JS payload as a second line of defense.
 const playerEngine = engine.replace(
   /aha\('([^']+)',(\d+),'[^']*','[^']*'(,'[^']*')?\)/g,
   (_match, id, act, kind = '') => `aha('${id}',${act},'',''${kind})`,
 );
+// The strip above is a regex over `aha(...)`, so a designer copy string added anywhere else in
+// that call would survive into the player bundle. The world lines are meant to survive — they
+// are the only reason an Aha is perceptible — but the design copy must not. Assert both halves
+// against the actual stripped payload instead of trusting the pattern.
+const designCopy = [...engine.matchAll(/aha\('[^']+',\d+,'([^']*)','([^']*)'/g)];
+if (designCopy.length !== 28) throw new Error(`预期 28 条 Aha 设计文案，实际 ${designCopy.length} 条。`);
+for (const [, title] of designCopy) {
+  if (title && playerEngine.includes(`'${title}'`)) throw new Error(`Aha 设计标题泄漏进玩家包：${title}`);
+}
+const worldCopy = [...engine.matchAll(/^ {4}A\d{2}: '([^']+)',$/gm)].map((match) => match[1]);
+if (worldCopy.length !== 28) throw new Error(`预期 28 条玩家向世界线，实际 ${worldCopy.length} 条。`);
+for (const line of worldCopy) {
+  if (!playerEngine.includes(line)) throw new Error(`玩家向世界线在构建中被剥离：${line}`);
+  if (/A\d{2}|AHA|ACT/i.test(line)) throw new Error(`玩家向世界线含内部术语：${line}`);
+}
+
 const playerController = controller
   .replace(
     /  const AHA_EN = \{[\s\S]*?\n  \};\n  const ACTIONS =/,
@@ -64,7 +87,7 @@ const playerController = controller
     "localStorage.getItem(LOCALE_KEY) || 'zh-CN'",
   );
 
-// Reused local/CI output must not retain files from an older review build.
+// A reused output directory must not retain files from an older review build.
 await rm(out, { recursive: true, force: true });
 await mkdir(out, { recursive: true });
 await writeFile(new URL('index.html', out), playerHtml);
