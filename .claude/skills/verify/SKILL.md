@@ -66,8 +66,15 @@ dependency, or stage that did not execute counting as not-ALL-PASS. It records `
 `dirty`, and a `sourceSha256` over `public/ src/ scripts/ tests/ .github/ aha.md intent.md
 package.json package-lock.json vercel.json` into
 `test-results/intent-audit/report.json`, and its stages are, in order:
-`fast` → `review-build` → `player-chromium` → `player-webkit` → `aha-chromium` →
-`aha-webkit` → `diff-check`.
+`fast` → `review-build` → `player-chromium` → `aha-chromium` → `player-webkit` →
+`aha-webkit` → `diff-check`. That is the order they are *recorded* in; since 2026-09-24 the
+Chromium and WebKit lanes (player then aha inside each) run **in parallel**, which takes a run
+from ~5 minutes to roughly the WebKit lane alone (measured 2026-09-24 on `718a176`: 192s wall
+versus ~307s serial; each suite runs ~10–15% slower under the contention, the total still drops). They share no writable state — each suite
+serves the prebuilt `dist/` / `review-dist/` read-only on its own ephemeral port and writes
+screenshots to a per-browser `test-results/` directory — so this is not the "two suites at once"
+the Gotchas warn about. Any FAIL still aborts, after both lanes finish and after every stage
+that ran in either lane is recorded — so a stage missing from `stages` still means it did not run.
 
 **The script is `.claude/skills/verify/audit.mjs`, not a file in `scripts/`.** It is
 verification orchestration — the job the deleted `Player merge gate` used to do — so it
@@ -113,6 +120,33 @@ git diff --check
 ```
 
 …then say in so many words that this was the hand-run equivalent, not `intent-audit` itself.
+
+### 两档：改代码时跑什么，提 PR 前跑什么
+
+完整 audit 一次约 3 分钟（实测 192 秒，WebKit 那条线最慢），每个新提交都要重跑。迭代时不必每次都跑它：
+
+| 什么时候 | 跑什么 | 大约多久 |
+|---|---|---|
+| 改代码、来回试 | `npm run verify:fast && npm run build:review && GLYPH_BROWSER=chromium python3 scripts/run-browser-contracts.py player && GLYPH_BROWSER=chromium python3 scripts/run-browser-contracts.py aha` | 约 2 分钟（两组各约 64 秒） |
+| 提 PR 前 / 推送要被评审的提交前 / 用户要部署前 | `npm run intent-audit`，在**确切的那个提交**上、干净的树 | 约 3 分钟 |
+
+迭代档**不是**验证结论：它不跑 WebKit、不写 `report.json`，报告时只能说「迭代检查通过」，不能说
+`/verify` PASS。PR 描述里引用的必须是完整 audit 的结果（或下一节的复用）。
+
+### Reusing a PASS：只改了 hash 覆盖范围以外的文件
+
+`sourceSha256` 盖的是产品字节（`public/ src/ scripts/ tests/ .github/ aha.md intent.md
+package.json package-lock.json vercel.json`）。一个提交如果一个字节都没碰这些，它的产品就是
+上一次已审过的那一份，可以**复用**那次 PASS，不必重跑。条件全部满足才算：
+
+1. 有一次 `status: PASS` 的 audit，记下了它的 `commit` 和 `sourceSha256`；
+2. 在当前提交、干净的树上 `node .claude/skills/verify/audit.mjs --hash-only` 打出**同一个**
+   hash——这是判据，不是「看 diff 觉得只改了文档」；
+3. 这之间没有改过验证工具本身：`.claude/skills/verify/audit.mjs` 不在 hash 里，改了它必须重跑
+   （工具变了，旧读数证明不了新工具能跑通）。`scripts/run-browser-contracts.py` 和测试在 hash 里，
+   天然被第 2 条盖住。
+
+报告时写成「复用 `<commit>` 的 PASS，`sourceSha256` 一致：`<hash>`」，不要写成本提交跑过 audit。
 
 ### The rhythm contract: the gaps between Aha moments
 
@@ -1195,11 +1229,18 @@ overclaimed verdict.
   `test_F02_city_and_world_require_real_actions` pins the stricter behavior: hidden until
   `act === 3`, even at `cityReady`. Legibility for Act II belongs on the metric row and in
   `#primary-actions`, which is where `renderActions()` already carries the shortfall idiom.
-- **Playwright version drift.** `tests/browser/requirements.txt` pins `1.57.0`; a machine
-  may have a newer one. Nothing installs the pin for you any more — this repository has no
-  CI runner, so `python -m playwright install` on the machine you are on is now the only
-  source of the browsers. Only the sync API is used, so either version works, but a
-  version-only difference is not a candidate regression.
+- **Playwright version drift — the Python package and the browser cache must match.**
+  `tests/browser/requirements.txt` pins `1.57.0`. Nothing installs the pin for you any more —
+  this repository has no CI runner — so on a fresh machine run
+  `python3 -m pip install -r tests/browser/requirements.txt` and then
+  `python3 -m playwright install --with-deps chromium webkit` with *that* package. The API is
+  the same across versions, but each package release looks for its own browser build: a
+  package whose build is absent from the cache (e.g. a container pre-seeded with
+  `chromium-1194` and no WebKit, with a newer `pip install playwright` on top) fails every
+  stage in `setUpClass` with `BrowserType.launch: Executable doesn't exist at …`, followed by
+  a misleading `Sync API inside the asyncio loop` error. The audit reports that as a browser
+  stage FAIL (`discovered 29, run 0, errors 2`) — an environment defect, not a candidate
+  regression; fix the install and re-run rather than reading it as a product failure.
 - **The suite installs its own clock.** `page.clock.install(FIXED)` + `pause_at` +
   `run_for(1500)` in teardown make the run deterministic; do not add wall-clock `sleep`s.
 - **Teardown fails the test on any console error, page error, or failed request.** A test
