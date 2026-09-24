@@ -80,7 +80,9 @@ Replit 适配器的那两项检查（离线夹具与公开站验收）随工作�
 部署只通过显式的 Vercel 部署发生（`vercel.json` 的 `outputDirectory: dist`，
 `git.deploymentEnabled: false`，推送不会触发构建），与本地验证是两条独立路径；
 READY 不代表浏览器验证通过。只有同一提交的完整门禁成功，才可标记「已验证」，
-不能沿用旧提交的绿色状态。
+不能沿用旧提交的绿色状态。唯一的例外是 `/verify` 技能里的「Reusing a PASS」：提交没有改动
+`sourceSha256` 覆盖的任何文件（`audit.mjs --hash-only` 打出同一个 hash），且 `audit.mjs` 本身没变，
+才可以复用那次 PASS，并且必须写明复用的是哪个提交。
 
 ## 发现回归时
 

@@ -92,12 +92,18 @@ try {
     return results;
   };
   const lanes=await Promise.all(['chromium','webkit'].map(lane));
+  // Record every stage that ran, in both lanes, before failing: a stage absent from report.json
+  // must keep meaning "did not run", so a Chromium FAIL may not hide WebKit stages that finished.
+  let firstError=null;
   for(const {name,status,text} of lanes.flat()) {
-    const {stage}=record(name,status,text);
-    const detail=JSON.parse(readFileSync(new URL(name+'.json',output),'utf8'));
-    if(detail.status!=='PASS') throw new Error('Browser report disagrees with process status');
-    stage.tests=detail.run; stage.skipped=detail.skipped;
+    try {
+      const {stage}=record(name,status,text);
+      const detail=JSON.parse(readFileSync(new URL(name+'.json',output),'utf8'));
+      if(detail.status!=='PASS') throw new Error('Browser report disagrees with process status');
+      stage.tests=detail.run; stage.skipped=detail.skipped;
+    } catch(error) { firstError??=error; }
   }
+  if(firstError) throw firstError;
   run('diff-check','git',['diff','--check']);
   report.totalTests=report.stages.reduce((n,s)=>n+(s.tests||0),0);
   report.status='PASS';

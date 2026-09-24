@@ -73,7 +73,8 @@ from ~5 minutes to roughly the WebKit lane alone (measured 2026-09-24 on `718a17
 versus ~307s serial; each suite runs ~10–15% slower under the contention, the total still drops). They share no writable state — each suite
 serves the prebuilt `dist/` / `review-dist/` read-only on its own ephemeral port and writes
 screenshots to a per-browser `test-results/` directory — so this is not the "two suites at once"
-the Gotchas warn about. Any FAIL still aborts, after both lanes finish.
+the Gotchas warn about. Any FAIL still aborts, after both lanes finish and after every stage
+that ran in either lane is recorded — so a stage missing from `stages` still means it did not run.
 
 **The script is `.claude/skills/verify/audit.mjs`, not a file in `scripts/`.** It is
 verification orchestration — the job the deleted `Player merge gate` used to do — so it
